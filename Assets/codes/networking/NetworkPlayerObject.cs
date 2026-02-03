@@ -21,9 +21,32 @@ public class NetworkPlayerObject : MonoBehaviour
     [Header("Object References")]
     public GameObject Head;
     public GameObject Body;
+    public GameObject Camera;
     public void Disconnect()
     {
         Destroy(gameObject);
+    }
+    private void Initialize_Local()
+    {
+        Camera.SetActive(true);
+
+    }
+    private void Initalize_NonLocal()
+    {
+        Camera.SetActive(false);
+    }
+
+
+    private void Start()
+    {
+        if (IsLocal)
+        {
+            Initialize_Local();
+        }
+        else
+        {
+            Initalize_NonLocal();
+        }
     }
     private void Update()
     {

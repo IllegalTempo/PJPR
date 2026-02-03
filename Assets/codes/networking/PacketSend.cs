@@ -90,7 +90,7 @@ public class PacketSend
     }
     private static Result BroadcastPacket(int excludeid, packet p)
     {
-        for (int i = 1; i < NetworkSystem.instance.server.GetPlayerCount(); i++)
+        for (int i = 1; i < NetworkSystem.instance.server.players.Count; i++)
         {
             NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (sendtarget.NetworkID != excludeid)
@@ -108,8 +108,7 @@ public class PacketSend
     private static Result BroadcastPacketToReady(int excludeid, packet p)
     {
         if (NetworkSystem.instance.server == null) return Result.Disabled;
-        int playercount = NetworkSystem.instance.server.GetPlayerCount();
-        for (int i = 1; i < playercount; i++)
+        for (int i = 1; i < NetworkSystem.instance.server.players.Count; i++)
         {
             NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (sendtarget.NetworkID != excludeid && sendtarget.MovementUpdateReady)

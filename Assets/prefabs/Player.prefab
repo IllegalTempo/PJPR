@@ -145,6 +145,7 @@ MonoBehaviour:
   Sync_BodyRot: 1
   Head: {fileID: 7799460242873675173}
   Body: {fileID: 8607065313151132812}
+  Camera: {fileID: 3810218801565531111}
 --- !u!143 &-7730893453738433682
 CharacterController:
   m_ObjectHideFlags: 0
