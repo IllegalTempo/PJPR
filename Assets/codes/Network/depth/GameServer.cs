@@ -25,20 +25,20 @@ public class GameServer : SocketManager
             { (int)PacketSend.ClientPackets.Test_Packet,PacketHandles_Method.Server_Handle_test },
             { (int)PacketSend.ClientPackets.SendPosition,PacketHandles_Method.Server_Handle_PosUpdate},
             { (int)PacketSend.ClientPackets.SendAnimationState,PacketHandles_Method.Server_Handle_AnimationState},
-            { (int)PacketSend.ClientPackets.Ready,PacketHandles_Method.Server_Handle_ReadyUpdate},
-
-        
-
-
-
-};
-
+            { (int)PacketSend.ClientPackets.Ready,PacketHandles_Method.Server_Handle_ReadyUpdate}
+            
+            
+            ,
+            { (int)PacketSend.ClientPackets.SendNOInfo, PacketHandles_Method.Server_Handle_SendNOInfo }
+        ,
+            { (int)PacketSend.ClientPackets.PickUpItem, PacketHandles_Method.Server_Handle_PickUpItem }
+        };
 
 
 
     public GameServer()
     {
-        this.maxplayer = NetworkSystem.instance.maxPlayer;
+        this.maxplayer = NetworkSystem.instance.MaxPlayer;
         GetSteamID.Add(0, SteamClient.SteamId);
         GameObject g = NetworkSystem.instance.SpawnPlayer(true, 0, SteamClient.SteamId).gameObject;
 
@@ -67,14 +67,15 @@ public class GameServer : SocketManager
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Connected!");
         await Task.Delay(1000);
         Debug.Log("Sending Test Packet");
+        NetworkListener.Server_OnPlayerJoining?.Invoke(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
+        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.NetworkID, connectedPlayer.steamId);
 
         PacketSend.Server_Send_test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;
         PacketSend.Server_Send_InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
 
         PacketSend.Server_Send_NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
-        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false,connectedPlayer.NetworkID,connectedPlayer.steamId);
     }
     public NetworkPlayer GetPlayer(ConnectionInfo info)
     {
@@ -82,7 +83,7 @@ public class GameServer : SocketManager
     }
     public NetworkPlayer GetPlayerByIndex(int index)
     {
-        return players.ElementAt(index).Value;
+        return players.ElementAt(index-1).Value;
     }
     public NetworkPlayer GetPlayer(int NetworkID)
     {
@@ -98,7 +99,9 @@ public class GameServer : SocketManager
             Debug.Log(new Friend(info.Identity.SteamId).Name + " is connecting");
             int networkid = GetSteamID.Count;
             players.Add(info.Identity.SteamId.Value, new NetworkPlayer(info.Identity.SteamId, networkid, connection));
+
             GetSteamID.Add(networkid, info.Identity.SteamId.Value);
+            Debug.Log(players.Count);
             connection.Accept();
         }
         else

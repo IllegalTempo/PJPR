@@ -11,10 +11,14 @@ public class PlayerMain : MonoBehaviour
     private float pitch = 0f;
     private CharacterController controller;
     private Vector3 moveInput = Vector3.zero;
+
     public Item seenOutline = null;
     public Item clickedOutline = null;
+
     public GameObject cam;
     public NetworkPlayerObject networkinfo;
+
+    public Item holdingItem = null;
 
 
     void Start()
@@ -22,11 +26,28 @@ public class PlayerMain : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         controller = GetComponent<CharacterController>();
+        if (networkinfo.IsLocal)
+        {
+            Initialize_local();
+        }
+        else
+        {
+            Initialize_remote();
+
+        }
     }
-    private void onSelectPlush(Item item)
+    private void Initialize_local()
+    {
+        cam.SetActive(true);
+    }
+    private void Initialize_remote()
+    {
+        cam.SetActive(false);
+    }
+    private void onSelectItem(Item item)
     {
         item.OnClicked();
-        GameCore.Instance.LocalInfo.SelectingItem = item;
+        holdingItem = item;
 
     }
     private void PlayerControl()
@@ -60,7 +81,7 @@ public class PlayerMain : MonoBehaviour
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 100f, GameCore.Instance.Masks.SelectableItems))
+        if (Physics.Raycast(ray, out hit, 100f, GameCore.instance.Masks.SelectableItems))
         {
 
             seenOutline = hit.collider.GetComponent<Item>();
@@ -69,7 +90,7 @@ public class PlayerMain : MonoBehaviour
             if (seenOutline != null && Input.GetMouseButtonDown(0))
             {
                 clickedOutline = seenOutline;
-                onSelectPlush(clickedOutline);
+                onSelectItem(clickedOutline);
 
 
 

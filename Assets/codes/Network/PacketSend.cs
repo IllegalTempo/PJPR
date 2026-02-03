@@ -15,7 +15,11 @@ public class PacketSend
         PlayerQuit = 3,
 
         DistributeMovement = 4,
-        DistributeAnimation = 5,};
+        DistributeAnimation = 5,
+        DistributeNOInfo = 6,
+        DistributePickUpItem = 7,
+        DistributeInitialPos = 9
+    };
     public static string TestRandomUnicode = "幻想鄉是一個與外界隔絕的神秘之地，其存在自古以來便被視為傳說而流傳。";
     public static Result Server_Send_test(NetworkPlayer pl)
     {
@@ -27,11 +31,12 @@ public class PacketSend
             p.Write(DateTime.Now.Ticks);
             return pl.SendPacket(p);
 
-        };
+        }
+        ;
     }
-    
 
-    
+
+
     public static Result Server_DistributeMovement(int SourceNetworkID, Vector3 pos, Quaternion headrot, Quaternion bodyrot)
     {
         using (packet p = new packet((int)ServerPackets.DistributeMovement))
@@ -40,11 +45,12 @@ public class PacketSend
             p.Write(pos);
             p.Write(headrot);
             p.Write(bodyrot);
-            return BroadcastPacketToReady(SourceNetworkID,p);
+            return BroadcastPacketToReady(SourceNetworkID, p);
 
-        };
+        }
+        ;
     }
-    public static Result Server_DistributePlayerAnimationState(int SourceNetworkID,float movementx,float movementy)
+    public static Result Server_DistributePlayerAnimationState(int SourceNetworkID, float movementx, float movementy)
     {
         using (packet p = new packet((int)ServerPackets.DistributeAnimation))
         {
@@ -53,9 +59,10 @@ public class PacketSend
             p.Write(movementy);
 
             return BroadcastPacketToReady(SourceNetworkID, p);
-        };
+        }
+        ;
     }
-    
+
     public static Result Server_Send_NewPlayerJoined(ConnectionInfo newplayer)
     {
         using (packet p = new packet((int)ServerPackets.UpdatePlayerEnterRoomForExistingPlayer))
@@ -64,7 +71,8 @@ public class PacketSend
             p.Write(NetworkSystem.instance.server.GetPlayer(newplayer).NetworkID);
             return BroadcastPacket(newplayer, p);
 
-        };
+        }
+        ;
     }
     public static Result Server_Send_PlayerQuit(int NetworkID) //who quitted
     {
@@ -74,15 +82,16 @@ public class PacketSend
 
             return BroadcastPacket(p);
 
-        };
+        }
+        ;
     }
     private static Result BroadcastPacket(packet p)
     {
         return BroadcastPacket(9999, p);
     }
-    private static Result BroadcastPacket(ConnectionInfo i, packet p)               
+    private static Result BroadcastPacket(ConnectionInfo i, packet p)
     {
-        return BroadcastPacket( NetworkSystem.instance.server.GetPlayer(i).NetworkID, p);
+        return BroadcastPacket(NetworkSystem.instance.server.GetPlayer(i).NetworkID, p);
     }
     private static Result BroadcastPacket(ulong ExcludeID, packet p)
     {
@@ -90,7 +99,7 @@ public class PacketSend
     }
     private static Result BroadcastPacket(int excludeid, packet p)
     {
-        for (int i = 1; i < NetworkSystem.instance.server.players.Count; i++)
+        for (int i = 1; i < NetworkSystem.instance.server.GetPlayerCount(); i++)
         {
             NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (sendtarget.NetworkID != excludeid)
@@ -108,7 +117,8 @@ public class PacketSend
     private static Result BroadcastPacketToReady(int excludeid, packet p)
     {
         if (NetworkSystem.instance.server == null) return Result.Disabled;
-        for (int i = 1; i < NetworkSystem.instance.server.players.Count; i++)
+        int playercount = NetworkSystem.instance.server.GetPlayerCount();
+        for (int i = 1; i < playercount; i++)
         {
             NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (sendtarget.NetworkID != excludeid && sendtarget.MovementUpdateReady)
@@ -138,15 +148,58 @@ public class PacketSend
     }
 
 
+    public static Result Server_Send_DistributeNOInfo(string id, Vector3 pos, Quaternion rot)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributeNOInfo))
+        {
 
+            // TODO: Write packet data here
+            // p.Write(...);
+            p.WriteUNICODE(id);
+            p.Write(pos);
+            p.Write(rot);
+
+            return BroadcastPacket(p);
+        }
+    }
+
+
+    public static Result Server_Send_DistributePickUpItem(string itemid, int PickedUpBy)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributePickUpItem))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            p.WriteUNICODE(itemid);
+            p.Write(PickedUpBy);
+            return BroadcastPacket(p);
+        }
+    }
+
+
+    public static Result Server_Send_DistributeInitialPos(NetworkPlayer target, Vector3 pos, Quaternion Rot)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributeInitialPos))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            p.Write(pos);
+            p.Write(Rot);
+            return target.SendPacket(p);
+        }
+    }
     //Area for client Packets!
     public enum ClientPackets
     {
         Test_Packet = 0,
         SendPosition = 1,
         Ready = 2,
-        SendAnimationState = 3,};
-    public static Result Client_Send_AnimationState(float movementx,float movementy)
+        SendAnimationState = 3,
+        SendNOInfo = 4
+    ,
+        PickUpItem = 5
+    };
+    public static Result Client_Send_AnimationState(float movementx, float movementy)
     {
         using (packet p = new packet((int)ClientPackets.SendAnimationState))
         {
@@ -155,7 +208,7 @@ public class PacketSend
             return SendToServer(p);
         }
     }
-    
+
     public static Result Client_Send_test()
     {
         using (packet p = new packet((int)ClientPackets.Test_Packet))
@@ -167,9 +220,10 @@ public class PacketSend
             return SendToServer(p);
 
 
-        };
+        }
+        ;
     }
-    
+
     public static Result Client_Send_ReadyUpdate()
     {
         Debug.Log("Send Ready");
@@ -180,15 +234,48 @@ public class PacketSend
             return SendToServer(p);
 
 
-        };
+        }
+        ;
     }
-    public static Result Client_Send_Position(Vector3 pos,Quaternion cameraRotation, Quaternion BodyRotation)
+    public static Result Client_Send_Position(Vector3 pos, Quaternion cameraRotation, Quaternion BodyRotation)
     {
         using (packet p = new packet((int)ClientPackets.SendPosition))
         {
             p.Write(pos);
             p.Write(cameraRotation);
             p.Write(BodyRotation);
+            return SendToServer(p);
+        }
+    }
+
+
+
+    public static Result Client_Send_SendNOInfo(string id, Vector3 pos, Quaternion rot)
+    {
+        using (packet p = new packet((int)ClientPackets.SendNOInfo))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            p.WriteUNICODE(id);
+            p.Write(pos);
+            p.Write(rot);
+
+
+            return SendToServer(p);
+        }
+    }
+
+
+    public static Result Client_Send_PickUpItem(string objectID, int whopicked)
+    {
+        using (packet p = new packet((int)ClientPackets.PickUpItem))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            p.WriteUNICODE(objectID);
+
+            p.Write(whopicked);
+
             return SendToServer(p);
         }
     }
@@ -206,18 +293,6 @@ public class PacketSend
             return PacketSendingUtils.SendPacketToConnection(NetworkSystem.instance.client.GetServer(), p);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 public class PacketSendingUtils
@@ -231,6 +306,4 @@ public class PacketSendingUtils
         Marshal.FreeHGlobal(datapointer); //Free memory allocated
         return r;
     }
-    
-
 }

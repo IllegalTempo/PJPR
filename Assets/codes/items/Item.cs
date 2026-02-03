@@ -19,7 +19,7 @@ public abstract class Item : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(UUID) && UUID.Length < 5)
         {
-            GameCore.Instance.GetItemByUUID.Add(UUID, this);
+            GameCore.instance.GetItemByUUID.Add(UUID, this);
         }
     }
     public abstract void OnSelect();
