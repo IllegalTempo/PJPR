@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerCamera : MonoBehaviour
+public class PlayerMain : MonoBehaviour
 {
     public float moveSpeed = 0.5f;
     public float lookSpeed = 2f;
@@ -9,12 +9,12 @@ public class PlayerCamera : MonoBehaviour
 
     private float yaw = 0f;
     private float pitch = 0f;
-    public bool InFocus = false;
     private CharacterController controller;
     private Vector3 moveInput = Vector3.zero;
     public Item seenOutline = null;
-    public Item ClickedOutline = null;
+    public Item clickedOutline = null;
     public GameObject cam;
+    public NetworkPlayerObject networkinfo;
 
 
     void Start()
@@ -28,44 +28,35 @@ public class PlayerCamera : MonoBehaviour
         item.OnClicked();
         GameCore.Instance.LocalInfo.SelectingItem = item;
 
-
     }
-    void Update()
+    private void PlayerControl()
     {
         controller.Move(Vector3.down * Time.deltaTime * 5);
-        // Mouse look
-        if (!InFocus)
+        yaw += lookSpeed * Input.GetAxis("Mouse X");
+        pitch -= lookSpeed * Input.GetAxis("Mouse Y");
+        pitch = Mathf.Clamp(pitch, -90f, 90f);
+        transform.eulerAngles = new Vector3(pitch, yaw, 0f);
+
+        // WASD movement (direct, instant, with collision)
+        Vector3 forward = transform.forward;
+        Vector3 right = transform.right;
+
+        float moveX = Input.GetAxisRaw("Horizontal"); // A/D
+        float moveZ = Input.GetAxisRaw("Vertical");   // W/S
+
+        Vector3 move = (forward * moveZ + right * moveX);
+        move.y = 0;
+        if (move.sqrMagnitude > 0f)
         {
-            yaw += lookSpeed * Input.GetAxis("Mouse X");
-            pitch -= lookSpeed * Input.GetAxis("Mouse Y");
-            pitch = Mathf.Clamp(pitch, -90f, 90f);
-            transform.eulerAngles = new Vector3(pitch, yaw, 0f);
-
-            // WASD movement (direct, instant, with collision)
-            Vector3 forward = transform.forward;
-            Vector3 right = transform.right;
-
-            float moveX = Input.GetAxisRaw("Horizontal"); // A/D
-            float moveZ = Input.GetAxisRaw("Vertical");   // W/S
-
-            Vector3 move = (forward * moveZ + right * moveX);
-            move.y = 0;
-            if (move.sqrMagnitude > 0f)
-            {
-                moveInput = move.normalized * moveSpeed * maxSpeed;
-                controller.Move(moveInput * Time.deltaTime);
-            }
-            else
-            {
-                moveInput = Vector3.zero;
-                controller.Move(Vector3.zero); // Stop instantly
-            }
+            moveInput = move.normalized * moveSpeed * maxSpeed;
+            controller.Move(moveInput * Time.deltaTime);
         }
         else
         {
             moveInput = Vector3.zero;
             controller.Move(Vector3.zero); // Stop instantly
         }
+
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
@@ -77,12 +68,19 @@ public class PlayerCamera : MonoBehaviour
             seenOutline.LookedAt = true;
             if (seenOutline != null && Input.GetMouseButtonDown(0))
             {
-                ClickedOutline = seenOutline;
-                onSelectPlush(ClickedOutline);
+                clickedOutline = seenOutline;
+                onSelectPlush(clickedOutline);
 
 
 
             }
+        }
+    }
+    void Update()
+    {
+        if (networkinfo.IsLocal)
+        {
+            PlayerControl();
         }
 
     }

@@ -70,7 +70,7 @@ public class NetworkPlayerObject : MonoBehaviour
     {
         if (IsLocal)
         {
-            if (!NetworkSystem.instance.IsServer)
+            if (!NetworkSystem.instance.isServer)
             {
                 PacketSend.Client_Send_Position(transform.position, Head.transform.rotation, transform.rotation);
             }

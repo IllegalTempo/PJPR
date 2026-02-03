@@ -10,21 +10,21 @@ public class NetworkSystem : MonoBehaviour
 {
     [Header("Network Setting")]
     [SerializeField]
-    private bool CreateLobbyOnStart = true;
-    public int MaxPlayer = 8;
+    private bool createLobbyOnStart = true;
+    public int maxPlayer = 8;
     [Header("NetworkData")]
-    public bool Connected = false;
+    public bool connected = false;
     public static NetworkSystem instance;
     public GameServer server;
     public GameClient client;
     //True if current instance is server
-    public bool IsServer = true;
+    public bool isServer = true;
     //Network Player Prefab
-    public GameObject PlayerInstance;
+    public GameObject playerInstance;
     //All player list
-    public List<NetworkPlayerObject> PlayerList = new List<NetworkPlayerObject>();
+    public List<NetworkPlayerObject> playerList = new List<NetworkPlayerObject>();
     //Current Lobby player is in, no matter server or client
-    public Lobby CurrentLobby;
+    public Lobby currentLobby;
     // Start is called before the first frame update
 
     
@@ -43,13 +43,13 @@ public class NetworkSystem : MonoBehaviour
     //Spawn the network Player
     public NetworkPlayerObject SpawnPlayer(bool isLocal, int networkid, ulong steamid)
     {
-        if (PlayerInstance == null)
+        if (playerInstance == null)
         {
             Debug.LogError("PlayerInstance prefab is not set. Cannot spawn player.");
             return null;
         }
         Debug.Log("Spawning Player");
-        NetworkPlayerObject p = Instantiate(PlayerInstance, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(playerInstance, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayerObject>();
         if (p == null)
         {
             Debug.LogError("PlayerInstance prefab does not have NetworkPlayerObject component.");
@@ -59,12 +59,12 @@ public class NetworkSystem : MonoBehaviour
         p.NetworkID = networkid;
         p.steamID = steamid;
         p.IsLocal = isLocal;
-        PlayerList.Add(p);
+        playerList.Add(p);
         return p;
     }
     public void RemoveAllPlayerObject()
     {
-        foreach (NetworkPlayerObject g in PlayerList)
+        foreach (NetworkPlayerObject g in playerList)
         {
             Destroy(g.gameObject);
         }
@@ -79,7 +79,7 @@ public class NetworkSystem : MonoBehaviour
                 SteamClient.Init(480, true);
                 SteamNetworkingUtils.InitRelayNetworkAccess();
                 Debug.Log("Steam Initialized");
-                if(CreateLobbyOnStart)
+                if(createLobbyOnStart)
                 {
                     CreateGameLobby();
 
@@ -167,7 +167,7 @@ public class NetworkSystem : MonoBehaviour
             return false;
         }
         NewLobby();
-        IsServer = true;
+        isServer = true;
         client = null;
         try
         {
@@ -220,7 +220,7 @@ public class NetworkSystem : MonoBehaviour
         l.Owner = new Friend(SteamClient.SteamId);
         Debug.Log($"Lobby ID: {l} Result: {r} Starting Game Server...");
         l.SetGameServer(SteamClient.SteamId);
-        CurrentLobby = l;
+        currentLobby = l;
         while(server == null)
         {
             try
@@ -250,10 +250,10 @@ public class NetworkSystem : MonoBehaviour
         Debug.Log($"Connecting To Relay Server: {ip}:{port}, {id}");
         if (client == null)
         {
-            IsServer = false;
+            isServer = false;
 
             client = SteamNetworkingSockets.ConnectRelay<GameClient>(id);
-            CurrentLobby = lobby;
+            currentLobby = lobby;
         }
     }
     private void OnLobbyEntered(Lobby l)
@@ -271,9 +271,9 @@ public class NetworkSystem : MonoBehaviour
             if (haveserver)
             {
                 Debug.Log($"Connecting To Relay Server: {ip}:{port}, {serverid}");
-                CurrentLobby = l;
+                currentLobby = l;
                 server = null;
-                IsServer = false;
+                isServer = false;
                 client = SteamNetworkingSockets.ConnectRelay<GameClient>(serverid, 1111);
 
             }

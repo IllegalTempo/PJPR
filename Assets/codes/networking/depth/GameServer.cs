@@ -38,7 +38,7 @@ public class GameServer : SocketManager
 
     public GameServer()
     {
-        this.maxplayer = NetworkSystem.instance.MaxPlayer;
+        this.maxplayer = NetworkSystem.instance.maxPlayer;
         GetSteamID.Add(0, SteamClient.SteamId);
         GameObject g = NetworkSystem.instance.SpawnPlayer(true, 0, SteamClient.SteamId).gameObject;
 
