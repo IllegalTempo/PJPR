@@ -186,10 +186,10 @@ MonoBehaviour:
   moveSpeed: 0.5
   lookSpeed: 2
   maxSpeed: 3
-  InFocus: 0
   seenOutline: {fileID: 0}
-  ClickedOutline: {fileID: 0}
+  clickedOutline: {fileID: 0}
   cam: {fileID: 3810218801565531111}
+  networkinfo: {fileID: 5670073900387558509}
 --- !u!1 &3810218801565531111
 GameObject:
   m_ObjectHideFlags: 0
