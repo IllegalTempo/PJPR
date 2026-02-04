@@ -32,13 +32,13 @@ public class NetworkObject : MonoBehaviour
     {
         if (NetworkSystem.instance.IsServer)
         {
-            PacketSend.Server_Send_DistributeNOInfo(Identifier, transform.position, transform.rotation);
+            ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
         }
         else
         {
             if (GameCore.instance.IsLocal(Owner))
             {
-                PacketSend.Client_Send_SendNOInfo(Identifier, transform.position, transform.rotation);
+                ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
 
             }
         }

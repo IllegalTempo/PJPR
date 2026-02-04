@@ -430,6 +430,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameCore
   Masks: {fileID: 516030513}
+  localPlayer: {fileID: 0}
+  localNetworkPlayer: {fileID: 0}
 --- !u!114 &516030513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -651,12 +653,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  createLobbyOnStart: 1
-  maxPlayer: 8
-  connected: 0
-  isServer: 1
-  playerInstance: {fileID: 1074483101829538221, guid: 3ebb611e972f2664bbe76fba2c12756e, type: 3}
-  playerList: []
+  CreateLobbyOnStart: 1
+  MaxPlayer: 2
+  Connected: 0
+  IsServer: 1
+  PlayerInstance: {fileID: 1074483101829538221, guid: 3ebb611e972f2664bbe76fba2c12756e, type: 3}
+  PlayerList: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

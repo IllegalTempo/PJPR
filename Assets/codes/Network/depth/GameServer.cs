@@ -22,16 +22,12 @@ public class GameServer : SocketManager
 
     private Dictionary<int, PacketHandle> ServerPacketHandles = new Dictionary<int, PacketHandle>()
         {
-            { (int)PacketSend.ClientPackets.Test_Packet,PacketHandles_Method.Server_Handle_test },
-            { (int)PacketSend.ClientPackets.SendPosition,PacketHandles_Method.Server_Handle_PosUpdate},
-            { (int)PacketSend.ClientPackets.SendAnimationState,PacketHandles_Method.Server_Handle_AnimationState},
-            { (int)PacketSend.ClientPackets.Ready,PacketHandles_Method.Server_Handle_ReadyUpdate}
-            
-            
-            ,
-            { (int)PacketSend.ClientPackets.SendNOInfo, PacketHandles_Method.Server_Handle_SendNOInfo }
-        ,
-            { (int)PacketSend.ClientPackets.PickUpItem, PacketHandles_Method.Server_Handle_PickUpItem }
+            { (int)packets.ClientPackets.Test_Packet,ServerHandle.test },
+            { (int)packets.ClientPackets.SendPosition,ServerHandle.PosUpdate},
+            { (int)packets.ClientPackets.SendAnimationState,ServerHandle.AnimationState},
+            { (int)packets.ClientPackets.Ready,ServerHandle.ReadyUpdate},
+            { (int)packets.ClientPackets.SendNOInfo, ServerHandle.SendNOInfo },
+            { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
         };
 
 
@@ -71,11 +67,11 @@ public class GameServer : SocketManager
         NetworkPlayer connectedPlayer = GetPlayer(info);
         players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.NetworkID, connectedPlayer.steamId);
 
-        PacketSend.Server_Send_test(connectedPlayer); // Send a test to the player along with his networkid
+        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;
-        PacketSend.Server_Send_InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
+        ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
 
-        PacketSend.Server_Send_NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+        ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
     }
     public NetworkPlayer GetPlayer(ConnectionInfo info)
     {
@@ -123,7 +119,7 @@ public class GameServer : SocketManager
         players.Remove(info.Identity.SteamId.Value);
         GetSteamID.Remove(networkid);
 
-        PacketSend.Server_Send_PlayerQuit(networkid);
+        ServerSend.PlayerQuit(networkid);
 
     }
     public override unsafe void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum, long recvTime, int channel)

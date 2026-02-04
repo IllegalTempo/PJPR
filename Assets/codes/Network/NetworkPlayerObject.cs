@@ -39,11 +39,11 @@ public class NetworkPlayerObject : MonoBehaviour
         {
             if (!NetworkSystem.instance.IsServer)
             {
-                PacketSend.Client_Send_Position(transform.position, Head.transform.rotation, transform.rotation);
+                ClientSend.Position(transform.position, Head.transform.rotation, transform.rotation);
             }
             else
             {
-                PacketSend.Server_DistributeMovement(0, transform.position, Head.transform.rotation, transform.rotation);
+                ServerSend.DistributeMovement(0, transform.position, Head.transform.rotation, transform.rotation);
             }
 
         }
