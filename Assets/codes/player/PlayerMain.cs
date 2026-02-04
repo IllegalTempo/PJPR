@@ -16,6 +16,7 @@ public class PlayerMain : MonoBehaviour
     public Item clickedOutline = null;
 
     public GameObject cam;
+    public GameObject head;
     public NetworkPlayerObject networkinfo;
 
     public Item holdingItem = null;
@@ -56,7 +57,8 @@ public class PlayerMain : MonoBehaviour
         yaw += lookSpeed * Input.GetAxis("Mouse X");
         pitch -= lookSpeed * Input.GetAxis("Mouse Y");
         pitch = Mathf.Clamp(pitch, -90f, 90f);
-        transform.eulerAngles = new Vector3(pitch, yaw, 0f);
+        head.transform.eulerAngles = new Vector3(pitch, yaw, 0f);
+        transform.eulerAngles = new Vector3(0, yaw, 0f);
 
         // WASD movement (direct, instant, with collision)
         Vector3 forward = transform.forward;
