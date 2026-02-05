@@ -36,6 +36,7 @@ public class Item : Selectable
 
         rb.linearVelocity = Vector3.zero;
         outline.OutlineColor = Color.aquamarine;
+        netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
 
         if (itemCollider != null)
         {
@@ -43,7 +44,6 @@ public class Item : Selectable
         }
         if (NetworkSystem.instance.IsServer)
         {
-            netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
             ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
         }
         else
