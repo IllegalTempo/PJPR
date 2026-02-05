@@ -74,7 +74,7 @@ public class Item : Selectable
         this.transform.position = dropPosition;
 
         itemCollider.isTrigger = false;
-
+        netObj.Owner = -1;
         if (NetworkSystem.instance.IsServer)
         {
             ServerSend.DistributePickUpItem(netObj.Identifier, -1);
