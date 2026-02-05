@@ -21,7 +21,7 @@ public class ServerHandle
 
         // TODO: Handle the packet
         string itemid = packet.ReadstringUNICODE();
-        int whopicked = p.NetworkID;
+        int whopicked = packet.Readint();
         NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, p.NetworkID);
