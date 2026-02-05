@@ -22,7 +22,7 @@ public class ServerHandle
         // TODO: Handle the packet
         string itemid = packet.ReadstringUNICODE();
         int whopicked = p.NetworkID;
-        NetworkSystem.instance.FindNetworkObject[itemid].Owner = whopicked;
+        NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, p.NetworkID);
     }

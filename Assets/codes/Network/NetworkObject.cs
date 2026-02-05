@@ -12,7 +12,7 @@ public class NetworkObject : MonoBehaviour
 
     public int Owner = -1;
 
-    private void Awake()
+    private void Start()
     {
         //If not set, set to gameobject name
         if (string.IsNullOrEmpty(Identifier))
@@ -45,6 +45,10 @@ public class NetworkObject : MonoBehaviour
 
 
 
+    }
+    public void ReceivedNetwork_PickUp(int newowner)
+    {
+        Owner = newowner;
     }
     private void Update()
     {

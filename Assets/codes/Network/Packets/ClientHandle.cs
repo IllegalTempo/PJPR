@@ -32,7 +32,7 @@ public class ClientHandle
         string itemid = packet.ReadstringUNICODE();
         int whopicked = packet.Readint();
 
-        NetworkSystem.instance.FindNetworkObject[itemid].Owner = whopicked;
+        NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
 
         // TODO: Handle the packet
     }

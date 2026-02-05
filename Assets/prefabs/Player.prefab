@@ -125,12 +125,13 @@ MonoBehaviour:
   moveSpeed: 0.5
   lookSpeed: 2
   maxSpeed: 3
-  seenOutline: {fileID: 0}
-  clickedOutline: {fileID: 0}
+  seenObject: {fileID: 0}
+  clickedObject: {fileID: 0}
   cam: {fileID: 2002703588627120506}
   head: {fileID: 5541582815378028596}
   networkinfo: {fileID: 5670073900387558509}
   holdingItem: {fileID: 0}
+  itemHoldOffset: {x: 0, y: 0, z: 3}
 --- !u!1 &2002703588627120506
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,7 +21,7 @@ public class PacketSend
     {
         return BroadcastPacket(NetworkSystem.instance.server.players[ExcludeID].NetworkID, p);
     }
-    private static Result BroadcastPacket(int excludeid, packet p)
+    public static Result BroadcastPacket(int excludeid, packet p)
     {
         for (int i = 1; i < NetworkSystem.instance.server.GetPlayerCount(); i++)
         {

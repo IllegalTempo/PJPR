@@ -1,73 +1,95 @@
 using UnityEngine;
 
-public abstract class Item : MonoBehaviour
+[RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
+
+public class Item : Selectable
 {
     public string ItemName;
     public string ItemDescription;
-    public bool LookedAt = false;
-    public float ClickTimer = 0f;
-    public string UUID;
-    public StaticOutline outline;
+    public NetworkObject netObj;
+    private Rigidbody rb;
+    private Collider itemCollider;
 
-
-    private void OnEnable()
+    protected new void OnEnable()
     {
-        outline = GetComponent<StaticOutline>();
+        base.OnEnable();
+        netObj = GetComponent<NetworkObject>();
+        rb = GetComponent<Rigidbody>();
+        itemCollider = GetComponent<Collider>();
+    }
+
+
+
+
+
+    public override void OnClicked()
+    {
+        base.OnClicked();
+        if (netObj.Owner != -1) return;
+        // Item is not in inventory, so pick it up
+        PickUpItem();
 
     }
-    private void Start()
+
+    private void PickUpItem() //Only Run by local
     {
-        if (!string.IsNullOrEmpty(UUID) && UUID.Length < 5)
+
+        rb.linearVelocity = Vector3.zero;
+        outline.OutlineColor = Color.aquamarine;
+
+        if (itemCollider != null)
         {
-            GameCore.instance.GetItemByUUID.Add(UUID, this);
+            itemCollider.isTrigger = true;
+        }
+        if (NetworkSystem.instance.IsServer)
+        {
+            netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
+            ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
+        }
+        else
+        {
+            ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
+        }
+        GameCore.instance.localPlayer.OnPickUpItem(this);
+
+
+    }
+    protected override void Update()
+    {
+        base.Update();
+        if (GameCore.instance.IsLocal(netObj.Owner))
+        {
+            // Update position to follow camera
+            GameCore.instance.localPlayer.HoldingItem(this);
+
         }
     }
-    public abstract void OnSelect();
-    public void OnClicked()
+    public void Drop(Vector3 dropPosition) //Only Run by local
     {
-        ClickTimer = 0.2f;
-        OnSelect();
-    }
-    public void SetAsTarget()
-    {
-        outline.OutlineColor = Color.yellow;
-        outline.enabled = true;
-    }
-    public void SetAsNotTarget()
-    {
+
+
+        // Remove from inventory
         outline.OutlineColor = Color.white;
-        outline.enabled = false;
 
-    }
-    protected virtual void update()
-    {
-    }
-    private void Update()
+        this.transform.position = dropPosition;
 
-    {
-        update();
-        if (ClickTimer > 0)
+        itemCollider.isTrigger = false;
+        netObj.Owner = -1;
+
+        if (NetworkSystem.instance.IsServer)
         {
-            ClickTimer -= Time.deltaTime;
-            outline.OutlineWidth = 10f;
+            ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
         }
         else
         {
-            ClickTimer = 0f;
-            outline.OutlineWidth = 5f;
-
+            ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
         }
-        if (LookedAt)
-        {
-            outline.enabled = true;
-            LookedAt = false;
-        }
-        else
-        {
-            outline.enabled = false;
+        GameCore.instance.localPlayer.OnDropItem(this);
 
-
-
-        }
     }
+    public void Drop()
+    {
+        Drop(transform.position);
+    }
+
 }

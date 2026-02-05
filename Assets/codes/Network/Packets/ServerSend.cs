@@ -97,7 +97,7 @@ public class ServerSend
             p.Write(pos);
             p.Write(rot);
 
-            return PacketSend.BroadcastPacket(p);
+            return PacketSend.BroadcastPacket(0,p);
         }
     }
 

@@ -79,10 +79,10 @@ public class NetworkSystem : MonoBehaviour
         p.steamID = steamid;
         p.IsLocal = isLocal;
         p.gameObject.name = "Player_" + networkid;
-        if (p.IsLocal)
-        {
-            GameCore.instance.localNetworkPlayer = p;
-        }
+        //if (p.IsLocal)
+        //{
+        //    GameCore.instance.localNetworkPlayer = p;
+        //}
         PlayerList.Add(p);
         return p;
     }

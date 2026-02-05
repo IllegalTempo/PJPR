@@ -27,9 +27,13 @@ public class NetworkPlayerObject : MonoBehaviour
     {
         Destroy(gameObject);
     }
-    private void Awake()
+    private void Start()
     {
-        playerControl = GetComponent<PlayerMain>();
+        if(IsLocal)
+        {
+            GameCore.instance.localNetworkPlayer = this;
+            GameCore.instance.localPlayer = playerControl;
+        }
 
     }
     private void FixedUpdate()
