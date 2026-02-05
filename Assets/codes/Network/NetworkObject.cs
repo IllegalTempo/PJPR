@@ -52,7 +52,7 @@ public class NetworkObject : MonoBehaviour
     }
     private void Update()
     {
-        //if (NetworkSystem.instance.IsServer) return;
+        if (NetworkSystem.instance.IsServer) return;
         if (Sync_Position)
         {
             transform.position = Vector3.Lerp(transform.position, NetworkPos, Time.deltaTime * 10f);
@@ -67,5 +67,11 @@ public class NetworkObject : MonoBehaviour
     {
         NetworkPos = pos;
         NetworkRot = rot;
+    }
+    public void SetServerMovement(Vector3 pos, Quaternion rot)
+    {
+        SetMovement(pos, rot);
+        transform.position = pos;
+        transform.rotation = rot;
     }
 }
