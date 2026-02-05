@@ -32,7 +32,7 @@ public class ServerHandle
         long clienttime = packet.Readlong();
         if (text == PacketSend.TestRandomUnicode)
         {
-            Debug.Log($"{clienttime} Confirmed {p.SteamName}, successfully connected, delay:{(DateTime.Now.Ticks - clienttime) / 10000}ms");
+            Debug.Log($"{clienttime} Confirmed {p.SteamName}, successfully connected, delay:{(DateTime.UtcNow.Ticks - clienttime) / 10000}ms");
             //trigger listeners
             NetworkListener.Server_OnPlayerJoinSuccessful?.Invoke(p);
 

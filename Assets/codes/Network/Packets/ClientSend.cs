@@ -26,7 +26,7 @@ public class ClientSend
         {
             p.WriteUNICODE(PacketSend.TestRandomUnicode);
             p.Write(DateTime.Now.Ticks);
-            Debug.Log("sending: " + DateTime.Now.Ticks);
+            Debug.Log("sending: " + DateTime.UtcNow.Ticks);
 
             return SendToServer(p);
 
