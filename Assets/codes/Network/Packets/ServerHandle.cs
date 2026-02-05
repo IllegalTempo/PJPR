@@ -8,7 +8,7 @@ public class ServerHandle
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        NetworkSystem.instance.FindNetworkObject[uuid].SetMovement(pos, rot);
+        NetworkSystem.instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
         ServerSend.DistributeNOInfo(uuid, pos, rot);
 
 

@@ -33,6 +33,7 @@ public class ClientHandle
         int whopicked = packet.Readint();
 
         NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
+        Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
 
         // TODO: Handle the packet
     }
