@@ -74,15 +74,14 @@ public class Item : Selectable
         this.transform.position = dropPosition;
 
         itemCollider.isTrigger = false;
-        netObj.Owner = -1;
 
         if (NetworkSystem.instance.IsServer)
         {
-            ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
+            ServerSend.DistributePickUpItem(netObj.Identifier, -1);
         }
         else
         {
-            ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
+            ClientSend.PickUpItem(netObj.Identifier, -1);
         }
         GameCore.instance.localPlayer.OnDropItem(this);
 
