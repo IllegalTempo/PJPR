@@ -24,7 +24,7 @@ public class ServerHandle
         int whopicked = packet.Readint();
         NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
 
-        ServerSend.DistributePickUpItem(itemid, p.NetworkID);
+        ServerSend.DistributePickUpItem(itemid, whopicked);
     }
     public static void test(NetworkPlayer p, packet packet)
     {
