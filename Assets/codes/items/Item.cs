@@ -70,6 +70,7 @@ public class Item : Selectable
 
         // Remove from inventory
         outline.OutlineColor = Color.white;
+        rb.linearVelocity = Vector3.zero;
 
         this.transform.position = dropPosition;
 
