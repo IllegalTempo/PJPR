@@ -1,3 +1,4 @@
+using Steamworks;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -46,7 +47,7 @@ public class NetworkPlayerObject : MonoBehaviour
             }
             else
             {
-                ServerSend.DistributeMovement(0, transform.position, Head.transform.rotation, transform.rotation);
+                ServerSend.DistributeMovement(SteamClient.SteamId, transform.position, Head.transform.rotation, transform.rotation);
             }
 
         }
