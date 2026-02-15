@@ -25,7 +25,7 @@ public class Item : Selectable
     public override void OnClicked()
     {
         base.OnClicked();
-        if (netObj.Owner != -1) return;
+        if (netObj.Owner != 0) return;
         // Item is not in inventory, so pick it up
         PickUpItem();
 
@@ -43,7 +43,7 @@ public class Item : Selectable
         GameCore.instance.localPlayer.OnPickUpItem(this);
 
 
-        netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
+        netObj.Owner = GameCore.instance.localNetworkPlayer.steamID;
         if (NetworkSystem.instance.IsServer)
         {
             ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
@@ -80,14 +80,14 @@ public class Item : Selectable
         this.transform.position = dropPosition;
 
         itemCollider.isTrigger = false;
-        netObj.Owner = -1;
+        netObj.Owner = 0;
         if (NetworkSystem.instance.IsServer)
         {
-            ServerSend.DistributePickUpItem(netObj.Identifier, -1);
+            ServerSend.DistributePickUpItem(netObj.Identifier,0);
         }
         else
         {
-            ClientSend.PickUpItem(netObj.Identifier, -1);
+            ClientSend.PickUpItem(netObj.Identifier, 0);
         }
         GameCore.instance.localPlayer.OnDropItem(this);
 

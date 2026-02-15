@@ -14,7 +14,7 @@ public class GameServer : SocketManager
 {
     public int maxplayer;
     public Dictionary<ulong, NetworkPlayer> players = new Dictionary<ulong, NetworkPlayer>(); //This does not include the server player
-    public Dictionary<int, ulong> GetSteamID = new Dictionary<int, ulong>();
+    //public Dictionary<int, ulong> GetSteamID = new Dictionary<int, ulong>();
     private delegate void PacketHandle(NetworkPlayer n, packet p);
 
 
@@ -35,14 +35,14 @@ public class GameServer : SocketManager
     public GameServer()
     {
         this.maxplayer = NetworkSystem.instance.MaxPlayer;
-        GetSteamID.Add(0, SteamClient.SteamId);
-        GameObject g = NetworkSystem.instance.SpawnPlayer(true, 0, SteamClient.SteamId).gameObject;
+        //GetSteamID.Add(0, SteamClient.SteamId);
+        GameObject g = NetworkSystem.instance.SpawnPlayer(true, SteamClient.SteamId).gameObject;
         NetworkSystem.instance.IsOnline = true;
         Debug.Log("Created GameServer Object");
     }
     public int GetPlayerCount()
     {
-        return GetSteamID.Count;
+        return players.Count + 1;
     }
     public void DisconnectAll()
     {
@@ -65,7 +65,7 @@ public class GameServer : SocketManager
         Debug.Log("Sending Test Packet");
         NetworkListener.Server_OnPlayerJoining?.Invoke(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
-        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.NetworkID, connectedPlayer.steamId);
+        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.steamId);
 
         ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;
@@ -81,10 +81,10 @@ public class GameServer : SocketManager
     {
         return players.ElementAt(index-1).Value;
     }
-    public NetworkPlayer GetPlayer(int NetworkID)
-    {
-        return players[GetSteamID[NetworkID]];
-    }
+    //public NetworkPlayer GetPlayer(int NetworkID)
+    //{
+    //    return players[GetSteamID[NetworkID]];
+    //}
     public override void OnConnecting(Connection connection, ConnectionInfo info)
     {
         base.OnConnecting(connection, info);
@@ -93,10 +93,10 @@ public class GameServer : SocketManager
         {
 
             Debug.Log(new Friend(info.Identity.SteamId).Name + " is connecting");
-            int networkid = GetSteamID.Count;
-            players.Add(info.Identity.SteamId.Value, new NetworkPlayer(info.Identity.SteamId, networkid, connection));
+            //int networkid = GetSteamID.Count;
+            players.Add(info.Identity.SteamId.Value, new NetworkPlayer(info.Identity.SteamId, connection));
 
-            GetSteamID.Add(networkid, info.Identity.SteamId.Value);
+            //GetSteamID.Add(networkid, info.Identity.SteamId.Value);
             Debug.Log(players.Count);
             connection.Accept();
         }
@@ -113,11 +113,11 @@ public class GameServer : SocketManager
         base.OnDisconnected(connection, info);
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Disconnected.");
         NetworkPlayer whodis = players[info.Identity.SteamId];
-        int networkid = whodis.NetworkID;
+        ulong networkid = whodis.steamId;
         whodis.player.Disconnect();
         
         players.Remove(info.Identity.SteamId.Value);
-        GetSteamID.Remove(networkid);
+        //GetSteamID.Remove(networkid);
 
         ServerSend.PlayerQuit(networkid);
 

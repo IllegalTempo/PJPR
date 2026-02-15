@@ -49,17 +49,14 @@ public class PlayerMain : MonoBehaviour
     }
     public void OnPickUpItem(Item Item)
     {
-        Debug.Log($"Picked up {Item.ItemName}");
         holdingItem = Item;
         
     }
 
     public void OnDropItem(Item Item)
     {
-        Debug.Log($"Dropped {Item.ItemName}");
 
         holdingItem = null;
-        Debug.Log($"haha");
 
     }
     private void onSelectObject(Selectable item)

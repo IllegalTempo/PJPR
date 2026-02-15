@@ -11,13 +11,15 @@ public class NetworkPlayer
     public Connection connection;
     public string SteamName;
     public SteamId steamId;
-    public int NetworkID;
+    //public int NetworkID;
     public bool IsLocal;
     public NetworkPlayerObject player;
     public bool MovementUpdateReady;
-    public NetworkPlayer(SteamId steamid,int NetworkID,Connection connection)
+    public NetworkPlayer(SteamId steamid
+        //,int NetworkID
+        ,Connection connection)
     {
-        this.NetworkID = NetworkID;
+        //this.NetworkID = NetworkID;
         SteamName = (new Friend(steamid)).Name;
         this.connection = connection;
         this.steamId = steamid;

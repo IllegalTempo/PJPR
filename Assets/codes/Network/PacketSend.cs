@@ -15,20 +15,20 @@ public class PacketSend
     }
     public static Result BroadcastPacket(ConnectionInfo i, packet p)
     {
-        return BroadcastPacket(NetworkSystem.instance.server.GetPlayer(i).NetworkID, p);
+        return BroadcastPacket(i.Identity.SteamId, p);
     }
-    public static Result BroadcastPacket(ulong ExcludeID, packet p)
+    //public static Result BroadcastPacket(ulong ExcludeID, packet p)
+    //{
+    //    return BroadcastPacket(NetworkSystem.instance.server.players[ExcludeID].NetworkID, p);
+    //}
+    public static Result BroadcastPacket(ulong excludeid, packet p)
     {
-        return BroadcastPacket(NetworkSystem.instance.server.players[ExcludeID].NetworkID, p);
-    }
-    public static Result BroadcastPacket(int excludeid, packet p)
-    {
-        for (int i = 1; i < NetworkSystem.instance.server.GetPlayerCount(); i++)
+        foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
         {
-            NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
-            if (sendtarget.NetworkID != excludeid)
+            //NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
+            if (pl.steamId != excludeid)
             {
-                if (sendtarget.SendPacket(p) != Result.OK)
+                if (pl.SendPacket(p) != Result.OK)
                 {
                     Debug.Log("Result Error when broadcasting packet");
                     return Result.Cancelled;
@@ -38,16 +38,16 @@ public class PacketSend
         }
         return Result.OK;
     }
-    public static Result BroadcastPacketToReady(int excludeid, packet p)
+    public static Result BroadcastPacketToReady(ulong excludeid, packet p)
     {
         if (NetworkSystem.instance.server == null) return Result.Disabled;
-        int playercount = NetworkSystem.instance.server.GetPlayerCount();
-        for (int i = 1; i < playercount; i++)
+        //int playercount = NetworkSystem.instance.server.GetPlayerCount();
+        foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
         {
-            NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
-            if (sendtarget.NetworkID != excludeid && sendtarget.MovementUpdateReady)
+            //NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
+            if (pl.steamId != excludeid && pl.MovementUpdateReady)
             {
-                if (sendtarget.SendPacket(p) != Result.OK)
+                if (pl.SendPacket(p) != Result.OK)
                 {
                     Debug.Log("Result Error when broadcasting packet");
                     return Result.Cancelled;

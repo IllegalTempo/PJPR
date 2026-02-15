@@ -21,7 +21,7 @@ public class ServerHandle
 
 
         string itemid = packet.ReadstringUNICODE();
-        int whopicked = packet.Readint();
+        ulong whopicked = packet.Readulong();
         NetworkSystem.instance.FindNetworkObject[itemid].Network_ChangeOwner(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, whopicked);
@@ -48,7 +48,8 @@ public class ServerHandle
         float movex = packet.Readfloat();
         float movey = packet.Readfloat();
         p.player.SetAnimation(movex, movey);
-        ServerSend.DistributePlayerAnimationState(p.NetworkID, movex, movey);
+        ServerSend.DistributePlayerAnimationState(p.steamId, movex, movey);
+
     }
     public static void ReadyUpdate(NetworkPlayer p, packet packet)
     {
@@ -62,7 +63,7 @@ public class ServerHandle
         Quaternion rot = packet.Readquaternion();
         Quaternion yrot = packet.Readquaternion();
         p.player.SetMovement(pos, rot, yrot);
-        ServerSend.DistributeMovement(p.NetworkID, pos, rot, yrot);
+        ServerSend.DistributeMovement(p.steamId, pos, rot, yrot);
     }
 
 }

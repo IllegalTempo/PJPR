@@ -7,7 +7,6 @@ public class NetworkPlayerObject : MonoBehaviour
     [Header("Network Data")]
     public ulong steamID;
     public bool IsLocal;
-    public int NetworkID;
 
     public Vector3 NetworkPos;
     public Quaternion NetworkHeadRot;

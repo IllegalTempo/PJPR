@@ -9,13 +9,14 @@ using System.Runtime.InteropServices;
 
 public class GameClient : ConnectionManager
 {
-    public int NetworkID;
+    //public int NetworkID;
     private delegate void PacketHandle(Connection c, packet p);
-    public Dictionary<int, NetworkPlayerObject> GetPlayerByNetworkID = new Dictionary<int, NetworkPlayerObject>();
-
+    public Dictionary<ulong, NetworkPlayerObject> GetPlayerBySteamID = new Dictionary<ulong, NetworkPlayerObject>();
+    public ulong LocalSteamID;
     public GameClient()
     {
         NetworkSystem.instance.IsOnline = true;
+        LocalSteamID = SteamClient.SteamId;
     }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
@@ -34,9 +35,9 @@ public class GameClient : ConnectionManager
         };
 
 
-    public bool IsLocal(int id)
+    public bool IsLocal(ulong id)
     {
-        return id == NetworkID;
+        return id == LocalSteamID;
     }
     public Connection GetServer()
     {

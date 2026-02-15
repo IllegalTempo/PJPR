@@ -74,12 +74,12 @@ public class GameCore : MonoBehaviour
         return nobj;
 
     }
-    public bool IsLocal(int id)
+    public bool IsLocal(ulong id)
     {
         //if (!NetworkSystem.instance.IsOnline)
         //{
         //    return true;
         //}
-        return id == localNetworkPlayer.NetworkID;
+        return id == localNetworkPlayer.steamID;
     }
 }

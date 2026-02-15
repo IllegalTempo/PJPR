@@ -7,10 +7,10 @@ public class ClientHandle
 {
     public static async void test(Connection c, packet packet)
     {
-        int NetworkID = packet.Readint();
+        //int NetworkID = packet.Readint();
         string text = packet.ReadstringUNICODE();
         long Servertime = packet.Readlong();
-        NetworkSystem.instance.client.NetworkID = NetworkID;
+        //NetworkSystem.instance.client.NetworkID = NetworkID;
 
         if (text == PacketSend.TestRandomUnicode)
         {
@@ -30,7 +30,7 @@ public class ClientHandle
 
 
         string itemid = packet.ReadstringUNICODE();
-        int whopicked = packet.Readint();
+        ulong whopicked = packet.Readulong();
 
         NetworkSystem.instance.FindNetworkObject[itemid].Network_ChangeOwner(whopicked);
         Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
@@ -58,10 +58,9 @@ public class ClientHandle
         GameClient client = NetworkSystem.instance.client;
         for (int i = 0; i < numplayer; i++)
         {
-            int NetworkID = packet.Readint();
             ulong steamid = packet.Readulong();
-            Debug.Log($"Spawning Player {NetworkID} {steamid}");
-            client.GetPlayerByNetworkID.Add(NetworkID, NetworkSystem.instance.SpawnPlayer(client.IsLocal(NetworkID), NetworkID, steamid));
+            Debug.Log($"Spawning Player {steamid}");
+            client.GetPlayerBySteamID.Add(steamid, NetworkSystem.instance.SpawnPlayer(client.IsLocal(steamid), steamid));
 
 
         }
@@ -71,38 +70,38 @@ public class ClientHandle
     public static void NewPlayerJoin(Connection c, packet packet)
     {
         ulong playerid = packet.Readulong();
-        int supposeNetworkID = packet.Readint();
+        //int supposeNetworkID = packet.Readint();
 
 
 
 
-        NetworkSystem.instance.client.GetPlayerByNetworkID.Add(supposeNetworkID, NetworkSystem.instance.SpawnPlayer(false, supposeNetworkID, playerid));
+        NetworkSystem.instance.client.GetPlayerBySteamID.Add(playerid, NetworkSystem.instance.SpawnPlayer(false, playerid));
     }
     public static void PlayerQuit(Connection c, packet packet)
     {
         GameClient cl = NetworkSystem.instance.client;
-        int NetworkID = packet.Readint();
-        cl.GetPlayerByNetworkID[NetworkID].Disconnect();
-        cl.GetPlayerByNetworkID.Remove(NetworkID);
+        ulong steamID = packet.Readulong();
+        cl.GetPlayerBySteamID[steamID].Disconnect();
+        cl.GetPlayerBySteamID.Remove(steamID);
     }
 
     public static void ReceivedPlayerMovement(Connection c, packet packet)
     {
-        int NetworkID = packet.Readint();
+        ulong steamID = packet.Readulong();
 
         Vector3 pos = packet.Readvector3();
         Quaternion headrot = packet.Readquaternion();
         Quaternion bodyrot = packet.Readquaternion();
-        NetworkSystem.instance.client.GetPlayerByNetworkID[NetworkID].SetMovement(pos, headrot, bodyrot);
+        NetworkSystem.instance.client.GetPlayerBySteamID[steamID].SetMovement(pos, headrot, bodyrot);
     }
 
 
     public static void ReceivedPlayerAnimation(Connection c, packet packet)
     {
-        int NetworkID = packet.Readint();
+        ulong NetworkID = packet.Readulong();
         float x = packet.Readfloat();
         float y = packet.Readfloat();
-        NetworkSystem.instance.client.GetPlayerByNetworkID[NetworkID].SetAnimation(x, y);
+        NetworkSystem.instance.client.GetPlayerBySteamID[NetworkID].SetAnimation(x, y);
     }
 
     public static void DistributeNOInfo(Connection c, packet packet)

@@ -11,7 +11,7 @@ public class ServerSend
     {
         using (packet p = new packet((int)ServerPackets.Test_Packet))
         {
-            p.Write(pl.NetworkID);
+            p.Write(pl.steamId);
             p.WriteUNICODE(PacketSend.TestRandomUnicode);
             Debug.Log("sending: " + DateTime.Now.Ticks);
             p.Write(DateTime.Now.Ticks);
@@ -23,7 +23,7 @@ public class ServerSend
 
 
 
-    public static Result DistributeMovement(int SourceNetworkID, Vector3 pos, Quaternion headrot, Quaternion bodyrot)
+    public static Result DistributeMovement(ulong SourceNetworkID, Vector3 pos, Quaternion headrot, Quaternion bodyrot)
     {
         using (packet p = new packet((int)ServerPackets.DistributeMovement))
         {
@@ -36,7 +36,7 @@ public class ServerSend
         }
         ;
     }
-    public static Result DistributePlayerAnimationState(int SourceNetworkID, float movementx, float movementy)
+    public static Result DistributePlayerAnimationState(ulong SourceNetworkID, float movementx, float movementy)
     {
         using (packet p = new packet((int)ServerPackets.DistributeAnimation))
         {
@@ -54,17 +54,17 @@ public class ServerSend
         using (packet p = new packet((int)ServerPackets.UpdatePlayerEnterRoomForExistingPlayer))
         {
             p.Write(newplayer.Identity.SteamId);
-            p.Write(NetworkSystem.instance.server.GetPlayer(newplayer).NetworkID);
+            //p.Write(NetworkSystem.instance.server.GetPlayer(newplayer).NetworkID);
             return PacketSend.BroadcastPacket(newplayer, p);
 
         }
         ;
     }
-    public static Result PlayerQuit(int NetworkID) //who quitted
+    public static Result PlayerQuit(ulong steamID) //who quitted
     {
         using (packet p = new packet((int)ServerPackets.PlayerQuit))
         {
-            p.Write(NetworkID);
+            p.Write(steamID);
 
             return PacketSend.BroadcastPacket(p);
 
@@ -76,10 +76,9 @@ public class ServerSend
         using (packet p = new packet((int)ServerPackets.RoomInfoOnPlayerEnterRoom))
         {
             p.Write(NumPlayer);
-            for (int i = 0; i < NumPlayer; i++)
+            foreach (ulong steamid in NetworkSystem.instance.server.players.Keys)
             {
-                p.Write(NetworkSystem.instance.server.GetSteamID.ElementAt(i).Key);
-                p.Write(NetworkSystem.instance.server.GetSteamID[i]); //given information (SteamID)
+                p.Write(steamid); //given information (SteamID)
             }
             return target.SendPacket(p);
         }
@@ -106,7 +105,7 @@ public class ServerSend
     }
 
 
-    public static Result DistributePickUpItem(string itemid, int PickedUpBy)
+    public static Result DistributePickUpItem(string itemid, ulong PickedUpBy)
     {
         using (packet p = new packet((int)ServerPackets.DistributePickUpItem))
         {

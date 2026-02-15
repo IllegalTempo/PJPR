@@ -26,6 +26,7 @@ public class NetworkSystem : MonoBehaviour
     public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
     //All player list
     public List<NetworkPlayerObject> PlayerList = new List<NetworkPlayerObject>();
+    public Dictionary<ulong,Spaceship> GetSpaceShip = new Dictionary<ulong, Spaceship>();
     //Current Lobby player is in, no matter server or client
     public Lobby CurrentLobby;
     // Start is called before the first frame update
@@ -77,7 +78,7 @@ public class NetworkSystem : MonoBehaviour
         }
     }
     //Spawn the network Player
-    public NetworkPlayerObject SpawnPlayer(bool isLocal, int networkid, ulong steamid)
+    public NetworkPlayerObject SpawnPlayer(bool isLocal, ulong steamid)
     {
         Debug.Log("SpawnPlayer Called " + "steamid:" + steamid);
         if (PlayerInstance == null)
@@ -92,10 +93,10 @@ public class NetworkSystem : MonoBehaviour
             Debug.LogError("PlayerInstance prefab does not have NetworkPlayerObject component.");
             return null;
         }
-        p.NetworkID = networkid;
+        //p.NetworkID = networkid;
         p.steamID = steamid;
         p.IsLocal = isLocal;
-        p.gameObject.name = "Player_" + networkid;
+        p.gameObject.name = "Player_" + steamid;
         //if (p.IsLocal)
         //{
         //    GameCore.instance.localNetworkPlayer = p;
@@ -321,7 +322,7 @@ public class NetworkSystem : MonoBehaviour
                 IsServer = false;
                 // Use the port returned by GetGameServer
                 client = SteamNetworkingSockets.ConnectRelay<GameClient>(serverid, port);
-                print(client.NetworkID);
+                //print(client.NetworkID);
 
             }
             else

@@ -77,7 +77,7 @@ public class ClientSend
     }
 
 
-    public static Result PickUpItem(string objectID, int whopicked)
+    public static Result PickUpItem(string objectID, ulong whopicked)
     {
         using (packet p = new packet((int)ClientPackets.PickUpItem))
         {

@@ -15,12 +15,13 @@ public class NetworkObject : MonoBehaviour
     public bool Sync_Position = true;
     public bool Sync_Rotation = true;
 
-    public int Owner = -1;
+    public ulong Owner = 0;
 
     private void Start()
     {
         //If not set, set to gameobject name
-        
+        Owner = 0;
+
     }
     public void Init(string uid, GameObject obj) //when a new object is created, server will send a packet to all client, this method is run by client
     {
@@ -33,7 +34,7 @@ public class NetworkObject : MonoBehaviour
         else
         {
             Debug.LogError($"NetworkObject with Identifier {uid} already exists in NetworkSystem. UID COLLISION??? END OF WORLD????");
-           
+
         }
 
 
@@ -56,7 +57,7 @@ public class NetworkObject : MonoBehaviour
 
 
     }
-    public void Network_ChangeOwner(int newowner)
+    public void Network_ChangeOwner(ulong newowner)
     {
         Owner = newowner;
     }
