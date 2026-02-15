@@ -46,6 +46,7 @@ public class Item : Selectable
     private void gotPickedup()
     {
         rb.linearVelocity = Vector3.zero;
+        rb.useGravity = false;
         outline.OutlineColor = Color.aquamarine;
         if (itemCollider != null)
         {
@@ -57,7 +58,7 @@ public class Item : Selectable
         // Remove from inventory
         outline.OutlineColor = Color.white;
         rb.linearVelocity = Vector3.zero;
-
+        rb.useGravity = true;
         this.transform.position = dropPosition;
 
         itemCollider.isTrigger = false;
