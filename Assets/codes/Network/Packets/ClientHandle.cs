@@ -27,30 +27,30 @@ public class ClientHandle
     }
     public static void DistributePickUpItem(Connection c, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
+
+
         string itemid = packet.ReadstringUNICODE();
         int whopicked = packet.Readint();
 
-        NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
+        NetworkSystem.instance.FindNetworkObject[itemid].Network_ChangeOwner(whopicked);
         Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
 
-        // TODO: Handle the packet
+
     }
 
 
 
     public static void DistributeInitialPos(Connection c, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
+
+
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
 
         GameCore.instance.localPlayer.transform.position = pos;
         GameCore.instance.localPlayer.transform.rotation = rot;
         Debug.Log("Received Initial Pos and Rot");
-        // TODO: Handle the packet
+
     }
     public static async void InitRoomInfo(Connection c, packet packet)
     {
@@ -107,13 +107,22 @@ public class ClientHandle
 
     public static void DistributeNOInfo(Connection c, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
+
+
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
         NetworkSystem.instance.FindNetworkObject[uuid].SetMovement(pos, rot);
 
-        // TODO: Handle the packet
+
+    }
+
+    public static void NewObject(Connection c, packet packet)
+    {
+        string prefabID = packet.ReadstringUNICODE();
+        string uid = packet.ReadstringUNICODE();
+        Vector3 spawnLocation = packet.Readvector3();
+        Quaternion spawnRot = packet.Readquaternion();
+        NetworkSystem.instance.Client_ReceivedNewNetworkObject(prefabID,uid, spawnLocation,spawnRot);
     }
 }

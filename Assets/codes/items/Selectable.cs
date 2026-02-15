@@ -8,7 +8,7 @@ public partial class Selectable : MonoBehaviour
     public StaticOutline outline;
     public bool LookedAt = false;
     public float ClickTimer = 0f;
-    protected void OnEnable()
+    protected virtual void OnEnable()
     {
         outline = GetComponent<StaticOutline>();
 

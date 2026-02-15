@@ -16,13 +16,13 @@ public class ServerHandle
 
     public static void PickUpItem(NetworkPlayer p, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
 
-        // TODO: Handle the packet
+
+
+
         string itemid = packet.ReadstringUNICODE();
         int whopicked = packet.Readint();
-        NetworkSystem.instance.FindNetworkObject[itemid].ReceivedNetwork_PickUp(whopicked);
+        NetworkSystem.instance.FindNetworkObject[itemid].Network_ChangeOwner(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, whopicked);
     }

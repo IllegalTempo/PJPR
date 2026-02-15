@@ -37,7 +37,7 @@ public class GameServer : SocketManager
         this.maxplayer = NetworkSystem.instance.MaxPlayer;
         GetSteamID.Add(0, SteamClient.SteamId);
         GameObject g = NetworkSystem.instance.SpawnPlayer(true, 0, SteamClient.SteamId).gameObject;
-
+        NetworkSystem.instance.IsOnline = true;
         Debug.Log("Created GameServer Object");
     }
     public int GetPlayerCount()

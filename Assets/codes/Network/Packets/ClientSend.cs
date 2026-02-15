@@ -65,8 +65,8 @@ public class ClientSend
     {
         using (packet p = new packet((int)ClientPackets.SendNOInfo))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+            
+
             p.WriteUNICODE(id);
             p.Write(pos);
             p.Write(rot);
@@ -81,8 +81,8 @@ public class ClientSend
     {
         using (packet p = new packet((int)ClientPackets.PickUpItem))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+            
+
             p.WriteUNICODE(objectID);
 
             p.Write(whopicked);

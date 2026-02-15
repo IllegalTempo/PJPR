@@ -7,13 +7,13 @@ public class Item : Selectable
     public string ItemName;
     public string ItemDescription;
     public NetworkObject netObj;
-    private Rigidbody rb;
-    private Collider itemCollider;
+    protected Rigidbody rb;
+    protected Collider itemCollider;
 
     protected new void OnEnable()
     {
         base.OnEnable();
-        netObj = GetComponent<NetworkObject>();
+
         rb = GetComponent<Rigidbody>();
         itemCollider = GetComponent<Collider>();
     }
@@ -31,17 +31,19 @@ public class Item : Selectable
 
     }
 
-    private void PickUpItem() //Only Run by local
+    protected virtual void PickUpItem() //Only Run by local
     {
 
         rb.linearVelocity = Vector3.zero;
         outline.OutlineColor = Color.aquamarine;
-        netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
-
         if (itemCollider != null)
         {
             itemCollider.isTrigger = true;
         }
+        GameCore.instance.localPlayer.OnPickUpItem(this);
+
+
+        netObj.Owner = GameCore.instance.localNetworkPlayer.NetworkID;
         if (NetworkSystem.instance.IsServer)
         {
             ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
@@ -50,13 +52,13 @@ public class Item : Selectable
         {
             ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
         }
-        GameCore.instance.localPlayer.OnPickUpItem(this);
 
 
     }
     protected override void Update()
     {
         base.Update();
+        if (!NetworkSystem.instance.IsOnline) return;
         if (GameCore.instance.IsLocal(netObj.Owner))
         {
             // Update position to follow camera
@@ -64,7 +66,10 @@ public class Item : Selectable
 
         }
     }
-    public void Drop(Vector3 dropPosition) //Only Run by local
+
+        
+    
+    protected virtual void Drop(Vector3 dropPosition) //Only Run by local
     {
 
 
@@ -88,8 +93,8 @@ public class Item : Selectable
 
     }
     public void Drop()
-    {
-        Drop(transform.position);
-    }
+{
+    Drop(transform.position);
+}
 
 }

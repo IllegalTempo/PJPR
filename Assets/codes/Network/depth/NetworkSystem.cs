@@ -1,27 +1,29 @@
-using System;
-using UnityEngine;
 using Steamworks;
-using System.Threading.Tasks;
 using Steamworks.Data;
-using UnityEditor;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Identifiers;
 
 public class NetworkSystem : MonoBehaviour
 {
     [Header("Network Setting")]
     [SerializeField]
-    private bool CreateLobbyOnStart = true;
+    public bool CreateLobbyOnStart = true;
     public int MaxPlayer = 2;
     [Header("NetworkData")]
     public bool Connected = false;
     public static NetworkSystem instance;
     public GameServer server;
     public GameClient client;
+    public bool IsOnline = false;
     //True if current instance is server
     public bool IsServer = true;
     //Network Player Prefab
     public GameObject PlayerInstance;
-    public Dictionary<string,NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
+    public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
     //All player list
     public List<NetworkPlayerObject> PlayerList = new List<NetworkPlayerObject>();
     //Current Lobby player is in, no matter server or client
@@ -46,7 +48,22 @@ public class NetworkSystem : MonoBehaviour
         }
 
     }
+    /// <summary>
+    /// Call by packet handle. 
+    /// </summary>
+    /// <param name="prefabID"></param>
+    /// <param name="UID"></param>
+    /// <param name="pos"></param>
+    /// <param name="rot"></param>
+    public void Client_ReceivedNewNetworkObject(string prefabID,string UID,Vector3 pos,Quaternion rot)
+    {
+        //Instantiate Prefab
 
+        GameObject obj = Instantiate(GameCore.instance.GetPrefabObject(prefabID),pos,rot);
+        NetworkObject nobj = obj.AddComponent<NetworkObject>();
+        nobj.Init(UID, obj);
+        FindNetworkObject.Add(nobj.Identifier, nobj);
+    }
     void Awake()
     {
         if (instance == null)
@@ -103,7 +120,7 @@ public class NetworkSystem : MonoBehaviour
                 SteamClient.Init(480, true);
                 SteamNetworkingUtils.InitRelayNetworkAccess();
                 Debug.Log("Steam Initialized");
-                if(CreateLobbyOnStart)
+                if (CreateLobbyOnStart)
                 {
                     CreateGameLobby();
 
@@ -265,7 +282,7 @@ public class NetworkSystem : MonoBehaviour
 
             }
         }
-        
+
         await Task.Delay(300);
         Debug.Log($"Server: {server}");
     }

@@ -1,10 +1,15 @@
+using System;
 using UnityEngine;
 
+//Network Object can be both
+//1. Default in scene, please set good identifier
+//2. Spawned by server , server will assign a unique identifier and send to all client, client will run Init() to set the identifier
 public class NetworkObject : MonoBehaviour
 {
     public string Identifier;
     public Vector3 NetworkPos;
     public Quaternion NetworkRot;
+    public GameObject parent = null;
 
     [Header("Network Setting")]
     public bool Sync_Position = true;
@@ -15,18 +20,23 @@ public class NetworkObject : MonoBehaviour
     private void Start()
     {
         //If not set, set to gameobject name
-        if (string.IsNullOrEmpty(Identifier))
+        
+    }
+    public void Init(string uid, GameObject obj) //when a new object is created, server will send a packet to all client, this method is run by client
+    {
+        Identifier = uid;
+        this.parent = obj;
+        if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
         {
-            Identifier = gameObject.name;
-        }
-        if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(Identifier))
-        {
-            NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
+            NetworkSystem.instance.FindNetworkObject.Add(uid, this);
         }
         else
         {
-            Debug.LogError($"NetworkObject with Identifier {Identifier} already exists in NetworkSystem. Please use unique Identifiers.");
+            Debug.LogError($"NetworkObject with Identifier {uid} already exists in NetworkSystem. UID COLLISION??? END OF WORLD????");
+           
         }
+
+
     }
     private void FixedUpdate()
     {
@@ -46,7 +56,7 @@ public class NetworkObject : MonoBehaviour
 
 
     }
-    public void ReceivedNetwork_PickUp(int newowner)
+    public void Network_ChangeOwner(int newowner)
     {
         Owner = newowner;
     }

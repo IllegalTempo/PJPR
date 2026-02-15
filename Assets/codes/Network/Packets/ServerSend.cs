@@ -86,13 +86,17 @@ public class ServerSend
     }
 
 
+    /// <summary>
+    /// Update Network Object Info every fixed interval
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="pos"></param>
+    /// <param name="rot"></param>
+    /// <returns></returns>
     public static Result DistributeNOInfo(string id, Vector3 pos, Quaternion rot)
     {
         using (packet p = new packet((int)ServerPackets.DistributeNOInfo))
         {
-
-            // TODO: Write packet data here
-            // p.Write(...);
             p.WriteUNICODE(id);
             p.Write(pos);
             p.Write(rot);
@@ -106,8 +110,8 @@ public class ServerSend
     {
         using (packet p = new packet((int)ServerPackets.DistributePickUpItem))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+
+
             p.WriteUNICODE(itemid);
             p.Write(PickedUpBy);
             return PacketSend.BroadcastPacket(p);
@@ -119,11 +123,34 @@ public class ServerSend
     {
         using (packet p = new packet((int)ServerPackets.DistributeInitialPos))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+
+
             p.Write(pos);
             p.Write(Rot);
             return target.SendPacket(p);
+        }
+    }
+
+    /// <summary>
+    /// Send Spawn network object to clients. 
+    /// </summary>
+    /// <param name="prefabID"></param>
+    /// <param name="spawnLocation"></param>
+    /// <param name="UID">Network Object Identifier</param>
+    /// <param name="rot"></param>
+    /// <returns></returns>
+    public static Result NewObject(string prefabID,string UID, Vector3 spawnLocation, Quaternion rot)
+    {
+        using (packet p = new packet((int)ServerPackets.NewObject))
+        {
+
+
+            p.WriteUNICODE(prefabID);
+            p.WriteUNICODE(UID);
+            p.Write(spawnLocation);
+            p.Write(rot);
+
+            return PacketSend.BroadcastPacket(p);
         }
     }
 }

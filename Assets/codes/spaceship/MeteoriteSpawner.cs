@@ -134,7 +134,7 @@ public class MeteoriteSpawner : MonoBehaviour
             Vector3 finalDirection = Vector3.Lerp(randomDirection, directionToTarget, aimTowardTarget).normalized;
             
             float speed = Random.Range(speedRange.x, speedRange.y);
-            rb.velocity = finalDirection * speed;
+            rb.linearVelocity = finalDirection * speed;
             rb.angularVelocity = Random.insideUnitSphere * 2f;
         }
 

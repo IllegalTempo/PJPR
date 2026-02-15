@@ -19,6 +19,8 @@ public class packets
         DistributeNOInfo = 6,
         DistributePickUpItem = 7,
         DistributeInitialPos = 9
+    ,
+        NewObject = 10
     };
     public enum ClientPackets
     {

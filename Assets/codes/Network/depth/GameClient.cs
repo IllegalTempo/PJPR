@@ -13,7 +13,10 @@ public class GameClient : ConnectionManager
     private delegate void PacketHandle(Connection c, packet p);
     public Dictionary<int, NetworkPlayerObject> GetPlayerByNetworkID = new Dictionary<int, NetworkPlayerObject>();
 
-
+    public GameClient()
+    {
+        NetworkSystem.instance.IsOnline = true;
+    }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
         {
@@ -26,7 +29,9 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.DistributeNOInfo, ClientHandle.DistributeNOInfo },
             { (int)packets.ServerPackets.DistributePickUpItem, ClientHandle.DistributePickUpItem },
             { (int)packets.ServerPackets.DistributeInitialPos, ClientHandle.DistributeInitialPos }
-            };
+            ,
+            { (int)packets.ServerPackets.NewObject, ClientHandle.NewObject }
+        };
 
 
     public bool IsLocal(int id)
@@ -54,7 +59,11 @@ public class GameClient : ConnectionManager
     {
         base.OnDisconnected(info);
         Debug.Log("Disconnected to " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
-        NetworkSystem.instance.CreateGameLobby();
+        if(NetworkSystem.instance.CreateLobbyOnStart)
+        {
+            NetworkSystem.instance.CreateGameLobby();
+
+        }
 
     }
     public override unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
