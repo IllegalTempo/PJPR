@@ -21,6 +21,10 @@ public class NetworkObject : MonoBehaviour
     {
         //If not set, set to gameobject name
         Owner = 0;
+        if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(Identifier))
+        {
+            NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
+        }
 
     }
     public void Init(string uid, GameObject obj) //when a new object is created, server will send a packet to all client, this method is run by client

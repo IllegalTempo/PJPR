@@ -7,7 +7,7 @@ public class ClientHandle
 {
     public static async void test(Connection c, packet packet)
     {
-        //int NetworkID = packet.Readint();
+        ulong NetworkID = packet.Readulong();
         string text = packet.ReadstringUNICODE();
         long Servertime = packet.Readlong();
         //NetworkSystem.instance.client.NetworkID = NetworkID;
