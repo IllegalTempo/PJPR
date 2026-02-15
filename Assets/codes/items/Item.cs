@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
 
@@ -21,7 +22,6 @@ public class Item : Selectable
 
 
 
-
     public override void OnClicked()
     {
         base.OnClicked();
@@ -30,16 +30,42 @@ public class Item : Selectable
         PickUpItem();
 
     }
-
-    protected virtual void PickUpItem() //Only Run by local
+    public void Network_onChangeOwnership(ulong newowner)
     {
+        netObj.Network_ChangeOwner(newowner);
+        if (newowner == 0)
+        {
+            gotDropped(transform.position);
 
+        }
+        else
+        {
+            gotPickedup();
+        }
+    }
+    private void gotPickedup()
+    {
         rb.linearVelocity = Vector3.zero;
         outline.OutlineColor = Color.aquamarine;
         if (itemCollider != null)
         {
             itemCollider.isTrigger = true;
         }
+    }
+    private void gotDropped(Vector3 dropPosition)
+    {
+        // Remove from inventory
+        outline.OutlineColor = Color.white;
+        rb.linearVelocity = Vector3.zero;
+
+        this.transform.position = dropPosition;
+
+        itemCollider.isTrigger = false;
+    }
+    protected virtual void PickUpItem() //Only Run by local
+    {
+
+        gotPickedup();
         GameCore.instance.localPlayer.OnPickUpItem(this);
 
 
@@ -73,13 +99,7 @@ public class Item : Selectable
     {
 
 
-        // Remove from inventory
-        outline.OutlineColor = Color.white;
-        rb.linearVelocity = Vector3.zero;
-
-        this.transform.position = dropPosition;
-
-        itemCollider.isTrigger = false;
+        gotDropped(dropPosition);
         netObj.Owner = 0;
         if (NetworkSystem.instance.IsServer)
         {

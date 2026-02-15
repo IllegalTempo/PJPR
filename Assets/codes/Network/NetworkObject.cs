@@ -9,7 +9,6 @@ public class NetworkObject : MonoBehaviour
     public string Identifier;
     public Vector3 NetworkPos;
     public Quaternion NetworkRot;
-    public GameObject parent = null;
 
     [Header("Network Setting")]
     public bool Sync_Position = true;
@@ -30,7 +29,6 @@ public class NetworkObject : MonoBehaviour
     public void Init(string uid, GameObject obj) //when a new object is created, server will send a packet to all client, this method is run by client
     {
         Identifier = uid;
-        this.parent = obj;
         if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
         {
             NetworkSystem.instance.FindNetworkObject.Add(uid, this);
@@ -65,6 +63,7 @@ public class NetworkObject : MonoBehaviour
     {
         Owner = newowner;
     }
+    
     private void Update()
     {
         if (NetworkSystem.instance.IsServer) return;

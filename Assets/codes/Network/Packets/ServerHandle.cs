@@ -22,7 +22,7 @@ public class ServerHandle
 
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
-        NetworkSystem.instance.FindNetworkObject[itemid].Network_ChangeOwner(whopicked);
+        NetworkSystem.instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, whopicked);
     }
