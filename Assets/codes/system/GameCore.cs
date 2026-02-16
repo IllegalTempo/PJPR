@@ -60,7 +60,7 @@ public class GameCore : MonoBehaviour
     /// <param name="pos"></param>
     /// <param name="rot"></param>
     /// <returns></returns>
-    private NetworkObject CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot) //Server Only
+    public NetworkObject CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot) //Server Only
     {
         if (NetworkSystem.instance.IsServer) return null;
         GameObject prefab = GetPrefabObject(prefabID);
@@ -72,6 +72,26 @@ public class GameCore : MonoBehaviour
         ServerSend.NewObject(prefabID, nobj.Identifier, pos, rot);
 
         return nobj;
+
+    }
+    public Spaceship SpawnSpaceShip(DecorationSaveData[] decs)
+    {
+        Spaceship ss = Instantiate(GetPrefabObject("Spaceship")).GetComponent<Spaceship>();
+        if (decs != null)
+        {
+            foreach (DecorationSaveData dsd in decs)
+            {
+                GameObject obj = Instantiate(GetDecoration(dsd.DecorationID),localSpaceship.transform);
+                obj.transform.localPosition = dsd.DecorationPosition;
+                obj.transform.localRotation = dsd.DecorationRotation;
+
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot load decorations");
+        }
+        return ss;
 
     }
     public bool IsLocal(ulong id)

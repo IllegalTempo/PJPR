@@ -29,19 +29,7 @@ public class SaveObject : MonoBehaviour
         string json = File.ReadAllText(savepath);
         string decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(json));
         JsonUtility.FromJsonOverwrite(decoded, this);
-        if (saved_decorations != null)
-        {
-            foreach (DecorationSaveData dsd in saved_decorations)
-            {
-                GameObject obj = Instantiate(GameCore.instance.GetDecoration(dsd.DecorationID),GameCore.instance.localSpaceship.transform);
-                obj.transform.localPosition = dsd.DecorationPosition;
-                obj.transform.localRotation = dsd.DecorationRotation;
-
-            }
-        } else
-        {
-            Debug.Log("Cannot load decorations");
-        }
+        
         
 
     }
