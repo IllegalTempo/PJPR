@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// General Important method are saved here...
@@ -45,6 +46,13 @@ public class GameCore : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+    }
+    private void OnApplicationQuit()
+    {
+        string rebinds = localPlayer.control.SaveBindingOverridesAsJson();
+        PlayerPrefs.SetString("inputRebinds", rebinds);
+
+
     }
     public GameObject GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {

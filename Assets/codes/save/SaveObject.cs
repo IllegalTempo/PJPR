@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 [Serializable]
-public class SaveObject : MonoBehaviour
+public class SaveObject
 {
     readonly string savepath = Path.Combine(Application.persistentDataPath, "save.json");
     //Save Stuff about the spaceship, decoration
@@ -12,7 +12,7 @@ public class SaveObject : MonoBehaviour
     public void Save()
     {
         //Save the decoration
-        saved_decorations = new DecorationSaveData[transform.childCount];
+        saved_decorations = new DecorationSaveData[GameCore.instance.localSpaceship.GetDecorationByUUID_onShip.Count];
         int decorationIndex = 0;
         foreach(Decoration dec in GameCore.instance.localSpaceship.GetDecorationByUUID_onShip.Values)
         {
