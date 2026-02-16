@@ -63,7 +63,7 @@ public class NetworkSystem : MonoBehaviour
         GameObject obj = Instantiate(GameCore.instance.GetPrefabObject(prefabID),pos,rot);
         NetworkObject nobj = obj.AddComponent<NetworkObject>();
         nobj.Init(UID, obj);
-        FindNetworkObject.Add(nobj.Identifier, nobj);
+        // FindNetworkObject.Add(nobj.Identifier, nobj);
     }
     void Awake()
     {

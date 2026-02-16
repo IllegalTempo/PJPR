@@ -6,6 +6,7 @@ public class MeteoriteSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
     [SerializeField] private GameObject[] meteoritePrefabs;
+    [SerializeField] private string[] meteoritePrefabIDs;
     [SerializeField] private Transform spaceshipTarget;
     [SerializeField] private float spawnRadius = 50f;
     [SerializeField] private float minDistanceFromTarget = 20f;
@@ -34,6 +35,14 @@ public class MeteoriteSpawner : MonoBehaviour
     private float nextSpawnTime;
     private bool isWaveActive = false;
     private int currentWaveMeteorites = 0;
+
+    private bool IsServerAuthority
+    {
+        get
+        {
+            return NetworkSystem.instance == null || NetworkSystem.instance.IsServer;
+        }
+    }
     
     public enum SpawnAreaType
     {
@@ -44,6 +53,12 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void Start()
     {
+        if (!IsServerAuthority)
+        {
+            enabled = false;
+            return;
+        }
+
         // find spaceship if not assigned eh 
         if (spaceshipTarget == null)
         {
@@ -68,6 +83,11 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void Update()
     {
+        if (!IsServerAuthority)
+        {
+            return;
+        }
+
         // clean
         activeMeteorites.RemoveAll(item => item == null);
 
@@ -115,15 +135,21 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void SpawnMeteorite()
     {
-        if (meteoritePrefabs == null || meteoritePrefabs.Length == 0)
+        string prefabID = GetRandomMeteoritePrefabID();
+        if (string.IsNullOrEmpty(prefabID))
         {
-            Debug.LogWarning("No meteorite prefabs assigned to spawner!");
+            Debug.LogWarning("No meteorite prefab IDs configured for network spawn!");
             return;
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
-        GameObject meteorite = Instantiate(meteoritePrefab, spawnPosition, Random.rotation);
+        NetworkObject networkObject = GameCore.instance.CreateNetworkObject(prefabID, spawnPosition, Random.rotation);
+        if (networkObject == null)
+        {
+            return;
+        }
+
+        GameObject meteorite = networkObject.gameObject;
         float scale = Random.Range(sizeRange.x, sizeRange.y);
         meteorite.transform.localScale = Vector3.one * scale;
         Rigidbody rb = meteorite.GetComponent<Rigidbody>();
@@ -141,6 +167,56 @@ public class MeteoriteSpawner : MonoBehaviour
         activeMeteorites.Add(meteorite);
         // clean when too far
         StartCoroutine(CheckMeteoriteDistance(meteorite));
+    }
+
+    string GetRandomMeteoritePrefabID()
+    {
+        if (meteoritePrefabIDs != null && meteoritePrefabIDs.Length > 0)
+        {
+            List<string> validIDs = new List<string>();
+            foreach (string prefabID in meteoritePrefabIDs)
+            {
+                if (!string.IsNullOrWhiteSpace(prefabID))
+                {
+                    validIDs.Add(prefabID);
+                }
+            }
+
+            if (validIDs.Count > 0)
+            {
+                return validIDs[Random.Range(0, validIDs.Count)];
+            }
+        }
+
+        if (meteoritePrefabs != null && meteoritePrefabs.Length > 0)
+        {
+            GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
+            if (meteoritePrefab != null)
+            {
+                foreach (KeyValuePair<string, string> prefabEntry in GameCore.instance.getPrefab)
+                {
+                    if (prefabEntry.Key == meteoritePrefab.name || prefabEntry.Value == meteoritePrefab.name)
+                    {
+                        return prefabEntry.Key;
+                    }
+                }
+            }
+        }
+
+        if (GameCore.instance != null)
+        {
+            if (GameCore.instance.getPrefab.ContainsKey("Meteorite_Test"))
+            {
+                return "Meteorite_Test";
+            }
+
+            if (GameCore.instance.getPrefab.ContainsKey("Meteorite_Fragment"))
+            {
+                return "Meteorite_Fragment";
+            }
+        }
+
+        return string.Empty;
     }
 
     Vector3 GetSpawnPosition()

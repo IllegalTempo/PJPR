@@ -16,6 +16,8 @@ public class GameCore : MonoBehaviour
     public Dictionary<string, string> getPrefab = new Dictionary<string, string> //PrefabID, Path
     {
         { "TestPrefab","testPrefab" },
+        { "Meteorite_Test","Meteorite_Test" },
+        { "Meteorite_Fragment","Meteorite_Fragment" },
     };
     public Dictionary<string,string> getDecoration = new Dictionary<string, string> 
     {
@@ -61,15 +63,32 @@ public class GameCore : MonoBehaviour
     /// <param name="rot"></param>
     /// <returns></returns>
     public NetworkObject CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot) //Server Only
-    {
-        if (NetworkSystem.instance.IsServer) return null;
+    { //more check added
+        NetworkSystem networkSystem = NetworkSystem.instance;
+        if (networkSystem != null && !networkSystem.IsServer) return null;
+
+        if (!getPrefab.ContainsKey(prefabID))
+        {
+            Debug.LogError($"CreateNetworkObject failed: prefabID '{prefabID}' not found in GameCore.getPrefab dictionary.");
+            return null;
+        }
+
         GameObject prefab = GetPrefabObject(prefabID);
+        if (prefab == null)
+        {
+            Debug.LogError($"CreateNetworkObject failed: Resources prefab not found at 'Resources/{prefabPath}{getPrefab[prefabID]}'.");
+            return null;
+        }
+
         GameObject obj = Instantiate(prefab, pos, rot);
         NetworkObject nobj = obj.gameObject.AddComponent<NetworkObject>();
         string uid = Guid.NewGuid().ToString();
         nobj.Init(uid, obj);
-        
-        ServerSend.NewObject(prefabID, nobj.Identifier, pos, rot);
+
+        if (networkSystem != null && networkSystem.server != null)
+        {
+            ServerSend.NewObject(prefabID, nobj.Identifier, pos, rot);
+        }
 
         return nobj;
 
