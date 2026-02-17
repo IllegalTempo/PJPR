@@ -5,6 +5,9 @@ public class DecorationLight : interactable
     [Header("Light Target")]
     [SerializeField] private Light targetLight;
 
+    [Header("Interaction")]
+    [SerializeField] private float interactionDistance = 100f;
+
     [Header("Prompt")]
     [SerializeField] private bool showPrompt = true;
     [SerializeField] private string promptText = "{key}: Turn Light On/Off";
@@ -27,7 +30,7 @@ public class DecorationLight : interactable
     protected override void Update()
     {
         base.Update();
-        isLookedAtNow = outline != null && outline.enabled;
+        isLookedAtNow = IsLookedAt();
     }
 
     public override void OnClicked()
@@ -99,5 +102,33 @@ public class DecorationLight : interactable
         }
 
         return $"{keyLabel}: {promptText}";
+    }
+
+    private bool IsLookedAt()
+    {
+        Transform cameraTransform = GetCameraTransform();
+        if (cameraTransform == null)
+        {
+            return false;
+        }
+
+        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+        if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
+        {
+            return false;
+        }
+
+        interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
+        return lookedInteractable == this;
+    }
+
+    private Transform GetCameraTransform()
+    {
+        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
+        {
+            return GameCore.instance.localPlayer.cam.transform;
+        }
+
+        return Camera.main != null ? Camera.main.transform : null;
     }
 }

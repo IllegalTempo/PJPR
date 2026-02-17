@@ -304,11 +304,6 @@ if model orientation is unusual, or you are weird,
 
     private bool IsLookedAt()
     {
-        if (outline != null && outline.enabled)
-        {
-            return true;
-        }
-
         if (!useDirectRaycastFallback)
         {
             return false;
@@ -326,8 +321,8 @@ if model orientation is unusual, or you are weird,
             return false;
         }
 
-        ShipWindowPart lookedWindow = hit.collider.GetComponentInParent<ShipWindowPart>();
-        return lookedWindow == this;
+        interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
+        return lookedInteractable == this;
     }
 
     private Transform GetCameraTransform()

@@ -18,6 +18,8 @@ public class PlayerMain : MonoBehaviour
     private Vector2 lookinput = Vector2.zero;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
+    private interactable seenInteractable = null;
+    private interactable clickedInteractable = null;
 
     public GameObject cam;
     public GameObject head;
@@ -147,18 +149,18 @@ public class PlayerMain : MonoBehaviour
 
     private void OnFunctionInteract()
     {
-        if (holdingItem != null || seenObject == null)
+        if (holdingItem != null || seenInteractable == null)
         {
             return;
         }
 
-        if (!seenObject.IsFunctionKeyOnly())
+        if (!seenInteractable.IsFunctionKeyOnly())
         {
             return;
         }
 
-        clickedObject = seenObject;
-        onSelectObject(clickedObject);
+        clickedInteractable = seenInteractable;
+        onSelectObject(clickedInteractable);
     }
     private void OnDrop()
     {
@@ -197,6 +199,7 @@ public class PlayerMain : MonoBehaviour
             if (selectableMask.value != 0 && Physics.Raycast(ray, out hit, 100f, selectableMask))
             {
                 seenObject = hit.collider.GetComponentInParent<Selectable>();
+                seenInteractable = hit.collider.GetComponentInParent<interactable>();
                 if (seenObject != null)
                 {
                     seenObject.LookedAt = true;
@@ -207,6 +210,7 @@ public class PlayerMain : MonoBehaviour
             if (!foundSelectable && Physics.Raycast(ray, out hit, 100f))
             {
                 seenObject = hit.collider.GetComponentInParent<Selectable>();
+                seenInteractable = hit.collider.GetComponentInParent<interactable>();
                 if (seenObject != null)
                 {
                     seenObject.LookedAt = true;
@@ -217,11 +221,13 @@ public class PlayerMain : MonoBehaviour
             if (!foundSelectable)
             {
                 seenObject = null;
+                seenInteractable = null;
             }
         }
         else
         {
             seenObject = null;
+            seenInteractable = null;
         } 
         
     }
