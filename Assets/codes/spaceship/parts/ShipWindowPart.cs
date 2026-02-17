@@ -3,6 +3,17 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(SpaceshipPart))]
 public class ShipWindowPart : Selectable
+/*
+Well acutally I don't exactly know if I put this window into spaceship parts or decorations
+but currently I'm putting it into spaceship parts.
+and it has been connect with spaceship parts
+So that it can be damaged by meteorites and its fragment
+For custom model, currently use a 3D rectangle 
+It will work if the window object has: collider, staticoutline and the shipwindowpart scripit 
+assign the falp transform to the actual moving mesh, and verify local axes (longedgeaxis and fixededge) after importing a custom model
+if model orientation is unusual, or you are weird,
+ just switch longedgeaxis and fixededge in inspector, no code change needed at all
+*/
 {
     private enum LongEdgeAxis
     {
@@ -14,7 +25,9 @@ public class ShipWindowPart : Selectable
     private enum FixedEdge
     {
         Top,
-        Bottom
+        Bottom,
+        Left,
+        Right
     }
 
     private enum EdgeDepth
@@ -43,7 +56,7 @@ public class ShipWindowPart : Selectable
 
     [Header("Prompt")]
     [SerializeField] private bool showPrompt = true;
-    [SerializeField] private string promptText = "Right Click: Open/Close Window";
+    [SerializeField] private string promptText = "F: Open/Close Window";
     [SerializeField] private Vector2 promptSize = new Vector2(320f, 28f);
     [SerializeField] private Vector2 promptOffset = new Vector2(0f, 70f);
 
@@ -89,11 +102,6 @@ public class ShipWindowPart : Selectable
 
         isLookedAtNow = IsLookedAt();
 
-        if (Mouse.current != null && isLookedAtNow && Mouse.current.rightButton.wasPressedThisFrame)
-        {
-            ToggleWindow();
-        }
-
         AnimateFlap();
     }
 
@@ -101,6 +109,11 @@ public class ShipWindowPart : Selectable
     {
         base.OnClicked();
         ToggleWindow();
+    }
+
+    public override bool IsFunctionKeyOnly()
+    {
+        return true;
     }
 
     [ContextMenu("Toggle Window")]
@@ -139,16 +152,36 @@ public class ShipWindowPart : Selectable
         Vector3 half = GetHalfExtentsLocal();
         bool hingeAxisIsX = ResolveUseXAxisAsHinge(half);
 
-        Vector3 axisLocal = hingeAxisIsX ? Vector3.right : Vector3.forward;
-        Vector3 depthAxisLocal = hingeAxisIsX ? Vector3.forward : Vector3.right;
-        float depthExtent = hingeAxisIsX ? half.z : half.x;
+        Vector3 horizontalLongAxisLocal = hingeAxisIsX ? Vector3.right : Vector3.forward;
+        Vector3 horizontalOtherAxisLocal = hingeAxisIsX ? Vector3.forward : Vector3.right;
+        float horizontalLongExtent = hingeAxisIsX ? half.x : half.z;
+        float horizontalOtherExtent = hingeAxisIsX ? half.z : half.x;
 
-        float ySign = fixedEdge == FixedEdge.Top ? 1f : -1f;
         float depthSign = ResolveDepthSign();
 
-        Vector3 pivotLocal = new Vector3(0f, ySign * half.y, 0f) + (depthAxisLocal * (depthSign * depthExtent));
+        Vector3 axisLocal;
+        Vector3 pivotLocal;
+        Vector3 oppositeEdgeCenter;
+        bool preferUpward = fixedEdge == FixedEdge.Top || fixedEdge == FixedEdge.Bottom;
 
-        float signedAngle = ChooseOpenAngle(pivotLocal, axisLocal, half, ySign, Mathf.Abs(openAngle));
+        if (fixedEdge == FixedEdge.Top || fixedEdge == FixedEdge.Bottom)
+        {
+            float ySign = fixedEdge == FixedEdge.Top ? 1f : -1f;
+
+            axisLocal = horizontalLongAxisLocal;
+            pivotLocal = new Vector3(0f, ySign * half.y, 0f) + (horizontalOtherAxisLocal * (depthSign * horizontalOtherExtent));
+            oppositeEdgeCenter = new Vector3(0f, -ySign * half.y, 0f);
+        }
+        else
+        {
+            float sideSign = fixedEdge == FixedEdge.Right ? 1f : -1f;
+
+            axisLocal = Vector3.up;
+            pivotLocal = (horizontalLongAxisLocal * (sideSign * horizontalLongExtent)) + (horizontalOtherAxisLocal * (depthSign * horizontalOtherExtent));
+            oppositeEdgeCenter = horizontalLongAxisLocal * (-sideSign * horizontalLongExtent);
+        }
+
+        float signedAngle = ChooseOpenAngle(pivotLocal, axisLocal, oppositeEdgeCenter, preferUpward, Mathf.Abs(openAngle));
 
         Quaternion delta = Quaternion.AngleAxis(signedAngle, axisLocal);
 
@@ -158,13 +191,12 @@ public class ShipWindowPart : Selectable
         targetLocalPosition = isOpen ? closedLocalPosition + hingeCompensation : closedLocalPosition;
     }
 
-    private float ChooseOpenAngle(Vector3 pivotLocal, Vector3 axisLocal, Vector3 half, float ySign, float magnitude)
+    private float ChooseOpenAngle(Vector3 pivotLocal, Vector3 axisLocal, Vector3 oppositeEdgeCenter, bool preferUpward, float magnitude)
     {
-        Vector3 oppositeEdgeCenter = new Vector3(0f, -ySign * half.y, 0f);
         Vector3 awayLocal = GetAwayDirectionLocal();
 
-        float plus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, +magnitude, awayLocal, openAwayFromPlayer);
-        float minus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, -magnitude, awayLocal, openAwayFromPlayer);
+        float plus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, +magnitude, awayLocal, openAwayFromPlayer, preferUpward);
+        float minus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, -magnitude, awayLocal, openAwayFromPlayer, preferUpward);
 
         return plus >= minus ? +magnitude : -magnitude;
     }
@@ -187,15 +219,17 @@ public class ShipWindowPart : Selectable
         return awayLocal;
     }
 
-    private static float ScoreAngle(Vector3 pivot, Vector3 point, Vector3 axisLocal, float angle, Vector3 awayLocal, bool includeAway)
+    private static float ScoreAngle(Vector3 pivot, Vector3 point, Vector3 axisLocal, float angle, Vector3 awayLocal, bool includeAway, bool preferUpward)
     {
         Quaternion delta = Quaternion.AngleAxis(angle, axisLocal);
         Vector3 moved = pivot + delta * (point - pivot);
         Vector3 displacement = moved - point;
 
-        float upwardScore = displacement.y * 10f;
+        float upwardWeight = preferUpward ? 10f : 0.25f;
+        float upwardScore = displacement.y * upwardWeight;
         float awayScore = includeAway ? Vector3.Dot(displacement, awayLocal) : 0f;
-        return upwardScore + awayScore;
+        float moveScore = (Mathf.Abs(displacement.x) + Mathf.Abs(displacement.z)) * 0.05f;
+        return upwardScore + awayScore + moveScore;
     }
 
     private bool ResolveUseXAxisAsHinge(Vector3 half)

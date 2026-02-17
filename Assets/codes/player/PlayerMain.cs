@@ -55,7 +55,7 @@ public class PlayerMain : MonoBehaviour
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.Interact.performed += ctx => OnClickPickUp();
+        control.Player.Interact.performed += ctx => OnPrimaryInteract();
     }
     private void OnDisable()
     {
@@ -112,21 +112,42 @@ public class PlayerMain : MonoBehaviour
         transform.eulerAngles = new Vector3(0, yaw, 0f);
 
     }
-    private void OnClickPickUp()
+    private void OnPrimaryInteract()
     {
-        if(holdingItem == null)
-        {
-            if (seenObject != null)
-            {
-                clickedObject = seenObject;
-                onSelectObject(clickedObject);
-
-            }
-        } else
+        if (holdingItem != null)
         {
             OnDrop();
+            return;
         }
-       
+
+        if (seenObject == null)
+        {
+            return;
+        }
+
+        if (seenObject.IsFunctionKeyOnly())
+        {
+            return;
+        }
+
+        clickedObject = seenObject;
+        onSelectObject(clickedObject);
+    }
+
+    private void OnFunctionInteract()
+    {
+        if (holdingItem != null || seenObject == null)
+        {
+            return;
+        }
+
+        if (!seenObject.IsFunctionKeyOnly())
+        {
+            return;
+        }
+
+        clickedObject = seenObject;
+        onSelectObject(clickedObject);
     }
     private void OnDrop()
     {
@@ -135,6 +156,11 @@ public class PlayerMain : MonoBehaviour
     }
     private void PlayerControl()
     {
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            OnFunctionInteract();
+        }
+
         
         controller.Move(Vector3.down * Time.deltaTime * 5);
         Move();
@@ -146,14 +172,40 @@ public class PlayerMain : MonoBehaviour
         RaycastHit hit;
         if(holdingItem == null)
         {
-            if (Physics.Raycast(ray, out hit, 100f, GameCore.instance.Masks.SelectableItems))
-            {
+            bool foundSelectable = false;
 
-                seenObject = hit.collider.GetComponent<Selectable>();
-                if (seenObject == null) return;
-                seenObject.LookedAt = true;
-                
+            LayerMask selectableMask = GameCore.instance != null && GameCore.instance.Masks != null
+                ? GameCore.instance.Masks.SelectableItems
+                : 0;
+
+            if (selectableMask.value != 0 && Physics.Raycast(ray, out hit, 100f, selectableMask))
+            {
+                seenObject = hit.collider.GetComponentInParent<Selectable>();
+                if (seenObject != null)
+                {
+                    seenObject.LookedAt = true;
+                    foundSelectable = true;
+                }
             }
+
+            if (!foundSelectable && Physics.Raycast(ray, out hit, 100f))
+            {
+                seenObject = hit.collider.GetComponentInParent<Selectable>();
+                if (seenObject != null)
+                {
+                    seenObject.LookedAt = true;
+                    foundSelectable = true;
+                }
+            }
+
+            if (!foundSelectable)
+            {
+                seenObject = null;
+            }
+        }
+        else
+        {
+            seenObject = null;
         } 
         
     }
