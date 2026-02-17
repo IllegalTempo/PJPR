@@ -43,13 +43,18 @@ public class NetworkObject : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        if (NetworkSystem.instance == null)
+        {
+            return;
+        }
+
         if (NetworkSystem.instance.IsServer)
         {
             ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
         }
         else
         {
-            if (GameCore.instance.IsLocal(Owner))
+            if (GameCore.instance != null && GameCore.instance.IsLocal(Owner))
             {
                 ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
 

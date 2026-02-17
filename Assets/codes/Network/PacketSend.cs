@@ -23,8 +23,18 @@ public class PacketSend
     //}
     public static Result BroadcastPacket(ulong excludeid, packet p)
     {
+        if (NetworkSystem.instance == null || NetworkSystem.instance.server == null || NetworkSystem.instance.server.players == null)
+        {
+            return Result.Disabled;
+        }
+
         foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
         {
+            if (pl == null)
+            {
+                continue;
+            }
+
             //NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (pl.steamId != excludeid)
             {
@@ -40,10 +50,19 @@ public class PacketSend
     }
     public static Result BroadcastPacketToReady(ulong excludeid, packet p)
     {
-        if (NetworkSystem.instance.server == null) return Result.Disabled;
+        if (NetworkSystem.instance == null || NetworkSystem.instance.server == null || NetworkSystem.instance.server.players == null)
+        {
+            return Result.Disabled;
+        }
+
         //int playercount = NetworkSystem.instance.server.GetPlayerCount();
         foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
         {
+            if (pl == null)
+            {
+                continue;
+            }
+
             //NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
             if (pl.steamId != excludeid && pl.MovementUpdateReady)
             {

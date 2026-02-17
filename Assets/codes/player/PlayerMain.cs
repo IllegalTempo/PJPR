@@ -27,6 +27,8 @@ public class PlayerMain : MonoBehaviour
 
     public Vector3 itemHoldOffset = new Vector3(0, 2f, 15f); // Position in front of the camera for held items
 
+    private PlayerSettingsMenu settingsMenu;
+
     void Start()
     {
         
@@ -56,10 +58,19 @@ public class PlayerMain : MonoBehaviour
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
         control.Player.Interact.performed += ctx => OnPrimaryInteract();
+
+        settingsMenu = GetComponent<PlayerSettingsMenu>();
+        if (settingsMenu == null)
+        {
+            settingsMenu = gameObject.AddComponent<PlayerSettingsMenu>();
+        }
     }
     private void OnDisable()
     {
-        control.Disable();
+        if (control != null)
+        {
+            control.Disable();
+        }
     }
     private void Initialize_remote()
     {
@@ -156,7 +167,12 @@ public class PlayerMain : MonoBehaviour
     }
     private void PlayerControl()
     {
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        if (settingsMenu != null && settingsMenu.IsMenuOpen)
+        {
+            return;
+        }
+
+        if (IsFunctionInteractPressedThisFrame())
         {
             OnFunctionInteract();
         }
@@ -216,5 +232,16 @@ public class PlayerMain : MonoBehaviour
             PlayerControl();
         }
 
+    }
+
+    private bool IsFunctionInteractPressedThisFrame()
+    {
+        if (Keyboard.current == null)
+        {
+            return false;
+        }
+
+        var keyControl = Keyboard.current[(Key)PlayerSettingsMenu.GetFunctionInteractKey()];
+        return keyControl != null && keyControl.wasPressedThisFrame;
     }
 }
