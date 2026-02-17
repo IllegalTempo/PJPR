@@ -9,7 +9,7 @@ public class PlayerMain : MonoBehaviour
     public float moveSpeed = 0.5f;
     public float lookSpeed = 2f;
     public float maxSpeed = 3f; // Maximum allowed speed
-
+    
     private float yaw = 0f;
     private float pitch = 0f;
     private CharacterController controller;
@@ -105,8 +105,9 @@ public class PlayerMain : MonoBehaviour
     }
     private void Look()
     {
-        yaw += lookSpeed * lookinput.x;
-        pitch -= lookSpeed * lookinput.y;
+        float sens = GameCore.instance.option.mouseSensitivity;
+        yaw += lookSpeed * lookinput.x * sens;
+        pitch -= lookSpeed * lookinput.y * sens;
         pitch = Mathf.Clamp(pitch, -90f, 90f);
         head.transform.eulerAngles = new Vector3(pitch, yaw, 0f);
         transform.eulerAngles = new Vector3(0, yaw, 0f);

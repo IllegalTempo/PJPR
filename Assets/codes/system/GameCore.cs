@@ -11,7 +11,7 @@ public class GameCore : MonoBehaviour
 {
     public static GameCore instance;
     public LayerMasks Masks;
-
+    public options option;
     private const string prefabPath = "Prefabs/";
     private const string decorationPath = "Prefabs/Decorations/";
     public Dictionary<string, string> getPrefab = new Dictionary<string, string> //PrefabID, Path
@@ -33,6 +33,10 @@ public class GameCore : MonoBehaviour
     private void Awake()
     {
 
+#if UNITY_EDITOR
+        PlayerPrefs.DeleteAll();
+#endif
+        option = JsonUtility.FromJson<options>(PlayerPrefs.GetString("options", JsonUtility.ToJson(new options())));
         Masks = GetComponent<LayerMasks>();
 
         // Convert the serialized list to dictionary
@@ -51,7 +55,7 @@ public class GameCore : MonoBehaviour
     {
         string rebinds = localPlayer.control.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("inputRebinds", rebinds);
-
+        PlayerPrefs.SetString("options", option.saveAsJSON());
 
     }
     public GameObject GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
