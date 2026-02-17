@@ -1,0 +1,365 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+[RequireComponent(typeof(SpaceshipPart))]
+public class ShipWindowPart : Selectable
+{
+    private enum LongEdgeAxis
+    {
+        Auto,
+        X,
+        Z
+    }
+
+    private enum FixedEdge
+    {
+        Top,
+        Bottom
+    }
+
+    private enum EdgeDepth
+    {
+        Center,
+        PositiveSide,
+        NegativeSide
+    }
+
+    [Header("Animator (Optional)")]
+    [SerializeField] private Animator windowAnimator;
+    [SerializeField] private string isOpenBoolName = "IsOpen";
+
+    [Header("Trapdoor Flap")]
+    [SerializeField] private Transform flap;
+    [SerializeField] private float openAngle = 75f;
+    [SerializeField] private float openCloseSpeed = 7f;
+    [SerializeField] private bool openAwayFromPlayer = true;
+    [SerializeField] private LongEdgeAxis longEdgeAxis = LongEdgeAxis.Auto;
+    [SerializeField] private FixedEdge fixedEdge = FixedEdge.Top;
+    [SerializeField] private EdgeDepth edgeDepth = EdgeDepth.Center;
+
+    [Header("Interaction")]
+    [SerializeField] private bool useDirectRaycastFallback = true;
+    [SerializeField] private float interactionDistance = 100f;
+
+    [Header("Prompt")]
+    [SerializeField] private bool showPrompt = true;
+    [SerializeField] private string promptText = "Right Click: Open/Close Window";
+    [SerializeField] private Vector2 promptSize = new Vector2(320f, 28f);
+    [SerializeField] private Vector2 promptOffset = new Vector2(0f, 70f);
+
+    [Header("State")]
+    [SerializeField] private bool isOpen;
+
+    private int isOpenBoolHash;
+    private bool isLookedAtNow;
+    private GUIStyle promptStyle;
+
+    private Quaternion closedLocalRotation;
+    private Quaternion targetLocalRotation;
+    private Vector3 closedLocalPosition;
+    private Vector3 targetLocalPosition;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        if (flap == null)
+        {
+            flap = transform;
+        }
+
+        if (windowAnimator == null)
+        {
+            windowAnimator = GetComponent<Animator>();
+        }
+
+        isOpenBoolHash = Animator.StringToHash(isOpenBoolName);
+
+        closedLocalRotation = flap.localRotation;
+        closedLocalPosition = flap.localPosition;
+
+        RebuildTrapdoorTargets();
+        ApplyStateImmediate();
+        EnsurePromptStyle();
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        isLookedAtNow = IsLookedAt();
+
+        if (Mouse.current != null && isLookedAtNow && Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            ToggleWindow();
+        }
+
+        AnimateFlap();
+    }
+
+    public override void OnClicked()
+    {
+        base.OnClicked();
+        ToggleWindow();
+    }
+
+    [ContextMenu("Toggle Window")]
+    public void ToggleWindow()
+    {
+        isOpen = !isOpen;
+        RebuildTrapdoorTargets();
+        ApplyStateToAnimator();
+    }
+
+    [ContextMenu("Open Window")]
+    public void OpenWindow()
+    {
+        if (!isOpen)
+        {
+            ToggleWindow();
+        }
+    }
+
+    [ContextMenu("Close Window")]
+    public void CloseWindow()
+    {
+        if (isOpen)
+        {
+            ToggleWindow();
+        }
+    }
+
+    private void RebuildTrapdoorTargets()
+    {
+        if (flap == null)
+        {
+            return;
+        }
+
+        Vector3 half = GetHalfExtentsLocal();
+        bool hingeAxisIsX = ResolveUseXAxisAsHinge(half);
+
+        Vector3 axisLocal = hingeAxisIsX ? Vector3.right : Vector3.forward;
+        Vector3 depthAxisLocal = hingeAxisIsX ? Vector3.forward : Vector3.right;
+        float depthExtent = hingeAxisIsX ? half.z : half.x;
+
+        float ySign = fixedEdge == FixedEdge.Top ? 1f : -1f;
+        float depthSign = ResolveDepthSign();
+
+        Vector3 pivotLocal = new Vector3(0f, ySign * half.y, 0f) + (depthAxisLocal * (depthSign * depthExtent));
+
+        float signedAngle = ChooseOpenAngle(pivotLocal, axisLocal, half, ySign, Mathf.Abs(openAngle));
+
+        Quaternion delta = Quaternion.AngleAxis(signedAngle, axisLocal);
+
+        targetLocalRotation = isOpen ? closedLocalRotation * delta : closedLocalRotation;
+
+        Vector3 hingeCompensation = closedLocalRotation * (pivotLocal - (delta * pivotLocal));
+        targetLocalPosition = isOpen ? closedLocalPosition + hingeCompensation : closedLocalPosition;
+    }
+
+    private float ChooseOpenAngle(Vector3 pivotLocal, Vector3 axisLocal, Vector3 half, float ySign, float magnitude)
+    {
+        Vector3 oppositeEdgeCenter = new Vector3(0f, -ySign * half.y, 0f);
+        Vector3 awayLocal = GetAwayDirectionLocal();
+
+        float plus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, +magnitude, awayLocal, openAwayFromPlayer);
+        float minus = ScoreAngle(pivotLocal, oppositeEdgeCenter, axisLocal, -magnitude, awayLocal, openAwayFromPlayer);
+
+        return plus >= minus ? +magnitude : -magnitude;
+    }
+
+    private Vector3 GetAwayDirectionLocal()
+    {
+        Transform cam = GetCameraTransform();
+        if (cam == null || flap == null)
+        {
+            return Vector3.forward;
+        }
+
+        Vector3 cameraLocal = flap.InverseTransformPoint(cam.position);
+        Vector3 awayLocal = (-cameraLocal).normalized;
+        if (awayLocal.sqrMagnitude < 0.0001f)
+        {
+            awayLocal = Vector3.forward;
+        }
+
+        return awayLocal;
+    }
+
+    private static float ScoreAngle(Vector3 pivot, Vector3 point, Vector3 axisLocal, float angle, Vector3 awayLocal, bool includeAway)
+    {
+        Quaternion delta = Quaternion.AngleAxis(angle, axisLocal);
+        Vector3 moved = pivot + delta * (point - pivot);
+        Vector3 displacement = moved - point;
+
+        float upwardScore = displacement.y * 10f;
+        float awayScore = includeAway ? Vector3.Dot(displacement, awayLocal) : 0f;
+        return upwardScore + awayScore;
+    }
+
+    private bool ResolveUseXAxisAsHinge(Vector3 half)
+    {
+        if (longEdgeAxis == LongEdgeAxis.X)
+        {
+            return true;
+        }
+
+        if (longEdgeAxis == LongEdgeAxis.Z)
+        {
+            return false;
+        }
+
+        return half.x >= half.z;
+    }
+
+    private float ResolveDepthSign()
+    {
+        if (edgeDepth == EdgeDepth.PositiveSide)
+        {
+            return 1f;
+        }
+
+        if (edgeDepth == EdgeDepth.NegativeSide)
+        {
+            return -1f;
+        }
+
+        return 0f;
+    }
+
+    private void ApplyStateImmediate()
+    {
+        if (flap == null)
+        {
+            return;
+        }
+
+        flap.localRotation = targetLocalRotation;
+        flap.localPosition = targetLocalPosition;
+        ApplyStateToAnimator();
+    }
+
+    private void AnimateFlap()
+    {
+        if (windowAnimator != null || flap == null)
+        {
+            return;
+        }
+
+        flap.localRotation = Quaternion.Slerp(flap.localRotation, targetLocalRotation, Time.deltaTime * openCloseSpeed);
+        flap.localPosition = Vector3.Lerp(flap.localPosition, targetLocalPosition, Time.deltaTime * openCloseSpeed);
+    }
+
+    private void ApplyStateToAnimator()
+    {
+        if (windowAnimator == null)
+        {
+            return;
+        }
+
+        foreach (AnimatorControllerParameter parameter in windowAnimator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Bool && parameter.name == isOpenBoolName)
+            {
+                windowAnimator.SetBool(isOpenBoolHash, isOpen);
+                break;
+            }
+        }
+    }
+
+    private bool IsLookedAt()
+    {
+        if (outline != null && outline.enabled)
+        {
+            return true;
+        }
+
+        if (!useDirectRaycastFallback)
+        {
+            return false;
+        }
+
+        Transform cameraTransform = GetCameraTransform();
+        if (cameraTransform == null)
+        {
+            return false;
+        }
+
+        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+        if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
+        {
+            return false;
+        }
+
+        ShipWindowPart lookedWindow = hit.collider.GetComponentInParent<ShipWindowPart>();
+        return lookedWindow == this;
+    }
+
+    private Transform GetCameraTransform()
+    {
+        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
+        {
+            return GameCore.instance.localPlayer.cam.transform;
+        }
+
+        return Camera.main != null ? Camera.main.transform : null;
+    }
+
+    private Vector3 GetHalfExtentsLocal()
+    {
+        if (flap == null)
+        {
+            return new Vector3(0.5f, 0.5f, 0.05f);
+        }
+
+        MeshFilter meshFilter = flap.GetComponent<MeshFilter>();
+        if (meshFilter != null && meshFilter.sharedMesh != null)
+        {
+            Vector3 size = Vector3.Scale(meshFilter.sharedMesh.bounds.size, flap.localScale);
+            return size * 0.5f;
+        }
+
+        BoxCollider box = flap.GetComponent<BoxCollider>();
+        if (box != null)
+        {
+            Vector3 size = Vector3.Scale(box.size, flap.localScale);
+            return size * 0.5f;
+        }
+
+        return Vector3.Max(flap.localScale * 0.5f, new Vector3(0.1f, 0.1f, 0.02f));
+    }
+
+    private void EnsurePromptStyle()
+    {
+        if (promptStyle != null)
+        {
+            return;
+        }
+
+        promptStyle = new GUIStyle(GUI.skin.box)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 14
+        };
+    }
+
+    private void OnGUI()
+    {
+        if (!showPrompt || !isLookedAtNow)
+        {
+            return;
+        }
+
+        EnsurePromptStyle();
+
+        Rect rect = new Rect(
+            (Screen.width * 0.5f) - (promptSize.x * 0.5f) + promptOffset.x,
+            (Screen.height * 0.5f) + promptOffset.y,
+            promptSize.x,
+            promptSize.y
+        );
+
+        GUI.Box(rect, promptText, promptStyle);
+    }
+}
