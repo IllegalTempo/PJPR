@@ -18,6 +18,8 @@ public class PlayerMain : MonoBehaviour
     private Vector2 lookinput = Vector2.zero;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
+    private interactable seenInteractable = null;
+    private interactable clickedInteractable = null;
 
     public GameObject cam;
     public GameObject head;
@@ -26,6 +28,8 @@ public class PlayerMain : MonoBehaviour
     public Item holdingItem = null;
 
     public Vector3 itemHoldOffset = new Vector3(0, 2f, 15f); // Position in front of the camera for held items
+
+    private PlayerSettingsMenu settingsMenu;
 
     void Start()
     {
@@ -55,11 +59,20 @@ public class PlayerMain : MonoBehaviour
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.Interact.performed += ctx => OnClickPickUp();
+        control.Player.Interact.performed += ctx => OnPrimaryInteract();
+
+        settingsMenu = GetComponent<PlayerSettingsMenu>();
+        if (settingsMenu == null)
+        {
+            settingsMenu = gameObject.AddComponent<PlayerSettingsMenu>();
+        }
     }
     private void OnDisable()
     {
-        control.Disable();
+        if (control != null)
+        {
+            control.Disable();
+        }
     }
     private void Initialize_remote()
     {
@@ -113,21 +126,42 @@ public class PlayerMain : MonoBehaviour
         transform.eulerAngles = new Vector3(0, yaw, 0f);
 
     }
-    private void OnClickPickUp()
+    private void OnPrimaryInteract()
     {
-        if(holdingItem == null)
-        {
-            if (seenObject != null)
-            {
-                clickedObject = seenObject;
-                onSelectObject(clickedObject);
-
-            }
-        } else
+        if (holdingItem != null)
         {
             OnDrop();
+            return;
         }
-       
+
+        if (seenObject == null)
+        {
+            return;
+        }
+
+        if (seenObject.IsFunctionKeyOnly())
+        {
+            return;
+        }
+
+        clickedObject = seenObject;
+        onSelectObject(clickedObject);
+    }
+
+    private void OnFunctionInteract()
+    {
+        if (holdingItem != null || seenInteractable == null)
+        {
+            return;
+        }
+
+        if (!seenInteractable.IsFunctionKeyOnly())
+        {
+            return;
+        }
+
+        clickedInteractable = seenInteractable;
+        onSelectObject(clickedInteractable);
     }
     private void OnDrop()
     {
@@ -136,6 +170,16 @@ public class PlayerMain : MonoBehaviour
     }
     private void PlayerControl()
     {
+        if (settingsMenu != null && settingsMenu.IsMenuOpen)
+        {
+            return;
+        }
+
+        if (IsFunctionInteractPressedThisFrame())
+        {
+            OnFunctionInteract();
+        }
+
         
         controller.Move(Vector3.down * Time.deltaTime * 5);
         Move();
@@ -147,14 +191,44 @@ public class PlayerMain : MonoBehaviour
         RaycastHit hit;
         if(holdingItem == null)
         {
-            if (Physics.Raycast(ray, out hit, 100f, GameCore.instance.Masks.SelectableItems))
-            {
+            bool foundSelectable = false;
 
-                seenObject = hit.collider.GetComponent<Selectable>();
-                if (seenObject == null) return;
-                seenObject.LookedAt = true;
-                
+            LayerMask selectableMask = GameCore.instance != null && GameCore.instance.Masks != null
+                ? GameCore.instance.Masks.SelectableItems
+                : 0;
+
+            if (selectableMask.value != 0 && Physics.Raycast(ray, out hit, 100f, selectableMask))
+            {
+                seenObject = hit.collider.GetComponentInParent<Selectable>();
+                seenInteractable = hit.collider.GetComponentInParent<interactable>();
+                if (seenObject != null)
+                {
+                    seenObject.LookedAt = true;
+                    foundSelectable = true;
+                }
             }
+
+            if (!foundSelectable && Physics.Raycast(ray, out hit, 100f))
+            {
+                seenObject = hit.collider.GetComponentInParent<Selectable>();
+                seenInteractable = hit.collider.GetComponentInParent<interactable>();
+                if (seenObject != null)
+                {
+                    seenObject.LookedAt = true;
+                    foundSelectable = true;
+                }
+            }
+
+            if (!foundSelectable)
+            {
+                seenObject = null;
+                seenInteractable = null;
+            }
+        }
+        else
+        {
+            seenObject = null;
+            seenInteractable = null;
         } 
         
     }
@@ -165,5 +239,16 @@ public class PlayerMain : MonoBehaviour
             PlayerControl();
         }
 
+    }
+
+    private bool IsFunctionInteractPressedThisFrame()
+    {
+        if (Keyboard.current == null)
+        {
+            return false;
+        }
+
+        var keyControl = Keyboard.current[(Key)PlayerSettingsMenu.GetFunctionInteractKey()];
+        return keyControl != null && keyControl.wasPressedThisFrame;
     }
 }
