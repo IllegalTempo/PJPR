@@ -1,19 +1,7 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(SpaceshipPart))]
-public class ShipWindowPart : interactable
-/*
-Well acutally I don't exactly know if I put this window into spaceship parts or decorations
-but currently I'm putting it into spaceship parts.
-and it has been connect with spaceship parts
-So that it can be damaged by meteorites and its fragment
-For custom model, currently use a 3D rectangle 
-It will work if the window object has: collider, staticoutline and the shipwindowpart scripit 
-assign the falp transform to the actual moving mesh, and verify local axes (longedgeaxis and fixededge) after importing a custom model
-if model orientation is unusual, or you are weird,
- just switch longedgeaxis and fixededge in inspector, no code change needed at all
-*/
+public class HingedInteractable : interactable
 {
     private enum LongEdgeAxis
     {
@@ -37,6 +25,12 @@ if model orientation is unusual, or you are weird,
         NegativeSide
     }
 
+    private enum PromptTargetType
+    {
+        Window,
+        Door
+    }
+
     [Header("Animator (Optional)")]
     [SerializeField] private Animator windowAnimator;
     [SerializeField] private string isOpenBoolName = "IsOpen";
@@ -56,7 +50,8 @@ if model orientation is unusual, or you are weird,
 
     [Header("Prompt")]
     [SerializeField] private bool showPrompt = true;
-    [SerializeField] private string promptText = "{key}: Open/Close Window";
+    [SerializeField] private PromptTargetType promptTargetType = PromptTargetType.Window;
+    [SerializeField] private string promptText = "{key}: Open/Close {type}";
     [SerializeField] private Vector2 promptSize = new Vector2(320f, 28f);
     [SerializeField] private Vector2 promptOffset = new Vector2(0f, 70f);
 
@@ -71,6 +66,7 @@ if model orientation is unusual, or you are weird,
     private Quaternion targetLocalRotation;
     private Vector3 closedLocalPosition;
     private Vector3 targetLocalPosition;
+    private Vector3 hingePivotLocal;
 
     protected override void OnEnable()
     {
@@ -183,6 +179,8 @@ if model orientation is unusual, or you are weird,
 
         float signedAngle = ChooseOpenAngle(pivotLocal, axisLocal, oppositeEdgeCenter, preferUpward, Mathf.Abs(openAngle));
 
+        hingePivotLocal = pivotLocal;
+
         Quaternion delta = Quaternion.AngleAxis(signedAngle, axisLocal);
 
         targetLocalRotation = isOpen ? closedLocalRotation * delta : closedLocalRotation;
@@ -282,7 +280,25 @@ if model orientation is unusual, or you are weird,
         }
 
         flap.localRotation = Quaternion.Slerp(flap.localRotation, targetLocalRotation, Time.deltaTime * openCloseSpeed);
-        flap.localPosition = Vector3.Lerp(flap.localPosition, targetLocalPosition, Time.deltaTime * openCloseSpeed);
+        ApplyHingePositionFromCurrentRotation();
+
+        if (Quaternion.Angle(flap.localRotation, targetLocalRotation) < 0.05f)
+        {
+            flap.localRotation = targetLocalRotation;
+            flap.localPosition = targetLocalPosition;
+        }
+    }
+
+    private void ApplyHingePositionFromCurrentRotation()
+    {
+        if (flap == null)
+        {
+            return;
+        }
+
+        Quaternion deltaFromClosed = Quaternion.Inverse(closedLocalRotation) * flap.localRotation;
+        Vector3 hingeCompensation = closedLocalRotation * (hingePivotLocal - (deltaFromClosed * hingePivotLocal));
+        flap.localPosition = closedLocalPosition + hingeCompensation;
     }
 
     private void ApplyStateToAnimator()
@@ -395,23 +411,27 @@ if model orientation is unusual, or you are weird,
     private string BuildPromptText()
     {
         string keyLabel = PlayerSettingsMenu.GetFunctionInteractKeyLabel();
+        string targetTypeLabel = promptTargetType.ToString();
+
         if (string.IsNullOrEmpty(promptText))
         {
-            return $"{keyLabel}: Interact";
+            return $"{keyLabel}: Open/Close {targetTypeLabel}";
         }
 
-        if (promptText.Contains("{key}"))
+        string formattedText = promptText.Replace("{type}", targetTypeLabel);
+
+        if (formattedText.Contains("{key}"))
         {
-            return promptText.Replace("{key}", keyLabel);
+            return formattedText.Replace("{key}", keyLabel);
         }
 
-        int colonIndex = promptText.IndexOf(':');
-        if (colonIndex >= 0 && colonIndex < promptText.Length - 1)
+        int colonIndex = formattedText.IndexOf(':');
+        if (colonIndex >= 0 && colonIndex < formattedText.Length - 1)
         {
-            string actionText = promptText.Substring(colonIndex + 1).Trim();
+            string actionText = formattedText.Substring(colonIndex + 1).Trim();
             return $"{keyLabel}: {actionText}";
         }
 
-        return $"{keyLabel}: {promptText}";
+        return $"{keyLabel}: {formattedText}";
     }
 }

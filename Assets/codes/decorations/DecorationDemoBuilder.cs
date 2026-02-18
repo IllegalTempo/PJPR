@@ -29,6 +29,7 @@ public class DecorationDemoBuilder : MonoBehaviour
 
         BuildWindow(root.transform);
         BuildLight(root.transform);
+        BuildHammer(root.transform);
     }
 
     [ContextMenu("Clear Decorations")]
@@ -56,7 +57,7 @@ public class DecorationDemoBuilder : MonoBehaviour
         }
 
         window.AddComponent<SpaceshipPart>();
-        window.AddComponent<ShipWindowPart>();
+        window.AddComponent<ship_window>();
     }
 
     private void BuildLight(Transform root)
@@ -79,6 +80,37 @@ public class DecorationDemoBuilder : MonoBehaviour
         sceneLight.intensity = 2f;
 
         lightRoot.AddComponent<DecorationLight>();
+    }
+
+    private void BuildHammer(Transform root)
+    {
+        GameObject hammer = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        hammer.name = "Tool_Hammer";
+        hammer.transform.SetParent(root, false);
+        hammer.transform.localPosition = new Vector3(0f, 0.7f, 1.5f);
+        hammer.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+        hammer.transform.localScale = new Vector3(0.12f, 0.35f, 0.12f);
+
+        int layerToUse = GetSelectableLayerToUse();
+        if (layerToUse >= 0)
+        {
+            hammer.layer = layerToUse;
+        }
+
+        if (hammer.GetComponent<StaticOutline>() == null)
+        {
+            hammer.AddComponent<StaticOutline>();
+        }
+
+        Rigidbody rb = hammer.AddComponent<Rigidbody>();
+        rb.mass = 1f;
+
+        NetworkObject netObj = hammer.AddComponent<NetworkObject>();
+        netObj.Identifier = $"demo_hammer_{hammer.GetInstanceID()}";
+
+        HammerItem hammerItem = hammer.AddComponent<HammerItem>();
+        hammerItem.ItemName = "Hammer";
+        hammerItem.ItemDescription = "Used to repair damaged spaceship parts.";
     }
 
     private int GetSelectableLayerToUse()
