@@ -28,7 +28,8 @@ public class GameServer : SocketManager
             { (int)packets.ClientPackets.Ready,ServerHandle.ReadyUpdate},
             { (int)packets.ClientPackets.SendNOInfo, ServerHandle.SendNOInfo },
             { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
-        };
+
+            };
 
 
 
@@ -36,9 +37,18 @@ public class GameServer : SocketManager
     {
         this.maxplayer = NetworkSystem.instance.MaxPlayer;
         //GetSteamID.Add(0, SteamClient.SteamId);
-        GameObject g = NetworkSystem.instance.SpawnPlayer(true, SteamClient.SteamId).gameObject;
-        NetworkSystem.instance.IsOnline = true;
+        onOnline();
         Debug.Log("Created GameServer Object");
+    }
+    public void onOnline()
+    {
+        NetworkSystem.instance.IsOnline = true;
+        NetworkSystem.instance.IsServer = true;
+        ulong steamid = SteamClient.SteamId;
+        NetworkSystem.instance.SpawnPlayer(true, steamid); //Add the server player to the player list
+        SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+
+
     }
     public int GetPlayerCount()
     {
@@ -56,35 +66,82 @@ public class GameServer : SocketManager
     {
         return players[steamid].SendPacket(p);
     }
-
+    private void ClientConnectionEstablished(ConnectionInfo info)
+    {
+        Debug.Log("Client Connection Established.");
+        NetworkListener.Server_OnPlayerJoining?.Invoke(info);
+        NetworkPlayer connectedPlayer = GetPlayer(info);
+        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.steamId);
+        SpawnSpaceShip(connectedPlayer.steamId);
+        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
+        //When a player enter the server, send them the room info including all current players including himself;
+        ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
+        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.instance.FindNetworkObject.Values.ToArray()); //TODO: If array too long, split into multiple packets
+        ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+    }
     public override async void OnConnected(Connection connection, ConnectionInfo info)
     {
         base.OnConnected(connection, info);
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Connected!");
         await Task.Delay(1000);
-        Debug.Log("Sending Test Packet");
-        NetworkListener.Server_OnPlayerJoining?.Invoke(info);
-        NetworkPlayer connectedPlayer = GetPlayer(info);
-        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.steamId);
-
-        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
-        //When a player enter the server, send them the room info including all current players including himself;
-        ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
-
-        ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+        ClientConnectionEstablished(info);
     }
     public NetworkPlayer GetPlayer(ConnectionInfo info)
     {
         return players[info.Identity.SteamId.Value];
     }
-    public NetworkPlayer GetPlayerByIndex(int index)
+    public NetworkPlayer GetPlayer(ulong steamid)
     {
-        return players.ElementAt(index-1).Value;
+        return players[steamid];
     }
     //public NetworkPlayer GetPlayer(int NetworkID)
     //{
     //    return players[GetSteamID[NetworkID]];
     //}
+    public NetworkObject CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null) //Server Only
+    { //more check added
+        NetworkSystem networkSystem = NetworkSystem.instance;
+        if (networkSystem != null && !networkSystem.IsServer) return null;
+        string uid = Guid.NewGuid().ToString();
+
+        NetworkObject nobj = GameCore.instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
+        if (networkSystem != null && networkSystem.server != null)
+        {
+            ServerSend.NewObject(prefabID, uid, pos, rot, owner);
+        }
+
+        return nobj;
+
+    }
+    public Connector SpawnConnector()
+    {
+        Connector connector = CreateNetworkObject("Spaceship_connector", new Vector3(10, 0, 10), Quaternion.identity, 0).GetComponent<Connector>();
+        return connector;
+
+    }
+    public Spaceship SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
+    {
+        Spaceship ss = CreateNetworkObject("Spaceship", Vector3.zero, Quaternion.identity, owner).GetComponent<Spaceship>();
+        if (decs != null)
+        {
+            foreach (DecorationSaveData dsd in decs)
+            {
+                Decoration obj = GameObject.Instantiate(GameCore.instance.GetDecoration(dsd.DecorationID), ss.transform).GetComponent<Decoration>();
+                obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
+
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot load decorations");
+        }
+        return ss;
+
+    }
+    public Spaceship SpawnSpaceShip(ulong owner) //run by server itself
+    {
+        return SpawnSpaceShip(null, owner);
+    }
     public override void OnConnecting(Connection connection, ConnectionInfo info)
     {
         base.OnConnecting(connection, info);
@@ -115,7 +172,7 @@ public class GameServer : SocketManager
         NetworkPlayer whodis = players[info.Identity.SteamId];
         ulong networkid = whodis.steamId;
         whodis.player.Disconnect();
-        
+
         players.Remove(info.Identity.SteamId.Value);
         //GetSteamID.Remove(networkid);
 

@@ -135,6 +135,7 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void SpawnMeteorite()
     {
+        if (!NetworkSystem.instance.IsServer) return;
         string prefabID = GetRandomMeteoritePrefabID();
         if (string.IsNullOrEmpty(prefabID))
         {
@@ -143,7 +144,7 @@ public class MeteoriteSpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        NetworkObject networkObject = GameCore.instance.CreateNetworkObject(prefabID, spawnPosition, Random.rotation);
+        NetworkObject networkObject = NetworkSystem.instance.server.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
         if (networkObject == null)
         {
             return;

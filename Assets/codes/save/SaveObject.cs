@@ -1,14 +1,24 @@
+using Steamworks;
 using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 [Serializable]
-public class SaveObject
+public class SaveObject : MonoBehaviour
 {
-    readonly string savepath = Path.Combine(Application.persistentDataPath, "save.json");
+    string savepath;
     //Save Stuff about the spaceship, decoration
-    public DecorationSaveData[] saved_decorations;
+    public DecorationSaveData[] saved_decorations = new DecorationSaveData[0];
+    public static SaveObject instance;
+    private void Awake()
+    {
+        savepath = Path.Combine(Application.persistentDataPath, "save.json");
+
+        instance = this;
+        Load();
+
+    }
     public void Save()
     {
         //Save the decoration
@@ -26,9 +36,18 @@ public class SaveObject
     }
     public void Load() //run this after the spaceship is loaded, so the decorations can be loaded on the spaceship
     {
-        string json = File.ReadAllText(savepath);
-        string decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(json));
-        JsonUtility.FromJsonOverwrite(decoded, this);
+        //if file dont exists
+        if (!File.Exists(savepath))
+        {
+
+        } else
+        {
+            string json = File.ReadAllText(savepath);
+            string decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(json));
+            JsonUtility.FromJsonOverwrite(decoded, this);
+        }
+        transform.GetChild(0).gameObject.SetActive(true);
+        
         
         
 

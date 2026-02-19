@@ -44,8 +44,8 @@ public partial class Selectable : MonoBehaviour
         ClickTimer = 0.2f;
     }
 
-    public virtual bool IsFunctionKeyOnly()
-    {
-        return false;
-    }
+    //public virtual bool IsFunctionKeyOnly()
+    //{
+    //    return false;
+    //}
 }

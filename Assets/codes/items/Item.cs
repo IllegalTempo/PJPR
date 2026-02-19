@@ -3,16 +3,16 @@ using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
 
-public class Item : Selectable
+public class Item : Selectable //Item is any that is pickable
 {
     public string ItemName;
     public string ItemDescription;
-    [SerializeField] protected bool isRepairTool;
+    //[SerializeField] protected bool isRepairTool;
     public NetworkObject netObj;
     protected Rigidbody rb;
     protected Collider itemCollider;
 
-    public virtual bool IsRepairTool => isRepairTool;
+    //public virtual bool IsRepairTool => isRepairTool;
 
     protected new void OnEnable()
     {
@@ -69,18 +69,17 @@ public class Item : Selectable
         outline.OutlineColor = Color.aquamarine;
         if (itemCollider != null)
         {
-            itemCollider.isTrigger = true;
+            itemCollider.enabled = false;
         }
     }
     private void gotDropped(Vector3 dropPosition)
     {
-        // Remove from inventory
         outline.OutlineColor = Color.white;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
         this.transform.position = dropPosition;
 
-        itemCollider.isTrigger = false;
+        itemCollider.enabled = true;
     }
     protected virtual void PickUpItem() //Only Run by local
     {

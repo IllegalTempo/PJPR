@@ -1,10 +1,10 @@
+using Assets.codes.items;
 using UnityEngine;
 
-public class HammerItem : Item
+public class HammerItem : usableItem
 {
     protected new void OnEnable()
     {
-        isRepairTool = true;
         base.OnEnable();
 
         if (string.IsNullOrWhiteSpace(ItemName))
@@ -12,6 +12,14 @@ public class HammerItem : Item
             ItemName = "Hammer";
         }
     }
+    public override void OnInteract()
+    {
+        base.OnInteract();
+        if (GameCore.instance.localPlayer.seenObject is SpaceshipPart ssp)
+        {
+            ssp.Repair(10f);
+        }
 
-    public override bool IsRepairTool => true;
+    }
+
 }

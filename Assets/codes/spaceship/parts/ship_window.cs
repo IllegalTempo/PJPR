@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(SpaceshipPart))]
 public class ship_window : HingedInteractable
 {
 }

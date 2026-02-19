@@ -21,6 +21,10 @@ public class packets
         DistributeInitialPos = 9
     ,
         NewObject = 10
+    ,
+        DistributeNOactive = 11
+    ,
+        SyncNetworkObjects = 12
     };
     public enum ClientPackets
     {

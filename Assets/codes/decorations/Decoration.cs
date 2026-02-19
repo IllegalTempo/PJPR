@@ -18,9 +18,11 @@ public class Decoration : Item
         PickUpItem();
 
     }
-    public void OnCreate()
+    public void OnCreate(Spaceship createdon,Vector3 pos,Quaternion rot)
     {
         GameCore.instance.localSpaceship.GetDecorationByUUID_onShip.Add(netObj.Identifier, this);
+        transform.position = pos;
+        transform.rotation = rot;
     }
     protected override void PickUpItem() //Only Run by local
     {

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(SpaceshipPart))]
-public class HingedInteractable : interactable
+public class HingedInteractable : SpaceshipPart
 {
     private enum LongEdgeAxis
     {
@@ -48,19 +48,11 @@ public class HingedInteractable : interactable
     [SerializeField] private bool useDirectRaycastFallback = true;
     [SerializeField] private float interactionDistance = 100f;
 
-    [Header("Prompt")]
-    [SerializeField] private bool showPrompt = true;
-    [SerializeField] private PromptTargetType promptTargetType = PromptTargetType.Window;
-    [SerializeField] private string promptText = "{key}: Open/Close {type}";
-    [SerializeField] private Vector2 promptSize = new Vector2(320f, 28f);
-    [SerializeField] private Vector2 promptOffset = new Vector2(0f, 70f);
-
     [Header("State")]
     [SerializeField] private bool isOpen;
 
     private int isOpenBoolHash;
-    private bool isLookedAtNow;
-    private GUIStyle promptStyle;
+    //private bool isLookedAtNow;
 
     private Quaternion closedLocalRotation;
     private Quaternion targetLocalRotation;
@@ -89,14 +81,14 @@ public class HingedInteractable : interactable
 
         RebuildTrapdoorTargets();
         ApplyStateImmediate();
-        EnsurePromptStyle();
+        //EnsurePromptStyle();
     }
 
     protected override void Update()
     {
         base.Update();
 
-        isLookedAtNow = IsLookedAt();
+        //isLookedAtNow = IsLookedAt();
 
         AnimateFlap();
     }
@@ -107,10 +99,10 @@ public class HingedInteractable : interactable
         ToggleWindow();
     }
 
-    public override bool IsFunctionKeyOnly()
-    {
-        return true;
-    }
+    //public override bool IsFunctionKeyOnly()
+    //{
+    //    return true;
+    //}
 
     [ContextMenu("Toggle Window")]
     public void ToggleWindow()
@@ -201,7 +193,7 @@ public class HingedInteractable : interactable
 
     private Vector3 GetAwayDirectionLocal()
     {
-        Transform cam = GetCameraTransform();
+        Transform cam = Camera.main.transform;
         if (cam == null || flap == null)
         {
             return Vector3.forward;
@@ -289,7 +281,7 @@ public class HingedInteractable : interactable
         }
     }
 
-    private void ApplyHingePositionFromCurrentRotation()
+    private void ApplyHingePositionFromCurrentRotation() //code animation only
     {
         if (flap == null)
         {
@@ -318,38 +310,38 @@ public class HingedInteractable : interactable
         }
     }
 
-    private bool IsLookedAt()
-    {
-        if (!useDirectRaycastFallback)
-        {
-            return false;
-        }
+    //private bool IsLookedAt()
+    //{
+    //    if (!useDirectRaycastFallback)
+    //    {
+    //        return false;
+    //    }
 
-        Transform cameraTransform = GetCameraTransform();
-        if (cameraTransform == null)
-        {
-            return false;
-        }
+    //    Transform cameraTransform = Camera.main.transform;
+    //    if (cameraTransform == null)
+    //    {
+    //        return false;
+    //    }
 
-        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-        if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
-        {
-            return false;
-        }
+    //    Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+    //    if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
+    //    {
+    //        return false;
+    //    }
 
-        interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
-        return lookedInteractable == this;
-    }
+    //    interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
+    //    return lookedInteractable == this;
+    //}
 
-    private Transform GetCameraTransform()
-    {
-        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
-        {
-            return GameCore.instance.localPlayer.cam.transform;
-        }
+    //private Transform GetCameraTransform()
+    //{
+    //    if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
+    //    {
+    //        return GameCore.instance.localPlayer.cam.transform;
+    //    }
 
-        return Camera.main != null ? Camera.main.transform : null;
-    }
+    //    return Camera.main != null ? Camera.main.transform : null;
+    //}
 
     private Vector3 GetHalfExtentsLocal()
     {
@@ -375,63 +367,63 @@ public class HingedInteractable : interactable
         return Vector3.Max(flap.localScale * 0.5f, new Vector3(0.1f, 0.1f, 0.02f));
     }
 
-    private void EnsurePromptStyle()
-    {
-        if (promptStyle != null)
-        {
-            return;
-        }
+    //private void EnsurePromptStyle()
+    //{
+    //    if (promptStyle != null)
+    //    {
+    //        return;
+    //    }
 
-        promptStyle = new GUIStyle(GUI.skin.box)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 14
-        };
-    }
+    //    promptStyle = new GUIStyle(GUI.skin.box)
+    //    {
+    //        alignment = TextAnchor.MiddleCenter,
+    //        fontSize = 14
+    //    };
+    //}
 
-    private void OnGUI()
-    {
-        if (!showPrompt || !isLookedAtNow)
-        {
-            return;
-        }
+    //private void OnGUI()
+    //{
+    //    if (!showPrompt || !isLookedAtNow)
+    //    {
+    //        return;
+    //    }
 
-        EnsurePromptStyle();
+    //    EnsurePromptStyle();
 
-        Rect rect = new Rect(
-            (Screen.width * 0.5f) - (promptSize.x * 0.5f) + promptOffset.x,
-            (Screen.height * 0.5f) + promptOffset.y,
-            promptSize.x,
-            promptSize.y
-        );
+    //    Rect rect = new Rect(
+    //        (Screen.width * 0.5f) - (promptSize.x * 0.5f) + promptOffset.x,
+    //        (Screen.height * 0.5f) + promptOffset.y,
+    //        promptSize.x,
+    //        promptSize.y
+    //    );
 
-        GUI.Box(rect, BuildPromptText(), promptStyle);
-    }
+    //    GUI.Box(rect, BuildPromptText(), promptStyle);
+    //}
 
-    private string BuildPromptText()
-    {
-        string keyLabel = PlayerSettingsMenu.GetFunctionInteractKeyLabel();
-        string targetTypeLabel = promptTargetType.ToString();
+    //private string BuildPromptText()
+    //{
+    //    string keyLabel = PlayerSettingsMenu.GetFunctionInteractKeyLabel();
+    //    string targetTypeLabel = promptTargetType.ToString();
 
-        if (string.IsNullOrEmpty(promptText))
-        {
-            return $"{keyLabel}: Open/Close {targetTypeLabel}";
-        }
+    //    if (string.IsNullOrEmpty(promptText))
+    //    {
+    //        return $"{keyLabel}: Open/Close {targetTypeLabel}";
+    //    }
 
-        string formattedText = promptText.Replace("{type}", targetTypeLabel);
+    //    string formattedText = promptText.Replace("{type}", targetTypeLabel);
 
-        if (formattedText.Contains("{key}"))
-        {
-            return formattedText.Replace("{key}", keyLabel);
-        }
+    //    if (formattedText.Contains("{key}"))
+    //    {
+    //        return formattedText.Replace("{key}", keyLabel);
+    //    }
 
-        int colonIndex = formattedText.IndexOf(':');
-        if (colonIndex >= 0 && colonIndex < formattedText.Length - 1)
-        {
-            string actionText = formattedText.Substring(colonIndex + 1).Trim();
-            return $"{keyLabel}: {actionText}";
-        }
+    //    int colonIndex = formattedText.IndexOf(':');
+    //    if (colonIndex >= 0 && colonIndex < formattedText.Length - 1)
+    //    {
+    //        string actionText = formattedText.Substring(colonIndex + 1).Trim();
+    //        return $"{keyLabel}: {actionText}";
+    //    }
 
-        return $"{keyLabel}: {formattedText}";
-    }
+    //    return $"{keyLabel}: {formattedText}";
+    //}
 }

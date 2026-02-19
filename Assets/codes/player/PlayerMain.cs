@@ -1,3 +1,4 @@
+using Assets.codes.items;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -5,27 +6,22 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMain : MonoBehaviour
 {
-    public PlayerInputAction control;
     public float moveSpeed = 0.5f;
     public float lookSpeed = 2f;
     public float maxSpeed = 3f; // Maximum allowed speed
     public float jumpHeight = 1.6f;
     public float gravity = -25f;
     public float groundedStickVelocity = -2f;
-    
+
     private float yaw = 0f;
     private float pitch = 0f;
     private float verticalVelocity = 0f;
-    private bool jumpQueued = false;
     private CharacterController controller;
     private Vector3 movement = Vector3.zero;
     private Vector2 moveinput = Vector2.zero;
     private Vector2 lookinput = Vector2.zero;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
-    private interactable seenInteractable = null;
-    private interactable clickedInteractable = null;
-
     public GameObject cam;
     public GameObject head;
     public NetworkPlayerObject networkinfo;
@@ -38,7 +34,7 @@ public class PlayerMain : MonoBehaviour
 
     void Start()
     {
-        
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         controller = GetComponent<CharacterController>();
@@ -56,15 +52,16 @@ public class PlayerMain : MonoBehaviour
     private void Initialize_local()
     {
         cam.SetActive(true);
-        control = new PlayerInputAction();
-        string rebinds = PlayerPrefs.GetString("inputRebinds", string.Empty);
-        control.LoadBindingOverridesFromJson(rebinds);
-        control.Enable();
+        PlayerInputAction control = GameCore.instance.control;
+
         control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.Interact.performed += ctx => OnPrimaryInteract();
+        control.Player.pickup.performed += ctx => OnPickUp();
+        control.Player.jump.performed += ctx => Jump();
+        control.Player.Interact.performed += ctx => OnInteract();
+
 
         settingsMenu = GetComponent<PlayerSettingsMenu>();
         if (settingsMenu == null)
@@ -74,9 +71,28 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnDisable()
     {
+        PlayerInputAction control = GameCore.instance.control;
+
         if (control != null)
         {
-            control.Disable();
+            control.Player.Move.performed -= ctx => moveinput = ctx.ReadValue<Vector2>();
+            control.Player.Move.canceled -= ctx => moveinput = Vector2.zero;
+            control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
+            control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
+            control.Player.pickup.performed -= ctx => OnPickUp();
+            control.Player.jump.performed -= ctx => Jump();
+            control.Player.Interact.performed -= ctx => OnInteract();
+        }
+    }
+    private void OnInteract()
+    {
+        if (holdingItem != null && holdingItem is usableItem usi)
+        {
+            usi.OnInteract();
+        }
+        if(seenObject is InteractableDecoration sid)
+        {
+            sid.OnInteract();
         }
     }
     private void Initialize_remote()
@@ -86,7 +102,7 @@ public class PlayerMain : MonoBehaviour
     public void OnPickUpItem(Item Item)
     {
         holdingItem = Item;
-        
+
     }
 
     public void OnDropItem(Item Item)
@@ -106,7 +122,7 @@ public class PlayerMain : MonoBehaviour
         item.transform.rotation = cam.transform.rotation;
 
     }
-    private void Move()
+    private void Jump()
     {
         bool grounded = controller.isGrounded;
         if (grounded && verticalVelocity < 0f)
@@ -114,17 +130,17 @@ public class PlayerMain : MonoBehaviour
             verticalVelocity = groundedStickVelocity;
         }
 
-        if (jumpQueued)
-        {
-            if (grounded)
-            {
-                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            }
-
-            jumpQueued = false;
-        }
 
         verticalVelocity += gravity * Time.deltaTime;
+        if (grounded)
+        {
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+        }
+    }
+    private void Move()
+    {
+
 
         Vector3 move = (transform.forward * moveinput.y + transform.right * moveinput.x);
         move.y = 0f;
@@ -136,7 +152,7 @@ public class PlayerMain : MonoBehaviour
         Vector3 horizontal = move * moveSpeed * maxSpeed;
         movement = horizontal;
 
-        Vector3 velocity = horizontal + (Vector3.up * verticalVelocity);
+        Vector3 velocity = horizontal + (Vector3.up * gravity);
         controller.Move(velocity * Time.deltaTime);
 
         if (horizontal.sqrMagnitude <= 0.0001f)
@@ -154,15 +170,10 @@ public class PlayerMain : MonoBehaviour
         transform.eulerAngles = new Vector3(0, yaw, 0f);
 
     }
-    private void OnPrimaryInteract()
+    private void OnPickUp()
     {
         if (holdingItem != null)
         {
-            if (IsHoldingRepairToolAndLookingAtRepairablePart())
-            {
-                return;
-            }
-
             OnDrop();
             return;
         }
@@ -172,52 +183,48 @@ public class PlayerMain : MonoBehaviour
             return;
         }
 
-        if (seenObject.IsFunctionKeyOnly())
-        {
-            return;
-        }
 
         clickedObject = seenObject;
         onSelectObject(clickedObject);
     }
 
-    private bool IsHoldingRepairToolAndLookingAtRepairablePart()
-    {
-        if (holdingItem == null || !holdingItem.IsRepairTool)
-        {
-            return false;
-        }
+    //private bool IsHoldingRepairToolAndLookingAtRepairablePart()
+    //{
+    //    if (holdingItem == null || !holdingItem.IsRepairTool)
+    //    {
+    //        return false;
+    //    }
 
-        if (cam == null)
-        {
-            return false;
-        }
+    //    if (cam == null)
+    //    {
+    //        return false;
+    //    }
 
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-        if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
-        {
-            return false;
-        }
+    //    Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+    //    if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
+    //    {
+    //        return false;
+    //    }
 
-        SpaceshipPart part = hit.collider.GetComponentInParent<SpaceshipPart>();
-        return part != null && part.CanStartRepairWithHeldItem(holdingItem);
-    }
+    //    SpaceshipPart part = hit.collider.GetComponentInParent<SpaceshipPart>();
+    //    return part != null && part.CanStartRepairWithHeldItem(holdingItem);
+    //}
 
-    private void OnFunctionInteract()
-    {
-        if (holdingItem != null || seenInteractable == null)
-        {
-            return;
-        }
+    //private void OnFunctionInteract()
+    //{
+    //    if (holdingItem != null || seenInteractable == null)
+    //    {
+    //        return;
+    //    }
 
-        if (!seenInteractable.IsFunctionKeyOnly())
-        {
-            return;
-        }
+    //    //if (!seenInteractable.IsFunctionKeyOnly())
+    //    //{
+    //    //    return;
+    //    //}
 
-        clickedInteractable = seenInteractable;
-        onSelectObject(clickedInteractable);
-    }
+    //    clickedInteractable = seenInteractable;
+    //    onSelectObject(clickedInteractable);
+    //}
     private void OnDrop()
     {
         holdingItem.Drop();
@@ -225,70 +232,37 @@ public class PlayerMain : MonoBehaviour
     }
     private void PlayerControl()
     {
-        if (settingsMenu != null && settingsMenu.IsMenuOpen)
-        {
-            return;
-        }
+        //if (settingsMenu != null && settingsMenu.IsMenuOpen)
+        //{
+        //    return;
+        //}
 
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            jumpQueued = true;
-        }
 
-        if (IsFunctionInteractPressedThisFrame())
-        {
-            OnFunctionInteract();
-        }
+        //if (IsFunctionInteractPressedThisFrame())
+        //{
+        //    OnFunctionInteract();
+        //}
 
         Move();
         Look();
-        
+
 
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
-        if(holdingItem == null)
+        if (Physics.Raycast(ray, out hit, 100f, GameCore.instance.Masks.SelectableItems))
         {
-            bool foundSelectable = false;
 
-            LayerMask selectableMask = GameCore.instance != null && GameCore.instance.Masks != null
-                ? GameCore.instance.Masks.SelectableItems
-                : 0;
+            seenObject = hit.collider.GetComponent<Selectable>();
+            if (seenObject == null) return;
+            seenObject.LookedAt = true;
 
-            if (selectableMask.value != 0 && Physics.Raycast(ray, out hit, 100f, selectableMask))
-            {
-                seenObject = hit.collider.GetComponentInParent<Selectable>();
-                seenInteractable = hit.collider.GetComponentInParent<interactable>();
-                if (seenObject != null)
-                {
-                    seenObject.LookedAt = true;
-                    foundSelectable = true;
-                }
-            }
-
-            if (!foundSelectable && Physics.Raycast(ray, out hit, 100f))
-            {
-                seenObject = hit.collider.GetComponentInParent<Selectable>();
-                seenInteractable = hit.collider.GetComponentInParent<interactable>();
-                if (seenObject != null)
-                {
-                    seenObject.LookedAt = true;
-                    foundSelectable = true;
-                }
-            }
-
-            if (!foundSelectable)
-            {
-                seenObject = null;
-                seenInteractable = null;
-            }
+        } else
+        {
+            seenObject= null;
         }
-        else
-        {
-            seenObject = null;
-            seenInteractable = null;
-        } 
-        
+
+
     }
     void Update()
     {
@@ -299,14 +273,5 @@ public class PlayerMain : MonoBehaviour
 
     }
 
-    private bool IsFunctionInteractPressedThisFrame()
-    {
-        if (Keyboard.current == null)
-        {
-            return false;
-        }
-
-        var keyControl = Keyboard.current[(Key)PlayerSettingsMenu.GetFunctionInteractKey()];
-        return keyControl != null && keyControl.wasPressedThisFrame;
-    }
+    
 }

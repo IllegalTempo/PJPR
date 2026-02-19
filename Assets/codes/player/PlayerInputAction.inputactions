@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "PlayerInputAction",
     "maps": [
         {
@@ -27,7 +28,25 @@
                     "name": "Interact",
                     "type": "Button",
                     "id": "522aeb09-78fc-4046-90a8-de1935dce70e",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "pickup",
+                    "type": "Button",
+                    "id": "eb2377b3-6004-42ca-996e-83aa99affcd3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "jump",
+                    "type": "Button",
+                    "id": "33313cfb-e413-4d31-bdba-454381910940",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -103,11 +122,33 @@
                 {
                     "name": "",
                     "id": "68218b93-47ba-4c43-85ec-bbae59d905cc",
-                    "path": "<Mouse>/leftButton",
+                    "path": "*/{PrimaryAction}",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94f10859-cef1-4c3f-b2f0-748868f9e4b4",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "pickup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "81bdcefd-ad80-43e5-b679-60e7294ef6d8",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "jump",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

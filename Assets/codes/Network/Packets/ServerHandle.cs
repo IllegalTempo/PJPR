@@ -65,6 +65,5 @@ public class ServerHandle
         p.player.SetMovement(pos, rot, yrot);
         ServerSend.DistributeMovement(p.steamId, pos, rot, yrot);
     }
-
 }
 

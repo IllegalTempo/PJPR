@@ -15,7 +15,6 @@ public class GameClient : ConnectionManager
     
     public GameClient()
     {
-        NetworkSystem.instance.IsOnline = true;
     }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
@@ -31,12 +30,22 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.DistributeInitialPos, ClientHandle.DistributeInitialPos }
             ,
             { (int)packets.ServerPackets.NewObject, ClientHandle.NewObject }
+        
+            
+            ,
+            { (int)packets.ServerPackets.DistributeNOactive, ClientHandle.DistributeNOactive }
+        ,
+            { (int)packets.ServerPackets.SyncNetworkObjects, ClientHandle.SyncNetworkObjects }
         };
 
-
+    public void NewPlayer(ulong who)
+    {
+        Debug.Log($"Spawning Player {who} and spaceship");
+        GetPlayerBySteamID.Add(who, NetworkSystem.instance.SpawnPlayer(false, who));
+    }
     public bool IsLocal(ulong id)
     {
-        return id == SteamClient.SteamId;
+        return id == NetworkSystem.instance.PlayerId;
     }
     public Connection GetServer()
     {
@@ -58,8 +67,9 @@ public class GameClient : ConnectionManager
     public override void OnDisconnected(ConnectionInfo info)
     {
         base.OnDisconnected(info);
-        Debug.Log("Disconnected to " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
-        if(NetworkSystem.instance.CreateLobbyOnStart)
+        Debug.Log("Disconnected from " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
+        NetworkSystem.instance.resetGame();
+        if (NetworkSystem.instance.CreateLobbyOnStart)
         {
             NetworkSystem.instance.CreateGameLobby();
 

@@ -49,6 +49,7 @@ public class ServerSend
         ;
     }
 
+    //inform the whole room that a new player has joined, and send the new player's steamID.
     public static Result NewPlayerJoined(ConnectionInfo newplayer)
     {
         using (packet p = new packet((int)ServerPackets.UpdatePlayerEnterRoomForExistingPlayer))
@@ -76,7 +77,7 @@ public class ServerSend
         using (packet p = new packet((int)ServerPackets.RoomInfoOnPlayerEnterRoom))
         {
             p.Write(NumPlayer);
-            p.Write(SteamClient.SteamId);
+            p.Write(NetworkSystem.instance.PlayerId);
             foreach (ulong steamid in NetworkSystem.instance.server.players.Keys)
             {
                 p.Write(steamid); //given information (SteamID)
@@ -139,7 +140,7 @@ public class ServerSend
     /// <param name="UID">Network Object Identifier</param>
     /// <param name="rot"></param>
     /// <returns></returns>
-    public static Result NewObject(string prefabID,string UID, Vector3 spawnLocation, Quaternion rot)
+    public static Result NewObject(string prefabID,string UID, Vector3 spawnLocation, Quaternion rot,ulong owner)
     {
         using (packet p = new packet((int)ServerPackets.NewObject))
         {
@@ -149,8 +150,33 @@ public class ServerSend
             p.WriteUNICODE(UID);
             p.Write(spawnLocation);
             p.Write(rot);
-
+            p.Write(owner);
             return PacketSend.BroadcastPacket(p);
+        }
+    }
+
+    public static Result DistributeNOactive(string UID,bool status)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributeNOactive))
+        {
+            p.WriteUNICODE(UID);
+            return PacketSend.BroadcastPacket(p);
+        }
+    }
+
+    public static Result SyncNetworkObjects(NetworkPlayer target, NetworkObject[] nobjs)
+    {
+        using (packet p = new packet((int)ServerPackets.SyncNetworkObjects))
+        {
+            p.Write(nobjs.Length);
+            foreach (NetworkObject no in nobjs)
+            {
+
+                p.WriteUNICODE(no.Identifier);
+                p.Write(no.Owner);
+                p.WriteUNICODE(no.PrefabID);
+            }
+            return target.SendPacket(p);
         }
     }
 }

@@ -23,9 +23,11 @@ public class NetworkPlayerObject : MonoBehaviour
     public GameObject Head;
     public GameObject Body;
     public PlayerMain playerControl;
+    public Spaceship spaceship;
     public void Disconnect()
     {
         Destroy(gameObject);
+        Destroy(spaceship);
     }
     private void Start()
     {
@@ -47,7 +49,7 @@ public class NetworkPlayerObject : MonoBehaviour
             }
             else
             {
-                ServerSend.DistributeMovement(SteamClient.SteamId, transform.position, Head.transform.rotation, transform.rotation);
+                ServerSend.DistributeMovement(NetworkSystem.instance.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
             }
 
         }

@@ -1,6 +1,7 @@
 using Steamworks.Data;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ClientHandle
@@ -59,8 +60,8 @@ public class ClientHandle
         for (int i = 0; i < numplayer; i++)
         {
             ulong steamid = packet.Readulong();
-            Debug.Log($"Spawning Player {steamid}");
-            client.GetPlayerBySteamID.Add(steamid, NetworkSystem.instance.SpawnPlayer(client.IsLocal(steamid), steamid));
+            NetworkSystem.instance.client.NewPlayer(steamid);
+
 
 
         }
@@ -71,11 +72,8 @@ public class ClientHandle
     {
         ulong playerid = packet.Readulong();
         //int supposeNetworkID = packet.Readint();
+        NetworkSystem.instance.client.NewPlayer(playerid);
 
-
-
-
-        NetworkSystem.instance.client.GetPlayerBySteamID.Add(playerid, NetworkSystem.instance.SpawnPlayer(false, playerid));
     }
     public static void PlayerQuit(Connection c, packet packet)
     {
@@ -108,10 +106,17 @@ public class ClientHandle
     {
 
 
-        string uuid = packet.ReadstringUNICODE();
+        string uid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        NetworkSystem.instance.FindNetworkObject[uuid].SetMovement(pos, rot);
+        if (NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
+        {
+            NetworkSystem.instance.FindNetworkObject[uid].SetMovement(pos, rot);
+        }
+        else
+        {
+            throw new NO_Not_Found(uid);
+        }
 
 
     }
@@ -122,6 +127,33 @@ public class ClientHandle
         string uid = packet.ReadstringUNICODE();
         Vector3 spawnLocation = packet.Readvector3();
         Quaternion spawnRot = packet.Readquaternion();
-        NetworkSystem.instance.Client_ReceivedNewNetworkObject(prefabID,uid, spawnLocation,spawnRot);
+        ulong owner = packet.Readulong();
+        GameCore.instance.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot);
+    }
+
+    public static void DistributeNOactive(Connection c, packet packet)
+    {
+        string uid = packet.ReadstringUNICODE();    
+        bool active = packet.Readbool();
+        if (NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
+        {
+            NetworkSystem.instance.FindNetworkObject[uid].gameObject.SetActive(active);
+        }
+        else
+        {
+            throw new NO_Not_Found(uid);
+        }
+    }
+
+    public static void SyncNetworkObjects(Connection c, packet packet)
+    {
+        int length = packet.Readint();
+        for (int i = 0; i < length; i++)
+        {
+            string uid = packet.ReadstringUNICODE();
+            ulong owner = packet.Readulong();
+            string prefabID = packet.ReadstringUNICODE();
+            GameCore.instance.spawnNetworkPrefab(prefabID,owner, uid,Vector3.zero,Quaternion.identity);
+        }
     }
 }

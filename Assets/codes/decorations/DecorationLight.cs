@@ -1,41 +1,15 @@
 using UnityEngine;
 
-public class DecorationLight : interactable
+public class DecorationLight : InteractableDecoration
 {
     [Header("Light Target")]
     [SerializeField] private Light targetLight;
 
-    [Header("Interaction")]
-    [SerializeField] private float interactionDistance = 100f;
 
-    [Header("Prompt")]
-    [SerializeField] private bool showPrompt = true;
-    [SerializeField] private string promptText = "{key}: Turn Light On/Off";
-    [SerializeField] private Vector2 promptSize = new Vector2(260f, 28f);
-    [SerializeField] private Vector2 promptOffset = new Vector2(0f, 70f);
 
-    private bool isLookedAtNow;
-    private GUIStyle promptStyle;
-
-    protected override void OnEnable()
+    public override void OnInteract()
     {
-        base.OnEnable();
-
-        if (targetLight == null)
-        {
-            targetLight = GetComponentInChildren<Light>();
-        }
-    }
-
-    protected override void Update()
-    {
-        base.Update();
-        isLookedAtNow = IsLookedAt();
-    }
-
-    public override void OnClicked()
-    {
-        base.OnClicked();
+        base.OnInteract();
 
         if (targetLight != null)
         {
@@ -43,92 +17,87 @@ public class DecorationLight : interactable
         }
     }
 
-    public override bool IsFunctionKeyOnly()
-    {
-        return true;
-    }
+    //private void EnsurePromptStyle()
+    //{
+    //    if (promptStyle != null)
+    //    {
+    //        return;
+    //    }
 
-    private void EnsurePromptStyle()
-    {
-        if (promptStyle != null)
-        {
-            return;
-        }
+    //    promptStyle = new GUIStyle(GUI.skin.box)
+    //    {
+    //        alignment = TextAnchor.MiddleCenter,
+    //        fontSize = 14
+    //    };
+    //}
 
-        promptStyle = new GUIStyle(GUI.skin.box)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 14
-        };
-    }
+    //private void OnGUI()
+    //{
+    //    if (!showPrompt || !isLookedAtNow)
+    //    {
+    //        return;
+    //    }
 
-    private void OnGUI()
-    {
-        if (!showPrompt || !isLookedAtNow)
-        {
-            return;
-        }
+    //    EnsurePromptStyle();
 
-        EnsurePromptStyle();
+    //    Rect rect = new Rect(
+    //        (Screen.width * 0.5f) - (promptSize.x * 0.5f) + promptOffset.x,
+    //        (Screen.height * 0.5f) + promptOffset.y,
+    //        promptSize.x,
+    //        promptSize.y
+    //    );
 
-        Rect rect = new Rect(
-            (Screen.width * 0.5f) - (promptSize.x * 0.5f) + promptOffset.x,
-            (Screen.height * 0.5f) + promptOffset.y,
-            promptSize.x,
-            promptSize.y
-        );
+    //    GUI.Box(rect, BuildPromptText(), promptStyle);
+    //}
 
-        GUI.Box(rect, BuildPromptText(), promptStyle);
-    }
+    //private string BuildPromptText()
+    //{
+    //    string keyLabel = PlayerSettingsMenu.GetFunctionInteractKeyLabel();
+    //    if (string.IsNullOrEmpty(promptText))
+    //    {
+    //        return $"{keyLabel}: Interact";
+    //    }
 
-    private string BuildPromptText()
-    {
-        string keyLabel = PlayerSettingsMenu.GetFunctionInteractKeyLabel();
-        if (string.IsNullOrEmpty(promptText))
-        {
-            return $"{keyLabel}: Interact";
-        }
+    //    if (promptText.Contains("{key}"))
+    //    {
+    //        return promptText.Replace("{key}", keyLabel);
+    //    }
 
-        if (promptText.Contains("{key}"))
-        {
-            return promptText.Replace("{key}", keyLabel);
-        }
+    //    int colonIndex = promptText.IndexOf(':');
+    //    if (colonIndex >= 0 && colonIndex < promptText.Length - 1)
+    //    {
+    //        string actionText = promptText.Substring(colonIndex + 1).Trim();
+    //        return $"{keyLabel}: {actionText}";
+    //    }
 
-        int colonIndex = promptText.IndexOf(':');
-        if (colonIndex >= 0 && colonIndex < promptText.Length - 1)
-        {
-            string actionText = promptText.Substring(colonIndex + 1).Trim();
-            return $"{keyLabel}: {actionText}";
-        }
+    //    return $"{keyLabel}: {promptText}";
+    //}
 
-        return $"{keyLabel}: {promptText}";
-    }
+    //private bool IsLookedAt()
+    //{
+    //    Transform cameraTransform = GetCameraTransform();
+    //    if (cameraTransform == null)
+    //    {
+    //        return false;
+    //    }
 
-    private bool IsLookedAt()
-    {
-        Transform cameraTransform = GetCameraTransform();
-        if (cameraTransform == null)
-        {
-            return false;
-        }
+    //    Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+    //    if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
+    //    {
+    //        return false;
+    //    }
 
-        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-        if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
-        {
-            return false;
-        }
+    //    interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
+    //    return lookedInteractable == this;
+    //}
 
-        interactable lookedInteractable = hit.collider.GetComponentInParent<interactable>();
-        return lookedInteractable == this;
-    }
+    //private Transform GetCameraTransform()
+    //{
+    //    if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
+    //    {
+    //        return GameCore.instance.localPlayer.cam.transform;
+    //    }
 
-    private Transform GetCameraTransform()
-    {
-        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
-        {
-            return GameCore.instance.localPlayer.cam.transform;
-        }
-
-        return Camera.main != null ? Camera.main.transform : null;
-    }
+    //    return Camera.main != null ? Camera.main.transform : null;
+    //}
 }

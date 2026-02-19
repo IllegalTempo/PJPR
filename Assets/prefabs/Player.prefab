@@ -85,6 +85,7 @@ MonoBehaviour:
   Head: {fileID: 5541582815378028596}
   Body: {fileID: 3035502837829196653}
   playerControl: {fileID: 3536072234528174081}
+  spaceship: {fileID: 0}
 --- !u!143 &-7730893453738433682
 CharacterController:
   m_ObjectHideFlags: 0
@@ -125,6 +126,9 @@ MonoBehaviour:
   moveSpeed: 0.5
   lookSpeed: 2
   maxSpeed: 3
+  jumpHeight: 1.6
+  gravity: -25
+  groundedStickVelocity: -2
   seenObject: {fileID: 0}
   clickedObject: {fileID: 0}
   cam: {fileID: 2002703588627120506}
@@ -168,7 +172,7 @@ GameObject:
   - component: {fileID: 3599954185346126634}
   m_Layer: 0
   m_Name: Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

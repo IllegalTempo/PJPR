@@ -7,6 +7,7 @@ using UnityEngine;
 public class NetworkObject : MonoBehaviour
 {
     public string Identifier;
+    public string PrefabID;
     public Vector3 NetworkPos;
     public Quaternion NetworkRot;
 
@@ -14,21 +15,31 @@ public class NetworkObject : MonoBehaviour
     public bool Sync_Position = true;
     public bool Sync_Rotation = true;
 
-    public ulong Owner = 0;
+    public ulong Owner = 0; //owner = 0 is no owner
 
     private void Start()
     {
-        //If not set, set to gameobject name
-        Owner = 0;
-        if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(Identifier))
-        {
-            NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
-        }
+        //if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(Identifier))
+        //{
+        //    NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
+        //}
 
     }
-    public void Init(string uid, GameObject obj) //when a new object is created, server will send a packet to all client, this method is run by client
+    public void UpdateActive(bool status)
+    {
+        gameObject.SetActive(status);
+        if (NetworkSystem.instance.IsServer)
+        {
+            ServerSend.DistributeNOactive(Identifier, status);
+        }
+    }
+
+
+    public virtual void Init(string uid, ulong owner,string PrefabID) //when a new object is created, server will send a packet to all client, this method is run by client
     {
         Identifier = uid;
+        Owner = owner;
+        this.PrefabID = PrefabID;
         if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
         {
             NetworkSystem.instance.FindNetworkObject.Add(uid, this);
@@ -68,7 +79,7 @@ public class NetworkObject : MonoBehaviour
     {
         Owner = newowner;
     }
-    
+
     private void Update()
     {
         if (NetworkSystem.instance.IsServer) return;
