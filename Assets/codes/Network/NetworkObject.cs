@@ -6,7 +6,6 @@ using UnityEngine;
 //2. Spawned by server , server will assign a unique identifier and send to all client, client will run Init() to set the identifier
 public class NetworkObject : MonoBehaviour
 {
-    [HideInInspector]
     public string Identifier;
     public string PrefabID;
     public Vector3 NetworkPos;
