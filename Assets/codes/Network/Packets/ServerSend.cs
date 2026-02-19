@@ -151,7 +151,7 @@ public class ServerSend
             p.Write(spawnLocation);
             p.Write(rot);
             p.Write(owner);
-            return PacketSend.BroadcastPacket(p);
+            return PacketSend.BroadcastPacketToReady(p);
         }
     }
 
