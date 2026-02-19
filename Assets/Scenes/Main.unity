@@ -562,6 +562,7 @@ MonoBehaviour:
   Sync_Position: 1
   Sync_Rotation: 1
   Owner: 0
+  InScene: 1
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -774,6 +775,7 @@ MonoBehaviour:
   Sync_Position: 1
   Sync_Rotation: 1
   Owner: 0
+  InScene: 1
 --- !u!54 &332918752
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1430,7 +1432,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   brokenHiddenOpacity: 0
-  brokenLookedAtOpacity: 0.35
   windowAnimator: {fileID: 0}
   isOpenBoolName: IsOpen
   flap: {fileID: 0}
@@ -1500,6 +1501,7 @@ MonoBehaviour:
   Sync_Position: 1
   Sync_Rotation: 1
   Owner: 0
+  InScene: 1
 --- !u!65 &1212190687
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1866,7 +1868,9 @@ MonoBehaviour:
   IsOnline: 0
   IsServer: 1
   PlayerInstance: {fileID: 1074483101829538221, guid: 3ebb611e972f2664bbe76fba2c12756e, type: 3}
+  FindNetworkObjectKey: []
   PlayerId: 0
+  initRoom: 0
 --- !u!1001 &5168017986115501178
 PrefabInstance:
   m_ObjectHideFlags: 0
