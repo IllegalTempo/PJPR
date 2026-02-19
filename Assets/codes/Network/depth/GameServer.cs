@@ -45,7 +45,7 @@ public class GameServer : SocketManager
         NetworkSystem.instance.IsOnline = true;
         NetworkSystem.instance.IsServer = true;
         ulong steamid = SteamClient.SteamId;
-        NetworkSystem.instance.SpawnPlayer(true, steamid); //Add the server player to the player list
+        NetworkSystem.instance.SpawnPlayer(steamid); //Add the server player to the player list
         SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
 
 
@@ -71,7 +71,7 @@ public class GameServer : SocketManager
         Debug.Log("Client Connection Established.");
         NetworkListener.Server_OnPlayerJoining?.Invoke(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
-        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(false, connectedPlayer.steamId);
+        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(connectedPlayer.steamId);
         SpawnSpaceShip(connectedPlayer.steamId);
         ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;

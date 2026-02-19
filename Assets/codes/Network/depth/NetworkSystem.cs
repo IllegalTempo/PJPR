@@ -68,9 +68,9 @@ public class NetworkSystem : MonoBehaviour
         }
     }
     //Spawn the network Player
-    public NetworkPlayerObject SpawnPlayer(bool isLocal, ulong steamid)
+    public NetworkPlayerObject SpawnPlayer( ulong steamid)
     {
-
+        bool isLocal = steamid == PlayerId;
         Debug.Log("SpawnPlayer Called " + "steamid:" + steamid);
         if (PlayerInstance == null)
         {

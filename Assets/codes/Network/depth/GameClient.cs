@@ -41,7 +41,7 @@ public class GameClient : ConnectionManager
     public void NewPlayer(ulong who)
     {
         Debug.Log($"Spawning Player {who} and spaceship");
-        GetPlayerBySteamID.Add(who, NetworkSystem.instance.SpawnPlayer(false, who));
+        GetPlayerBySteamID.Add(who, NetworkSystem.instance.SpawnPlayer(who));
     }
     public bool IsLocal(ulong id)
     {
