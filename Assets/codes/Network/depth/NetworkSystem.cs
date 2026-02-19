@@ -139,7 +139,7 @@ public class NetworkSystem : MonoBehaviour
             Debug.Log("Create Lobby Failed");
         }
     }
-    public void resetGame()
+    private void NewLobby()
     {
         RemoveAllPlayerObject();
         foreach (NetworkObject nobj in FindNetworkObject.Values)
@@ -150,10 +150,6 @@ public class NetworkSystem : MonoBehaviour
             }
         }
         FindNetworkObject.Clear();
-    }
-    private void NewLobby()
-    {
-        
     }
 #if UNITY_EDITOR
     private void OnExit(PlayModeStateChange change)
@@ -187,7 +183,6 @@ public class NetworkSystem : MonoBehaviour
             if (server != null)
             {
                 Debug.Log("Destroyed Server");
-                NetworkSystem.instance.resetGame();
 
                 server.DisconnectAll();
                 server = null;

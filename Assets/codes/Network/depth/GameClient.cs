@@ -60,8 +60,7 @@ public class GameClient : ConnectionManager
     public override void OnConnecting(ConnectionInfo info)
     {
         base.OnConnecting(info);
-        Debug.Log("Connecting to " + info.Identity.SteamId + "..." + ",Reseting Game");
-        NetworkSystem.instance.resetGame();
+        Debug.Log("Connecting to " + info.Identity.SteamId + "..." + "");
 
 
 
