@@ -171,7 +171,6 @@ public class ServerSend
             p.Write(nobjs.Length);
             foreach (NetworkObject no in nobjs)
             {
-
                 p.WriteUNICODE(no.Identifier);
                 p.Write(no.Owner);
                 p.WriteUNICODE(no.PrefabID);

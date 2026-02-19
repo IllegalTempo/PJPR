@@ -43,7 +43,7 @@ public class NetworkPlayer
     {
         if (!ready) return;
         init = ready;
-        ServerSend.SyncNetworkObjects(this, NetworkSystem.instance.FindNetworkObject.Values.ToArray()); //TODO: If array too long, split into multiple packets
+        ServerSend.SyncNetworkObjects(this, NetworkSystem.instance.FindNetworkObject.Values.Where(x=>!x.InScene).ToArray()); //TODO: If array too long, split into multiple packets
 
     }
 }
