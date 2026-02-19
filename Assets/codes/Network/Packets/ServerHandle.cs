@@ -54,7 +54,7 @@ public class ServerHandle
     public static void ReadyUpdate(NetworkPlayer p, packet packet)
     {
         bool ready = packet.Readbool();
-        p.MovementUpdateReady = ready;
+        p.onReady(ready);
         Debug.Log($"Player {p.SteamName} is ready for receiving pos informations!");
     }
     public static void PosUpdate(NetworkPlayer p, packet packet)

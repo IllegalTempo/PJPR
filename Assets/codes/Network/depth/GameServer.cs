@@ -76,7 +76,6 @@ public class GameServer : SocketManager
         ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;
         ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
-        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.instance.FindNetworkObject.Values.ToArray()); //TODO: If array too long, split into multiple packets
         ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
     }
     public override async void OnConnected(Connection connection, ConnectionInfo info)

@@ -64,7 +64,7 @@ public class PacketSend
             }
 
             //NetworkPlayer sendtarget = NetworkSystem.instance.server.GetPlayerByIndex(i);
-            if (pl.steamId != excludeid && pl.MovementUpdateReady)
+            if (pl.steamId != excludeid && pl.init)
             {
                 if (pl.SendPacket(p) != Result.OK)
                 {

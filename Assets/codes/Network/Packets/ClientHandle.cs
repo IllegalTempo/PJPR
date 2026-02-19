@@ -61,11 +61,13 @@ public class ClientHandle
         {
             ulong steamid = packet.Readulong();
             NetworkSystem.instance.client.NewPlayer(steamid);
-
+            
 
 
         }
         await Task.Delay(1000);
+        NetworkSystem.instance.initRoom = true;
+
         ClientSend.ReadyUpdate();
     }
     public static void NewPlayerJoin(Connection c, packet packet)

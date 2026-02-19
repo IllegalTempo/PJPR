@@ -29,6 +29,7 @@ public class NetworkSystem : MonoBehaviour
     public Dictionary<ulong,NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
     public ulong PlayerId;
 
+    public bool initRoom = false;
     //Current Lobby player is in, no matter server or client
     public Lobby CurrentLobby;
     // Start is called before the first frame update
@@ -141,6 +142,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private void NewLobby()
     {
+        initRoom = false;
         RemoveAllPlayerObject();
         foreach (NetworkObject nobj in FindNetworkObject.Values)
         {

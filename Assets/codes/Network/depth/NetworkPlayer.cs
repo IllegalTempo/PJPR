@@ -3,7 +3,9 @@ using Steamworks.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
 
 public class NetworkPlayer
@@ -14,7 +16,7 @@ public class NetworkPlayer
     //public int NetworkID;
     public bool IsLocal;
     public NetworkPlayerObject player;
-    public bool MovementUpdateReady;
+    public bool init = false;
     public NetworkPlayer(SteamId steamid
         //,int NetworkID
         ,Connection connection)
@@ -36,5 +38,12 @@ public class NetworkPlayer
     public Result SendPacket(packet p)
     {
         return SendData(p.GetPacketData());
+    }
+    public void onReady(bool ready) //when Init Room is done, (Player is spawned)
+    {
+        if (!ready) return;
+        init = ready;
+        ServerSend.SyncNetworkObjects(this, NetworkSystem.instance.FindNetworkObject.Values.ToArray()); //TODO: If array too long, split into multiple packets
+
     }
 }
