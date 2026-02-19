@@ -92,7 +92,8 @@ public class PlayerMain : MonoBehaviour
         }
         if(seenObject is InteractableDecoration sid)
         {
-            sid.OnInteract();
+            sid.OnInteract(this);
+            //todo add send interact packet
         }
     }
     private void Initialize_remote()

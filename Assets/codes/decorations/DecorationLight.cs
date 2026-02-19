@@ -7,9 +7,9 @@ public class DecorationLight : InteractableDecoration
 
 
 
-    public override void OnInteract()
+    public override void OnInteract(PlayerMain who)
     {
-        base.OnInteract();
+        base.OnInteract(who);
 
         if (targetLight != null)
         {

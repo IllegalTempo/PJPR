@@ -159,4 +159,12 @@ public class ClientHandle
             GameCore.instance.spawnNetworkPrefab(prefabID,owner, uid,Vector3.zero,Quaternion.identity);
         }
     }
+
+    public static void DistributeDecorationInteract(Connection c, packet packet)
+    {
+        // TODO: Read packet data here
+        // var data = packet.Read...();
+        
+        // TODO: Handle the packet
+    }
 }

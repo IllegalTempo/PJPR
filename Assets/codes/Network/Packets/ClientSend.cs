@@ -50,7 +50,6 @@ public class ClientSend
     }
     public static Result Position(Vector3 pos, Quaternion cameraRotation, Quaternion BodyRotation)
     {
-        Debug.Log("Send Position");
         using (packet p = new packet((int)ClientPackets.SendPosition))
         {
             p.Write(pos);
@@ -103,6 +102,17 @@ public class ClientSend
         else
         {
             return PacketSend.SendPacketToConnection(NetworkSystem.instance.client.GetServer(), p);
+        }
+    }
+
+    public static Result SendDecorationInteract()
+    {
+        using (packet p = new packet((int)ClientPackets.SendDecorationInteract))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            
+            return SendToServer(p);
         }
     }
 }

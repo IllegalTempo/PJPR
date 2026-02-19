@@ -37,6 +37,8 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.DistributeNOactive, ClientHandle.DistributeNOactive }
         ,
             { (int)packets.ServerPackets.SyncNetworkObjects, ClientHandle.SyncNetworkObjects }
+        ,
+            { (int)packets.ServerPackets.DistributeDecorationInteract, ClientHandle.DistributeDecorationInteract }
         };
 
     public void NewPlayer(ulong who)

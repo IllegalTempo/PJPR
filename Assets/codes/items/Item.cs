@@ -36,10 +36,6 @@ public class Item : Selectable //Item is any that is pickable
         if (netObj == null)
         {
             netObj = GetComponent<NetworkObject>();
-        }
-
-        if (netObj == null)
-        {
             Debug.LogWarning($"{name} has no NetworkObject, cannot be picked up.");
             return;
         }

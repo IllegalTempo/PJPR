@@ -25,6 +25,8 @@ public class packets
         DistributeNOactive = 11
     ,
         SyncNetworkObjects = 12
+    ,
+        DistributeDecorationInteract = 13
     };
     public enum ClientPackets
     {
@@ -34,6 +36,8 @@ public class packets
         SendAnimationState = 3,
         SendNOInfo = 4,
         PickUpItem = 5
+    ,
+        SendDecorationInteract = 6
     };
 }
 

@@ -62,9 +62,16 @@ public class ServerHandle
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
         Quaternion yrot = packet.Readquaternion();
-        Debug.Log("Received Pos update from" + p.SteamName);
         p.player.SetMovement(pos, rot, yrot);
         ServerSend.DistributeMovement(p.steamId, pos, rot, yrot);
+    }
+
+    public static void SendDecorationInteract(NetworkPlayer p, packet packet)
+    {
+        // TODO: Read packet data here
+        // var data = packet.Read...();
+        
+        // TODO: Handle the packet
     }
 }
 

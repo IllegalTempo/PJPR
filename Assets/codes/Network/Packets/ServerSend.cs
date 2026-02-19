@@ -178,6 +178,17 @@ public class ServerSend
             return target.SendPacket(p);
         }
     }
+
+    public static Result DistributeDecorationInteract(NetworkPlayer target)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributeDecorationInteract))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            
+            return target.SendPacket(p);
+        }
+    }
 }
 
     

@@ -29,7 +29,9 @@ public class GameServer : SocketManager
             { (int)packets.ClientPackets.SendNOInfo, ServerHandle.SendNOInfo },
             { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
 
-            };
+            ,
+            { (int)packets.ClientPackets.SendDecorationInteract, ServerHandle.SendDecorationInteract }
+        };
 
 
 
