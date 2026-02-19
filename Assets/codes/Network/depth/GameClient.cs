@@ -15,6 +15,7 @@ public class GameClient : ConnectionManager
     
     public GameClient()
     {
+        NetworkSystem.instance.IsServer = false;
     }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
