@@ -86,7 +86,7 @@ public class GameCore : MonoBehaviour
             Debug.LogError($"CreateNetworkObject failed: prefabID '{prefabID}' not found in GameCore.getPrefab dictionary.");
             return null;
         }
-
+        Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
         GameObject prefab = GetPrefabObject(prefabID);
 
         GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);

@@ -48,7 +48,7 @@ public class PacketSend
         }
         return Result.OK;
     }
-    public static Result BroadcastPacketToReady(ulong excludeid, packet p)
+    public static Result BroadcastPacketToReady(packet p,ulong excludeid = 0 )
     {
         if (NetworkSystem.instance == null || NetworkSystem.instance.server == null || NetworkSystem.instance.server.players == null)
         {

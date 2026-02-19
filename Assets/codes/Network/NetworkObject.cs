@@ -66,7 +66,7 @@ public class NetworkObject : MonoBehaviour
 
         if (NetworkSystem.instance.IsServer)
         {
-            ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
+            ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation,Owner);
         }
         else
         {

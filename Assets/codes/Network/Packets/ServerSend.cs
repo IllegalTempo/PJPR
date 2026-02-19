@@ -31,7 +31,7 @@ public class ServerSend
             p.Write(pos);
             p.Write(headrot);
             p.Write(bodyrot);
-            return PacketSend.BroadcastPacketToReady(SourceNetworkID, p);
+            return PacketSend.BroadcastPacketToReady(p, SourceNetworkID);
 
         }
         ;
@@ -44,7 +44,7 @@ public class ServerSend
             p.Write(movementx);
             p.Write(movementy);
 
-            return PacketSend.BroadcastPacketToReady(SourceNetworkID, p);
+            return PacketSend.BroadcastPacketToReady(p, SourceNetworkID);
         }
         ;
     }
@@ -94,7 +94,7 @@ public class ServerSend
     /// <param name="pos"></param>
     /// <param name="rot"></param>
     /// <returns></returns>
-    public static Result DistributeNOInfo(string id, Vector3 pos, Quaternion rot)
+    public static Result DistributeNOInfo(string id, Vector3 pos, Quaternion rot,ulong owner)
     {
         using (packet p = new packet((int)ServerPackets.DistributeNOInfo))
         {
@@ -102,7 +102,7 @@ public class ServerSend
             p.Write(pos);
             p.Write(rot);
 
-            return PacketSend.BroadcastPacket(p);
+            return PacketSend.BroadcastPacketToReady(p,owner);
         }
     }
 

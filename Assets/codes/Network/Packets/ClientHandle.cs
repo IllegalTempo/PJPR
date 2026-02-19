@@ -150,6 +150,7 @@ public class ClientHandle
     public static void SyncNetworkObjects(Connection c, packet packet)
     {
         int length = packet.Readint();
+        Debug.Log($"Syncing {length} Network Objects from Server");
         for (int i = 0; i < length; i++)
         {
             string uid = packet.ReadstringUNICODE();
