@@ -25,6 +25,7 @@ public class NetworkSystem : MonoBehaviour
     //Network Player Prefab
     public GameObject PlayerInstance;
     public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
+    [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     //All player list
     public Dictionary<ulong,NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
     public ulong PlayerId;
@@ -144,11 +145,12 @@ public class NetworkSystem : MonoBehaviour
     {
         initRoom = false;
         RemoveAllPlayerObject();
-        foreach (NetworkObject nobj in FindNetworkObject.Values)
+        foreach (KeyValuePair<string,NetworkObject> kvp in FindNetworkObject)
         {
-            if (nobj != null && !nobj.InScene)
+            if (kvp.Value != null && !kvp.Value.InScene)
             {
-                Destroy(nobj.gameObject);
+                Destroy(kvp.Value.gameObject);
+                FindNetworkObject.Remove(kvp.Key);
             }
         }
         FindNetworkObject.Clear();
@@ -256,6 +258,11 @@ public class NetworkSystem : MonoBehaviour
                 Debug.LogError($"Client receive error: {e}");
             }
         }
+#if UNITY_EDITOR
+        // Sync dictionary keys to inspector for debugging
+        FindNetworkObjectKey.Clear();
+        FindNetworkObjectKey.AddRange(FindNetworkObject.Keys);
+#endif
     }
 
     private async void OnLobbyCreated(Result r, Lobby l)
