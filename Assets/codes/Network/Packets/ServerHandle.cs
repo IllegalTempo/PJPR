@@ -9,7 +9,7 @@ public class ServerHandle
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
         NetworkSystem.instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
-        ServerSend.DistributeNOInfo(uuid, pos, rot,p.steamId);
+        ServerSend.DistributeNOInfo(uuid, pos, rot);
 
 
     }
