@@ -94,7 +94,7 @@ public class ServerSend
     /// <param name="pos"></param>
     /// <param name="rot"></param>
     /// <returns></returns>
-    public static Result DistributeNOInfo(string id, Vector3 pos, Quaternion rot,ulong owner)
+    public static Result DistributeNOInfo(string id, Vector3 pos, Quaternion rot)
     {
         using (packet p = new packet((int)ServerPackets.DistributeNOInfo))
         {
@@ -102,7 +102,7 @@ public class ServerSend
             p.Write(pos);
             p.Write(rot);
 
-            return PacketSend.BroadcastPacketToReady(p,owner);
+            return PacketSend.BroadcastPacketToReady(p);
         }
     }
 
