@@ -6,6 +6,7 @@ using UnityEngine;
 //2. Spawned by server , server will assign a unique identifier and send to all client, client will run Init() to set the identifier
 public class NetworkObject : MonoBehaviour
 {
+    [HideInInspector]
     public string Identifier;
     public string PrefabID;
     public Vector3 NetworkPos;
@@ -16,13 +17,17 @@ public class NetworkObject : MonoBehaviour
     public bool Sync_Rotation = true;
 
     public ulong Owner = 0; //owner = 0 is no owner
-
+    public bool InScene = false;
+    private bool init = false;
     private void Start()
     {
-        //if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(Identifier))
-        //{
-        //    NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
-        //}
+        if (!init)
+        {
+            InScene = true;
+            Identifier = gameObject.name;
+            NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
+
+        }
 
     }
     public void UpdateActive(bool status)
@@ -37,6 +42,7 @@ public class NetworkObject : MonoBehaviour
 
     public virtual void Init(string uid, ulong owner,string PrefabID) //when a new object is created, server will send a packet to all client, this method is run by client
     {
+        init = true;
         Identifier = uid;
         Owner = owner;
         this.PrefabID = PrefabID;

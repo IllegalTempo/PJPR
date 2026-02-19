@@ -60,7 +60,9 @@ public class GameClient : ConnectionManager
     public override void OnConnecting(ConnectionInfo info)
     {
         base.OnConnecting(info);
-        Debug.Log("Connecting to " + info.Identity.SteamId + "...");
+        Debug.Log("Connecting to " + info.Identity.SteamId + "..." + ",Reseting Game");
+        NetworkSystem.instance.resetGame();
+
 
 
     }
@@ -68,7 +70,6 @@ public class GameClient : ConnectionManager
     {
         base.OnDisconnected(info);
         Debug.Log("Disconnected from " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
-        NetworkSystem.instance.resetGame();
         if (NetworkSystem.instance.CreateLobbyOnStart)
         {
             NetworkSystem.instance.CreateGameLobby();

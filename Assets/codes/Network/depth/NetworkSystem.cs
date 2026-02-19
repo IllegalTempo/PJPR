@@ -144,7 +144,7 @@ public class NetworkSystem : MonoBehaviour
         RemoveAllPlayerObject();
         foreach (NetworkObject nobj in FindNetworkObject.Values)
         {
-            if (nobj != null)
+            if (nobj != null && !nobj.InScene)
             {
                 Destroy(nobj.gameObject);
             }

@@ -41,7 +41,7 @@ public class SpaceshipPart : interactable
 
     [Header("Broken Visibility")]
     [SerializeField, Range(0f, 1f)] private float brokenHiddenOpacity = 0f;
-    [SerializeField, Range(0f, 1f)] private float brokenLookedAtOpacity = 0.35f;
+    //[SerializeField, Range(0f, 1f)] private float brokenLookedAtOpacity = 0.35f;
 
     public bool IsBroken => currentHealth <= 0f;
 
