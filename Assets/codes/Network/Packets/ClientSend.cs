@@ -105,12 +105,11 @@ public class ClientSend
         }
     }
 
-    public static Result SendDecorationInteract()
+    public static Result SendDecorationInteract(string decorationUID)
     {
         using (packet p = new packet((int)ClientPackets.SendDecorationInteract))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+            p.WriteUNICODE(decorationUID);
             
             return SendToServer(p);
         }

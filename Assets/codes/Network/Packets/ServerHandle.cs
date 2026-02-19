@@ -68,10 +68,11 @@ public class ServerHandle
 
     public static void SendDecorationInteract(NetworkPlayer p, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
-        
-        // TODO: Handle the packet
+        string decorationUID = packet.ReadstringUNICODE();
+        InteractableDecoration decoration = NetworkSystem.instance.FindNetworkObject[decorationUID].GetComponent<InteractableDecoration>();
+        PlayerMain who = p.player.playerControl;
+        decoration.OnInteract(who);
+        ServerSend.DistributeDecorationInteract(p.steamId, decorationUID);
     }
 }
 

@@ -92,8 +92,23 @@ public class PlayerMain : MonoBehaviour
         }
         if(seenObject is InteractableDecoration sid)
         {
-            sid.OnInteract(this);
             //todo add send interact packet
+
+            if (NetworkSystem.instance == null || !NetworkSystem.instance.IsOnline)
+            {
+                sid.OnInteract(this);
+                return;
+            }
+
+            if (NetworkSystem.instance.IsServer)
+            {
+                sid.OnInteract(this);
+                ServerSend.DistributeDecorationInteract(networkinfo.steamID, sid.netObj.Identifier);
+            }
+            else
+            {
+                ClientSend.SendDecorationInteract(sid.netObj.Identifier);
+            }
         }
     }
     private void Initialize_remote()

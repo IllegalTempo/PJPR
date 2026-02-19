@@ -179,14 +179,14 @@ public class ServerSend
         }
     }
 
-    public static Result DistributeDecorationInteract(NetworkPlayer target)
+    public static Result DistributeDecorationInteract(ulong whoInteracted, string decorationUID)
     {
         using (packet p = new packet((int)ServerPackets.DistributeDecorationInteract))
         {
-            // TODO: Write packet data here
-            // p.Write(...);
+            p.Write(whoInteracted);
+            p.WriteUNICODE(decorationUID);
             
-            return target.SendPacket(p);
+            return PacketSend.BroadcastPacketToReady(p);
         }
     }
 }

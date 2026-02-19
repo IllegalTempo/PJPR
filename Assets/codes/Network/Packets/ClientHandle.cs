@@ -162,9 +162,11 @@ public class ClientHandle
 
     public static void DistributeDecorationInteract(Connection c, packet packet)
     {
-        // TODO: Read packet data here
-        // var data = packet.Read...();
-        
-        // TODO: Handle the packet
+        ulong whoInteracted = packet.Readulong();
+        string decorationUID = packet.ReadstringUNICODE();
+
+        InteractableDecoration decoration = NetworkSystem.instance.FindNetworkObject[decorationUID].GetComponent<InteractableDecoration>();
+        PlayerMain who = NetworkSystem.instance.client.GetPlayerBySteamID[whoInteracted].playerControl;
+        decoration.OnInteract(who);
     }
 }
