@@ -50,6 +50,7 @@ public class ClientSend
     }
     public static Result Position(Vector3 pos, Quaternion cameraRotation, Quaternion BodyRotation)
     {
+        Debug.Log("Send Position");
         using (packet p = new packet((int)ClientPackets.SendPosition))
         {
             p.Write(pos);
