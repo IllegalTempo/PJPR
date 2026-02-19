@@ -2,7 +2,9 @@ using Steamworks;
 using Steamworks.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
@@ -27,7 +29,7 @@ public class NetworkSystem : MonoBehaviour
     public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     //All player list
-    public Dictionary<ulong,NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
+    public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
     public ulong PlayerId;
 
     public bool initRoom = false;
@@ -68,7 +70,7 @@ public class NetworkSystem : MonoBehaviour
     //Spawn the network Player
     public NetworkPlayerObject SpawnPlayer(bool isLocal, ulong steamid)
     {
-        
+
         Debug.Log("SpawnPlayer Called " + "steamid:" + steamid);
         if (PlayerInstance == null)
         {
@@ -90,7 +92,7 @@ public class NetworkSystem : MonoBehaviour
         //{
         //    GameCore.instance.localNetworkPlayer = p;
         //}
-        PlayerList.Add(steamid,p);
+        PlayerList.Add(steamid, p);
         return p;
     }
     public void RemoveAllPlayerObject()
@@ -134,7 +136,7 @@ public class NetworkSystem : MonoBehaviour
     //GO ONLINE!
     public async void CreateGameLobby()
     {
-        
+
         bool success = await CreateLobby();
         if (!success)
         {
@@ -145,15 +147,14 @@ public class NetworkSystem : MonoBehaviour
     {
         initRoom = false;
         RemoveAllPlayerObject();
-        foreach (KeyValuePair<string,NetworkObject> kvp in FindNetworkObject)
-        {
-            if (kvp.Value != null && !kvp.Value.InScene)
-            {
-                Destroy(kvp.Value.gameObject);
-                FindNetworkObject.Remove(kvp.Key);
-            }
-        }
-        FindNetworkObject.Clear();
+        FindNetworkObject
+    .Where(kvp => kvp.Value && !kvp.Value.InScene)
+    .ToList()
+    .ForEach(kvp =>
+    {
+        Destroy(kvp.Value.gameObject);
+        FindNetworkObject.Remove(kvp.Key);
+    });
     }
 #if UNITY_EDITOR
     private void OnExit(PlayModeStateChange change)
@@ -169,7 +170,7 @@ public class NetworkSystem : MonoBehaviour
         OnDestroy();
     }
 
-    
+
     private bool destroyed = false;
     private void OnDestroy()
     {
@@ -276,19 +277,19 @@ public class NetworkSystem : MonoBehaviour
         CurrentLobby = l;
         //MainScreenUI.instance.InviteCodeDisplay.text = NetworkSystem.instance.GetInviteCode().ToString();
 
-            try
-            {
-                server = SteamNetworkingSockets.CreateRelaySocket<GameServer>();
-                Debug.Log($"Successfully created Game Server");
+        try
+        {
+            server = SteamNetworkingSockets.CreateRelaySocket<GameServer>();
+            Debug.Log($"Successfully created Game Server");
 
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Please Restart your game Client | Error: {ex}");
-                await Task.Delay(5000);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Please Restart your game Client | Error: {ex}");
+            await Task.Delay(5000);
 
-            }
-        
+        }
+
 
         await Task.Delay(300);
         Debug.Log($"Server: {server}");
