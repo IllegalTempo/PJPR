@@ -49,6 +49,8 @@ public class GameServer : SocketManager
         ulong steamid = SteamClient.SteamId;
         NetworkSystem.instance.SpawnPlayer(steamid); //Add the server player to the player list
         SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        SpawnConnector();
+
 
 
     }
@@ -139,6 +141,7 @@ public class GameServer : SocketManager
         return ss;
 
     }
+    
     public Spaceship SpawnSpaceShip(ulong owner) //run by server itself
     {
         return SpawnSpaceShip(null, owner);
