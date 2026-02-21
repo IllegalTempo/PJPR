@@ -160,7 +160,7 @@ public class ClientHandle
             string prefabID = packet.ReadstringUNICODE();
             Vector3 spawnLocation = packet.Readvector3();
             Quaternion spawnRot = packet.Readquaternion();
-            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,spawnLocation,spawnRot).Forget();
+            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,spawnLocation,Quaternion.identity).Forget();
         }
     }
 

@@ -104,6 +104,7 @@ public class GameCore : MonoBehaviour
         }
         
         nobj.Init(uid, owner,prefabID);
+        nobj.SetMovement(pos, rot);
         return nobj;
     }
     public bool IsLocal(ulong id)
