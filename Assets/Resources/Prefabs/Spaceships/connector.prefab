@@ -2304,7 +2304,7 @@ MonoBehaviour:
   Sync_Position: 1
   Sync_Rotation: 1
   Owner: 0
-  InScene: 1
+  InScene: 0
   animator: {fileID: 7884205595135014872}
   dockpos:
   - {fileID: 2833960929770514311}
