@@ -122,7 +122,7 @@ public class ClientHandle
         {
             throw new NO_Not_Found(uid);
         }
-        logger.LogPacketReceive($"[Client] NOINFO Received: [{uid}] [{pos}] [{rot}]");
+        Debug.Log($"[Client] NOINFO Received: [{uid}] [{pos}] [{rot}]");
 
 
     }
