@@ -174,6 +174,8 @@ public class ServerSend
                 p.WriteUNICODE(no.Identifier);
                 p.Write(no.Owner);
                 p.WriteUNICODE(no.PrefabID);
+                p.Write(no.transform.position);
+                p.Write(no.transform.rotation);
             }
             return target.SendPacket(p);
         }

@@ -124,7 +124,7 @@ public class GameServer : SocketManager
     //}
     public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
-        Spaceship ss = (await CreateNetworkObject("Spaceship", Vector3.zero, Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
+        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0,5,0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
         if (decs != null)
         {
             foreach (DecorationSaveData dsd in decs)

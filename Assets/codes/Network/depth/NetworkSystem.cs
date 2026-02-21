@@ -167,7 +167,7 @@ public class NetworkSystem : MonoBehaviour
         ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
-        NetworkPlayerObject p = Instantiate(PlayerInstance).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(PlayerInstance,new Vector3(0,5,0),Quaternion.identity).GetComponent<NetworkPlayerObject>();
         p.steamID = steamid;
         p.IsLocal = isLocal;
         p.gameObject.name = "Player_" + steamid;
