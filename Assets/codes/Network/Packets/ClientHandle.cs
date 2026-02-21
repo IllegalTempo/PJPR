@@ -1,3 +1,4 @@
+using Assets.codes;
 using Assets.codes.items;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -121,6 +122,7 @@ public class ClientHandle
         {
             throw new NO_Not_Found(uid);
         }
+        logger.LogPacketReceive($"[Client] NOINFO Received: [{uid}] [{pos}] [{rot}]");
 
 
     }
@@ -160,7 +162,7 @@ public class ClientHandle
             string prefabID = packet.ReadstringUNICODE();
             Vector3 spawnLocation = packet.Readvector3();
             Quaternion spawnRot = packet.Readquaternion();
-            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,spawnLocation,Quaternion.identity).Forget();
+            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,spawnLocation,spawnRot).Forget();
         }
     }
 

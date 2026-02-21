@@ -1,3 +1,4 @@
+using Assets.codes;
 using Steamworks;
 using Steamworks.Data;
 using System;
@@ -101,6 +102,7 @@ public class ServerSend
             p.WriteUNICODE(id);
             p.Write(pos);
             p.Write(rot);
+            logger.LogPacketReceive($"[Server] NOINFO Sended: [{id}] [{pos}] [{rot}]");
 
             return PacketSend.BroadcastPacketToReady(p);
         }
