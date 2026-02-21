@@ -120,12 +120,12 @@ public class DecorationDemoBuilder : MonoBehaviour
             return selectableLayer;
         }
 
-        if (GameCore.instance == null || GameCore.instance.Masks == null)
+        if (GameCore.INSTANCE == null || GameCore.INSTANCE.Masks == null)
         {
             return -1;
         }
 
-        int mask = GameCore.instance.Masks.SelectableItems.value;
+        int mask = GameCore.INSTANCE.Masks.SelectableItems.value;
         if (mask == 0)
         {
             return -1;
@@ -144,9 +144,9 @@ public class DecorationDemoBuilder : MonoBehaviour
 
     private Vector3 ResolveSpawnPosition()
     {
-        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.cam != null)
+        if (GameCore.INSTANCE != null && GameCore.INSTANCE.Local_Player != null && GameCore.INSTANCE.Local_Player.cam != null)
         {
-            Transform cam = GameCore.instance.localPlayer.cam.transform;
+            Transform cam = GameCore.INSTANCE.Local_Player.cam.transform;
             Vector3 forward = cam.forward;
             forward.y = 0f;
             if (forward.sqrMagnitude < 0.001f)

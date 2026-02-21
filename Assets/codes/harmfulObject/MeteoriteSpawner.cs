@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 public class MeteoriteSpawner : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class MeteoriteSpawner : MonoBehaviour
     {
         get
         {
-            return NetworkSystem.instance == null || NetworkSystem.instance.IsServer;
+            return NetworkSystem.INSTANCE == null || NetworkSystem.INSTANCE.IsServer;
         }
     }
     
@@ -94,7 +95,7 @@ public class MeteoriteSpawner : MonoBehaviour
         // keep spawning if not using wave system
         if (!useWaveSystem && Time.time >= nextSpawnTime && activeMeteorites.Count < maxMeteorites)
         {
-            SpawnMeteorite();
+            SpawnMeteorite().Forget();
             nextSpawnTime = Time.time + baseSpawnInterval + Random.Range(-spawnIntervalVariation, spawnIntervalVariation);
         }
     }
@@ -114,7 +115,7 @@ public class MeteoriteSpawner : MonoBehaviour
             {
                 if (activeMeteorites.Count < maxMeteorites)
                 {
-                    SpawnMeteorite();
+                    SpawnMeteorite().Forget();
                     currentWaveMeteorites++;
                     
                     float waveSpawnInterval = waveDuration / meteoritesPerWave;
@@ -133,9 +134,9 @@ public class MeteoriteSpawner : MonoBehaviour
         }
     }
 
-    void SpawnMeteorite()
+    async UniTask SpawnMeteorite()
     {
-        if (!NetworkSystem.instance.IsServer) return;
+        if (!NetworkSystem.INSTANCE.IsServer) return;
         string prefabID = GetRandomMeteoritePrefabID();
         if (string.IsNullOrEmpty(prefabID))
         {
@@ -144,7 +145,7 @@ public class MeteoriteSpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        NetworkObject networkObject = NetworkSystem.instance.server.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
+        NetworkObject networkObject = await NetworkSystem.INSTANCE.Server.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
         if (networkObject == null)
         {
             return;
@@ -194,7 +195,7 @@ public class MeteoriteSpawner : MonoBehaviour
             GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
             if (meteoritePrefab != null)
             {
-                foreach (KeyValuePair<string, string> prefabEntry in GameCore.instance.getPrefab)
+                foreach (KeyValuePair<string, string> prefabEntry in GameCore.INSTANCE.GetPrefabWithID)
                 {
                     if (prefabEntry.Key == meteoritePrefab.name || prefabEntry.Value == meteoritePrefab.name)
                     {
@@ -204,14 +205,14 @@ public class MeteoriteSpawner : MonoBehaviour
             }
         }
 
-        if (GameCore.instance != null)
+        if (GameCore.INSTANCE != null)
         {
-            if (GameCore.instance.getPrefab.ContainsKey("Meteorite_Test"))
+            if (GameCore.INSTANCE.GetPrefabWithID.ContainsKey("Meteorite_Test"))
             {
                 return "Meteorite_Test";
             }
 
-            if (GameCore.instance.getPrefab.ContainsKey("Meteorite_Fragment"))
+            if (GameCore.INSTANCE.GetPrefabWithID.ContainsKey("Meteorite_Fragment"))
             {
                 return "Meteorite_Fragment";
             }

@@ -1,3 +1,4 @@
+using Assets.codes.items;
 using System;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class ServerHandle
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        NetworkSystem.instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
+        NetworkSystem.INSTANCE.FindNetworkObject[uuid].SetServerMovement(pos, rot);
         ServerSend.DistributeNOInfo(uuid, pos, rot);
 
 
@@ -22,7 +23,7 @@ public class ServerHandle
 
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
-        NetworkSystem.instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
+        NetworkSystem.INSTANCE.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, whopicked);
     }
@@ -69,7 +70,7 @@ public class ServerHandle
     public static void SendDecorationInteract(NetworkPlayer p, packet packet)
     {
         string decorationUID = packet.ReadstringUNICODE();
-        InteractableDecoration decoration = NetworkSystem.instance.FindNetworkObject[decorationUID].GetComponent<InteractableDecoration>();
+        IUsable decoration = NetworkSystem.INSTANCE.FindNetworkObject[decorationUID].GetComponent<IUsable>();
         PlayerMain who = p.player.playerControl;
         decoration.OnInteract(who);
         ServerSend.DistributeDecorationInteract(p.steamId, decorationUID);

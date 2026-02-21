@@ -22,9 +22,9 @@ public class SaveObject : MonoBehaviour
     public void Save()
     {
         //Save the decoration
-        saved_decorations = new DecorationSaveData[GameCore.instance.localSpaceship.GetDecorationByUUID_onShip.Count];
+        saved_decorations = new DecorationSaveData[GameCore.INSTANCE.Local_PlayerSpaceship.GetDecorationByUUID_onShip.Count];
         int decorationIndex = 0;
-        foreach(Decoration dec in GameCore.instance.localSpaceship.GetDecorationByUUID_onShip.Values)
+        foreach(Decoration dec in GameCore.INSTANCE.Local_PlayerSpaceship.GetDecorationByUUID_onShip.Values)
         {
             saved_decorations[decorationIndex] = new DecorationSaveData(dec.DecorationID, dec.transform.localPosition,dec.transform.localRotation);
             decorationIndex++;

@@ -33,8 +33,8 @@ public class NetworkPlayerObject : MonoBehaviour
     {
         if(IsLocal)
         {
-            GameCore.instance.localNetworkPlayer = this;
-            GameCore.instance.localPlayer = playerControl;
+            GameCore.INSTANCE.Local_NetworkPlayer = this;
+            GameCore.INSTANCE.Local_Player = playerControl;
         }
 
     }
@@ -43,13 +43,13 @@ public class NetworkPlayerObject : MonoBehaviour
         
         if (IsLocal)
         {
-            if (!NetworkSystem.instance.IsServer)
+            if (!NetworkSystem.INSTANCE.IsServer)
             {
                 ClientSend.Position(transform.position, Head.transform.rotation, transform.rotation);
             }
             else
             {
-                ServerSend.DistributeMovement(NetworkSystem.instance.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
+                ServerSend.DistributeMovement(NetworkSystem.INSTANCE.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
             }
 
         }

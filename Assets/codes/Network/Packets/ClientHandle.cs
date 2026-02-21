@@ -1,3 +1,6 @@
+using Assets.codes.items;
+using Cysharp.Threading.Tasks;
+using Steamworks;
 using Steamworks.Data;
 using System;
 using System.Threading.Tasks;
@@ -33,7 +36,7 @@ public class ClientHandle
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
 
-        NetworkSystem.instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
+        NetworkSystem.INSTANCE.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
         Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
 
 
@@ -48,25 +51,25 @@ public class ClientHandle
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
 
-        GameCore.instance.localPlayer.transform.position = pos;
-        GameCore.instance.localPlayer.transform.rotation = rot;
+        GameCore.INSTANCE.Local_Player.transform.position = pos;
+        GameCore.INSTANCE.Local_Player.transform.rotation = rot;
         Debug.Log("Received Initial Pos and Rot");
 
     }
     public static async void InitRoomInfo(Connection c, packet packet)
     {
         int numplayer = packet.Readint();
-        GameClient client = NetworkSystem.instance.client;
+        GameClient client = NetworkSystem.INSTANCE.Client;
         for (int i = 0; i < numplayer; i++)
         {
             ulong steamid = packet.Readulong();
-            NetworkSystem.instance.client.NewPlayer(steamid);
+            NetworkSystem.INSTANCE.Client.NewPlayer(steamid).Forget();
             
 
 
         }
         await Task.Delay(1000);
-        NetworkSystem.instance.initRoom = true;
+        NetworkSystem.INSTANCE.initRoom = true;
 
         ClientSend.ReadyUpdate();
     }
@@ -74,15 +77,14 @@ public class ClientHandle
     {
         ulong playerid = packet.Readulong();
         //int supposeNetworkID = packet.Readint();
-        NetworkSystem.instance.client.NewPlayer(playerid);
+        NetworkSystem.INSTANCE.Client.NewPlayer(playerid).Forget();
 
     }
     public static void PlayerQuit(Connection c, packet packet)
     {
-        GameClient cl = NetworkSystem.instance.client;
+        GameClient cl = NetworkSystem.INSTANCE.Client;
         ulong steamID = packet.Readulong();
-        cl.GetPlayerBySteamID[steamID].Disconnect();
-        cl.GetPlayerBySteamID.Remove(steamID);
+        cl.PlayerQuit(steamID);
     }
 
     public static void ReceivedPlayerMovement(Connection c, packet packet)
@@ -92,7 +94,7 @@ public class ClientHandle
         Vector3 pos = packet.Readvector3();
         Quaternion headrot = packet.Readquaternion();
         Quaternion bodyrot = packet.Readquaternion();
-        NetworkSystem.instance.client.GetPlayerBySteamID[steamID].SetMovement(pos, headrot, bodyrot);
+        NetworkSystem.INSTANCE.PlayerList[steamID].SetMovement(pos, headrot, bodyrot);
     }
 
 
@@ -101,7 +103,7 @@ public class ClientHandle
         ulong NetworkID = packet.Readulong();
         float x = packet.Readfloat();
         float y = packet.Readfloat();
-        NetworkSystem.instance.client.GetPlayerBySteamID[NetworkID].SetAnimation(x, y);
+        NetworkSystem.INSTANCE.PlayerList[NetworkID].SetAnimation(x, y);
     }
 
     public static void DistributeNOInfo(Connection c, packet packet)
@@ -111,9 +113,9 @@ public class ClientHandle
         string uid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        if (NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
+        if (NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.instance.FindNetworkObject[uid].SetMovement(pos, rot);
+            NetworkSystem.INSTANCE.FindNetworkObject[uid].SetMovement(pos, rot);
         }
         else
         {
@@ -130,16 +132,16 @@ public class ClientHandle
         Vector3 spawnLocation = packet.Readvector3();
         Quaternion spawnRot = packet.Readquaternion();
         ulong owner = packet.Readulong();
-        GameCore.instance.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot);
+        GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot).Forget();
     }
 
     public static void DistributeNOactive(Connection c, packet packet)
     {
         string uid = packet.ReadstringUNICODE();    
         bool active = packet.Readbool();
-        if (NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
+        if (NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.instance.FindNetworkObject[uid].gameObject.SetActive(active);
+            NetworkSystem.INSTANCE.FindNetworkObject[uid].gameObject.SetActive(active);
         }
         else
         {
@@ -156,7 +158,7 @@ public class ClientHandle
             string uid = packet.ReadstringUNICODE();
             ulong owner = packet.Readulong();
             string prefabID = packet.ReadstringUNICODE();
-            GameCore.instance.spawnNetworkPrefab(prefabID,owner, uid,Vector3.zero,Quaternion.identity);
+            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,Vector3.zero,Quaternion.identity).Forget();
         }
     }
 
@@ -165,8 +167,8 @@ public class ClientHandle
         ulong whoInteracted = packet.Readulong();
         string decorationUID = packet.ReadstringUNICODE();
 
-        InteractableDecoration decoration = NetworkSystem.instance.FindNetworkObject[decorationUID].GetComponent<InteractableDecoration>();
-        PlayerMain who = NetworkSystem.instance.client.GetPlayerBySteamID[whoInteracted].playerControl;
+        IUsable decoration = NetworkSystem.INSTANCE.FindNetworkObject[decorationUID].GetComponent<IUsable>();
+        PlayerMain who = NetworkSystem.INSTANCE.PlayerList[whoInteracted].playerControl;
         decoration.OnInteract(who);
     }
 }

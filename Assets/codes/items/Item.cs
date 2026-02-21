@@ -59,6 +59,7 @@ public class Item : Selectable //Item is any that is pickable
         }
     }
     private void gotPickedup()
+
     {
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = false;
@@ -81,19 +82,19 @@ public class Item : Selectable //Item is any that is pickable
     {
 
         gotPickedup();
-        GameCore.instance.localPlayer.OnPickUpItem(this);
+        GameCore.INSTANCE.Local_Player.OnPickUpItem(this);
 
         ulong localOwner = 1;
-        if (GameCore.instance != null && GameCore.instance.localNetworkPlayer != null)
+        if (GameCore.INSTANCE != null && GameCore.INSTANCE.Local_NetworkPlayer != null)
         {
-            localOwner = GameCore.instance.localNetworkPlayer.steamID;
+            localOwner = GameCore.INSTANCE.Local_NetworkPlayer.steamID;
         }
 
         netObj.Owner = localOwner;
 
-        if (NetworkSystem.instance != null && NetworkSystem.instance.IsOnline)
+        if (NetworkSystem.INSTANCE != null && NetworkSystem.INSTANCE.IsOnline)
         {
-            if (NetworkSystem.instance.IsServer)
+            if (NetworkSystem.INSTANCE.IsServer)
             {
                 ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
             }
@@ -109,20 +110,20 @@ public class Item : Selectable //Item is any that is pickable
     {
         base.Update();
 
-        if (GameCore.instance != null && GameCore.instance.localPlayer != null && GameCore.instance.localPlayer.holdingItem == this)
+        if (GameCore.INSTANCE != null && GameCore.INSTANCE.Local_Player != null && GameCore.INSTANCE.Local_Player.holdingItem == this)
         {
-            GameCore.instance.localPlayer.HoldingItem(this);
+            GameCore.INSTANCE.Local_Player.HoldingItem(this);
             return;
         }
 
-        if (NetworkSystem.instance == null || !NetworkSystem.instance.IsOnline || netObj == null || GameCore.instance == null || GameCore.instance.localNetworkPlayer == null || GameCore.instance.localPlayer == null)
+        if (NetworkSystem.INSTANCE == null || !NetworkSystem.INSTANCE.IsOnline || netObj == null || GameCore.INSTANCE == null || GameCore.INSTANCE.Local_NetworkPlayer == null || GameCore.INSTANCE.Local_Player == null)
         {
             return;
         }
 
-        if (GameCore.instance.IsLocal(netObj.Owner))
+        if (GameCore.INSTANCE.IsLocal(netObj.Owner))
         {
-            GameCore.instance.localPlayer.HoldingItem(this);
+            GameCore.INSTANCE.Local_Player.HoldingItem(this);
         }
     }
 
@@ -134,9 +135,9 @@ public class Item : Selectable //Item is any that is pickable
 
         gotDropped(dropPosition);
         netObj.Owner = 0;
-        if (NetworkSystem.instance != null && NetworkSystem.instance.IsOnline)
+        if (NetworkSystem.INSTANCE != null && NetworkSystem.INSTANCE.IsOnline)
         {
-            if (NetworkSystem.instance.IsServer)
+            if (NetworkSystem.INSTANCE.IsServer)
             {
                 ServerSend.DistributePickUpItem(netObj.Identifier,0);
             }
@@ -145,7 +146,7 @@ public class Item : Selectable //Item is any that is pickable
                 ClientSend.PickUpItem(netObj.Identifier, 0);
             }
         }
-        GameCore.instance.localPlayer.OnDropItem(this);
+        GameCore.INSTANCE.Local_Player.OnDropItem(this);
 
     }
     public void Drop()

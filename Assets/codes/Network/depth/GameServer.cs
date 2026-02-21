@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Unity.VisualScripting;
+using Cysharp.Threading.Tasks;
 
 public class GameServer : SocketManager
 {
@@ -37,18 +38,19 @@ public class GameServer : SocketManager
 
     public GameServer()
     {
-        this.maxplayer = NetworkSystem.instance.MaxPlayer;
-        //GetSteamID.Add(0, SteamClient.SteamId);
-        onOnline();
+        this.maxplayer = NetworkSystem.INSTANCE.MaxPlayer;
         Debug.Log("Created GameServer Object");
+
     }
-    public void onOnline()
+    public async UniTask<bool> onOnline()
     {
-        NetworkSystem.instance.IsOnline = true;
-        NetworkSystem.instance.IsServer = true;
+        NetworkSystem.INSTANCE.IsOnline = true;
+        NetworkSystem.INSTANCE.IsServer = true;
         ulong steamid = SteamClient.SteamId;
-        NetworkSystem.instance.SpawnPlayer(steamid); //Add the server player to the player list
-        SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        await SpawnConnector();
+        await NetworkSystem.INSTANCE.SpawnPlayer(steamid); //Add the server player to the player list
+        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        return true;
         //SpawnConnector();
 
 
@@ -70,24 +72,25 @@ public class GameServer : SocketManager
     {
         return players[steamid].SendPacket(p);
     }
-    private void ClientConnectionEstablished(ConnectionInfo info)
+    private async UniTask<bool> ClientConnectionEstablished(ConnectionInfo info)
     {
         Debug.Log("Client Connection Established.");
         NetworkListener.Server_OnPlayerJoining?.Invoke(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
-        players[connectedPlayer.steamId].player = NetworkSystem.instance.SpawnPlayer(connectedPlayer.steamId);
-        SpawnSpaceShip(connectedPlayer.steamId);
+        players[connectedPlayer.steamId].player = await NetworkSystem.INSTANCE.SpawnPlayer(connectedPlayer.steamId);
+        await SpawnSpaceShip(connectedPlayer.steamId);
         ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
         //When a player enter the server, send them the room info including all current players including himself;
         ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
         ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+        return true;
     }
     public override async void OnConnected(Connection connection, ConnectionInfo info)
     {
         base.OnConnected(connection, info);
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Connected!");
         await Task.Delay(1000);
-        ClientConnectionEstablished(info);
+        await ClientConnectionEstablished(info);
     }
     public NetworkPlayer GetPlayer(ConnectionInfo info)
     {
@@ -101,18 +104,15 @@ public class GameServer : SocketManager
     //{
     //    return players[GetSteamID[NetworkID]];
     //}
-    public NetworkObject CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null) //Server Only
+    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null) //Server Only
     { //more check added
-        NetworkSystem networkSystem = NetworkSystem.instance;
+        NetworkSystem networkSystem = NetworkSystem.INSTANCE;
         if (networkSystem != null && !networkSystem.IsServer) return null;
         string uid = Guid.NewGuid().ToString();
 
-        NetworkObject nobj = GameCore.instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
-        if (networkSystem != null && networkSystem.server != null)
-        {
-            ServerSend.NewObject(prefabID, uid, pos, rot, owner);
-        }
-
+        NetworkObject nobj = await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
+        ServerSend.NewObject(prefabID, uid, pos, rot, owner);
+        
         return nobj;
 
     }
@@ -122,14 +122,15 @@ public class GameServer : SocketManager
     //    return connector;
 
     //}
-    public Spaceship SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
+    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
-        Spaceship ss = CreateNetworkObject("Spaceship", Vector3.zero, Quaternion.identity, owner).GetComponent<Spaceship>();
+        Spaceship ss = (await CreateNetworkObject("Spaceship", Vector3.zero, Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
         if (decs != null)
         {
             foreach (DecorationSaveData dsd in decs)
             {
-                Decoration obj = GameObject.Instantiate(GameCore.instance.GetDecoration(dsd.DecorationID), ss.transform).GetComponent<Decoration>();
+                GameObject prefab = await GameCore.INSTANCE.GetDecoration(dsd.DecorationID);
+                Decoration obj = GameObject.Instantiate(prefab, ss.transform).GetComponent<Decoration>();
                 obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
 
             }
@@ -141,16 +142,21 @@ public class GameServer : SocketManager
         return ss;
 
     }
-    
-    public Spaceship SpawnSpaceShip(ulong owner) //run by server itself
+    public async UniTask<Connector> SpawnConnector()
     {
-        return SpawnSpaceShip(null, owner);
+        Connector connector = (await CreateNetworkObject("Spaceship_connector", new Vector3(0, 0, 0), Quaternion.identity, 0)).GetComponent<Connector>();
+        GameCore.INSTANCE.Connector = connector;
+        return connector;
+    }
+    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
+    {
+        return await SpawnSpaceShip(null, owner);
     }
     public override void OnConnecting(Connection connection, ConnectionInfo info)
     {
         base.OnConnecting(connection, info);
 
-        if (NetworkSystem.instance.server.GetPlayerCount() < maxplayer)
+        if (GetPlayerCount() < maxplayer)
         {
 
             Debug.Log(new Friend(info.Identity.SteamId).Name + " is connecting");

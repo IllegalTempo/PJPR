@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -12,15 +13,15 @@ using static UnityEngine.Rendering.DebugUI.Table;
 [RequireComponent(typeof(LayerMasks))]
 public class GameCore : MonoBehaviour
 {
-    public static GameCore instance;
+    public static GameCore INSTANCE;
     public LayerMasks Masks;
-    public options option;
-    private const string prefabPath = "Prefabs/";
-    private const string decorationPath = "Prefabs/Decorations/";
-    public Connector connector;
-    public PlayerInputAction control;
+    public options Option;
+    private const string _prefabPath = "Prefabs/";
+    private const string _decorationPath = "Prefabs/Decorations/";
+    public Connector Connector;
+    public PlayerInputAction PlayerControl;
 
-    public Dictionary<string, string> getPrefab = new Dictionary<string, string> //PrefabID, Path
+    public Dictionary<string, string> GetPrefabWithID = new Dictionary<string, string> //PrefabID, Path
     {
         { "TestPrefab","testPrefab" },
         { "Meteorite_Test","Meteorite_Test" },
@@ -28,66 +29,73 @@ public class GameCore : MonoBehaviour
         { "Spaceship","Spaceships/default"},
         { "Spaceship_connector","Spaceships/connector"}
     };
-    public Dictionary<string,string> getDecoration = new Dictionary<string, string> 
+    public Dictionary<string,string> GetDecorationWithID = new Dictionary<string, string> 
     {
         { "TestDecoration","testDecoration" },
     }; 
 
 
     //Local Player Info
-    public PlayerMain localPlayer;
-    public Spaceship localSpaceship;
-    public NetworkPlayerObject localNetworkPlayer;
+    public PlayerMain Local_Player;
+    public Spaceship Local_PlayerSpaceship;
+    public NetworkPlayerObject Local_NetworkPlayer;
     private void Awake()
     {
-
-#if UNITY_EDITOR
-        PlayerPrefs.DeleteAll();
-#endif
-        option = JsonUtility.FromJson<options>(PlayerPrefs.GetString("options", JsonUtility.ToJson(new options())));
-        Masks = GetComponent<LayerMasks>();
-        
+        InitPlayerControl();
         // Convert the serialized list to dictionary
 
-        if (instance == null)
+        if (INSTANCE == null)
         {
-            instance = this;
+            INSTANCE = this;
             DontDestroyOnLoad(this.gameObject);
         }
         else
         {
             Destroy(this.gameObject);
         }
-        control = new PlayerInputAction();
+        
+    }
+
+    private void InitPlayerControl()
+    {
+#if UNITY_EDITOR
+        PlayerPrefs.DeleteAll();
+#endif
+        Option = JsonUtility.FromJson<options>(PlayerPrefs.GetString("options", JsonUtility.ToJson(new options())));
+        PlayerControl = new PlayerInputAction();
         string rebinds = PlayerPrefs.GetString("inputRebinds", string.Empty);
-        control.LoadBindingOverridesFromJson(rebinds);
-        control.Enable();
+        PlayerControl.LoadBindingOverridesFromJson(rebinds);
+        PlayerControl.Enable();
     }
     private void OnApplicationQuit()
     {
-        string rebinds = control.SaveBindingOverridesAsJson();
+        SavePlayerPrefs();
+
+    }
+    private void SavePlayerPrefs()
+    {
+        string rebinds = PlayerControl.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("inputRebinds", rebinds);
-        PlayerPrefs.SetString("options", option.saveAsJSON());
-
+        PlayerPrefs.SetString("options", Option.saveAsJSON());
     }
-    public GameObject GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
+    public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {
-        return Resources.Load<GameObject>(prefabPath + getPrefab[PrefabID]);
-
+        string prefabPath = GetPrefabWithID.ContainsKey(PrefabID) ? _prefabPath + GetPrefabWithID[PrefabID] : throw new PrefabNotFound(PrefabID);
+        ResourceRequest request = Resources.LoadAsync<GameObject>(prefabPath);
+        await request;
+        return request.asset as GameObject;
     }
-    public GameObject GetDecoration(string DecorationID)
+    public async UniTask<GameObject> GetDecoration(string DecorationID)
     {
-        return Resources.Load<GameObject>(decorationPath + getDecoration[DecorationID]);
+        string decPath = GetDecorationWithID.ContainsKey(DecorationID) ? _decorationPath + GetDecorationWithID[DecorationID] : throw new PrefabNotFound(DecorationID);
+        ResourceRequest request = Resources.LoadAsync<GameObject>(decPath);
+        await request;
+        return request.asset as GameObject;
     }
-    public NetworkObject spawnNetworkPrefab(string prefabID,ulong owner,string uid,Vector3 pos,Quaternion rot,Transform parent=null) //run by both server and client 
+    public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID,ulong owner,string uid,Vector3 pos,Quaternion rot,Transform parent=null) //run by both server and client 
     {
-        if (!getPrefab.ContainsKey(prefabID))
-        {
-            Debug.LogError($"CreateNetworkObject failed: prefabID '{prefabID}' not found in GameCore.getPrefab dictionary.");
-            return null;
-        }
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
-        GameObject prefab = GetPrefabObject(prefabID);
+        GameObject prefab = await GetPrefabObject(prefabID);
 
         GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);
         NetworkObject nobj = obj.gameObject.GetComponent<NetworkObject>();
@@ -104,6 +112,6 @@ public class GameCore : MonoBehaviour
         //{
         //    return true;
         //}
-        return id == localNetworkPlayer.steamID;
+        return id == Local_NetworkPlayer.steamID;
     }
 }

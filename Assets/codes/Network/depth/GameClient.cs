@@ -1,21 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 using System;
-using Connection = Steamworks.Data.Connection;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using UnityEngine;
+using static UnityEngine.AdaptivePerformance.Provider.AdaptivePerformanceSubsystemDescriptor;
+using Connection = Steamworks.Data.Connection;
 
 public class GameClient : ConnectionManager
 {
     //public int NetworkID;
     private delegate void PacketHandle(Connection c, packet p);
-    public Dictionary<ulong, NetworkPlayerObject> GetPlayerBySteamID = new Dictionary<ulong, NetworkPlayerObject>();
-    
+
     public GameClient()
     {
-        NetworkSystem.instance.IsServer = false;
+        NetworkSystem.INSTANCE.IsServer = false;
     }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
@@ -31,8 +33,8 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.DistributeInitialPos, ClientHandle.DistributeInitialPos }
             ,
             { (int)packets.ServerPackets.NewObject, ClientHandle.NewObject }
-        
-            
+
+
             ,
             { (int)packets.ServerPackets.DistributeNOactive, ClientHandle.DistributeNOactive }
         ,
@@ -41,14 +43,25 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.DistributeDecorationInteract, ClientHandle.DistributeDecorationInteract }
         };
 
-    public void NewPlayer(ulong who)
+    public async UniTask NewPlayer(ulong who)
     {
         Debug.Log($"Spawning Player {who} and spaceship");
-        GetPlayerBySteamID.Add(who, NetworkSystem.instance.SpawnPlayer(who));
+        NetworkPlayerObject player = await NetworkSystem.INSTANCE.SpawnPlayer(who);
+    }
+    public void PlayerQuit(ulong who)
+    {
+        Debug.Log($"Player {who} Quit the game");
+        if(!NetworkSystem.INSTANCE.PlayerList.ContainsKey(who))
+        {
+            Debug.Log($"Player {who} not found in GetPlayerBySteamID");
+            return;
+        }
+        NetworkSystem.INSTANCE.PlayerList[who].Disconnect();
+        NetworkSystem.INSTANCE.PlayerList.Remove(who);
     }
     public bool IsLocal(ulong id)
     {
-        return id == NetworkSystem.instance.PlayerId;
+        return id == NetworkSystem.INSTANCE.PlayerId;
     }
     public Connection GetServer()
     {
@@ -71,12 +84,16 @@ public class GameClient : ConnectionManager
     public override void OnDisconnected(ConnectionInfo info)
     {
         base.OnDisconnected(info);
-        Debug.Log("Disconnected from " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
-        if (NetworkSystem.instance.CreateLobbyOnStart)
-        {
-            NetworkSystem.instance.CreateGameLobby();
+        Disconnect(info).Forget();
 
-        }
+
+
+    }
+    private async UniTask Disconnect(ConnectionInfo info)
+    {
+        Debug.Log("Disconnected from " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
+
+        await NetworkSystem.INSTANCE.CreateLobby();
 
     }
     public override unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
@@ -91,10 +108,11 @@ public class GameClient : ConnectionManager
         {
             int packetid = packet.Readint();
             PacketHandle handle;
-            if (ClientPacketHandles.TryGetValue(packetid,out handle))
+            if (ClientPacketHandles.TryGetValue(packetid, out handle))
             {
                 handle(Connection, packet);
-            } else
+            }
+            else
             {
                 Debug.Log($"Packet ID: {packetid} not found");
             }

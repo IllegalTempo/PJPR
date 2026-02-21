@@ -19,10 +19,10 @@ public class Spaceship : NetworkObject
     public override void Init(string uid, ulong Owner, string PrefabID)
     {
         base.Init(uid, Owner, PrefabID);
-        owner = NetworkSystem.instance.PlayerList[Owner];
+        owner = NetworkSystem.INSTANCE.PlayerList[Owner];
         owner.spaceship = this;
-        string name = GameCore.instance.connector.GetNewSpaceShipName() + "_connect";
-        dockTarget = GameCore.instance.connector.connect(this);
+        string name = GameCore.INSTANCE.Connector.GetNewSpaceShipName() + "_connect";
+        dockTarget = GameCore.INSTANCE.Connector.connect(this);
 
 
 
@@ -43,7 +43,7 @@ public class Spaceship : NetworkObject
     public void Connect()
     {
         rb.linearVelocity = Vector3.zero;
-        Connector connector = GameCore.instance.connector;
+        Connector connector = GameCore.INSTANCE.Connector;
         transform.SetParent(connector.transform,true);
         Sync_Position = false;
         Sync_Rotation = false;

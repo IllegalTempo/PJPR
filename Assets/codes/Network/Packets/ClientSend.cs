@@ -8,8 +8,22 @@ using static packets;
 public class ClientSend
 {
     //Area for client Packets!
-    
 
+
+    private static Result SendToServer(packet p)
+    {
+        Connection server = NetworkSystem.INSTANCE.GetServerConnection();
+
+        // Fix: Check for default value instead of null for structs
+        if (server.Equals(default(Connection)))
+        {
+            return Result.ConnectFailed;
+        }
+        else
+        {
+            return PacketSend.SendPacketToConnection(server, p);
+        }
+    }
     public static Result AnimationState(float movementx, float movementy)
     {
         using (packet p = new packet((int)ClientPackets.SendAnimationState))
@@ -88,20 +102,6 @@ public class ClientSend
             p.Write(whopicked);
 
             return SendToServer(p);
-        }
-    }
-    private static Result SendToServer(packet p)
-    {
-        Connection server = NetworkSystem.instance.client.GetServer();
-
-        // Fix: Check for default value instead of null for structs
-        if (server.Equals(default(Connection)))
-        {
-            return Result.ConnectFailed;
-        }
-        else
-        {
-            return PacketSend.SendPacketToConnection(NetworkSystem.instance.client.GetServer(), p);
         }
     }
 

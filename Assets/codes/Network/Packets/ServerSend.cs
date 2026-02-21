@@ -77,8 +77,8 @@ public class ServerSend
         using (packet p = new packet((int)ServerPackets.RoomInfoOnPlayerEnterRoom))
         {
             p.Write(NumPlayer);
-            p.Write(NetworkSystem.instance.PlayerId);
-            foreach (ulong steamid in NetworkSystem.instance.server.players.Keys)
+            p.Write(NetworkSystem.INSTANCE.PlayerId);
+            foreach (ulong steamid in NetworkSystem.INSTANCE.Server.players.Keys)
             {
                 p.Write(steamid); //given information (SteamID)
             }

@@ -1,16 +1,15 @@
+using Assets.codes.items;
 using UnityEngine;
 
-public class DecorationLight : InteractableDecoration
+public class DecorationLight : Decoration,IUsable
 {
     [Header("Light Target")]
     [SerializeField] private Light targetLight;
 
 
 
-    public override void OnInteract(PlayerMain who)
+    public void OnInteract(PlayerMain who)
     {
-        base.OnInteract(who);
-
         if (targetLight != null)
         {
             targetLight.enabled = !targetLight.enabled;

@@ -53,7 +53,7 @@ public class PlayerMain : MonoBehaviour
     private void Initialize_local()
     {
         cam.SetActive(true);
-        PlayerInputAction control = GameCore.instance.control;
+        PlayerInputAction control = GameCore.INSTANCE.PlayerControl;
 
         control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
@@ -72,7 +72,7 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnDisable()
     {
-        PlayerInputAction control = GameCore.instance.control;
+        PlayerInputAction control = GameCore.INSTANCE.PlayerControl;
 
         if (control != null)
         {
@@ -87,30 +87,28 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnInteract()
     {
-        if (holdingItem != null && holdingItem is usableItem usi)
-        {
-            usi.OnInteract();
-        }
-        if (seenObject is InteractableDecoration sid)
-        {
-            //todo add send interact packet
+        IUsable usable = holdingItem as IUsable
+                 ?? seenObject as IUsable;
 
-            if (NetworkSystem.instance == null || !NetworkSystem.instance.IsOnline)
+        if (usable != null)
+        {
+            usable.OnInteract(this);
+            if (NetworkSystem.INSTANCE == null || !NetworkSystem.INSTANCE.IsOnline) return;
+            NetworkObject netObj = (usable as MonoBehaviour).GetComponent<NetworkObject>();
+            if (netObj == null) return;
+            if (NetworkSystem.INSTANCE.IsServer)
             {
-                sid.OnInteract(this);
-                return;
-            }
+                ServerSend.DistributeDecorationInteract(networkinfo.steamID, netObj.Identifier);
 
-            if (NetworkSystem.instance.IsServer)
-            {
-                sid.OnInteract(this);
-                ServerSend.DistributeDecorationInteract(networkinfo.steamID, sid.netObj.Identifier);
             }
             else
             {
-                ClientSend.SendDecorationInteract(sid.netObj.Identifier);
+                ClientSend.SendDecorationInteract(netObj.Identifier);
+
             }
         }
+        
+        
     }
     private void Initialize_remote()
     {
@@ -174,7 +172,7 @@ public class PlayerMain : MonoBehaviour
     }
     private void Look()
     {
-        float sens = GameCore.instance.option.mouseSensitivity;
+        float sens = GameCore.INSTANCE.Option.mouseSensitivity;
         yaw += lookSpeed * lookinput.x * sens;
         pitch -= lookSpeed * lookinput.y * sens;
         pitch = Mathf.Clamp(pitch, -90f, 90f);
@@ -262,7 +260,7 @@ public class PlayerMain : MonoBehaviour
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 100f, GameCore.instance.Masks.SelectableItems))
+        if (Physics.Raycast(ray, out hit, 100f, GameCore.INSTANCE.Masks.SelectableItems))
         {
 
             seenObject = hit.collider.GetComponent<Selectable>();
@@ -287,14 +285,14 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == GameCore.instance.Masks.MoveWith)
+        if (collision.gameObject.layer == GameCore.INSTANCE.Masks.MoveWith)
         {
             transform.SetParent(collision.transform, true);
         }
     }
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == GameCore.instance.Masks.MoveWith)
+        if (collision.gameObject.layer == GameCore.INSTANCE.Masks.MoveWith)
         {
             transform.SetParent(null, true);
         }

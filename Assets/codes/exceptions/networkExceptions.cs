@@ -6,3 +6,17 @@ public class NO_Not_Found: System.Exception
 
     }
 }
+public class InvalidLobbyCreated : System.Exception
+{
+    public InvalidLobbyCreated() : base($"Invalid Lobby Created")
+    {
+
+    }
+}
+public class ServerSocketInitializationFailed : System.Exception
+{
+    public ServerSocketInitializationFailed() : base($"Server Socket Failed to initialize")
+    {
+
+    }
+}

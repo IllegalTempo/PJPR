@@ -23,12 +23,12 @@ public class PacketSend
     //}
     public static Result BroadcastPacket(ulong excludeid, packet p)
     {
-        if (NetworkSystem.instance == null || NetworkSystem.instance.server == null || NetworkSystem.instance.server.players == null)
+        if (NetworkSystem.INSTANCE == null || NetworkSystem.INSTANCE.Server == null || NetworkSystem.INSTANCE.Server.players == null)
         {
             return Result.Disabled;
         }
 
-        foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
+        foreach (NetworkPlayer pl in NetworkSystem.INSTANCE.Server.players.Values)
         {
             if (pl == null)
             {
@@ -50,13 +50,13 @@ public class PacketSend
     }
     public static Result BroadcastPacketToReady(packet p,ulong excludeid = 0 )
     {
-        if (NetworkSystem.instance == null || NetworkSystem.instance.server == null || NetworkSystem.instance.server.players == null)
+        if (NetworkSystem.INSTANCE == null || NetworkSystem.INSTANCE.Server == null || NetworkSystem.INSTANCE.Server.players == null)
         {
             return Result.Disabled;
         }
 
         //int playercount = NetworkSystem.instance.server.GetPlayerCount();
-        foreach (NetworkPlayer pl in NetworkSystem.instance.server.players.Values)
+        foreach (NetworkPlayer pl in NetworkSystem.INSTANCE.Server.players.Values)
         {
             if (pl == null)
             {

@@ -24,7 +24,7 @@ public class NetworkObject : MonoBehaviour
         {
             InScene = true;
             Identifier = gameObject.name;
-            NetworkSystem.instance.FindNetworkObject.Add(Identifier, this);
+            NetworkSystem.INSTANCE.FindNetworkObject.Add(Identifier, this);
 
         }
 
@@ -32,7 +32,7 @@ public class NetworkObject : MonoBehaviour
     public void UpdateActive(bool status)
     {
         gameObject.SetActive(status);
-        if (NetworkSystem.instance.IsServer)
+        if (NetworkSystem.INSTANCE.IsServer)
         {
             ServerSend.DistributeNOactive(Identifier, status);
         }
@@ -45,9 +45,9 @@ public class NetworkObject : MonoBehaviour
         Identifier = uid;
         Owner = owner;
         this.PrefabID = PrefabID;
-        if (!NetworkSystem.instance.FindNetworkObject.ContainsKey(uid))
+        if (!NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.instance.FindNetworkObject.Add(uid, this);
+            NetworkSystem.INSTANCE.FindNetworkObject.Add(uid, this);
         }
         else
         {
@@ -59,18 +59,18 @@ public class NetworkObject : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (NetworkSystem.instance == null)
+        if (NetworkSystem.INSTANCE == null)
         {
             return;
         }
 
-        if (NetworkSystem.instance.IsServer)
+        if (NetworkSystem.INSTANCE.IsServer)
         {
             ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
         }
         else
         {
-            if (GameCore.instance != null && GameCore.instance.IsLocal(Owner))
+            if (GameCore.INSTANCE != null && GameCore.INSTANCE.IsLocal(Owner))
             {
                 ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
 
@@ -87,7 +87,7 @@ public class NetworkObject : MonoBehaviour
 
     private void Update()
     {
-        if (NetworkSystem.instance.IsServer) return;
+        if (NetworkSystem.INSTANCE.IsServer) return;
         if (Sync_Position)
         {
             transform.position = Vector3.Lerp(transform.position, NetworkPos, Time.deltaTime * 10f);
