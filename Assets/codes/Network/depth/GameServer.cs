@@ -49,7 +49,7 @@ public class GameServer : SocketManager
         ulong steamid = SteamClient.SteamId;
         NetworkSystem.instance.SpawnPlayer(steamid); //Add the server player to the player list
         SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
-        SpawnConnector();
+        //SpawnConnector();
 
 
 
@@ -116,12 +116,12 @@ public class GameServer : SocketManager
         return nobj;
 
     }
-    public Connector SpawnConnector()
-    {
-        Connector connector = CreateNetworkObject("Spaceship_connector", new Vector3(10, 0, 10), Quaternion.identity, 0).GetComponent<Connector>();
-        return connector;
+    //public Connector SpawnConnector()
+    //{
+    //    Connector connector = CreateNetworkObject("Spaceship_connector", new Vector3(10, 0, 10), Quaternion.identity, 0).GetComponent<Connector>();
+    //    return connector;
 
-    }
+    //}
     public Spaceship SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
         Spaceship ss = CreateNetworkObject("Spaceship", Vector3.zero, Quaternion.identity, owner).GetComponent<Spaceship>();

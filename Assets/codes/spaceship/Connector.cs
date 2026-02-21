@@ -1,11 +1,22 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class Connector : MonoBehaviour
+public class Connector : NetworkObject
 {
-    public Spaceship[] ConnectedShips = new Spaceship[5];
-    private void Start()
+    private List<SpaceshipPart> connectedParts = new List<SpaceshipPart>();
+    [SerializeField]
+    private Animator animator;
+    [SerializeField]
+    private Transform[] dockpos;
+    public string GetNewSpaceShipName()
     {
-        GameCore.instance.connector = this;
+        return "ss" + (connectedParts.Count +1);
+    }
+    public Vector3 connect(Spaceship s)
+    {
+        connectedParts.Add(s.GetComponent<SpaceshipPart>());
+        return dockpos[connectedParts.Count - 1].position;
     }
 }

@@ -3,20 +3,19 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMain : MonoBehaviour
 {
     public float moveSpeed = 0.5f;
     public float lookSpeed = 2f;
     public float maxSpeed = 3f; // Maximum allowed speed
-    public float jumpHeight = 1.6f;
-    public float gravity = -25f;
-    public float groundedStickVelocity = -2f;
+    public float jumpForce = 8f;
+    public float groundCheckDistance = 0.3f;
+    public LayerMask groundMask;
 
     private float yaw = 0f;
     private float pitch = 0f;
-    private float verticalVelocity = 0f;
-    private CharacterController controller;
+    private Rigidbody rb;
     private Vector3 movement = Vector3.zero;
     private Vector2 moveinput = Vector2.zero;
     private Vector2 lookinput = Vector2.zero;
@@ -37,7 +36,9 @@ public class PlayerMain : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        controller = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         if (networkinfo.IsLocal)
         {
             Initialize_local();
@@ -90,7 +91,7 @@ public class PlayerMain : MonoBehaviour
         {
             usi.OnInteract();
         }
-        if(seenObject is InteractableDecoration sid)
+        if (seenObject is InteractableDecoration sid)
         {
             //todo add send interact packet
 
@@ -138,21 +139,17 @@ public class PlayerMain : MonoBehaviour
         item.transform.rotation = cam.transform.rotation;
 
     }
+
+    private bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
+    }
+
     private void Jump()
     {
-        bool grounded = controller.isGrounded;
-        if (grounded && verticalVelocity < 0f)
-        {
-            verticalVelocity = groundedStickVelocity;
-        }
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
 
-
-        verticalVelocity += gravity * Time.deltaTime;
-        if (grounded)
-        {
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-
-        }
     }
     private void Move()
     {
@@ -165,13 +162,12 @@ public class PlayerMain : MonoBehaviour
             move.Normalize();
         }
 
-        Vector3 horizontal = move * moveSpeed * maxSpeed;
-        movement = horizontal;
+        Vector3 targetVelocity = move * moveSpeed * maxSpeed;
+        movement = targetVelocity;
 
-        Vector3 velocity = horizontal + (Vector3.up * gravity);
-        controller.Move(velocity * Time.deltaTime);
+        rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
 
-        if (horizontal.sqrMagnitude <= 0.0001f)
+        if (targetVelocity.sqrMagnitude <= 0.0001f)
         {
             movement = Vector3.zero;
         }
@@ -273,9 +269,10 @@ public class PlayerMain : MonoBehaviour
             if (seenObject == null) return;
             seenObject.LookedAt = true;
 
-        } else
+        }
+        else
         {
-            seenObject= null;
+            seenObject = null;
         }
 
 
@@ -288,6 +285,19 @@ public class PlayerMain : MonoBehaviour
         }
 
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == GameCore.instance.Masks.MoveWith)
+        {
+            transform.SetParent(collision.transform, true);
+        }
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.layer == GameCore.instance.Masks.MoveWith)
+        {
+            transform.SetParent(null, true);
+        }
+    }
 
-    
 }
