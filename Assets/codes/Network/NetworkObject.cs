@@ -16,7 +16,7 @@ public class NetworkObject : MonoBehaviour
     [Header("Network Setting")]
     public bool Sync_Transform = true;
 
-    public ulong Owner = 0; //owner = 0 is no owner
+    public ulong Owner = 0; //owner = 0 -> Server Authority
     public bool InScene = false;
     private bool init = false;
     private void Start()

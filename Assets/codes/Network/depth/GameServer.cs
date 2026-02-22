@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 using System;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
-using Cysharp.Threading.Tasks;
+using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class GameServer : SocketManager
 {
@@ -125,6 +126,8 @@ public class GameServer : SocketManager
     public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
         Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0,5,0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
+        ss.OwnerPlayer = NetworkSystem.INSTANCE.PlayerList[owner];
+        ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
         {
             foreach (DecorationSaveData dsd in decs)
