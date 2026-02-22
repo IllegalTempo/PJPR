@@ -73,7 +73,7 @@ public class ServerSend
         }
         ;
     }
-    public static Result InitRoomInfo(NetworkPlayer target, int NumPlayer)
+    public static Result SyncPlayer(NetworkPlayer target, int NumPlayer)
     {
         using (packet p = new packet((int)ServerPackets.RoomInfoOnPlayerEnterRoom))
         {
@@ -117,19 +117,6 @@ public class ServerSend
             p.WriteUNICODE(itemid);
             p.Write(PickedUpBy);
             return PacketSend.BroadcastPacket(p);
-        }
-    }
-
-
-    public static Result DistributeInitialPos(NetworkPlayer target, Vector3 pos, Quaternion Rot)
-    {
-        using (packet p = new packet((int)ServerPackets.DistributeInitialPos))
-        {
-
-
-            p.Write(pos);
-            p.Write(Rot);
-            return target.SendPacket(p);
         }
     }
 

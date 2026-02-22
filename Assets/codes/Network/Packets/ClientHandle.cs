@@ -10,6 +10,12 @@ using UnityEngine;
 
 public class ClientHandle
 {
+    public static void UpdateReadyState(ReadyState state)
+    {
+        int readyState = (int)state;
+        NetworkSystem.INSTANCE.initState = readyState;
+        ClientSend.SendReadyState(readyState);
+    }
     public static async void test(Connection c, packet packet)
     {
         ulong NetworkID = packet.Readulong();
@@ -42,22 +48,7 @@ public class ClientHandle
 
 
     }
-
-
-
-    public static void DistributeInitialPos(Connection c, packet packet)
-    {
-
-
-        Vector3 pos = packet.Readvector3();
-        Quaternion rot = packet.Readquaternion();
-
-        GameCore.INSTANCE.Local_Player.transform.position = pos;
-        GameCore.INSTANCE.Local_Player.transform.rotation = rot;
-        Debug.Log("Received Initial Pos and Rot");
-
-    }
-    public static async void InitRoomInfo(Connection c, packet packet)
+    public static async void SyncPlayer(Connection c, packet packet)
     {
         int numplayer = packet.Readint();
         GameClient client = NetworkSystem.INSTANCE.Client;
@@ -65,14 +56,11 @@ public class ClientHandle
         {
             ulong steamid = packet.Readulong();
             NetworkSystem.INSTANCE.Client.NewPlayer(steamid).Forget();
-            
-
-
         }
         await Task.Delay(1000);
-        NetworkSystem.INSTANCE.initRoom = true;
+        UpdateReadyState(ReadyState.SyncPlayer);
 
-        
+
     }
     public static void NewPlayerJoin(Connection c, packet packet)
     {
@@ -164,7 +152,8 @@ public class ClientHandle
             Quaternion spawnRot = packet.Readquaternion();
             await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot);
         }
-        ClientSend.ReadyUpdate();
+        UpdateReadyState(ReadyState.SyncNetworkObjects);
+
     }
 
     public static void DistributeDecorationInteract(Connection c, packet packet)

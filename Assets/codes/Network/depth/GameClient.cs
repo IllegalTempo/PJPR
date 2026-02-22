@@ -23,15 +23,14 @@ public class GameClient : ConnectionManager
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
         {
             { (int)packets.ServerPackets.Test_Packet, ClientHandle.test },
-            { (int)packets.ServerPackets.RoomInfoOnPlayerEnterRoom, ClientHandle.InitRoomInfo },
+            { (int)packets.ServerPackets.RoomInfoOnPlayerEnterRoom, ClientHandle.SyncPlayer },
             { (int)packets.ServerPackets.UpdatePlayerEnterRoomForExistingPlayer, ClientHandle.NewPlayerJoin },
             { (int)packets.ServerPackets.PlayerQuit, ClientHandle.PlayerQuit },
             { (int)packets.ServerPackets.DistributeMovement, ClientHandle.ReceivedPlayerMovement },
             { (int)packets.ServerPackets.DistributeAnimation, ClientHandle.ReceivedPlayerAnimation },
             { (int)packets.ServerPackets.DistributeNOInfo, ClientHandle.DistributeNOInfo },
             { (int)packets.ServerPackets.DistributePickUpItem, ClientHandle.DistributePickUpItem },
-            { (int)packets.ServerPackets.DistributeInitialPos, ClientHandle.DistributeInitialPos }
-            ,
+            
             { (int)packets.ServerPackets.NewObject, ClientHandle.NewObject }
 
 

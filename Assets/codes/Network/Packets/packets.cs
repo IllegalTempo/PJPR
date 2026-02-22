@@ -18,8 +18,6 @@ public class packets
         DistributeAnimation = 5,
         DistributeNOInfo = 6,
         DistributePickUpItem = 7,
-        DistributeInitialPos = 9
-    ,
         NewObject = 10
     ,
         DistributeNOactive = 11
@@ -32,12 +30,11 @@ public class packets
     {
         Test_Packet = 0,
         SendPosition = 1,
-        Ready = 2,
         SendAnimationState = 3,
         SendNOInfo = 4,
-        PickUpItem = 5
-    ,
-        SendDecorationInteract = 6
+        PickUpItem = 5,
+        SendDecorationInteract = 6,
+        SendReadyState = 7
     };
 }
 

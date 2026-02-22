@@ -48,20 +48,6 @@ public class ClientSend
         }
         ;
     }
-
-    public static Result ReadyUpdate()
-    {
-        Debug.Log("Send Ready");
-        using (packet p = new packet((int)ClientPackets.Ready))
-        {
-            p.Write(true);
-
-            return SendToServer(p);
-
-
-        }
-        ;
-    }
     public static Result Position(Vector3 pos, Quaternion cameraRotation, Quaternion BodyRotation)
     {
         using (packet p = new packet((int)ClientPackets.SendPosition))
@@ -111,6 +97,15 @@ public class ClientSend
         {
             p.WriteUNICODE(decorationUID);
             
+            return SendToServer(p);
+        }
+    }
+
+    public static Result SendReadyState(int state)
+    {
+        using (packet p = new packet((int)ClientPackets.SendReadyState))
+        {
+            p.Write(state);
             return SendToServer(p);
         }
     }

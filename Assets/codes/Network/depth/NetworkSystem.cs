@@ -27,13 +27,12 @@ public class NetworkSystem : MonoBehaviour
     //All player list
     public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
     public ulong PlayerId;
-
-    public bool initRoom = false;//Current Lobby player is in, no matter server or client
+    public int initState = 0;
     public Lobby CurrentLobby;// Start is called before the first frame update
     private GameServer _server;
     private GameClient _client;
     private bool _destroyed = false;
-
+    public const float TimeoutSeconds = 10f;
     public GameServer Server => _server;
     public GameClient Client => _client;
     public int MaxPlayer => _maxPlayer;
@@ -252,7 +251,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private void ResetScene()
     {
-        initRoom = false;
+        initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
         FindNetworkObject
     .Where(kvp => kvp.Value && !kvp.Value.InScene)

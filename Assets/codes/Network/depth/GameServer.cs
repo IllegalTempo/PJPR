@@ -9,7 +9,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
+using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
+using static UnityEngine.AdaptivePerformance.Provider.AdaptivePerformanceSubsystemDescriptor;
 using static UnityEngine.UI.GridLayoutGroup;
 
 public class GameServer : SocketManager
@@ -20,19 +22,18 @@ public class GameServer : SocketManager
     private delegate void PacketHandle(NetworkPlayer n, packet p);
 
 
-
-
     private Dictionary<int, PacketHandle> ServerPacketHandles = new Dictionary<int, PacketHandle>()
         {
             { (int)packets.ClientPackets.Test_Packet,ServerHandle.test },
             { (int)packets.ClientPackets.SendPosition,ServerHandle.PosUpdate},
             { (int)packets.ClientPackets.SendAnimationState,ServerHandle.AnimationState},
-            { (int)packets.ClientPackets.Ready,ServerHandle.ReadyUpdate},
             { (int)packets.ClientPackets.SendNOInfo, ServerHandle.SendNOInfo },
             { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
 
             ,
             { (int)packets.ClientPackets.SendDecorationInteract, ServerHandle.SendDecorationInteract }
+        ,
+            { (int)packets.ClientPackets.SendReadyState, ServerHandle.SendReadyState }
         };
 
 
@@ -48,7 +49,6 @@ public class GameServer : SocketManager
         NetworkSystem.INSTANCE.IsOnline = true;
         NetworkSystem.INSTANCE.IsServer = true;
         ulong steamid = SteamClient.SteamId;
-        await SpawnConnector();
         await NetworkSystem.INSTANCE.SpawnPlayer(steamid); //Add the server player to the player list
         await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
         return true;
@@ -76,15 +76,118 @@ public class GameServer : SocketManager
     private async UniTask<bool> ClientConnectionEstablished(ConnectionInfo info)
     {
         Debug.Log("Client Connection Established.");
-        NetworkListener.Server_OnPlayerJoining?.Invoke(info);
+        NetworkListener.RaisePlayerJoining(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
-        players[connectedPlayer.steamId].player = await NetworkSystem.INSTANCE.SpawnPlayer(connectedPlayer.steamId);
-        await SpawnSpaceShip(connectedPlayer.steamId);
-        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
-        //When a player enter the server, send them the room info including all current players including himself;
-        ServerSend.InitRoomInfo(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
+
+        await InstantiatePlayerToServer(info);
+        bool success = await SyncPlayer(connectedPlayer);
         ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+
+        return success;
+    }
+    private async UniTask InstantiatePlayerToServer(ConnectionInfo info)
+    {
+        ulong steamid = info.Identity.SteamId;
+        players[steamid].player = await NetworkSystem.INSTANCE.SpawnPlayer(steamid);
+        await SpawnSpaceShip(steamid);
+        Debug.Log($"Player {steamid} instantiated on server.");
+    }
+    private async UniTask<bool> SyncPlayer(NetworkPlayer connectedPlayer)
+    {
+
+        UniTaskCompletionSource player_spawned = new UniTaskCompletionSource();
+
+        bool testPass = await WaitForTestSuccess(connectedPlayer);
+        if (testPass)
+        {
+            Debug.Log($"Player {connectedPlayer.steamId} passed the network test.");
+
+        }
+        else
+        {
+            Debug.Log($"Player {connectedPlayer.steamId} failed the network test. Disconnecting...");
+            connectedPlayer.connection.Close();
+            return false;
+        }
+
+        ServerSend.SyncPlayer(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
+        bool syncplayer = await WaitForReadyState(connectedPlayer, (int)ReadyState.SyncPlayer);
+        if (syncplayer)
+        {
+            Debug.Log($"Player {connectedPlayer.steamId} is ready to receive player data.");
+        }
+        else
+        {
+            Debug.Log($"Player {connectedPlayer.steamId} failed to sync player data. Disconnecting...");
+            connectedPlayer.connection.Close();
+            return false;
+        }
+        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.INSTANCE.FindNetworkObject.Values.ToArray()); //Send all network objects to the one who connects to the server, with room info
+
         return true;
+    }
+    private async UniTask<bool> WaitForTestSuccess(NetworkPlayer connectedPlayer)
+    {
+        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
+
+        var network_test_pass = new UniTaskCompletionSource();
+        NetworkListener.Server_OnPlayerJoinSuccessful += onCallback;
+
+
+        void onCallback(NetworkPlayer pl)
+        {
+            if (connectedPlayer != pl) return;
+            NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
+            network_test_pass.TrySetResult();
+
+        }
+        try
+        {
+            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TimeoutSeconds));
+            return true;// Wait for the player to respond to the test packet, with a timeout of 5 seconds
+        }
+        catch (TimeoutException)
+        {
+            return false;
+
+        }
+        finally
+        {
+            NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
+
+        }
+
+    }
+    private async UniTask<bool> WaitForReadyState(NetworkPlayer connectedPlayer,int readystate)
+    {
+        var network_test_pass = new UniTaskCompletionSource();
+        NetworkListener.Server_ReadyStateReceived += onCallback;
+
+
+        void onCallback(NetworkPlayer pl,int state)
+        {
+            if (connectedPlayer != pl || readystate != state) return;
+
+            NetworkListener.Server_ReadyStateReceived -= onCallback;
+            network_test_pass.TrySetResult();
+
+        }
+        try
+        {
+            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TimeoutSeconds));
+            return true;// Wait for the player to respond to the test packet, with a timeout of 5 seconds
+        }
+        catch (TimeoutException)
+        {
+            return false;
+
+        }
+        finally
+        {
+            NetworkListener.Server_ReadyStateReceived -= onCallback;
+
+        }
+
     }
     public override async void OnConnected(Connection connection, ConnectionInfo info)
     {
@@ -105,7 +208,7 @@ public class GameServer : SocketManager
     //{
     //    return players[GetSteamID[NetworkID]];
     //}
-    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null) //Server Only
+    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
     { //more check added
         NetworkSystem networkSystem = NetworkSystem.INSTANCE;
         if (networkSystem != null && !networkSystem.IsServer) return null;
@@ -113,7 +216,7 @@ public class GameServer : SocketManager
 
         NetworkObject nobj = await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
         ServerSend.NewObject(prefabID, uid, pos, rot, owner);
-        
+
         return nobj;
 
     }
@@ -125,7 +228,7 @@ public class GameServer : SocketManager
     //}
     public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
-        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0,5,0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
+        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
         ss.OwnerPlayer = NetworkSystem.INSTANCE.PlayerList[owner];
         ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
@@ -144,12 +247,6 @@ public class GameServer : SocketManager
         }
         return ss;
 
-    }
-    public async UniTask<Connector> SpawnConnector()
-    {
-        Connector connector = (await CreateNetworkObject("Spaceship_connector", new Vector3(0, 0, 0), Quaternion.identity, 0)).GetComponent<Connector>();
-        GameCore.INSTANCE.Connector = connector;
-        return connector;
     }
     public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
     {

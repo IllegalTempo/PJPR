@@ -447,8 +447,7 @@ MonoBehaviour:
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Position: 1
-  Sync_Rotation: 1
+  Sync_Transform: 1
   Owner: 0
   InScene: 1
 --- !u!1 &330585543
@@ -660,8 +659,7 @@ MonoBehaviour:
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Position: 1
-  Sync_Rotation: 1
+  Sync_Transform: 1
   Owner: 0
   InScene: 1
 --- !u!54 &332918752
@@ -1043,7 +1041,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameCore
   Masks: {fileID: 516030513}
-  Connector: {fileID: 0}
+  Connector: {fileID: 938007592}
   Local_Player: {fileID: 0}
   Local_PlayerSpaceship: {fileID: 0}
   Local_NetworkPlayer: {fileID: 0}
@@ -1159,6 +1157,74 @@ Transform:
   - {fileID: 1209669303}
   m_Father: {fileID: 1330499431}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &938007592 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8736092739982952983, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+  m_PrefabInstance: {fileID: 1185744477}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d43692584734f594db64e1daefa9bd1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Connector
+--- !u!1001 &1185744477
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.03245
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3.49309
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9029014947728806352, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Name
+      value: connector
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
 --- !u!1 &1209669302
 GameObject:
   m_ObjectHideFlags: 0
@@ -1389,8 +1455,7 @@ MonoBehaviour:
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Position: 1
-  Sync_Rotation: 1
+  Sync_Transform: 1
   Owner: 0
   InScene: 1
 --- !u!65 &1212190687
@@ -1759,7 +1824,7 @@ MonoBehaviour:
   IsServer: 1
   FindNetworkObjectKey: []
   PlayerId: 0
-  initRoom: 0
+  initState: 0
 --- !u!1001 &5168017986115501178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1873,3 +1938,4 @@ SceneRoots:
   - {fileID: 137954285}
   - {fileID: 479126816}
   - {fileID: 5168017986115501178}
+  - {fileID: 1185744477}

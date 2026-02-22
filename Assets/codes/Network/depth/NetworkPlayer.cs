@@ -7,7 +7,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
-
+public enum ReadyState
+{
+    NotReady,
+    SpawnConnector,
+    SyncPlayer,
+    SyncNetworkObjects,
+}
 public class NetworkPlayer
 {
     public Connection connection;
@@ -16,7 +22,7 @@ public class NetworkPlayer
     //public int NetworkID;
     public bool IsLocal;
     public NetworkPlayerObject player;
-    public bool init = false;
+    public int ReadyState = 0;
     public NetworkPlayer(SteamId steamid
         //,int NetworkID
         ,Connection connection)
@@ -39,11 +45,7 @@ public class NetworkPlayer
     {
         return SendData(p.GetPacketData());
     }
-    public void onReady(bool ready) //when Init Room is done, (Player is spawned)
-    {
-        if (!ready) return;
-        init = ready;
-        ServerSend.SyncNetworkObjects(this, NetworkSystem.INSTANCE.FindNetworkObject.Values.Where(x=>!x.InScene).ToArray()); //TODO: If array too long, split into multiple packets
+    //ServerSend.SyncNetworkObjects(this, NetworkSystem.INSTANCE.FindNetworkObject.Values.Where(x=>!x.InScene).ToArray()); //TODO: If array too long, split into multiple packets
 
-    }
+    
 }

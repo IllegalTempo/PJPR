@@ -36,7 +36,7 @@ public class ServerHandle
         {
             Debug.Log($"{clienttime} Confirmed {p.SteamName}, successfully connected, delay:{(DateTime.UtcNow.Ticks - clienttime) / 10000}ms");
             //trigger listeners
-            NetworkListener.Server_OnPlayerJoinSuccessful?.Invoke(p);
+            NetworkListener.RaisePlayerJoinSuccessful(p);
 
         }
         else
@@ -52,12 +52,6 @@ public class ServerHandle
         p.player.SetAnimation(movex, movey);
         ServerSend.DistributePlayerAnimationState(p.steamId, movex, movey);
 
-    }
-    public static void ReadyUpdate(NetworkPlayer p, packet packet)
-    {
-        bool ready = packet.Readbool();
-        p.onReady(ready);
-        Debug.Log($"Player {p.SteamName} is ready for receiving pos informations!");
     }
     public static void PosUpdate(NetworkPlayer p, packet packet)
     {
@@ -75,6 +69,13 @@ public class ServerHandle
         PlayerMain who = p.player.playerControl;
         decoration.OnInteract(who);
         ServerSend.DistributeDecorationInteract(p.steamId, decorationUID);
+    }
+
+    public static void SendReadyState(NetworkPlayer p, packet packet)
+    {
+        int state = packet.Readint();
+        p.ReadyState = state;
+        NetworkListener.RaiseReadyState(p,state);
     }
 }
 
