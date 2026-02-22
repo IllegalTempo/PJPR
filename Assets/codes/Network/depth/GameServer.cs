@@ -122,7 +122,7 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
-        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.INSTANCE.FindNetworkObject.Values.ToArray()); //Send all network objects to the one who connects to the server, with room info
+        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.INSTANCE.FindNetworkObject.Values.Where(x => !x.InScene).ToArray());
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
     }
