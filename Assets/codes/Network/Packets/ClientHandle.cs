@@ -72,7 +72,7 @@ public class ClientHandle
         await Task.Delay(1000);
         NetworkSystem.INSTANCE.initRoom = true;
 
-        ClientSend.ReadyUpdate();
+        
     }
     public static void NewPlayerJoin(Connection c, packet packet)
     {
@@ -151,7 +151,7 @@ public class ClientHandle
         }
     }
 
-    public static void SyncNetworkObjects(Connection c, packet packet)
+    public static async void SyncNetworkObjects(Connection c, packet packet)
     {
         int length = packet.Readint();
         Debug.Log($"Syncing {length} Network Objects from Server");
@@ -162,8 +162,9 @@ public class ClientHandle
             string prefabID = packet.ReadstringUNICODE();
             Vector3 spawnLocation = packet.Readvector3();
             Quaternion spawnRot = packet.Readquaternion();
-            GameCore.INSTANCE.spawnNetworkPrefab(prefabID,owner, uid,spawnLocation,spawnRot).Forget();
+            await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot);
         }
+        ClientSend.ReadyUpdate();
     }
 
     public static void DistributeDecorationInteract(Connection c, packet packet)
