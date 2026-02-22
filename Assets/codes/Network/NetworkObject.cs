@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 //Network Object can be both
 //1. Default in scene, please set good identifier
@@ -12,8 +14,7 @@ public class NetworkObject : MonoBehaviour
     public Quaternion NetworkRot;
 
     [Header("Network Setting")]
-    public bool Sync_Position = true;
-    public bool Sync_Rotation = true;
+    public bool Sync_Transform = true;
 
     public ulong Owner = 0; //owner = 0 is no owner
     public bool InScene = false;
@@ -39,7 +40,7 @@ public class NetworkObject : MonoBehaviour
     }
 
 
-    public virtual void Init(string uid, ulong owner,string PrefabID) //when a new object is created, server will send a packet to all client, this method is run by client
+    public virtual void Init(string uid, ulong owner, string PrefabID) //when a new object is created, server will send a packet to all client, this method is run by client
     {
         init = true;
         Identifier = uid;
@@ -57,27 +58,32 @@ public class NetworkObject : MonoBehaviour
 
 
     }
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         if (NetworkSystem.INSTANCE == null)
         {
             return;
         }
+        if (Sync_Transform)
+        {
+            SendTransform();
+        }
 
+
+    }
+    private void SendTransform()
+    {
         if (NetworkSystem.INSTANCE.IsServer)
         {
             ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
+            Debug.Log($"[Server] Send Packet DistributeNOInfo " + Identifier);
+
         }
-        else
+        else if (GameCore.INSTANCE.IsLocal(Owner))
         {
-            if (GameCore.INSTANCE != null && GameCore.INSTANCE.IsLocal(Owner))
-            {
-                ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
+            ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
 
-            }
         }
-
-
 
     }
     public void Network_ChangeOwner(ulong newowner)
@@ -88,12 +94,9 @@ public class NetworkObject : MonoBehaviour
     private void Update()
     {
         if (NetworkSystem.INSTANCE.IsServer) return;
-        if (Sync_Position)
+        if (Sync_Transform)
         {
             transform.position = Vector3.Lerp(transform.position, NetworkPos, Time.deltaTime * 10f);
-        }
-        if (Sync_Rotation)
-        {
             transform.rotation = Quaternion.Slerp(transform.rotation, NetworkRot, Time.deltaTime * 10f);
         }
 
