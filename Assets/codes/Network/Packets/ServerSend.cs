@@ -102,7 +102,6 @@ public class ServerSend
             p.WriteUNICODE(id);
             p.Write(pos);
             p.Write(rot);
-            Debug.Log($"[Server] NOINFO Sended: [{id}] [{pos}] [{rot}]");
 
             return PacketSend.BroadcastPacketToReady(p);
         }

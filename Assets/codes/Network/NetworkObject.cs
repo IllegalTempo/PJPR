@@ -60,6 +60,7 @@ public class NetworkObject : MonoBehaviour
     }
     protected virtual void FixedUpdate()
     {
+        Debug.Log($"{gameObject.name} fixed update");
         if (NetworkSystem.INSTANCE == null)
         {
             return;

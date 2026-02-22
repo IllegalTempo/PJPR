@@ -2733,10 +2733,10 @@ MonoBehaviour:
   Owner: 0
   InScene: 0
   Parts:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 196814710088312511}
+  - {fileID: 3380967294193296557}
+  - {fileID: 7012747009817629520}
+  - {fileID: 7306085913213394553}
   OwnerPlayer: {fileID: 0}
   animator: {fileID: 566800756704519481}
   dockTarget: {x: 0, y: 0, z: 0}
