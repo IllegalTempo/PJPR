@@ -159,6 +159,7 @@ public class ServerSend
             p.Write(nobjs.Length);
             foreach (NetworkObject no in nobjs)
             {
+                if (no.Identifier == null) { Debug.LogError("NO Identifier is null for prefabID: " + no.PrefabID); return Result.UnexpectedError; }
                 p.WriteUNICODE(no.Identifier);
                 p.Write(no.Owner);
                 p.WriteUNICODE(no.PrefabID);
