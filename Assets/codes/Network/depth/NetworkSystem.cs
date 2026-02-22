@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Triggers;
 using Steamworks;
 using Steamworks.Data;
 using System;
@@ -251,6 +252,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private void ResetScene()
     {
+        GameCore.INSTANCE.Connector.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
         FindNetworkObject

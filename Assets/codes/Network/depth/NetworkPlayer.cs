@@ -45,7 +45,6 @@ public class NetworkPlayer
     {
         return SendData(p.GetPacketData());
     }
-    //ServerSend.SyncNetworkObjects(this, NetworkSystem.INSTANCE.FindNetworkObject.Values.Where(x=>!x.InScene).ToArray()); //TODO: If array too long, split into multiple packets
 
     
 }

@@ -14,6 +14,10 @@ public class Connector : NetworkObject
     {
         return "ss" + (connectedParts.Count +1);
     }
+    public void ResetScene()
+    {
+        connectedParts.Clear();
+    }
     public Vector3 connect(Spaceship s)
     {
         connectedParts.Add(s.GetComponent<SpaceshipPart>());
