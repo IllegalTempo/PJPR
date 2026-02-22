@@ -46,5 +46,11 @@ public class NetworkPlayer
         return SendData(p.GetPacketData());
     }
 
-    
+    public void Disconnect()
+    {
+        player.Disconnect();
+        NetworkSystem.INSTANCE.PlayerList.Remove(steamId);
+        ServerSend.PlayerQuit(steamId);
+
+    }
 }

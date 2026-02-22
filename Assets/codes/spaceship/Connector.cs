@@ -5,22 +5,27 @@ using UnityEngine;
 
 public class Connector : NetworkObject
 {
-    private List<SpaceshipPart> connectedParts = new List<SpaceshipPart>();
+    private List<Spaceship> connectedSpaceship = new List<Spaceship>();
     [SerializeField]
     private Animator animator;
     [SerializeField]
     private Transform[] dockpos;
     public string GetNewSpaceShipName()
     {
-        return "ss" + (connectedParts.Count +1);
+        return "ss" + (connectedSpaceship.Count +1);
     }
     public void ResetScene()
     {
-        connectedParts.Clear();
+        connectedSpaceship.Clear();
+    }
+    public void disconnect(Spaceship s)
+    {
+        
+        connectedSpaceship.Remove(s);
     }
     public Vector3 connect(Spaceship s)
     {
-        connectedParts.Add(s.GetComponent<SpaceshipPart>());
-        return dockpos[connectedParts.Count - 1].position;
+        connectedSpaceship.Add(s);
+        return dockpos[connectedSpaceship.Count - 1].position;
     }
 }

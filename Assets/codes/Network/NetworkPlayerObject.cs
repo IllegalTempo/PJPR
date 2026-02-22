@@ -27,6 +27,8 @@ public class NetworkPlayerObject : MonoBehaviour
     public void Disconnect()
     {
         Destroy(gameObject);
+        GameCore.INSTANCE.Connector.disconnect(spaceship);
+
         Destroy(spaceship);
     }
     private void Start()

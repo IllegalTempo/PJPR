@@ -279,14 +279,14 @@ public class GameServer : SocketManager
     {
         base.OnDisconnected(connection, info);
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Disconnected.");
-        NetworkPlayer whodis = players[info.Identity.SteamId];
-        ulong networkid = whodis.steamId;
-        whodis.player.Disconnect();
 
-        players.Remove(info.Identity.SteamId.Value);
+        NetworkPlayer whodis = players[info.Identity.SteamId];
+        whodis.Disconnect();
+        ulong networkid = whodis.steamId;
+
+        players.Remove(networkid);
         //GetSteamID.Remove(networkid);
 
-        ServerSend.PlayerQuit(networkid);
 
     }
     public override unsafe void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum, long recvTime, int channel)
