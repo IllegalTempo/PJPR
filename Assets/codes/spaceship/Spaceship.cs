@@ -48,7 +48,7 @@ public class Spaceship : NetworkObject
         rb.linearVelocity = Vector3.zero;
         Connector connector = GameCore.INSTANCE.Connector;
         transform.SetParent(connector.transform,true);
-        Sync_Transform = false;
+        //Sync_Transform = false;
         dockTarget = Vector3.zero;
 
     }

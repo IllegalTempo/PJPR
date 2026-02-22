@@ -2544,9 +2544,33 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -6870708284582061075, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6787297153695255001}
+    - targetCorrespondingSourceObject: {fileID: -6870708284582061075, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6235943088497075590}
+    - targetCorrespondingSourceObject: {fileID: -6870708284582061075, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 196814710088312511}
     - targetCorrespondingSourceObject: {fileID: 5229384218949552390, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7099146976606256036}
+    - targetCorrespondingSourceObject: {fileID: 5229384218949552390, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3839853134558152998}
+    - targetCorrespondingSourceObject: {fileID: 5229384218949552390, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3380967294193296557}
+    - targetCorrespondingSourceObject: {fileID: -2185646631630139839, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1415965570185313339}
+    - targetCorrespondingSourceObject: {fileID: -2185646631630139839, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7012747009817629520}
+    - targetCorrespondingSourceObject: {fileID: 3491921567704980777, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3808319939575349377}
+    - targetCorrespondingSourceObject: {fileID: 3491921567704980777, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7306085913213394553}
   m_SourcePrefab: {fileID: 100100000, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
 --- !u!4 &173745948755740216 stripped
 Transform:
@@ -2579,6 +2603,111 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.009404479, y: 0.034940876, z: 0.013786317}
   m_Center: {x: -0.013912934, y: 0.011728301, z: -0.0022313823}
+--- !u!114 &6235943088497075590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063237539868336892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &196814710088312511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063237539868336892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c64712a5d86744e96da65f1f67c95a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpaceshipPart
+  outline: {fileID: 0}
+  LookedAt: 0
+  ClickTimer: 0
+  partName: Left Wing
+  maxHealth: 100
+  currentHealth: 100
+  destroyWhenBroken: 0
+  permanentlyDestroyGameObjectOnBreak: 0
+  enableCollisionDamage: 1
+  meteoriteDamage: 25
+  fragmentDamage: 8
+  projectileDamage: 15
+  defaultCollisionDamage: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  brokenHiddenOpacity: 0
+--- !u!1 &2167071401729975352 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3491921567704980777, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+  m_PrefabInstance: {fileID: 3343702681369803025}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3808319939575349377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2167071401729975352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &7306085913213394553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2167071401729975352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c64712a5d86744e96da65f1f67c95a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpaceshipPart
+  outline: {fileID: 0}
+  LookedAt: 0
+  ClickTimer: 0
+  partName: Right Wing Propaganda
+  maxHealth: 100
+  currentHealth: 100
+  destroyWhenBroken: 0
+  permanentlyDestroyGameObjectOnBreak: 0
+  enableCollisionDamage: 1
+  meteoriteDamage: 25
+  fragmentDamage: 8
+  projectileDamage: 15
+  defaultCollisionDamage: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  brokenHiddenOpacity: 0
 --- !u!1 &2496786460223226944 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
@@ -2600,18 +2729,17 @@ MonoBehaviour:
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Position: 1
-  Sync_Rotation: 1
+  Sync_Transform: 1
   Owner: 0
   InScene: 0
-  parts:
-  - {fileID: 8477889036779136825}
+  Parts:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 3733494895590250157}
-  - {fileID: 2660949577116320707}
-  owner: {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  OwnerPlayer: {fileID: 0}
   animator: {fileID: 566800756704519481}
+  dockTarget: {x: 0, y: 0, z: 0}
 --- !u!95 &566800756704519481
 Animator:
   serializedVersion: 7
@@ -2661,6 +2789,61 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!1 &5750025973919217488 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2185646631630139839, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+  m_PrefabInstance: {fileID: 3343702681369803025}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1415965570185313339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5750025973919217488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &7012747009817629520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5750025973919217488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c64712a5d86744e96da65f1f67c95a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpaceshipPart
+  outline: {fileID: 0}
+  LookedAt: 0
+  ClickTimer: 0
+  partName: Left Wing Propaganda
+  maxHealth: 100
+  currentHealth: 100
+  destroyWhenBroken: 0
+  permanentlyDestroyGameObjectOnBreak: 0
+  enableCollisionDamage: 1
+  meteoriteDamage: 25
+  fragmentDamage: 8
+  projectileDamage: 15
+  defaultCollisionDamage: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  brokenHiddenOpacity: 0
 --- !u!1 &5796734045643059214 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9085191160303372575, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
@@ -2895,3 +3078,53 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.009404479, y: 0.034940876, z: 0.013786317}
   m_Center: {x: 0.013912934, y: 0.011728301, z: -0.0022313823}
+--- !u!114 &3839853134558152998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7419037046717870103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &3380967294193296557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7419037046717870103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c64712a5d86744e96da65f1f67c95a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpaceshipPart
+  outline: {fileID: 0}
+  LookedAt: 0
+  ClickTimer: 0
+  partName: Right Wing
+  maxHealth: 100
+  currentHealth: 100
+  destroyWhenBroken: 0
+  permanentlyDestroyGameObjectOnBreak: 0
+  enableCollisionDamage: 1
+  meteoriteDamage: 25
+  fragmentDamage: 8
+  projectileDamage: 15
+  defaultCollisionDamage: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  brokenHiddenOpacity: 0
