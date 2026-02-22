@@ -123,7 +123,7 @@ public class GameServer : SocketManager
             return false;
         }
         ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.INSTANCE.FindNetworkObject.Values.ToArray()); //Send all network objects to the one who connects to the server, with room info
-
+        Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
     }
     private async UniTask<bool> WaitForTestSuccess(NetworkPlayer connectedPlayer)
