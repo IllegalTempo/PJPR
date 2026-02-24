@@ -260,6 +260,7 @@ public class NetworkSystem : MonoBehaviour
         Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
         ss.OwnerPlayer = PlayerList[owner];
         ss.OwnerPlayer.transform.SetParent(ss.transform);
+        ss.OwnerPlayer.transform.localPosition = Vector3.zero;
         ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
         {

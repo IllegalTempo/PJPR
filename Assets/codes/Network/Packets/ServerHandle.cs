@@ -10,7 +10,7 @@ public class ServerHandle
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        Debug.Log($"Received NOInfo from {p.SteamName} for {uuid} at pos {pos} with rot {rot}");
+        //Debug.Log($"Received NOInfo from {p.SteamName} for {uuid} at pos {pos} with rot {rot}");
         NetworkSystem.Instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
         ServerSend.DistributeNOInfo(uuid, pos, rot);
 
@@ -59,6 +59,7 @@ public class ServerHandle
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
         Quaternion yrot = packet.Readquaternion();
+        Debug.Log($"Received PosUpdate from {p.SteamName} at pos {pos} with rot {rot} and yrot {yrot}");
         p.player.SetMovement(pos, rot, yrot);
         ServerSend.DistributeMovement(p.steamId, pos, rot, yrot);
     }
