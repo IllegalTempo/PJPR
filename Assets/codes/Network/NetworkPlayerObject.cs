@@ -50,7 +50,7 @@ public class NetworkPlayerObject : MonoBehaviour
         if (!NetworkSystem.Instance.IsOnline) return;
         if (NetworkSystem.Instance.IsServer)
         {
-            ServerSend.DistributeMovement(NetworkSystem.Instance.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
+            ServerSend.DistributeMovement(steamID, transform.position, Head.transform.rotation, transform.rotation);
         } else
         {
             if (IsLocal)
