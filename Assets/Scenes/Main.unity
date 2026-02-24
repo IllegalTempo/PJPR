@@ -1146,6 +1146,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4092144509857576553, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5481911757800422419, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6219072751583599215, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8359322747326565547, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.03245
@@ -1185,6 +1201,10 @@ PrefabInstance:
     - target: {fileID: 8504575025987259242, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759543123806792, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8736092739982952983, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
       propertyPath: InScene
@@ -1730,7 +1750,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1923367896
 Transform:
   m_ObjectHideFlags: 0
@@ -1758,6 +1778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
+  StartServerOnStart: 0
   _maxPlayer: 2
   Connected: 0
   IsOnline: 0

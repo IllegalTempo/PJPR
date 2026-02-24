@@ -13,7 +13,7 @@ public class ClientHandle
     public static void UpdateReadyState(ReadyState state)
     {
         int readyState = (int)state;
-        NetworkSystem.INSTANCE.initState = readyState;
+        NetworkSystem.Instance.initState = readyState;
         ClientSend.SendReadyState(readyState);
     }
     public static async void test(Connection c, packet packet)
@@ -43,7 +43,7 @@ public class ClientHandle
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
 
-        NetworkSystem.INSTANCE.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
+        NetworkSystem.Instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
         Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
 
 
@@ -51,11 +51,11 @@ public class ClientHandle
     public static async void SyncPlayer(Connection c, packet packet)
     {
         int numplayer = packet.Readint();
-        GameClient client = NetworkSystem.INSTANCE.Client;
+        GameClient client = NetworkSystem.Instance.Client;
         for (int i = 0; i < numplayer; i++)
         {
             ulong steamid = packet.Readulong();
-            NetworkSystem.INSTANCE.Client.NewPlayer(steamid).Forget();
+            NetworkSystem.Instance.Client.NewPlayer(steamid).Forget();
         }
         await Task.Delay(1000);
         UpdateReadyState(ReadyState.SyncPlayer);
@@ -66,12 +66,12 @@ public class ClientHandle
     {
         ulong playerid = packet.Readulong();
         //int supposeNetworkID = packet.Readint();
-        NetworkSystem.INSTANCE.Client.NewPlayer(playerid).Forget();
+        NetworkSystem.Instance.Client.NewPlayer(playerid).Forget();
 
     }
     public static void PlayerQuit(Connection c, packet packet)
     {
-        GameClient cl = NetworkSystem.INSTANCE.Client;
+        GameClient cl = NetworkSystem.Instance.Client;
         ulong steamID = packet.Readulong();
         cl.PlayerQuit(steamID);
     }
@@ -83,7 +83,7 @@ public class ClientHandle
         Vector3 pos = packet.Readvector3();
         Quaternion headrot = packet.Readquaternion();
         Quaternion bodyrot = packet.Readquaternion();
-        NetworkSystem.INSTANCE.PlayerList[steamID].SetMovement(pos, headrot, bodyrot);
+        NetworkSystem.Instance.PlayerList[steamID].SetMovement(pos, headrot, bodyrot);
     }
 
 
@@ -92,7 +92,7 @@ public class ClientHandle
         ulong NetworkID = packet.Readulong();
         float x = packet.Readfloat();
         float y = packet.Readfloat();
-        NetworkSystem.INSTANCE.PlayerList[NetworkID].SetAnimation(x, y);
+        NetworkSystem.Instance.PlayerList[NetworkID].SetAnimation(x, y);
     }
 
     public static void DistributeNOInfo(Connection c, packet packet)
@@ -102,9 +102,9 @@ public class ClientHandle
         string uid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        if (NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
+        if (NetworkSystem.Instance.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.INSTANCE.FindNetworkObject[uid].SetMovement(pos, rot);
+            NetworkSystem.Instance.FindNetworkObject[uid].SetMovement(pos, rot);
         }
         else
         {
@@ -129,9 +129,9 @@ public class ClientHandle
     {
         string uid = packet.ReadstringUNICODE();    
         bool active = packet.Readbool();
-        if (NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
+        if (NetworkSystem.Instance.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.INSTANCE.FindNetworkObject[uid].gameObject.SetActive(active);
+            NetworkSystem.Instance.FindNetworkObject[uid].gameObject.SetActive(active);
         }
         else
         {
@@ -161,8 +161,8 @@ public class ClientHandle
         ulong whoInteracted = packet.Readulong();
         string decorationUID = packet.ReadstringUNICODE();
 
-        IUsable decoration = NetworkSystem.INSTANCE.FindNetworkObject[decorationUID].GetComponent<IUsable>();
-        PlayerMain who = NetworkSystem.INSTANCE.PlayerList[whoInteracted].playerControl;
+        IUsable decoration = NetworkSystem.Instance.FindNetworkObject[decorationUID].GetComponent<IUsable>();
+        PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;
         decoration.OnInteract(who);
     }
 }

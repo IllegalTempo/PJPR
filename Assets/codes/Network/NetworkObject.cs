@@ -25,7 +25,7 @@ public class NetworkObject : MonoBehaviour
         {
             InScene = true;
             Identifier = gameObject.name;
-            NetworkSystem.INSTANCE.FindNetworkObject.Add(Identifier, this);
+            NetworkSystem.Instance.FindNetworkObject.Add(Identifier, this);
 
         }
 
@@ -33,7 +33,7 @@ public class NetworkObject : MonoBehaviour
     public void UpdateActive(bool status)
     {
         gameObject.SetActive(status);
-        if (NetworkSystem.INSTANCE.IsServer)
+        if (NetworkSystem.Instance.IsServer)
         {
             ServerSend.DistributeNOactive(Identifier, status);
         }
@@ -46,9 +46,9 @@ public class NetworkObject : MonoBehaviour
         Identifier = uid;
         Owner = owner;
         this.PrefabID = PrefabID;
-        if (!NetworkSystem.INSTANCE.FindNetworkObject.ContainsKey(uid))
+        if (!NetworkSystem.Instance.FindNetworkObject.ContainsKey(uid))
         {
-            NetworkSystem.INSTANCE.FindNetworkObject.Add(uid, this);
+            NetworkSystem.Instance.FindNetworkObject.Add(uid, this);
         }
         else
         {
@@ -60,7 +60,7 @@ public class NetworkObject : MonoBehaviour
     }
     protected virtual void FixedUpdate()
     {
-        if (NetworkSystem.INSTANCE == null)
+        if (NetworkSystem.Instance == null)
         {
             return;
         }
@@ -73,10 +73,10 @@ public class NetworkObject : MonoBehaviour
     }
     private void SendTransform()
     {
-        if (NetworkSystem.INSTANCE.IsServer)
+        if (!NetworkSystem.Instance.IsOnline) return;
+        if (NetworkSystem.Instance.IsServer)
         {
             ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
-            Debug.Log($"[Server] Send Packet DistributeNOInfo " + Identifier);
 
         }
         else if (GameCore.INSTANCE.IsLocal(Owner))
@@ -93,7 +93,7 @@ public class NetworkObject : MonoBehaviour
 
     private void Update()
     {
-        if (NetworkSystem.INSTANCE.IsServer) return;
+        if (NetworkSystem.Instance.IsServer) return;
         if (Sync_Transform)
         {
             transform.position = Vector3.Lerp(transform.position, NetworkPos, Time.deltaTime * 10f);

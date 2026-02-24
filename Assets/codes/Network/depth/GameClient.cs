@@ -17,7 +17,7 @@ public class GameClient : ConnectionManager
 
     public GameClient()
     {
-        NetworkSystem.INSTANCE.IsServer = false;
+        NetworkSystem.Instance.IsServer = false;
     }
 
     private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
@@ -45,22 +45,22 @@ public class GameClient : ConnectionManager
     public async UniTask NewPlayer(ulong who)
     {
         Debug.Log($"Spawning Player {who} and spaceship");
-        NetworkPlayerObject player = await NetworkSystem.INSTANCE.SpawnPlayer(who);
+        NetworkPlayerObject player = await NetworkSystem.Instance.SpawnPlayer(who);
     }
     public void PlayerQuit(ulong who)
     {
         Debug.Log($"Player {who} Quit the game");
-        if(!NetworkSystem.INSTANCE.PlayerList.ContainsKey(who))
+        if(!NetworkSystem.Instance.PlayerList.ContainsKey(who))
         {
             Debug.Log($"Player {who} not found in GetPlayerBySteamID");
             return;
         }
-        NetworkSystem.INSTANCE.PlayerList[who].Disconnect();
-        NetworkSystem.INSTANCE.PlayerList.Remove(who);
+        NetworkSystem.Instance.PlayerList[who].Disconnect();
+        NetworkSystem.Instance.PlayerList.Remove(who);
     }
     public bool IsLocal(ulong id)
     {
-        return id == NetworkSystem.INSTANCE.PlayerId;
+        return id == NetworkSystem.Instance.PlayerId;
     }
     public Connection GetServer()
     {
@@ -91,8 +91,10 @@ public class GameClient : ConnectionManager
     private async UniTask Disconnect(ConnectionInfo info)
     {
         Debug.Log("Disconnected from " + new Friend(info.Identity.SteamId).Name + " " + info.EndReason + " " + info.State + " " + info.Address.Address.ToString());
-
-        await NetworkSystem.INSTANCE.CreateLobby();
+        if(NetworkSystem.Instance.StartServerOnStart)
+        {
+            await NetworkSystem.Instance.CreateLobby();
+        }
 
     }
     public override unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)

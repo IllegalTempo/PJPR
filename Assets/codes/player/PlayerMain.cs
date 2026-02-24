@@ -93,10 +93,10 @@ public class PlayerMain : MonoBehaviour
         if (usable != null)
         {
             usable.OnInteract(this);
-            if (NetworkSystem.INSTANCE == null || !NetworkSystem.INSTANCE.IsOnline) return;
+            if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline) return;
             NetworkObject netObj = (usable as MonoBehaviour).GetComponent<NetworkObject>();
             if (netObj == null) return;
-            if (NetworkSystem.INSTANCE.IsServer)
+            if (NetworkSystem.Instance.IsServer)
             {
                 ServerSend.DistributeDecorationInteract(networkinfo.steamID, netObj.Identifier);
 
@@ -285,16 +285,16 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == GameCore.INSTANCE.Masks.MoveWith)
+        if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
-            transform.SetParent(collision.transform, true);
+            transform.SetParent(collision.transform);
         }
     }
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == GameCore.INSTANCE.Masks.MoveWith)
+        if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
-            transform.SetParent(null, true);
+            transform.SetParent(null);
         }
     }
 

@@ -55,7 +55,6 @@ public class GameCore : MonoBehaviour
         }
         
     }
-
     private void InitPlayerControl()
     {
 #if UNITY_EDITOR

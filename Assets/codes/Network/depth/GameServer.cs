@@ -17,7 +17,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 public class GameServer : SocketManager
 {
     public int maxplayer;
-    public Dictionary<ulong, NetworkPlayer> players = new Dictionary<ulong, NetworkPlayer>(); //This does not include the server player
+    public Dictionary<ulong, NetworkPlayer> NetworkUsers = new Dictionary<ulong, NetworkPlayer>(); //This does not include the server player
     //public Dictionary<int, ulong> GetSteamID = new Dictionary<int, ulong>();
     private delegate void PacketHandle(NetworkPlayer n, packet p);
 
@@ -40,38 +40,30 @@ public class GameServer : SocketManager
 
     public GameServer()
     {
-        this.maxplayer = NetworkSystem.INSTANCE.MaxPlayer;
+        this.maxplayer = NetworkSystem.Instance.MaxPlayer;
         Debug.Log("Created GameServer Object");
 
     }
     public async UniTask<bool> onOnline()
     {
-        NetworkSystem.INSTANCE.IsOnline = true;
-        NetworkSystem.INSTANCE.IsServer = true;
-        ulong steamid = SteamClient.SteamId;
-        await NetworkSystem.INSTANCE.SpawnPlayer(steamid); //Add the server player to the player list
-        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        NetworkSystem system = NetworkSystem.Instance;
+        system.IsOnline = true;
+        system.IsServer = true;
+        await system.StartAsHost();
         return true;
-        //SpawnConnector();
-
-
-
     }
-    public int GetPlayerCount()
+    
+    public int GetUserCount()
     {
-        return players.Count + 1;
+        return NetworkUsers.Count + 1;
     }
     public void DisconnectAll()
     {
-        players.Clear();
+        NetworkUsers.Clear();
         foreach (Connection item in Connected)
         {
             item.Close();
         }
-    }
-    public Result SendPacket(ulong steamid, packet p)
-    {
-        return players[steamid].SendPacket(p);
     }
     private async UniTask<bool> ClientConnectionEstablished(ConnectionInfo info)
     {
@@ -88,8 +80,9 @@ public class GameServer : SocketManager
     private async UniTask InstantiatePlayerToServer(ConnectionInfo info)
     {
         ulong steamid = info.Identity.SteamId;
-        players[steamid].player = await NetworkSystem.INSTANCE.SpawnPlayer(steamid);
-        await SpawnSpaceShip(steamid);
+        NetworkSystem system = NetworkSystem.Instance;
+        NetworkUsers[steamid].player = await system.SpawnPlayer(steamid);
+        await system.SpawnSpaceShip(steamid);
         Debug.Log($"Player {steamid} instantiated on server.");
     }
     private async UniTask<bool> SyncPlayer(NetworkPlayer connectedPlayer)
@@ -110,7 +103,7 @@ public class GameServer : SocketManager
             return false;
         }
 
-        ServerSend.SyncPlayer(connectedPlayer, GetPlayerCount()); //Send packet to the one who connects to the server, with room info
+        ServerSend.SyncPlayer(connectedPlayer, GetUserCount()); //Send packet to the one who connects to the server, with room info
         bool syncplayer = await WaitForReadyState(connectedPlayer, (int)ReadyState.SyncPlayer);
         if (syncplayer)
         {
@@ -122,7 +115,7 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
-        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.INSTANCE.FindNetworkObject.Values.Where(x => !x.InScene).ToArray());
+        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.Instance.FindNetworkObject.Values.Where(x => !x.InScene).ToArray());
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
     }
@@ -143,7 +136,7 @@ public class GameServer : SocketManager
         }
         try
         {
-            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TimeoutSeconds));
+            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TIMEOUTSECONDS));
             return true;// Wait for the player to respond to the test packet, with a timeout of 5 seconds
         }
         catch (TimeoutException)
@@ -174,7 +167,7 @@ public class GameServer : SocketManager
         }
         try
         {
-            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TimeoutSeconds));
+            await network_test_pass.Task.Timeout(TimeSpan.FromSeconds(NetworkSystem.TIMEOUTSECONDS));
             return true;// Wait for the player to respond to the test packet, with a timeout of 5 seconds
         }
         catch (TimeoutException)
@@ -198,73 +191,26 @@ public class GameServer : SocketManager
     }
     public NetworkPlayer GetPlayer(ConnectionInfo info)
     {
-        return players[info.Identity.SteamId.Value];
+        return NetworkUsers[info.Identity.SteamId.Value];
     }
     public NetworkPlayer GetPlayer(ulong steamid)
     {
-        return players[steamid];
+        return NetworkUsers[steamid];
     }
-    //public NetworkPlayer GetPlayer(int NetworkID)
-    //{
-    //    return players[GetSteamID[NetworkID]];
-    //}
-    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
-    { //more check added
-        NetworkSystem networkSystem = NetworkSystem.INSTANCE;
-        if (networkSystem != null && !networkSystem.IsServer) return null;
-        string uid = Guid.NewGuid().ToString();
-
-        NetworkObject nobj = await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
-        ServerSend.NewObject(prefabID, uid, pos, rot, owner);
-
-        return nobj;
-
-    }
-    //public Connector SpawnConnector()
-    //{
-    //    Connector connector = CreateNetworkObject("Spaceship_connector", new Vector3(10, 0, 10), Quaternion.identity, 0).GetComponent<Connector>();
-    //    return connector;
-
-    //}
-    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
-    {
-        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
-        ss.OwnerPlayer = NetworkSystem.INSTANCE.PlayerList[owner];
-        ss.OwnerPlayer.spaceship = ss;
-        if (decs != null)
-        {
-            foreach (DecorationSaveData dsd in decs)
-            {
-                GameObject prefab = await GameCore.INSTANCE.GetDecoration(dsd.DecorationID);
-                Decoration obj = GameObject.Instantiate(prefab, ss.transform).GetComponent<Decoration>();
-                obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
-
-            }
-        }
-        else
-        {
-            Debug.Log("Cannot load decorations");
-        }
-        return ss;
-
-    }
-    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
-    {
-        return await SpawnSpaceShip(null, owner);
-    }
+    
     public override void OnConnecting(Connection connection, ConnectionInfo info)
     {
         base.OnConnecting(connection, info);
 
-        if (GetPlayerCount() < maxplayer)
+        if (GetUserCount() < maxplayer)
         {
 
             Debug.Log(new Friend(info.Identity.SteamId).Name + " is connecting");
             //int networkid = GetSteamID.Count;
-            players.Add(info.Identity.SteamId.Value, new NetworkPlayer(info.Identity.SteamId, connection));
+            NetworkUsers.Add(info.Identity.SteamId.Value, new NetworkPlayer(info.Identity.SteamId, connection));
 
             //GetSteamID.Add(networkid, info.Identity.SteamId.Value);
-            Debug.Log(players.Count);
+            Debug.Log(NetworkUsers.Count);
             connection.Accept();
         }
         else
@@ -280,11 +226,11 @@ public class GameServer : SocketManager
         base.OnDisconnected(connection, info);
         Debug.Log(new Friend(info.Identity.SteamId).Name + " is Disconnected.");
 
-        NetworkPlayer whodis = players[info.Identity.SteamId];
+        NetworkPlayer whodis = NetworkUsers[info.Identity.SteamId];
         whodis.Disconnect();
         ulong networkid = whodis.steamId;
 
-        players.Remove(networkid);
+        NetworkUsers.Remove(networkid);
         //GetSteamID.Remove(networkid);
 
 
@@ -297,7 +243,7 @@ public class GameServer : SocketManager
         using (packet packet = new packet(bytedata))
         {
 
-            ServerPacketHandles[packet.Readint()](players[identity.SteamId], packet);
+            ServerPacketHandles[packet.Readint()](NetworkUsers[identity.SteamId], packet);
 
         }
     }

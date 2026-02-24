@@ -23,9 +23,9 @@ public class Connector : NetworkObject
         
         connectedSpaceship.Remove(s);
     }
-    public Vector3 connect(Spaceship s)
+    public Transform connect(Spaceship s)
     {
         connectedSpaceship.Add(s);
-        return dockpos[connectedSpaceship.Count - 1].position;
+        return dockpos[connectedSpaceship.Count - 1];
     }
 }

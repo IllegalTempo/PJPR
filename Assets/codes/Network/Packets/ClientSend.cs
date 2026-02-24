@@ -12,7 +12,7 @@ public class ClientSend
 
     private static Result SendToServer(packet p)
     {
-        Connection server = NetworkSystem.INSTANCE.GetServerConnection();
+        Connection server = NetworkSystem.Instance.GetServerConnection();
 
         // Fix: Check for default value instead of null for structs
         if (server.Equals(default(Connection)))

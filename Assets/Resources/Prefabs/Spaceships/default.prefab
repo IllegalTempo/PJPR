@@ -2390,6 +2390,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6870708284582061075, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: -6599271472219001609, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2407,6 +2411,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 046b21478f1bf9f43a5fa8b7b59d1ecd, type: 2}
     - target: {fileID: -2671149315685447958, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -2185646631630139839, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
@@ -2438,7 +2446,15 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 3491921567704980777, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 3797641152148799928, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5229384218949552390, guid: b69f0824b5b7edf419b5060d3000e097, type: 3}
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
@@ -2739,7 +2755,7 @@ MonoBehaviour:
   - {fileID: 7306085913213394553}
   OwnerPlayer: {fileID: 0}
   animator: {fileID: 566800756704519481}
-  dockTarget: {x: 0, y: 0, z: 0}
+  dockTarget: {fileID: 0}
 --- !u!95 &566800756704519481
 Animator:
   serializedVersion: 7

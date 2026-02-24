@@ -92,9 +92,9 @@ public class Item : Selectable //Item is any that is pickable
 
         netObj.Owner = localOwner;
 
-        if (NetworkSystem.INSTANCE != null && NetworkSystem.INSTANCE.IsOnline)
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
-            if (NetworkSystem.INSTANCE.IsServer)
+            if (NetworkSystem.Instance.IsServer)
             {
                 ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
             }
@@ -116,7 +116,7 @@ public class Item : Selectable //Item is any that is pickable
             return;
         }
 
-        if (NetworkSystem.INSTANCE == null || !NetworkSystem.INSTANCE.IsOnline || netObj == null || GameCore.INSTANCE == null || GameCore.INSTANCE.Local_NetworkPlayer == null || GameCore.INSTANCE.Local_Player == null)
+        if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline || netObj == null || GameCore.INSTANCE == null || GameCore.INSTANCE.Local_NetworkPlayer == null || GameCore.INSTANCE.Local_Player == null)
         {
             return;
         }
@@ -135,9 +135,9 @@ public class Item : Selectable //Item is any that is pickable
 
         gotDropped(dropPosition);
         netObj.Owner = 0;
-        if (NetworkSystem.INSTANCE != null && NetworkSystem.INSTANCE.IsOnline)
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
-            if (NetworkSystem.INSTANCE.IsServer)
+            if (NetworkSystem.Instance.IsServer)
             {
                 ServerSend.DistributePickUpItem(netObj.Identifier,0);
             }

@@ -10,7 +10,7 @@ public class ServerHandle
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
-        NetworkSystem.INSTANCE.FindNetworkObject[uuid].SetServerMovement(pos, rot);
+        NetworkSystem.Instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
         ServerSend.DistributeNOInfo(uuid, pos, rot);
 
 
@@ -24,7 +24,7 @@ public class ServerHandle
 
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
-        NetworkSystem.INSTANCE.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
+        NetworkSystem.Instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
 
         ServerSend.DistributePickUpItem(itemid, whopicked);
     }
@@ -65,7 +65,7 @@ public class ServerHandle
     public static void SendDecorationInteract(NetworkPlayer p, packet packet)
     {
         string decorationUID = packet.ReadstringUNICODE();
-        IUsable decoration = NetworkSystem.INSTANCE.FindNetworkObject[decorationUID].GetComponent<IUsable>();
+        IUsable decoration = NetworkSystem.Instance.FindNetworkObject[decorationUID].GetComponent<IUsable>();
         PlayerMain who = p.player.playerControl;
         decoration.OnInteract(who);
         ServerSend.DistributeDecorationInteract(p.steamId, decorationUID);

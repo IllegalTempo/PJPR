@@ -49,7 +49,7 @@ public class NetworkPlayer
     public void Disconnect()
     {
         player.Disconnect();
-        NetworkSystem.INSTANCE.PlayerList.Remove(steamId);
+        NetworkSystem.Instance.PlayerList.Remove(steamId);
         ServerSend.PlayerQuit(steamId);
 
     }

@@ -41,7 +41,7 @@ public class MeteoriteSpawner : MonoBehaviour
     {
         get
         {
-            return NetworkSystem.INSTANCE == null || NetworkSystem.INSTANCE.IsServer;
+            return NetworkSystem.Instance == null || NetworkSystem.Instance.IsServer;
         }
     }
     
@@ -136,7 +136,7 @@ public class MeteoriteSpawner : MonoBehaviour
 
     async UniTask SpawnMeteorite()
     {
-        if (!NetworkSystem.INSTANCE.IsServer) return;
+        if (!NetworkSystem.Instance.IsServer) return;
         string prefabID = GetRandomMeteoritePrefabID();
         if (string.IsNullOrEmpty(prefabID))
         {
@@ -145,7 +145,7 @@ public class MeteoriteSpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        NetworkObject networkObject = await NetworkSystem.INSTANCE.Server.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
+        NetworkObject networkObject = await NetworkSystem.Instance.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
         if (networkObject == null)
         {
             return;

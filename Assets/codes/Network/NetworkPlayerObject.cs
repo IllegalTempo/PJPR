@@ -43,18 +43,23 @@ public class NetworkPlayerObject : MonoBehaviour
     private void FixedUpdate()
     {
         
-        if (IsLocal)
+        SendTransform();
+    }
+    private void SendTransform()
+    {
+        if (!NetworkSystem.Instance.IsOnline) return;
+        if (NetworkSystem.Instance.IsServer)
         {
-            if (!NetworkSystem.INSTANCE.IsServer)
+            ServerSend.DistributeMovement(NetworkSystem.Instance.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
+        } else
+        {
+            if (IsLocal)
             {
-                ClientSend.Position(transform.position, Head.transform.rotation, transform.rotation);
+               ClientSend.Position(transform.position, Head.transform.rotation, transform.rotation);
+                
             }
-            else
-            {
-                ServerSend.DistributeMovement(NetworkSystem.INSTANCE.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
-            }
-
         }
+        
     }
     private void Update()
     {

@@ -15,12 +15,13 @@ using UnityEngine.Rendering.Universal;
 
 public class NetworkSystem : MonoBehaviour
 {
+    public bool StartServerOnStart = false;
     [Header("Network Setting")]
     [SerializeField]
     private int _maxPlayer = 2;
     [Header("NetworkData")]
     public bool Connected = false;
-    public static NetworkSystem INSTANCE;
+    public static NetworkSystem Instance;
     public bool IsOnline = false;//True if current instance is server
     public bool IsServer = true;
     public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
@@ -33,15 +34,16 @@ public class NetworkSystem : MonoBehaviour
     private GameServer _server;
     private GameClient _client;
     private bool _destroyed = false;
-    public const float TimeoutSeconds = 10f;
+    public const float TIMEOUTSECONDS = 10f;
     public GameServer Server => _server;
     public GameClient Client => _client;
     public int MaxPlayer => _maxPlayer;
+    private bool _startedAsHost = false;
     void Awake()
     {
-        if (INSTANCE == null)
+        if (Instance == null)
         {
-            INSTANCE = this;
+            Instance = this;
         }
         else
         {
@@ -49,7 +51,7 @@ public class NetworkSystem : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
-    
+
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -120,7 +122,7 @@ public class NetworkSystem : MonoBehaviour
                 Debug.LogError($"Server receive error: {e}");
             }
         }
-        else if(_client != null)
+        else if (_client != null)
         {
             try
             {
@@ -167,7 +169,7 @@ public class NetworkSystem : MonoBehaviour
         ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
-        NetworkPlayerObject p = Instantiate(PlayerInstance,new Vector3(0,5,0),Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(PlayerInstance, new Vector3(0, 5, 0), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         p.steamID = steamid;
         p.IsLocal = isLocal;
         p.gameObject.name = "Player_" + steamid;
@@ -184,7 +186,7 @@ public class NetworkSystem : MonoBehaviour
         }
         PlayerList.Clear();
     }
-    
+
     private async UniTask InitializeNetwork()
     {
         RegisterCallbacks();
@@ -195,19 +197,32 @@ public class NetworkSystem : MonoBehaviour
         }
         SteamClient.Init(480, true);
         PlayerId = SteamClient.SteamId;
-        SteamNetworkingUtils.InitRelayNetworkAccess(); 
+        if (StartServerOnStart)
+        {
+            await StartOnlineHost();
+        } else
+        {
+            await StartAsHost();
+        }
+        
+        Debug.Log("NetworkSystem Initialization Complete");
+    }
+    private async UniTask StartOnlineHost()
+    {
+        SteamNetworkingUtils.InitRelayNetworkAccess();
         Debug.Log("SteamClient Initialized, Waiting for relay network...");
-        bool relayReady = await WaitForRelayNetwork(); 
-        if (relayReady) 
-        { 
-            Debug.Log("SteamRelayNetwork Initialized,"); 
-        } else 
+        bool relayReady = await WaitForRelayNetwork();
+        if (relayReady)
+        {
+            Debug.Log("SteamRelayNetwork Initialized,");
+        }
+        else
         {
             Debug.LogError("Failed to initialize relay network. NetworkSystem initialization failed.");
-            return; 
+            return;
         }
+
         bool lobbyReady = await CreateLobby(); if (lobbyReady) { Debug.Log("Lobby System Ready"); } else { return; }
-        Debug.Log("NetworkSystem Initialization Complete");
     }
     private async UniTask<bool> WaitForRelayNetwork(float timeoutSeconds = 10f)
     {
@@ -227,7 +242,54 @@ public class NetworkSystem : MonoBehaviour
         Debug.Log($"Relay network status: {SteamNetworkingUtils.Status}");
         return true;
     }
-    
+    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
+    { //more check added
+        
+        if (IsOnline && !IsServer) return null;
+        string uid = Guid.NewGuid().ToString();
+
+        NetworkObject nobj = await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
+        ServerSend.NewObject(prefabID, uid, pos, rot, owner);
+
+        return nobj;
+
+    }
+    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
+    {
+        if (IsOnline && !Instance.IsServer) return null;
+        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
+        ss.OwnerPlayer = PlayerList[owner];
+        ss.OwnerPlayer.spaceship = ss;
+        if (decs != null)
+        {
+            foreach (DecorationSaveData dsd in decs)
+            {
+                GameObject prefab = await GameCore.INSTANCE.GetDecoration(dsd.DecorationID);
+                Decoration obj = Instantiate(prefab, ss.transform).GetComponent<Decoration>();
+                obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
+
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot load decorations");
+        }
+        return ss;
+
+    }
+    public async UniTask StartAsHost()
+    {
+        if (_startedAsHost) return;
+        _startedAsHost = true;
+        Debug.Log("Starting as Host...");
+        ulong steamid = SteamClient.SteamId;
+        await SpawnPlayer(steamid); //Add the server player to the player list
+        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+    }
+    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
+    {
+        return await SpawnSpaceShip(null, owner);
+    }
     private void RegisterCallbacks()
     {
 #if UNITY_EDITOR
@@ -252,6 +314,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private void ResetScene()
     {
+        _startedAsHost = false;
         GameCore.INSTANCE.Connector.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
@@ -294,7 +357,7 @@ public class NetworkSystem : MonoBehaviour
             return false;
         }
     }
-    
+
 
     private async void OnLobbyCreated(Result r, Lobby l)
     {
