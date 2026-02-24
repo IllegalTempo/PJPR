@@ -16,7 +16,6 @@ public class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    private Vector3 movement = Vector3.zero;
     private Vector2 moveinput = Vector2.zero;
     private Vector2 lookinput = Vector2.zero;
     public Selectable seenObject = null;
@@ -113,6 +112,7 @@ public class PlayerMain : MonoBehaviour
     private void Initialize_remote()
     {
         cam.SetActive(false);
+        rb.isKinematic = true;
     }
     public void OnPickUpItem(Item Item)
     {
@@ -153,22 +153,15 @@ public class PlayerMain : MonoBehaviour
     {
 
 
-        Vector3 move = (transform.forward * moveinput.y + transform.right * moveinput.x);
-        move.y = 0f;
+        Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
         if (move.sqrMagnitude > 1f)
         {
             move.Normalize();
         }
 
         Vector3 targetVelocity = move * moveSpeed * maxSpeed;
-        movement = targetVelocity;
 
-        rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
-
-        if (targetVelocity.sqrMagnitude <= 0.0001f)
-        {
-            movement = Vector3.zero;
-        }
+        rb.linearVelocity = targetVelocity;
     }
     private void Look()
     {
