@@ -16,6 +16,10 @@ public class Spaceship : NetworkObject
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        if(NetworkSystem.Instance.IsServer)
+        {
+            rb.isKinematic = false;
+        }
     }
     public override void Init(string uid, ulong Owner, string PrefabID)
     {
