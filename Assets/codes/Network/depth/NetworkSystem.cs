@@ -439,6 +439,7 @@ public class NetworkSystem : MonoBehaviour
                 _server = null;
                 // Use the port returned by GetGameServer
                 _client = SteamNetworkingSockets.ConnectRelay<GameClient>(serverid, port);
+                IsOnline = true;
                 //print(client.NetworkID);
 
             }
