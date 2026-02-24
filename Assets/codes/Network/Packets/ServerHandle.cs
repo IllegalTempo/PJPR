@@ -10,6 +10,7 @@ public class ServerHandle
         string uuid = packet.ReadstringUNICODE();
         Vector3 pos = packet.Readvector3();
         Quaternion rot = packet.Readquaternion();
+        Debug.Log($"Received NOInfo from {p.SteamName} for {uuid} at pos {pos} with rot {rot}");
         NetworkSystem.Instance.FindNetworkObject[uuid].SetServerMovement(pos, rot);
         ServerSend.DistributeNOInfo(uuid, pos, rot);
 
