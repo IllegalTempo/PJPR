@@ -40,7 +40,8 @@ public class Item : Selectable //Item is any that is pickable
             return;
         }
 
-        if (netObj.Owner != 0) return;
+        if (this is not Decoration && netObj.Owner != 0) return;
+        if (this is Decoration && !GameCore.INSTANCE.IsLocal(netObj.Owner)) return;
         // Item is not in inventory, so pick it up
         PickUpItem();
 
@@ -89,8 +90,11 @@ public class Item : Selectable //Item is any that is pickable
         {
             localOwner = GameCore.INSTANCE.Local_NetworkPlayer.steamID;
         }
+        if (this is not Decoration)
+        {
+            netObj.Owner = localOwner;
 
-        netObj.Owner = localOwner;
+        }
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
@@ -134,7 +138,11 @@ public class Item : Selectable //Item is any that is pickable
 
 
         gotDropped(dropPosition);
-        netObj.Owner = 0;
+        if(this is not Decoration)
+        {
+            netObj.Owner = 0;
+
+        }
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
             if (NetworkSystem.Instance.IsServer)

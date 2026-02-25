@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Spaceship : NetworkObject
@@ -16,10 +17,7 @@ public class Spaceship : NetworkObject
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        if(NetworkSystem.Instance.IsServer)
-        {
-            rb.isKinematic = false;
-        }
+        
     }
     public override void Init(string uid, ulong Owner, string PrefabID)
     {
@@ -27,9 +25,18 @@ public class Spaceship : NetworkObject
         
         string name = GameCore.INSTANCE.Connector.GetNewSpaceShipName() + "_connect";
         gameObject.name = name;
-        dockTarget = GameCore.INSTANCE.Connector.connect(this);
+        OwnerPlayer = NetworkSystem.Instance.PlayerList[Owner];
+        OwnerPlayer.spaceship = this;
+        if (NetworkSystem.Instance.IsServer && !OwnerPlayer.IsLocal)
+        {
+            rb.isKinematic = true;
+        }
 
 
+    }
+    public void ConnectTo(int index)
+    {
+        dockTarget = GameCore.INSTANCE.Connector.connect(this,index);
 
     }
     protected override void FixedUpdate()
@@ -41,7 +48,7 @@ public class Spaceship : NetworkObject
             rb.linearVelocity = direction.normalized * 3;
             if (direction.magnitude < 0.03f)
             {
-                Connect();
+                OnConnect();
             }
         }
         
@@ -54,13 +61,14 @@ public class Spaceship : NetworkObject
 
         }
     }
-    public void Connect()
+    public void OnConnect()
     {
         rb.linearVelocity = Vector3.zero;
         Connector connector = GameCore.INSTANCE.Connector;
         transform.SetParent(connector.transform,true);
         Sync_Transform = false;
         dockTarget = null;
+        rb.isKinematic = true;
 
     }
 

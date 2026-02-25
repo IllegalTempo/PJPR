@@ -254,14 +254,15 @@ public class NetworkSystem : MonoBehaviour
         return nobj;
 
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
+    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner,int index) //run by server
     {
         if (IsOnline && !Instance.IsServer) return null;
-        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>(); ;
-        ss.OwnerPlayer = PlayerList[owner];
-        ss.OwnerPlayer.transform.SetParent(ss.transform);
-        ss.OwnerPlayer.transform.localPosition = Vector3.zero;
-        ss.OwnerPlayer.spaceship = ss;
+        Vector3 spawnpos = GameCore.INSTANCE.GetSpaceshipSpawn(index);
+
+        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>();
+        ss.ConnectTo(index);
+        //ss.OwnerPlayer = PlayerList[owner];
+        //ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
         {
             foreach (DecorationSaveData dsd in decs)
@@ -286,11 +287,11 @@ public class NetworkSystem : MonoBehaviour
         Debug.Log("Starting as Host...");
         ulong steamid = SteamClient.SteamId;
         await SpawnPlayer(steamid); //Add the server player to the player list
-        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid,0);
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
+    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner,int index)
     {
-        return await SpawnSpaceShip(null, owner);
+        return await SpawnSpaceShip(null, owner,index);
     }
     private void RegisterCallbacks()
     {

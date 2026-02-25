@@ -6,12 +6,11 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMain : MonoBehaviour
 {
-    public float moveSpeed = 0.5f;
-    public float lookSpeed = 2f;
-    public float maxSpeed = 3f; // Maximum allowed speed
-    public float jumpForce = 8f;
-    public float groundCheckDistance = 0.3f;
-    public LayerMask groundMask;
+    public float MoveSpeed = 0.5f;
+    public float LookSpeed = 2f;
+    public float MaxSpeed = 3f; // Maximum allowed speed
+    public float JetPackForce = 0.5f;
+    public float GroundCheckDistance = 0.3f;
 
     private float yaw = 0f;
     private float pitch = 0f;
@@ -29,7 +28,7 @@ public class PlayerMain : MonoBehaviour
     public Vector3 itemHoldOffset = new Vector3(0, 2f, 15f); // Position in front of the camera for held items
 
     private PlayerSettingsMenu settingsMenu;
-
+    PlayerInputAction control;
     void Start()
     {
 
@@ -52,14 +51,13 @@ public class PlayerMain : MonoBehaviour
     private void Initialize_local()
     {
         cam.SetActive(true);
-        PlayerInputAction control = GameCore.INSTANCE.PlayerControl;
+        control = GameCore.INSTANCE.PlayerControl;
 
         control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
         control.Player.pickup.performed += ctx => OnPickUp();
-        control.Player.jump.performed += ctx => Jump();
         control.Player.Interact.performed += ctx => OnInteract();
 
 
@@ -71,7 +69,7 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnDisable()
     {
-        PlayerInputAction control = GameCore.INSTANCE.PlayerControl;
+        
 
         if (control != null)
         {
@@ -80,7 +78,6 @@ public class PlayerMain : MonoBehaviour
             control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
             control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
             control.Player.pickup.performed -= ctx => OnPickUp();
-            control.Player.jump.performed -= ctx => Jump();
             control.Player.Interact.performed -= ctx => OnInteract();
         }
     }
@@ -138,15 +135,10 @@ public class PlayerMain : MonoBehaviour
 
     }
 
-    private bool IsGrounded()
-    {
-        return Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
-    }
 
-    private void Jump()
+    private void Jetpack()
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        rb.AddForce(Vector3.up * JetPackForce, ForceMode.Impulse);
 
     }
     private void Move()
@@ -159,15 +151,19 @@ public class PlayerMain : MonoBehaviour
             move.Normalize();
         }
 
-        Vector3 targetVelocity = move * moveSpeed * maxSpeed;
+        Vector3 targetVelocity = move * MoveSpeed * MaxSpeed;
 
         rb.linearVelocity = targetVelocity;
+        if(control.Player.jump.IsPressed())
+        {
+            Jetpack();
+        }
     }
     private void Look()
     {
         float sens = GameCore.INSTANCE.Option.mouseSensitivity;
-        yaw += lookSpeed * lookinput.x * sens;
-        pitch -= lookSpeed * lookinput.y * sens;
+        yaw += LookSpeed * lookinput.x * sens;
+        pitch -= LookSpeed * lookinput.y * sens;
         pitch = Mathf.Clamp(pitch, -90f, 90f);
         head.transform.eulerAngles = new Vector3(pitch, yaw, 0f);
         transform.eulerAngles = new Vector3(0, yaw, 0f);
@@ -280,14 +276,14 @@ public class PlayerMain : MonoBehaviour
     {
         if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
-            transform.SetParent(collision.transform);
+            //transform.SetParent(collision.transform);
         }
     }
     private void OnCollisionExit(Collision collision)
     {
         if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
-            transform.SetParent(null);
+            //transform.SetParent(null);
         }
     }
 

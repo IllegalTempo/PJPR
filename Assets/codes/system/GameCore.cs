@@ -39,6 +39,10 @@ public class GameCore : MonoBehaviour
     public PlayerMain Local_Player;
     public Spaceship Local_PlayerSpaceship;
     public NetworkPlayerObject Local_NetworkPlayer;
+    [SerializeField]
+    private Transform[] SpaceshipSpawns;
+
+    
     private void Awake()
     {
         InitPlayerControl();
@@ -77,6 +81,10 @@ public class GameCore : MonoBehaviour
         PlayerPrefs.SetString("inputRebinds", rebinds);
         PlayerPrefs.SetString("options", Option.saveAsJSON());
     }
+    public Vector3 GetSpaceshipSpawn(int index)
+    {
+        return SpaceshipSpawns.Length > index ? SpaceshipSpawns[index].position : Vector3.zero;
+    }
     public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {
         string prefabPath = GetPrefabWithID.ContainsKey(PrefabID) ? _prefabPath + GetPrefabWithID[PrefabID] : throw new PrefabNotFound(PrefabID);
@@ -91,6 +99,7 @@ public class GameCore : MonoBehaviour
         await request;
         return request.asset as GameObject;
     }
+    
     public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID,ulong owner,string uid,Vector3 pos,Quaternion rot,Transform parent=null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
