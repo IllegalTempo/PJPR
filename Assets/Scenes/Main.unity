@@ -1220,7 +1220,12 @@ MonoBehaviour:
   Local_Player: {fileID: 0}
   Local_PlayerSpaceship: {fileID: 0}
   Local_NetworkPlayer: {fileID: 0}
-  SpaceshipSpawns: []
+  SpaceshipSpawns:
+  - {fileID: 958809613}
+  - {fileID: 847859028}
+  - {fileID: 1581808657}
+  - {fileID: 418150356}
+  - {fileID: 1109995957}
 --- !u!114 &516030513
 MonoBehaviour:
   m_ObjectHideFlags: 0
