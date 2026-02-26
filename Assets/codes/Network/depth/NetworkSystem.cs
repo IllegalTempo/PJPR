@@ -257,9 +257,9 @@ public class NetworkSystem : MonoBehaviour
     public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner,int index) //run by server
     {
         if (IsOnline && !Instance.IsServer) return null;
-        Vector3 spawnpos = GameCore.INSTANCE.GetSpaceshipSpawn(index);
+        Transform spawn = GameCore.INSTANCE.GetSpaceshipSpawn(index);
 
-        Spaceship ss = (await CreateNetworkObject("Spaceship", new Vector3(0, 5, 0), Quaternion.identity, owner)).GetComponent<Spaceship>();
+        Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
         ss.ConnectTo(index);
         //ss.OwnerPlayer = PlayerList[owner];
         //ss.OwnerPlayer.spaceship = ss;

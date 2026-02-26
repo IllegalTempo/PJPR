@@ -81,9 +81,9 @@ public class GameCore : MonoBehaviour
         PlayerPrefs.SetString("inputRebinds", rebinds);
         PlayerPrefs.SetString("options", Option.saveAsJSON());
     }
-    public Vector3 GetSpaceshipSpawn(int index)
+    public Transform GetSpaceshipSpawn(int index)
     {
-        return SpaceshipSpawns.Length > index ? SpaceshipSpawns[index].position : Vector3.zero;
+        return SpaceshipSpawns[index];
     }
     public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {

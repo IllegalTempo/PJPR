@@ -75,14 +75,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1d352eceb244e49a81e423e15cf1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
-  moveSpeed: 0.5
-  lookSpeed: 2
-  maxSpeed: 3
-  jumpForce: 8
-  groundCheckDistance: 0.3
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 0
+  MoveSpeed: 0.5
+  LookSpeed: 2
+  MaxSpeed: 3
+  JetPackForce: 0.5
+  GroundCheckDistance: 0.3
   seenObject: {fileID: 0}
   clickedObject: {fileID: 0}
   cam: {fileID: 2002703588627120506}
@@ -132,9 +129,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.11
-  m_Height: 0.49
+  m_Height: 0.4249431
   m_Direction: 1
-  m_Center: {x: 0, y: 0.3, z: 0}
+  m_Center: {x: 0, y: 0.33252847, z: 0}
 --- !u!54 &8934402716096596408
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -377,15 +374,15 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 764988098e99be848a6f176c577812f9, type: 2}
     - target: {fileID: 8879528566716807029, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalScale.x
-      value: 12.5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8879528566716807029, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalScale.y
-      value: 12.5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8879528566716807029, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalScale.z
-      value: 12.5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8879528566716807029, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalPosition.y
