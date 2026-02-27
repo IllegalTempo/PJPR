@@ -57,11 +57,15 @@ public class MeteoriteFragment : Meteorite
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Optional: Add small damage to spaceship if fragment hits
-        if (collision.gameObject.CompareTag("Spaceship"))
+        SpaceshipPart part = collision.gameObject.GetComponent<SpaceshipPart>();
+        if (part == null)
+            part = collision.gameObject.GetComponentInParent<SpaceshipPart>();
+
+        if (part != null)
         {
-            // Fragments deal minimal damage
-            // You can implement this when spaceship damage system is ready
+            // SpaceshipPart.OnCollisionEnter handles this via HarmfulObjectType check,
+            // but fallback here in case the part does not have collision damage enabled.
+            // Damage is already driven by MeteoriteFragment's HarmfulObjectType.
         }
     }
 }

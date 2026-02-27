@@ -4,7 +4,9 @@ public enum HarmfulObjectType // enum w
 {
     Other,
     Meteorite,
-    MeteoriteFragment
+    MeteoriteFragment,
+    Planet,
+    BlackHole
 }
 
 public abstract class HarmfulObject : MonoBehaviour
