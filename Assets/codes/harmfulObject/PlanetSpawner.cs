@@ -40,11 +40,11 @@ public class PlanetSpawner : HazardSpawnerBase
         Vector3 pos = GetSpawnPosition(minSpawnDistance, spawnRadius);
         Quaternion rot = Random.rotation;
 
-        GameObject planet = await SpawnHazardObject(planetPrefabs, planetPrefabIDs, pos, rot);
-        if (planet == null) return;
+        GameObject planetObj = await SpawnHazardObject(planetPrefabs, planetPrefabIDs, pos, rot);
+        if (planetObj == null) return;
 
-        planet.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
-        activePlanets.Add(planet);
+        planetObj.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
+        activePlanets.Add(planetObj);
 
         Debug.Log($"[PlanetSpawner] Spawned planet at {pos}");
     }

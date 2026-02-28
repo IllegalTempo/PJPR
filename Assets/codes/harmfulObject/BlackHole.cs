@@ -5,6 +5,10 @@ using UnityEngine;
 //testing
 public class BlackHole : HarmfulObject
 {
+    [Header("Movement")]
+    [SerializeField] private float movementSpeed = 2f;
+    [SerializeField] private Vector3 movementDirection;
+    
     [Header("Gravity Well")]
     [SerializeField] private float attractionRadius = 40f;
     [SerializeField] private float attractionForce = 20f;
@@ -32,6 +36,12 @@ public class BlackHole : HarmfulObject
         SetHarmfulObjectType(HarmfulObjectType.BlackHole);
     }
 
+    public void InitializeMovement(Vector3 direction, float speed)
+    {
+        movementDirection = direction;
+        movementSpeed = speed;
+    }
+
     private void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -41,15 +51,22 @@ public class BlackHole : HarmfulObject
             rb.useGravity = false;
         }
 
-        // Black hole is static – no need to broadcast transform every FixedUpdate
         NetworkObject netObj = GetComponent<NetworkObject>();
-        if (netObj != null) netObj.Sync_Transform = false;
+        if (netObj != null) netObj.Sync_Transform = true;
     }
 
     private void FixedUpdate()
     {
-        // Only server drives physics – clients just observe via the spawned NetworkObject
+        // Only server drives physics
         if (!IsServerAuthority) return;
+
+        // Move the black hole
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null && movementDirection.magnitude > 0)
+        {
+            rb.MovePosition(rb.position + movementDirection.normalized * movementSpeed * Time.fixedDeltaTime);
+        }
+
         ApplyGravity();
     }
 

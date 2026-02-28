@@ -6,6 +6,9 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class Planet : HarmfulObject
 {
+    [Header("Planet Movement Settings")]
+    [SerializeField] private float movementSpeed = 0f; // Disabled by default
+    [SerializeField] private Vector3 movementDirection;
     [Header("Planet Properties")]
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private Vector3 rotationAxis = Vector3.up;
@@ -34,13 +37,14 @@ public class Planet : HarmfulObject
         rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
+            // use isKinematic true if Planet physics shouldn't be affected by other objects
             rb.isKinematic = true;
             rb.useGravity = false;
         }
 
-        // Planet is static – no need to broadcast transform every FixedUpdate
+        // We only broadcast transform if the planet moves!
         NetworkObject netObj = GetComponent<NetworkObject>();
-        if (netObj != null) netObj.Sync_Transform = false;
+        if (netObj != null) netObj.Sync_Transform = movementSpeed > 0;
 
         if (spawnRingOnStart && meteoriteRingPrefab != null && meteoriteRing == null)
         {
@@ -52,6 +56,20 @@ public class Planet : HarmfulObject
     private void Update()
     {
         transform.Rotate(rotationAxis.normalized * rotationSpeed * Time.deltaTime, Space.World);
+    }
+    
+    private void FixedUpdate()
+    {
+        if (IsServerAuthority && rb != null && movementDirection.magnitude > 0 && movementSpeed > 0)
+        {
+            rb.MovePosition(rb.position + movementDirection.normalized * movementSpeed * Time.fixedDeltaTime);
+        }
+    }
+
+    public void InitializeMovement(Vector3 direction, float speed)
+    {
+        movementDirection = direction;
+        movementSpeed = speed;
     }
 
     private void OnCollisionEnter(Collision collision)

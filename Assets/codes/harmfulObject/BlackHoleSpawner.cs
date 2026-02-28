@@ -63,7 +63,16 @@ public class BlackHoleSpawner : HazardSpawnerBase
         bh.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
         activeBlackHoles.Add(bh);
 
-        Debug.Log($"[BlackHoleSpawner] Spawned black hole at {pos}, lifetime={blackHoleLifetime}s");
+        Vector3 targetPos = spaceshipTarget != null ? spaceshipTarget.position : Vector3.zero;
+        Vector3 direction = (targetPos - pos).normalized; // moves towards the spaceship 
+        
+        BlackHole bhScript = bh.GetComponent<BlackHole>();
+        if (bhScript != null)
+        {
+            bhScript.InitializeMovement(direction, Random.Range(1f, 3f)); // low speed
+        }
+
+        Debug.Log($"[BlackHoleSpawner] Spawned moving black hole at {pos}, lifetime={blackHoleLifetime}s");
 
         StartCoroutine(DespawnAfter(bh, blackHoleLifetime, despawnShrinkTime));
     }

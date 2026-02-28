@@ -158,8 +158,8 @@ public class Item : Selectable //Item is any that is pickable
 
     }
     public void Drop()
-{
-    Drop(transform.position);
-}
+    {
+        Drop(transform.position);
+    }
 
 }
