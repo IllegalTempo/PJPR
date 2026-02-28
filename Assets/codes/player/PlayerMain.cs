@@ -22,6 +22,7 @@ public class PlayerMain : MonoBehaviour
     private AudioSource audioSource;
     private Vector2 moveinput = Vector2.zero;
     private Vector2 lookinput = Vector2.zero;
+    private bool usingvc = false;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
     public GameObject cam;
@@ -64,6 +65,7 @@ public class PlayerMain : MonoBehaviour
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
         control.Player.pickup.performed += ctx => OnPickUp();
         control.Player.Interact.performed += ctx => OnInteract();
+        control.Player.voice.performed += ctx => OnClickVC();
 
 
         settingsMenu = GetComponent<PlayerSettingsMenu>();
@@ -72,6 +74,7 @@ public class PlayerMain : MonoBehaviour
             settingsMenu = gameObject.AddComponent<PlayerSettingsMenu>();
         }
     }
+    
     private void OnDisable()
     {
         
@@ -84,7 +87,22 @@ public class PlayerMain : MonoBehaviour
             control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
             control.Player.pickup.performed -= ctx => OnPickUp();
             control.Player.Interact.performed -= ctx => OnInteract();
+            control.Player.voice.performed -= ctx => OnClickVC();
         }
+    }
+    private void OnClickVC()
+    {
+        usingvc = !usingvc;
+        if (usingvc)
+        {
+            GameCore.INSTANCE.vc.StartVoice();
+        }
+        else
+        {
+            GameCore.INSTANCE.vc.StopVoice();
+        }
+
+
     }
     private void OnInteract()
     {

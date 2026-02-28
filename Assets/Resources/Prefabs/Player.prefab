@@ -81,6 +81,7 @@ MonoBehaviour:
   MaxSpeed: 3
   JetPackForce: 0.5
   GroundCheckDistance: 0.3
+  audioSource: {fileID: 0}
   seenObject: {fileID: 0}
   clickedObject: {fileID: 0}
   cam: {fileID: 2002703588627120506}
@@ -217,7 +218,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

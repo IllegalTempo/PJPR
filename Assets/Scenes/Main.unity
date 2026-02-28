@@ -1375,6 +1375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameCore
   Masks: {fileID: 516030513}
+  vc: {fileID: 516030515}
   Connector: {fileID: 1422254768}
   Local_Player: {fileID: 0}
   Local_PlayerSpaceship: {fileID: 0}
@@ -3223,7 +3224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 0
+  StartServerOnStart: 1
   _maxPlayer: 8
   Connected: 0
   IsOnline: 0

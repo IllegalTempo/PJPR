@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class VoiceRecorder : MonoBehaviour
+public class recording : MonoBehaviour
 {
     private AudioClip micClip;
     private string selectedDevice;
