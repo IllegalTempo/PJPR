@@ -1,7 +1,10 @@
 using Assets.codes.items;
+using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMain : MonoBehaviour
@@ -15,6 +18,8 @@ public class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
+    [SerializeField]
+    private AudioSource audioSource;
     private Vector2 moveinput = Vector2.zero;
     private Vector2 lookinput = Vector2.zero;
     public Selectable seenObject = null;
@@ -286,5 +291,46 @@ public class PlayerMain : MonoBehaviour
             //transform.SetParent(null);
         }
     }
+    public void ReceiveVoice(byte[] bytesArray)
+    {
+        if (bytesArray == null || bytesArray.Length == 0)
+            return;
 
+        // ¢w¢w Step 1: Convert 16-bit signed PCM bytes ¡÷ float[-1..1] ¢w¢w
+        float[] floatSamples = new float[bytesArray.Length / 2];   // 2 bytes per sample
+
+        for (int i = 0; i < floatSamples.Length; i++)
+        {
+            // Read two bytes ¡÷ little-endian signed 16-bit integer
+            short pcmValue = (short)(
+                (bytesArray[i * 2 + 1] << 8) |           // high byte
+                (bytesArray[i * 2] & 0xFF)               // low byte (mask to prevent sign extension)
+            );
+
+            // Normalize to float range [-1.0 .. 1.0]
+            floatSamples[i] = pcmValue / 32767f;        // 32767 = short.MaxValue
+        }
+
+        // ¢w¢w Step 2: Create or update the clip ¢w¢w
+        // Important: For streaming voice, it's better NOT to create a new clip every packet!
+        //            Create once (when first voice arrives), then keep SetData() on it.
+
+        // Option A: Simple version (new clip every packet) ¡V works but causes small gaps/clicks
+        AudioClip remoteClip = AudioClip.Create(
+            "remoteVoice",
+            floatSamples.Length,               // number of samples this packet contains
+            1,                                 // mono
+            GameCore.SAMPLE_RATE,
+            stream: false                      // stream:true is only useful with repeated SetData()
+        );
+
+        remoteClip.SetData(floatSamples, 0);
+
+        audioSource.clip = remoteClip;
+        audioSource.Play();
+
+        // ¢w¢w Option B: Better for real voice chat (recommended) ¢w¢w
+        // Use one persistent clip + rolling buffer + SetData(offset)
+        // See explanation below
+    }
 }

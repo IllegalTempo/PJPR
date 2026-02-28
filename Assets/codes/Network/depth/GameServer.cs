@@ -34,6 +34,9 @@ public class GameServer : SocketManager
             { (int)packets.ClientPackets.SendDecorationInteract, ServerHandle.SendDecorationInteract }
         ,
             { (int)packets.ClientPackets.SendReadyState, ServerHandle.SendReadyState }
+        
+            ,
+            { (int)packets.ClientPackets.VoicePacket, ServerHandle.VoicePacket }
         };
 
 

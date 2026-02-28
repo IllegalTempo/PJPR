@@ -109,4 +109,13 @@ public class ClientSend
             return SendToServer(p);
         }
     }
+
+    public static Result VoicePacket(byte[] pcmBytes)
+    {
+        using (packet p = new packet((int)ClientPackets.VoicePacket))
+        {
+            p.Write(pcmBytes);
+            return SendToServer(p);
+        }
+    }
 }

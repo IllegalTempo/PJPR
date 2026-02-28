@@ -79,5 +79,12 @@ public class ServerHandle
         p.ReadyState = state;
         NetworkListener.RaiseReadyState(p,state);
     }
+
+    public static void VoicePacket(NetworkPlayer p, packet packet)
+    {
+        byte[] data = packet.ReadBytesArray();
+        p.player.playerControl.ReceiveVoice(data);
+        ServerSend.DistributeVoicePacket(p.steamId, data);
+    }
 }
 

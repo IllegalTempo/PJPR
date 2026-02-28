@@ -165,4 +165,12 @@ public class ClientHandle
         PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;
         decoration.OnInteract(who);
     }
+
+    public static void DistributeVoicePacket(Connection c, packet packet)
+    {
+        ulong whoInteracted = packet.Readulong();
+        byte[] bytearray = packet.ReadBytesArray();
+        PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;
+        who.ReceiveVoice(bytearray);
+    }
 }

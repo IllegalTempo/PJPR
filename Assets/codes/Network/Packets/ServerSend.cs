@@ -180,6 +180,16 @@ public class ServerSend
             return PacketSend.BroadcastPacketToReady(p);
         }
     }
+
+    public static Result DistributeVoicePacket(ulong NetworkPlayer, byte[] bytearray)
+    {
+        using (packet p = new packet((int)ServerPackets.DistributeVoicePacket))
+        {
+            p.Write(NetworkPlayer);
+            p.Write(bytearray);
+            return PacketSend.BroadcastPacketToReady(p, NetworkPlayer);
+        }
+    }
 }
 
     

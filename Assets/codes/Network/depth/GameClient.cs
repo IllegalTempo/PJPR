@@ -40,6 +40,9 @@ public class GameClient : ConnectionManager
             { (int)packets.ServerPackets.SyncNetworkObjects, ClientHandle.SyncNetworkObjects }
         ,
             { (int)packets.ServerPackets.DistributeDecorationInteract, ClientHandle.DistributeDecorationInteract }
+        
+            ,
+            { (int)packets.ServerPackets.DistributeVoicePacket, ClientHandle.DistributeVoicePacket }
         };
 
     public async UniTask NewPlayer(ulong who)

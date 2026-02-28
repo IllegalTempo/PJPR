@@ -101,6 +101,11 @@ public class packet : IDisposable
         Write(text.Length * 2);
         buffer.AddRange(Encoding.Unicode.GetBytes(text));
     }
+    public void Write(byte[] bytes)
+    {
+        Write(bytes.Length);
+        buffer.AddRange(bytes);
+    }
     #endregion
     #region Read Packet
     public int Readint()
@@ -154,6 +159,14 @@ public class packet : IDisposable
     public Quaternion Readquaternion()
     {
         return new Quaternion(Readfloat(),Readfloat(),Readfloat(),Readfloat());
+    }
+    public byte[] ReadBytesArray()
+    {
+        int intlength = Readint();
+        byte[] data = new byte[intlength];
+        Buffer.BlockCopy(readerbuffer, readindex, data, 0, intlength);
+        readindex += intlength;
+        return data;
     }
     #endregion
 }
