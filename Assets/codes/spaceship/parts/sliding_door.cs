@@ -1,22 +1,82 @@
 using UnityEngine;
 
-public class sliding_door : SpaceshipPart
+public class sliding_door : SpaceshipPart //the animators are still in the animtion file, but now it's using hardcode
 {
-    [SerializeField] private Animator animator;
-    [SerializeField] private string openParameterName = "IsOpen";
+    public enum OpenDirection
+    {
+        Left = 0,
+        Right = 1,
+        Up = 2,
+        Down = 3
+    }
 
+    [Header("Door Settings")]
+    [SerializeField] private OpenDirection openDirection = OpenDirection.Left;
+    [SerializeField] private float slideDistanceMultiplier = 1.0f;
+    [SerializeField] private float slideSpeed = 2f;
+    [SerializeField] private Transform doorMesh; 
+
+    private Vector3 closedPosition;
+    private Vector3 openPosition;
+    
     private bool isDoorOpen = false;
 
     private void Start()
     {
-        // Get the Animator component attached to this GameObject if not assigned in Inspector
-        if (animator == null)
+        if (doorMesh == null)
+            doorMesh = transform;
+
+        closedPosition = doorMesh.localPosition;
+        CalculateOpenPosition();
+    }
+
+    private void CalculateOpenPosition()
+    {
+        Collider col = doorMesh.GetComponent<Collider>();
+        float distance = 2f; 
+
+        if (col != null)
         {
-            animator = GetComponent<Animator>();
+            switch (openDirection)
+            {
+                case OpenDirection.Left:
+                case OpenDirection.Right:
+                    distance = col.bounds.size.x;
+                    break;
+                case OpenDirection.Up:
+                case OpenDirection.Down:
+                    distance = col.bounds.size.y;
+                    break;
+            }
+        }
+
+        distance *= slideDistanceMultiplier; 
+
+        switch (openDirection)
+        {
+            case OpenDirection.Left:
+                openPosition = closedPosition + (Vector3.left * distance);
+                break;
+            case OpenDirection.Right:
+                openPosition = closedPosition + (Vector3.right * distance);
+                break;
+            case OpenDirection.Up:
+                openPosition = closedPosition + (Vector3.up * distance);
+                break;
+            case OpenDirection.Down:
+                openPosition = closedPosition + (Vector3.down * distance);
+                break;
         }
     }
 
-    // Toggle the door when clicked (requires interactable setup)
+    protected override void Update()
+    {
+        base.Update();
+        
+        Vector3 targetPos = isDoorOpen ? openPosition : closedPosition;
+        doorMesh.localPosition = Vector3.Lerp(doorMesh.localPosition, targetPos, Time.deltaTime * slideSpeed);
+    }
+
     public override void OnClicked()
     {
         base.OnClicked();
@@ -29,37 +89,26 @@ public class sliding_door : SpaceshipPart
 
     public void OpenDoor()
     {
-        if (isDoorOpen) return;
-        
         isDoorOpen = true;
-        if (animator != null)
-            animator.SetBool(openParameterName, true);
     }
 
     public void CloseDoor()
     {
-        if (!isDoorOpen) return;
-        
         isDoorOpen = false;
-        if (animator != null)
-            animator.SetBool(openParameterName, false);
     }
 
-    // Automatically open when a Player enters the trigger area
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            OpenDoor();
-        }
-    }
-
-    // Automatically close when a Player leaves the trigger area
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            CloseDoor();
-        }
-    }
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         OpenDoor();
+    //     }
+    // }
+    // private void OnTriggerExit(Collider other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         CloseDoor();
+    //     }
+    // }
 } 
