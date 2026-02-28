@@ -2061,6 +2061,8 @@ MonoBehaviour:
   meteoriteDamage: 25
   fragmentDamage: 8
   projectileDamage: 15
+  planetDamage: 50
+  blackHoleDamage: 20
   defaultCollisionDamage: 5
   OnHealthChanged:
     m_PersistentCalls:

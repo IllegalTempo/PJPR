@@ -19,6 +19,8 @@ public class SpaceshipPart : interactable
     [SerializeField] private float meteoriteDamage = 25f;
 	[SerializeField] private float fragmentDamage = 8f;
 	[SerializeField] private float projectileDamage = 15f;
+	[SerializeField] private float planetDamage = 50f;
+	[SerializeField] private float blackHoleDamage = 20f;  // per-second inside horizon
 	[SerializeField] private float defaultCollisionDamage = 5f;
 
 	[Header("Events")]
@@ -236,6 +238,16 @@ public class SpaceshipPart : interactable
                 return fragmentDamage;
             }
 
+            if (harmfulObject.Type == HarmfulObjectType.Planet)
+            {
+                return planetDamage;
+            }
+
+            if (harmfulObject.Type == HarmfulObjectType.BlackHole)
+            {
+                return blackHoleDamage;
+            }
+
             return harmfulObject.DamageToShipPart;
         }
 
@@ -265,6 +277,18 @@ public class SpaceshipPart : interactable
     private void DebugTestMeteoriteHit()
     {
         OnDamage(meteoriteDamage, "Meteorite(Debug)");
+    }
+
+    [ContextMenu("Debug/Test Planet Hit")]
+    private void DebugTestPlanetHit()
+    {
+        OnDamage(planetDamage, "Planet(Debug)");
+    }
+
+    [ContextMenu("Debug/Test BlackHole Damage")]
+    private void DebugTestBlackHoleDamage()
+    {
+        OnDamage(blackHoleDamage, "BlackHole(Debug)");
     }
 
     //private bool CanRepairNow()
