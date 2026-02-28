@@ -27,6 +27,7 @@ public class Spaceship : NetworkObject
         gameObject.name = name;
         OwnerPlayer = NetworkSystem.Instance.PlayerList[Owner];
         OwnerPlayer.spaceship = this;
+        OwnerPlayer.transform.position = this.transform.position;
         if (NetworkSystem.Instance.IsServer && !OwnerPlayer.IsLocal)
         {
             rb.isKinematic = true;
