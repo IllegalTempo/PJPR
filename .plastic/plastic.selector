@@ -1,4 +1,0 @@
-repository "PJPR/PJPR@18966706659644@cloud"
-  path "/"
-    br "/main"
-    co "/main"
