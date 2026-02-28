@@ -1454,6 +1454,113 @@ Transform:
   m_Children: []
   m_Father: {fileID: 700092642}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &931047499
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 931047502}
+  - component: {fileID: 931047501}
+  - component: {fileID: 931047500}
+  - component: {fileID: 931047503}
+  m_Layer: 0
+  m_Name: HazardSpawners
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &931047500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 931047499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe96bcaa39686bb4fae5b7debfa071ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHoleSpawner
+  spaceshipTarget: {fileID: 1212190685}
+  spawnRadius: 150
+  minSpawnDistance: 50
+  blackHolePrefab: {fileID: 4410065600927574753, guid: 78e58cdd2b7eb874691834aba6529ae4, type: 3}
+  blackHolePrefabID: 
+  firstSpawnDelay: 3
+  spawnInterval: 120
+  spawnIntervalVariation: 30
+  blackHoleLifetime: 45
+  despawnShrinkTime: 2
+  scaleRange: {x: 1.5, y: 3}
+--- !u!114 &931047501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 931047499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a391e3f282c4d242b6f23af0e897339, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlanetSpawner
+  spaceshipTarget: {fileID: 1212190685}
+  spawnRadius: 500
+  minSpawnDistance: 50
+  planetPrefabs:
+  - {fileID: 5034288764167464366, guid: b5cd604f549bb304fa88169139658726, type: 3}
+  planetPrefabIDs: []
+  planetCount: 20
+  scaleRange: {x: 8, y: 20}
+  spawnOnStart: 1
+--- !u!4 &931047502
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 931047499}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.7794, y: -2.27011, z: 16.85755}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &931047503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 931047499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87996bc8a0d3dd408dbbf12cbda568f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
+  meteoritePrefabs: []
+  meteoritePrefabIDs: []
+  spaceshipTarget: {fileID: 1117423805036007623, guid: 5152911973c425a4a865d24a7238f186, type: 3}
+  spawnRadius: 700
+  minDistanceFromTarget: 100
+  baseSpawnInterval: 3
+  spawnIntervalVariation: 1
+  maxMeteorites: 50
+  useWaveSystem: 0
+  waveDuration: 30
+  waveBreakTime: 10
+  meteoritesPerWave: 15
+  sizeRange: {x: 0.5, y: 2}
+  speedRange: {x: 5, y: 15}
+  aimTowardTarget: 0.7
+  spawnAreaType: 0
+  spawnAreaSize: {x: 50, y: 30, z: 50}
 --- !u!114 &938007592 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8736092739982952983, guid: ce6b88a41d547f947be6b2feb4f3cd9b, type: 3}
@@ -1958,6 +2065,8 @@ MonoBehaviour:
   meteoriteDamage: 25
   fragmentDamage: 8
   projectileDamage: 15
+  planetDamage: 50
+  blackHoleDamage: 20
   defaultCollisionDamage: 5
   OnHealthChanged:
     m_PersistentCalls:
@@ -2601,3 +2710,4 @@ SceneRoots:
   - {fileID: 1185744477}
   - {fileID: 700092642}
   - {fileID: 71559295}
+  - {fileID: 931047502}
