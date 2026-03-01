@@ -10,10 +10,6 @@ public class Connector : NetworkObject
     private Animator animator;
     [SerializeField]
     private Transform[] dockpos;
-    public string GetNewSpaceShipName()
-    {
-        return "ss" + (connectedSpaceship.Count +1);
-    }
     public void ResetScene()
     {
         connectedSpaceship.Clear();

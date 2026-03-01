@@ -23,11 +23,11 @@ public class Spaceship : NetworkObject
     {
         base.Init(uid, 0, PrefabID);
         
-        string name = GameCore.INSTANCE.Connector.GetNewSpaceShipName() + "_connect";
-        gameObject.name = name;
+        
         OwnerPlayer = NetworkSystem.Instance.PlayerList[Owner];
+        string name = $"Spaceship {OwnerPlayer.index}";
+        gameObject.name = name;
         OwnerPlayer.spaceship = this;
-        OwnerPlayer.transform.position = this.transform.position;
         if (NetworkSystem.Instance.IsServer && !OwnerPlayer.IsLocal)
         {
             rb.isKinematic = true;
@@ -37,6 +37,7 @@ public class Spaceship : NetworkObject
     }
     public void ConnectTo(int index)
     {
+        Debug.Log($"{gameObject.name} connecting to dock {index}");
         dockTarget = GameCore.INSTANCE.Connector.connect(this,index);
 
     }

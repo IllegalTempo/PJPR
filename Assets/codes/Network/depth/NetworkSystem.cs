@@ -195,6 +195,8 @@ public class NetworkSystem : MonoBehaviour
         }
         SteamClient.Init(480, true);
         SteamID = SteamClient.SteamId;
+        RegisterCallbacks();
+
         if (StartServerOnStart)
         {
             await StartOnlineHost();
@@ -219,7 +221,6 @@ public class NetworkSystem : MonoBehaviour
             Debug.LogError("Failed to initialize relay network. NetworkSystem initialization failed.");
             return;
         }
-        RegisterCallbacks();
 
 
         bool lobbyReady = await CreateLobby(); if (lobbyReady) { Debug.Log("Lobby System Ready"); } else { return; }
