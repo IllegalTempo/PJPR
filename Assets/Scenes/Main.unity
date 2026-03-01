@@ -1829,6 +1829,149 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &979251806
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 979251808}
+  - component: {fileID: 979251810}
+  - component: {fileID: 979251809}
+  - component: {fileID: 979251813}
+  - component: {fileID: 979251812}
+  - component: {fileID: 979251811}
+  m_Layer: 0
+  m_Name: Environment Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &979251808
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.56991, y: 0, z: -9.00896}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &979251809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a391e3f282c4d242b6f23af0e897339, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlanetSpawner
+  spaceshipTarget: {fileID: 979251808}
+  spawnRadius: 150
+  minSpawnDistance: 50
+  planetPrefabs:
+  - {fileID: 5034288764167464366, guid: b5cd604f549bb304fa88169139658726, type: 3}
+  planetPrefabIDs: []
+  planetCount: 3
+  scaleRange: {x: 8, y: 20}
+  spawnOnStart: 1
+--- !u!114 &979251810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87996bc8a0d3dd408dbbf12cbda568f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
+  meteoritePrefabs:
+  - {fileID: 3289048002020084101, guid: 5152911973c425a4a865d24a7238f186, type: 3}
+  meteoritePrefabIDs: []
+  spaceshipTarget: {fileID: 979251808}
+  spawnRadius: 50
+  minDistanceFromTarget: 20
+  baseSpawnInterval: 3
+  spawnIntervalVariation: 1
+  maxMeteorites: 20
+  useWaveSystem: 0
+  waveDuration: 30
+  waveBreakTime: 10
+  meteoritesPerWave: 15
+  sizeRange: {x: 0.5, y: 2}
+  speedRange: {x: 5, y: 15}
+  aimTowardTarget: 0.7
+  spawnAreaType: 0
+  spawnAreaSize: {x: 50, y: 30, z: 50}
+--- !u!114 &979251811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f317d921609564b40a75d4a5bb2e03fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PJPR.EnvironmentObject.SkySpawner
+  skyColor: {r: 0, g: 0, b: 0, a: 1}
+  skyFarClipPlane: 6000
+--- !u!114 &979251812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632dedc8a7e634441b6541ec7f1da5ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PJPR.EnvironmentObject.NormalStarsSpawner
+  starCount: 500
+  spawnRadius: 4000
+  minSize: 5
+  maxSize: 8
+  starColors:
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0.85, g: 0.95, b: 1, a: 1}
+  - {r: 1, g: 0.95, b: 0.85, a: 1}
+--- !u!114 &979251813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8953d011a6650c942af1a127d0d6f0f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PJPR.EnvironmentObject.AlgorithmStarsSpawner
+  constellationCount: 10
+  spawnRadius: 3800
+  algorithmStarSize: 20
+  minStarsPerGroup: 2
+  maxStarsPerGroup: 5
+  groupSpread: 800
+  lineWidth: 6
+  algorithmColor: {r: 0, g: 0.8, b: 1, a: 1}
+  emissionIntensity: 5
+  randomSeed: 1337
 --- !u!1 &999244214
 GameObject:
   m_ObjectHideFlags: 0
@@ -3548,3 +3691,4 @@ SceneRoots:
   - {fileID: 71559295}
   - {fileID: 956797692}
   - {fileID: 1422254766}
+  - {fileID: 979251808}
