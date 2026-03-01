@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class SpaceshipPart : interactable
+public class SpaceshipPart : Selectable
 { 
 
     [Header("Identity")]
@@ -79,7 +79,10 @@ public class SpaceshipPart : interactable
             HandleBroken();
         }
     }
-
+    protected override void Start()
+    {
+        gameObject.layer = 8;
+    }
     //private void Update()
     //{
     //    //isLookedAtNow = IsLookedAtByLocalPlayer();

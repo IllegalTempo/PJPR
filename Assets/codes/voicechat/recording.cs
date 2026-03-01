@@ -9,8 +9,8 @@ public class recording : MonoBehaviour
 
     // ¢w¢w Tune these values ¢w¢w
     public const int SAMPLE_RATE = 16000;   // 11025, 22050, 44100 also possible; lower = smaller packets
-    private const int RECORD_LENGTH = 1;       // seconds ¡X how long one clip segment is
-    private const int PACKET_FREQUENCY_MS = 100; // how often we grab & send data (every 100 ms = 10 packets/sec)
+    public const int RECORD_LENGTH = 1;       // seconds ¡X how long one clip segment is
+    public const int PACKET_FREQUENCY_MS = 100; // how often we grab & send data (every 100 ms = 10 packets/sec)
 
     private int lastMicPosition = 0;
 

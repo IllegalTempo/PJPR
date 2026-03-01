@@ -6,6 +6,9 @@ using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 
+/// <summary>
+/// This is the brain of a player, most action of the player is done here, such as movement, looking around, picking up items, interacting with objects, and voice chat control. It also handles the player's camera and what they are currently looking at or holding. This script is attached to the player GameObject and requires a Rigidbody component for physics-based movement.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMain : MonoBehaviour
 {
@@ -63,7 +66,7 @@ public class PlayerMain : MonoBehaviour
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.pickup.performed += ctx => OnPickUp();
+        control.Player.pickup.performed += ctx => OnClickPickUp();
         control.Player.Interact.performed += ctx => OnInteract();
         control.Player.voice.performed += ctx => OnClickVC();
 
@@ -85,7 +88,7 @@ public class PlayerMain : MonoBehaviour
             control.Player.Move.canceled -= ctx => moveinput = Vector2.zero;
             control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
             control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
-            control.Player.pickup.performed -= ctx => OnPickUp();
+            control.Player.pickup.performed -= ctx => OnClickPickUp();
             control.Player.Interact.performed -= ctx => OnInteract();
             control.Player.voice.performed -= ctx => OnClickVC();
         }
@@ -192,7 +195,7 @@ public class PlayerMain : MonoBehaviour
         transform.eulerAngles = new Vector3(0, yaw, 0f);
 
     }
-    private void OnPickUp()
+    private void OnClickPickUp()
     {
         if (holdingItem != null)
         {
@@ -272,6 +275,7 @@ public class PlayerMain : MonoBehaviour
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
+
         if (Physics.Raycast(ray, out hit, 100f, GameCore.INSTANCE.Masks.SelectableItems))
         {
 
@@ -338,7 +342,7 @@ public class PlayerMain : MonoBehaviour
             "remoteVoice",
             floatSamples.Length,               // number of samples this packet contains
             1,                                 // mono
-            GameCore.SAMPLE_RATE,
+            recording.SAMPLE_RATE,
             stream: false                      // stream:true is only useful with repeated SetData()
         );
 

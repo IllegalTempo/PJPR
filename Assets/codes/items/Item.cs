@@ -8,7 +8,8 @@ public class Item : Selectable //Item is any that is pickable
     public string ItemName;
     public string ItemDescription;
     //[SerializeField] protected bool isRepairTool;
-    public NetworkObject netObj;
+    [SerializeField]
+    protected NetworkObject netObj;
     protected Rigidbody rb;
     protected Collider itemCollider;
 

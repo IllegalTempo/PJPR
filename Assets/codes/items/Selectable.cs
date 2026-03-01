@@ -11,7 +11,10 @@ public partial class Selectable : MonoBehaviour
     protected virtual void OnEnable()
     {
         outline = GetComponent<StaticOutline>();
-
+    }
+    protected virtual void Start()
+    {
+        gameObject.layer = 6;
     }
     protected virtual void Update()
     {
