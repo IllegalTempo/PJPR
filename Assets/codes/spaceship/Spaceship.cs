@@ -21,7 +21,7 @@ public class Spaceship : NetworkObject
     }
     public override void Init(string uid, ulong Owner, string PrefabID)
     {
-        base.Init(uid, Owner, PrefabID);
+        base.Init(uid, 0, PrefabID);
         
         string name = GameCore.INSTANCE.Connector.GetNewSpaceShipName() + "_connect";
         gameObject.name = name;
