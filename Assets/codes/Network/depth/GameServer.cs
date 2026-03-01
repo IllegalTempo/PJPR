@@ -85,7 +85,7 @@ public class GameServer : SocketManager
         ulong steamid = info.Identity.SteamId;
         NetworkSystem system = NetworkSystem.Instance;
         NetworkUsers[steamid].player = await system.SpawnPlayer(steamid);
-        await system.SpawnSpaceShip(steamid,NetworkUsers.Count-1);
+        await system.SpawnSpaceShip(steamid,NetworkUsers.Count);
         Debug.Log($"Player {steamid} instantiated on server.");
     }
     private async UniTask<bool> SyncPlayer(NetworkPlayer connectedPlayer)
