@@ -21,13 +21,14 @@ public class Spaceship : NetworkObject
     }
     public override void Init(string uid, ulong Owner, string PrefabID)
     {
-        base.Init(uid, 0, PrefabID);
+        base.Init(uid, Owner, PrefabID);
         
         
         OwnerPlayer = NetworkSystem.Instance.PlayerList[Owner];
         string name = $"Spaceship {OwnerPlayer.index}";
         gameObject.name = name;
         OwnerPlayer.spaceship = this;
+        ConnectTo(OwnerPlayer.index);
         if (NetworkSystem.Instance.IsServer && !OwnerPlayer.IsLocal)
         {
             rb.isKinematic = true;

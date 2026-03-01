@@ -262,7 +262,7 @@ public class NetworkSystem : MonoBehaviour
         Transform spawn = GameCore.INSTANCE.GetSpaceshipSpawn(player.index);
 
         Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
-        ss.ConnectTo(player.index);
+        
         //ss.OwnerPlayer = PlayerList[owner];
         //ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
