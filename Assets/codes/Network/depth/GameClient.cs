@@ -63,7 +63,7 @@ public class GameClient : ConnectionManager
     }
     public bool IsLocal(ulong id)
     {
-        return id == NetworkSystem.Instance.PlayerId;
+        return id == NetworkSystem.Instance.SteamID;
     }
     public Connection GetServer()
     {

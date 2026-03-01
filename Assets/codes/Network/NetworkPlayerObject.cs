@@ -1,5 +1,6 @@
 using Steamworks;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 using static UnityEngine.GraphicsBuffer;
 
 public class NetworkPlayerObject : MonoBehaviour
@@ -8,6 +9,7 @@ public class NetworkPlayerObject : MonoBehaviour
     [Header("Network Data")]
     public ulong steamID;
     public bool IsLocal;
+    public int index;
 
     public Vector3 NetworkPos;
     public Quaternion NetworkHeadRot;
@@ -24,6 +26,13 @@ public class NetworkPlayerObject : MonoBehaviour
     public GameObject Body;
     public PlayerMain playerControl;
     public Spaceship spaceship;
+    public void Init(ulong steamid,int index)
+    {
+        steamID = steamid;
+        IsLocal = steamid == NetworkSystem.Instance.SteamID;
+        gameObject.name = $"Player {index} ({steamid})";
+
+    }
     public void Disconnect()
     {
         Destroy(gameObject);
@@ -52,7 +61,7 @@ public class NetworkPlayerObject : MonoBehaviour
         {
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributeMovement(NetworkSystem.Instance.PlayerId, transform.position, Head.transform.rotation, transform.rotation);
+                ServerSend.DistributeMovement(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
             }
             else
             {

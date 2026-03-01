@@ -99,7 +99,7 @@ public class recording : MonoBehaviour
 
         if (NetworkSystem.Instance.IsServer)
         {
-            ServerSend.DistributeVoicePacket(NetworkSystem.Instance.PlayerId,pcmBytes);
+            ServerSend.DistributeVoicePacket(NetworkSystem.Instance.SteamID,pcmBytes);
         }
         else
         {

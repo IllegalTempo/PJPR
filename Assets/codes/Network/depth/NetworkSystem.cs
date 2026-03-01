@@ -28,7 +28,7 @@ public class NetworkSystem : MonoBehaviour
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     //All player list
     public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
-    public ulong PlayerId;
+    public ulong SteamID;
     public int initState = 0;
     public Lobby CurrentLobby;// Start is called before the first frame update
     private GameServer _server;
@@ -165,15 +165,14 @@ public class NetworkSystem : MonoBehaviour
     //Spawn the network Player
     public async UniTask<NetworkPlayerObject> SpawnPlayer(ulong steamid)
     {
-        bool isLocal = steamid == PlayerId;
         ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
-        NetworkPlayerObject p = Instantiate(PlayerInstance, new Vector3(0, 5, 0), Quaternion.identity).GetComponent<NetworkPlayerObject>();
-        p.steamID = steamid;
-        p.IsLocal = isLocal;
-        p.gameObject.name = "Player_" + steamid;
+        int index = PlayerList.Count;
+        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.INSTANCE.GetSpaceshipSpawn(index).position, Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        p.Init(steamid,index);
         PlayerList.Add(steamid, p);
+
         Debug.Log($"Spawned Player {steamid}");
 
         return p;
@@ -189,14 +188,13 @@ public class NetworkSystem : MonoBehaviour
 
     private async UniTask InitializeNetwork()
     {
-        RegisterCallbacks();
         if (SteamClient.IsValid)
         {
             Debug.Log("SteamClient already initialized. ");
             return;
         }
         SteamClient.Init(480, true);
-        PlayerId = SteamClient.SteamId;
+        SteamID = SteamClient.SteamId;
         if (StartServerOnStart)
         {
             await StartOnlineHost();
@@ -221,6 +219,8 @@ public class NetworkSystem : MonoBehaviour
             Debug.LogError("Failed to initialize relay network. NetworkSystem initialization failed.");
             return;
         }
+        RegisterCallbacks();
+
 
         bool lobbyReady = await CreateLobby(); if (lobbyReady) { Debug.Log("Lobby System Ready"); } else { return; }
     }
@@ -254,13 +254,14 @@ public class NetworkSystem : MonoBehaviour
         return nobj;
 
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner,int index) //run by server
+    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     {
         if (IsOnline && !Instance.IsServer) return null;
-        Transform spawn = GameCore.INSTANCE.GetSpaceshipSpawn(index);
+        NetworkPlayerObject player = PlayerList[owner];
+        Transform spawn = GameCore.INSTANCE.GetSpaceshipSpawn(player.index);
 
         Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
-        ss.ConnectTo(index);
+        ss.ConnectTo(player.index);
         //ss.OwnerPlayer = PlayerList[owner];
         //ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
@@ -287,11 +288,11 @@ public class NetworkSystem : MonoBehaviour
         Debug.Log("Starting as Host...");
         ulong steamid = SteamClient.SteamId;
         await SpawnPlayer(steamid); //Add the server player to the player list
-        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid,0);
+        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner,int index)
+    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
     {
-        return await SpawnSpaceShip(null, owner,index);
+        return await SpawnSpaceShip(null, owner);
     }
     private void RegisterCallbacks()
     {
@@ -366,10 +367,10 @@ public class NetworkSystem : MonoBehaviour
     {
         l.SetFriendsOnly();
         l.SetJoinable(true);
-        l.Owner = new Friend(PlayerId);
+        l.Owner = new Friend(SteamID);
         Debug.Log($"Lobby ID: {l.Id} Result: {r} Starting Game Server...");
         // Publish the relay port as part of the lobby so clients receive it
-        l.SetGameServer(PlayerId);
+        l.SetGameServer(SteamID);
         CurrentLobby = l;
         //MainScreenUI.instance.InviteCodeDisplay.text = NetworkSystem.instance.GetInviteCode().ToString();
 
@@ -409,7 +410,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private void OnLobbyGameCreated(Lobby lobby, uint ip, ushort port, SteamId id)
     {
-        if (id == PlayerId) return;
+        if (id == SteamID) return;
         Debug.Log($"Connecting To Relay Server: {ip}:{port}, {id}");
         if (_client == null)
         {
@@ -421,7 +422,7 @@ public class NetworkSystem : MonoBehaviour
     }
     private async void OnLobbyEntered(Lobby l)
     {
-        if (l.Owner.Id == PlayerId) { return; }
+        if (l.Owner.Id == SteamID) { return; }
         ResetScene();
 
         if (_client == null)

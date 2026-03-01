@@ -8,14 +8,15 @@ public partial class Selectable : MonoBehaviour
     public StaticOutline outline;
     public bool LookedAt = false;
     public float ClickTimer = 0f;
+    protected virtual int Layer => 6; // Default layer for selectable objects
+
     protected virtual void OnEnable()
     {
         outline = GetComponent<StaticOutline>();
+        gameObject.layer = Layer;
+
     }
-    protected virtual void Start()
-    {
-        gameObject.layer = 6;
-    }
+
     protected virtual void Update()
     {
         if (ClickTimer > 0)

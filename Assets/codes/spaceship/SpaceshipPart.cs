@@ -65,7 +65,7 @@ public class SpaceshipPart : Selectable
     //    public int colorPropertyId;
     //    public Color baseColor;
     //}
-
+    protected override int Layer => 8;
 
     private void Awake()
     {
@@ -78,10 +78,7 @@ public class SpaceshipPart : Selectable
         {
             HandleBroken();
         }
-    }
-    protected override void Start()
-    {
-        gameObject.layer = 8;
+
     }
     //private void Update()
     //{
