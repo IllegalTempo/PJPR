@@ -30,6 +30,7 @@ public class NetworkPlayerObject : MonoBehaviour
     {
         steamID = steamid;
         IsLocal = steamid == NetworkSystem.Instance.SteamID;
+        this.index = index;
         gameObject.name = $"Player {index} ({steamid})";
 
     }
