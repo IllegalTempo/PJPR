@@ -60,7 +60,7 @@ public class PlayerMain : MonoBehaviour
     private void Initialize_local()
     {
         cam.SetActive(true);
-        control = GameCore.INSTANCE.PlayerControl;
+        control = GameCore.Instance.PlayerControl;
 
         control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
@@ -98,11 +98,11 @@ public class PlayerMain : MonoBehaviour
         usingvc = !usingvc;
         if (usingvc)
         {
-            GameCore.INSTANCE.vc.StartVoice();
+            GameCore.Instance.vc.StartVoice();
         }
         else
         {
-            GameCore.INSTANCE.vc.StopVoice();
+            GameCore.Instance.vc.StopVoice();
         }
 
 
@@ -187,7 +187,7 @@ public class PlayerMain : MonoBehaviour
     }
     private void Look()
     {
-        float sens = GameCore.INSTANCE.Option.mouseSensitivity;
+        float sens = GameCore.Instance.Option.mouseSensitivity;
         yaw += LookSpeed * lookinput.x * sens;
         pitch -= LookSpeed * lookinput.y * sens;
         pitch = Mathf.Clamp(pitch, -90f, 90f);
@@ -276,7 +276,7 @@ public class PlayerMain : MonoBehaviour
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100f, GameCore.INSTANCE.Masks.SelectableItems))
+        if (Physics.Raycast(ray, out hit, 100f, GameCore.Instance.Masks.SelectableItems))
         {
 
             seenObject = hit.collider.GetComponent<Selectable>();
@@ -301,14 +301,14 @@ public class PlayerMain : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
+        if ((GameCore.Instance.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
             //transform.SetParent(collision.transform);
         }
     }
     private void OnCollisionExit(Collision collision)
     {
-        if ((GameCore.INSTANCE.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
+        if ((GameCore.Instance.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
             //transform.SetParent(null);
         }

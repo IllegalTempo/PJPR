@@ -122,7 +122,7 @@ public class ClientHandle
         Vector3 spawnLocation = packet.Readvector3();
         Quaternion spawnRot = packet.Readquaternion();
         ulong owner = packet.Readulong();
-        GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot).Forget();
+        GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot).Forget();
     }
 
     public static void DistributeNOactive(Connection c, packet packet)
@@ -150,7 +150,7 @@ public class ClientHandle
             string prefabID = packet.ReadstringUNICODE();
             Vector3 spawnLocation = packet.Readvector3();
             Quaternion spawnRot = packet.Readquaternion();
-            GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot).Forget();
+            GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, spawnLocation, spawnRot).Forget();
         }
         UpdateReadyState(ReadyState.SyncNetworkObjects);
 

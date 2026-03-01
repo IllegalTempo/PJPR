@@ -2539,6 +2539,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: connector2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6928f8ef4eb97b644a044c36a424ac93, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -3224,13 +3228,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 1
+  StartServerOnStart: 0
   _maxPlayer: 8
   Connected: 0
   IsOnline: 0
   IsServer: 1
   FindNetworkObjectKey: []
-  PlayerId: 0
+  SteamID: 0
   initState: 0
 --- !u!1 &2026176164
 GameObject:

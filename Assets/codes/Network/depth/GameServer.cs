@@ -52,6 +52,7 @@ public class GameServer : SocketManager
         NetworkSystem system = NetworkSystem.Instance;
         system.IsOnline = true;
         system.IsServer = true;
+        GameCore.Instance.Connector.gameObject.SetActive(true);
         await system.StartAsHost();
         return true;
     }

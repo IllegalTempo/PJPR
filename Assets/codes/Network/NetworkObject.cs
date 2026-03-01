@@ -79,7 +79,7 @@ public class NetworkObject : MonoBehaviour
             ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
 
         }
-        else if (GameCore.INSTANCE.IsLocal(Owner))
+        else if (GameCore.Instance.IsLocal(Owner))
         {
             ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
 

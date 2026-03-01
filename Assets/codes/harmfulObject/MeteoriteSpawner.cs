@@ -195,7 +195,7 @@ public class MeteoriteSpawner : MonoBehaviour
             GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
             if (meteoritePrefab != null)
             {
-                foreach (KeyValuePair<string, string> prefabEntry in GameCore.INSTANCE.GetPrefabWithID)
+                foreach (KeyValuePair<string, string> prefabEntry in GameCore.Instance.GetPrefabWithID)
                 {
                     if (prefabEntry.Key == meteoritePrefab.name || prefabEntry.Value == meteoritePrefab.name)
                     {
@@ -205,14 +205,14 @@ public class MeteoriteSpawner : MonoBehaviour
             }
         }
 
-        if (GameCore.INSTANCE != null)
+        if (GameCore.Instance != null)
         {
-            if (GameCore.INSTANCE.GetPrefabWithID.ContainsKey("Meteorite_Test"))
+            if (GameCore.Instance.GetPrefabWithID.ContainsKey("Meteorite_Test"))
             {
                 return "Meteorite_Test";
             }
 
-            if (GameCore.INSTANCE.GetPrefabWithID.ContainsKey("Meteorite_Fragment"))
+            if (GameCore.Instance.GetPrefabWithID.ContainsKey("Meteorite_Fragment"))
             {
                 return "Meteorite_Fragment";
             }

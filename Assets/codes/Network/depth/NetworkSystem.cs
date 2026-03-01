@@ -169,8 +169,8 @@ public class NetworkSystem : MonoBehaviour
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
         int index = PlayerList.Count;
-        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.INSTANCE.GetSpaceshipSpawn(index).position, Quaternion.identity).GetComponent<NetworkPlayerObject>();
-        p.Init(steamid,index);
+        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.GetSpaceshipSpawn(index).position, Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        p.Init(steamid, index);
         PlayerList.Add(steamid, p);
 
         Debug.Log($"Spawned Player {steamid}");
@@ -200,11 +200,14 @@ public class NetworkSystem : MonoBehaviour
         if (StartServerOnStart)
         {
             await StartOnlineHost();
-        } else
+        }
+        else
         {
+            GameCore.Instance.Connector.gameObject.SetActive(false);
+
             await StartAsHost();
         }
-        
+
         Debug.Log("NetworkSystem Initialization Complete");
     }
     private async UniTask StartOnlineHost()
@@ -245,11 +248,11 @@ public class NetworkSystem : MonoBehaviour
     }
     public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
     { //more check added
-        
+
         if (IsOnline && !IsServer) return null;
         string uid = Guid.NewGuid().ToString();
 
-        NetworkObject nobj = await GameCore.INSTANCE.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
+        NetworkObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
         ServerSend.NewObject(prefabID, uid, pos, rot, owner);
 
         return nobj;
@@ -259,17 +262,17 @@ public class NetworkSystem : MonoBehaviour
     {
         if (IsOnline && !Instance.IsServer) return null;
         NetworkPlayerObject player = PlayerList[owner];
-        Transform spawn = GameCore.INSTANCE.GetSpaceshipSpawn(player.index);
+        Transform spawn = GameCore.Instance.GetSpaceshipSpawn(player.index);
 
         Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
-        
+
         //ss.OwnerPlayer = PlayerList[owner];
         //ss.OwnerPlayer.spaceship = ss;
         if (decs != null)
         {
             foreach (DecorationSaveData dsd in decs)
             {
-                GameObject prefab = await GameCore.INSTANCE.GetDecoration(dsd.DecorationID);
+                GameObject prefab = await GameCore.Instance.GetDecoration(dsd.DecorationID);
                 Decoration obj = Instantiate(prefab, ss.transform).GetComponent<Decoration>();
                 obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
 
@@ -319,18 +322,12 @@ public class NetworkSystem : MonoBehaviour
     }
     private void ResetScene()
     {
+        
         _startedAsHost = false;
-        GameCore.INSTANCE.Connector.ResetScene();
+        GameCore.Instance.Connector.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
-        FindNetworkObject
-    .Where(kvp => kvp.Value && !kvp.Value.InScene)
-    .ToList()
-    .ForEach(kvp =>
-    {
-        Destroy(kvp.Value.gameObject);
-        FindNetworkObject.Remove(kvp.Key);
-    });
+        FindNetworkObject.Where(kvp => kvp.Value && !kvp.Value.InScene).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkObject.Remove(kvp.Key); });
         Debug.Log("Cleaned up scene");
     }
 

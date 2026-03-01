@@ -14,7 +14,7 @@ public class HammerItem : Item,IUsable
     }
     public void OnInteract(PlayerMain who)
     {
-        if (GameCore.INSTANCE.Local_Player.seenObject is SpaceshipPart ssp)
+        if (GameCore.Instance.Local_Player.seenObject is SpaceshipPart ssp)
         {
             ssp.Repair(10f);
         }

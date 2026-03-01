@@ -28,7 +28,10 @@ public class Spaceship : NetworkObject
         string name = $"Spaceship {OwnerPlayer.index}";
         gameObject.name = name;
         OwnerPlayer.spaceship = this;
-        ConnectTo(OwnerPlayer.index);
+        if(NetworkSystem.Instance.IsOnline)
+        {
+            ConnectTo(OwnerPlayer.index);
+        }
         if (NetworkSystem.Instance.IsServer && !OwnerPlayer.IsLocal)
         {
             rb.isKinematic = true;
@@ -39,7 +42,7 @@ public class Spaceship : NetworkObject
     public void ConnectTo(int index)
     {
         Debug.Log($"{gameObject.name} connecting to dock {index}");
-        dockTarget = GameCore.INSTANCE.Connector.connect(this,index);
+        dockTarget = GameCore.Instance.Connector.connect(this,index);
 
     }
     protected override void FixedUpdate()
@@ -67,7 +70,7 @@ public class Spaceship : NetworkObject
     public void OnConnect()
     {
         rb.linearVelocity = Vector3.zero;
-        Connector connector = GameCore.INSTANCE.Connector;
+        Connector connector = GameCore.Instance.Connector;
         transform.SetParent(connector.transform,true);
         Sync_Transform = false;
         dockTarget = null;

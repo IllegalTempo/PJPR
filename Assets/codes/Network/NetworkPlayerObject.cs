@@ -37,16 +37,16 @@ public class NetworkPlayerObject : MonoBehaviour
     public void Disconnect()
     {
         Destroy(gameObject);
-        GameCore.INSTANCE.Connector.disconnect(spaceship);
-
+        GameCore.Instance.Connector.disconnect(spaceship);
         Destroy(spaceship);
+
     }
     private void Start()
     {
         if(IsLocal)
         {
-            GameCore.INSTANCE.Local_NetworkPlayer = this;
-            GameCore.INSTANCE.Local_Player = playerControl;
+            GameCore.Instance.Local_NetworkPlayer = this;
+            GameCore.Instance.Local_Player = playerControl;
         }
 
     }

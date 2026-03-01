@@ -13,7 +13,7 @@ using static UnityEngine.Rendering.DebugUI.Table;
 [RequireComponent(typeof(LayerMasks))]
 public class GameCore : MonoBehaviour
 {
-    public static GameCore INSTANCE;
+    public static GameCore Instance;
     public LayerMasks Masks;
     public recording vc;
     public options Option;
@@ -52,9 +52,9 @@ public class GameCore : MonoBehaviour
         InitPlayerControl();
         // Convert the serialized list to dictionary
 
-        if (INSTANCE == null)
+        if (Instance == null)
         {
-            INSTANCE = this;
+            Instance = this;
             DontDestroyOnLoad(this.gameObject);
         }
         else

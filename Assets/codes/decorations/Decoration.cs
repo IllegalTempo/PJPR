@@ -14,13 +14,13 @@ public class Decoration : Item
     {
         base.OnClicked();
         // Item is not in inventory, so pick it up
-        if(GameCore.INSTANCE.IsLocal(netObj.Owner))
+        if(GameCore.Instance.IsLocal(netObj.Owner))
         PickUpItem();
 
     }
     public void OnCreate(Spaceship createdon,Vector3 pos,Quaternion rot)
     {
-        GameCore.INSTANCE.Local_PlayerSpaceship.GetDecorationByUUID_onShip.Add(netObj.Identifier, this);
+        GameCore.Instance.Local_PlayerSpaceship.GetDecorationByUUID_onShip.Add(netObj.Identifier, this);
         transform.position = pos;
         transform.rotation = rot;
     }
