@@ -7,7 +7,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 public class Spaceship : NetworkObject
 {
     public List<SpaceshipPart> Parts = new List<SpaceshipPart>();
-    public Dictionary<string, Decoration> GetDecorationByUUID_onShip = new Dictionary<string, Decoration>();
+    public List<Decoration> Decorations = new List<Decoration>();
     public NetworkPlayerObject OwnerPlayer;
     [SerializeField]
     private Animator animator;

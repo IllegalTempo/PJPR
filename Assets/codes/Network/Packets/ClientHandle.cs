@@ -156,7 +156,7 @@ public class ClientHandle
 
     }
 
-    public static void DistributeDecorationInteract(Connection c, packet packet)
+    public static void DistributeInteract(Connection c, packet packet)
     {
         ulong whoInteracted = packet.Readulong();
         string decorationUID = packet.ReadstringUNICODE();

@@ -170,9 +170,9 @@ public class ServerSend
         }
     }
 
-    public static Result DistributeDecorationInteract(ulong whoInteracted, string decorationUID)
+    public static Result DistributeInteract(ulong whoInteracted, string decorationUID)
     {
-        using (packet p = new packet((int)ServerPackets.DistributeDecorationInteract))
+        using (packet p = new packet((int)ServerPackets.DistributeInteract))
         {
             p.Write(whoInteracted);
             p.WriteUNICODE(decorationUID);

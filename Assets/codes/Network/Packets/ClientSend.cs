@@ -91,9 +91,9 @@ public class ClientSend
         }
     }
 
-    public static Result SendDecorationInteract(string decorationUID)
+    public static Result SendInteract(string decorationUID)
     {
-        using (packet p = new packet((int)ClientPackets.SendDecorationInteract))
+        using (packet p = new packet((int)ClientPackets.SendInteract))
         {
             p.WriteUNICODE(decorationUID);
             

@@ -212,39 +212,54 @@ public class NetworkSystem : MonoBehaviour
     }
     private async UniTask StartOnlineHost()
     {
+        UIManager.Instance.ShowLoadingScreen("Waiting for Wormhole Network to respond...");
+
         SteamNetworkingUtils.InitRelayNetworkAccess();
         Debug.Log("SteamClient Initialized, Waiting for relay network...");
-        bool relayReady = await WaitForRelayNetwork();
-        if (relayReady)
+        bool networkready = await WaitForRelayNetwork();
+        if (networkready)
         {
             Debug.Log("SteamRelayNetwork Initialized,");
-        }
-        else
+            UIManager.Instance.ChangeLoadingStatus("Wormhole Network Approved... Creating a brand new wormhole", 0.5f);
+            bool lobbyReady = await CreateLobby();
+            if (lobbyReady)
+            {
+                Debug.Log("Lobby System Ready");
+                UIManager.Instance.LoadingComplete();
+            }
+            else { return; }
+
+        } else
         {
-            Debug.LogError("Failed to initialize relay network. NetworkSystem initialization failed.");
-            return;
+            UIManager.Instance.ChangeLoadingStatus("Wormhole Network Rejected... Please check your Appliances and restart this system (Maybe you are in eduroam, some uni banned steam relay)", 0f);
+
         }
 
 
-        bool lobbyReady = await CreateLobby(); if (lobbyReady) { Debug.Log("Lobby System Ready"); } else { return; }
+
+
+        
     }
-    private async UniTask<bool> WaitForRelayNetwork(float timeoutSeconds = 10f)
+    private async UniTask<bool> WaitForRelayNetwork()
     {
-        float elapsed = 0f;
         while (SteamNetworkingUtils.Status != SteamNetworkingAvailability.Current)
         {
-            if (elapsed >= timeoutSeconds)
-            {
-                Debug.LogWarning($"Failed to initialize relay network. Relay network timeout. Status: {SteamNetworkingUtils.Status}");
-                return false;
-            }
-
             await UniTask.Delay(100);
-            elapsed += 0.1f;
+            if(SteamNetworkingUtils.Status == SteamNetworkingAvailability.Failed)
+            {
+                Debug.LogError("Failed to initialize Steam Relay Network. Please check your network connection and try again.");
+                return false;
+
+            }
         }
 
         Debug.Log($"Relay network status: {SteamNetworkingUtils.Status}");
         return true;
+    }
+    public async UniTask<NetworkObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, bool dontcreateinInit = false)
+    {
+        NetworkObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform(), dontcreateinInit);
+        return nobj;
     }
     public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
     { //more check added
@@ -265,23 +280,10 @@ public class NetworkSystem : MonoBehaviour
         Transform spawn = GameCore.Instance.GetSpaceshipSpawn(player.index);
 
         Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
-
+        await GameCore.Instance.SpawnDecorations(decs, ss);
         //ss.OwnerPlayer = PlayerList[owner];
         //ss.OwnerPlayer.spaceship = ss;
-        if (decs != null)
-        {
-            foreach (DecorationSaveData dsd in decs)
-            {
-                GameObject prefab = await GameCore.Instance.GetDecoration(dsd.DecorationID);
-                Decoration obj = Instantiate(prefab, ss.transform).GetComponent<Decoration>();
-                obj.OnCreate(ss, dsd.DecorationPosition, dsd.DecorationRotation);
 
-            }
-        }
-        else
-        {
-            Debug.Log("Cannot load decorations");
-        }
         return ss;
 
     }
@@ -322,12 +324,12 @@ public class NetworkSystem : MonoBehaviour
     }
     private void ResetScene()
     {
-        
+
         _startedAsHost = false;
         GameCore.Instance.Connector.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
-        FindNetworkObject.Where(kvp => kvp.Value && !kvp.Value.InScene).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkObject.Remove(kvp.Key); });
+        FindNetworkObject.Where(kvp => kvp.Value && !kvp.Value.Preset).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkObject.Remove(kvp.Key); });
         Debug.Log("Cleaned up scene");
     }
 

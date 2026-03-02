@@ -36,7 +36,6 @@ public class PlayerMain : MonoBehaviour
 
     public Vector3 itemHoldOffset = new Vector3(0, 2f, 15f); // Position in front of the camera for held items
 
-    private PlayerSettingsMenu settingsMenu;
     PlayerInputAction control;
     void Start()
     {
@@ -71,11 +70,6 @@ public class PlayerMain : MonoBehaviour
         control.Player.voice.performed += ctx => OnClickVC();
 
 
-        settingsMenu = GetComponent<PlayerSettingsMenu>();
-        if (settingsMenu == null)
-        {
-            settingsMenu = gameObject.AddComponent<PlayerSettingsMenu>();
-        }
     }
     
     private void OnDisable()
@@ -120,12 +114,12 @@ public class PlayerMain : MonoBehaviour
             if (netObj == null) return;
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributeDecorationInteract(networkinfo.steamID, netObj.Identifier);
+                ServerSend.DistributeInteract(networkinfo.steamID, netObj.Identifier);
 
             }
             else
             {
-                ClientSend.SendDecorationInteract(netObj.Identifier);
+                ClientSend.SendInteract(netObj.Identifier);
 
             }
         }

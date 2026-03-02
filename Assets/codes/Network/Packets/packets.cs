@@ -24,7 +24,7 @@ public class packets
     ,
         SyncNetworkObjects = 12
     ,
-        DistributeDecorationInteract = 13
+        DistributeInteract = 13
     ,
         DistributeVoicePacket = 14
     };
@@ -35,7 +35,7 @@ public class packets
         SendAnimationState = 3,
         SendNOInfo = 4,
         PickUpItem = 5,
-        SendDecorationInteract = 6,
+        SendInteract = 6,
         SendReadyState = 7
     ,
         VoicePacket = 8

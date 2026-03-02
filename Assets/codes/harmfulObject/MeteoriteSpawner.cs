@@ -145,7 +145,7 @@ public class MeteoriteSpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        NetworkObject networkObject = await NetworkSystem.Instance.CreateNetworkObject(prefabID, spawnPosition, Random.rotation,0);
+        NetworkObject networkObject = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(prefabID, spawnPosition, Random.rotation,0);
         if (networkObject == null)
         {
             return;

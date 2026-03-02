@@ -13,18 +13,15 @@ using static UnityEngine.Rendering.DebugUI.Table;
 [RequireComponent(typeof(LayerMasks))]
 public class GameCore : MonoBehaviour
 {
+    private const string _prefabPath = "Prefabs/";
+    private const string _decorationPath = "Prefabs/Decorations/";
+
     public static GameCore Instance;
     public LayerMasks Masks;
     public recording vc;
     public options Option;
-    private const string _prefabPath = "Prefabs/";
-    private const string _decorationPath = "Prefabs/Decorations/";
     public Connector Connector;
     public PlayerInputAction PlayerControl;
-
-
-
-
     public Dictionary<string, string> GetPrefabWithID = new Dictionary<string, string> //PrefabID, Path
     {
         { "TestPrefab","testPrefab" },
@@ -45,8 +42,10 @@ public class GameCore : MonoBehaviour
     public NetworkPlayerObject Local_NetworkPlayer;
     [SerializeField]
     private Transform[] SpaceshipSpawns;
+    [SerializeField]
+    private GameObject WorldReference;
 
-    
+
     private void Awake()
     {
         InitPlayerControl();
@@ -103,7 +102,23 @@ public class GameCore : MonoBehaviour
         await request;
         return request.asset as GameObject;
     }
-    
+    public async UniTask SpawnDecorations(DecorationSaveData[] decs,Spaceship spaceship)
+    {
+        if (decs != null)
+        {
+            foreach (DecorationSaveData dsd in decs)
+            {
+                GameObject prefab = await GetDecoration(dsd.DecorationID);
+                Decoration obj = Instantiate(prefab, spaceship.transform).GetComponent<Decoration>();
+                obj.OnCreate(spaceship, dsd.DecorationPosition, dsd.DecorationRotation);
+
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot load decorations");
+        }
+    }
     public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID,ulong owner,string uid,Vector3 pos,Quaternion rot,Transform parent=null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
@@ -127,4 +142,6 @@ public class GameCore : MonoBehaviour
         //}
         return id == Local_NetworkPlayer.steamID;
     }
+    public Transform GetWorldReferenceTransform()
+    { return WorldReference.transform; }
 }

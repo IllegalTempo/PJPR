@@ -70,7 +70,7 @@ public class ServerHandle
         IUsable decoration = NetworkSystem.Instance.FindNetworkObject[decorationUID].GetComponent<IUsable>();
         PlayerMain who = p.player.playerControl;
         decoration.OnInteract(who);
-        ServerSend.DistributeDecorationInteract(p.steamId, decorationUID);
+        ServerSend.DistributeInteract(p.steamId, decorationUID);
     }
 
     public static void SendReadyState(NetworkPlayer p, packet packet)

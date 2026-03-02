@@ -3,6 +3,9 @@ using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
 
+///
+/// Item is any object that can be picked up
+///
 public class Item : Selectable //Item is any that is pickable
 {
     public string ItemName;
@@ -41,8 +44,6 @@ public class Item : Selectable //Item is any that is pickable
             return;
         }
 
-        if (this is not Decoration && netObj.Owner != 0) return;
-        if (this is Decoration && !GameCore.Instance.IsLocal(netObj.Owner)) return;
         // Item is not in inventory, so pick it up
         PickUpItem();
 
@@ -91,11 +92,8 @@ public class Item : Selectable //Item is any that is pickable
         {
             localOwner = GameCore.Instance.Local_NetworkPlayer.steamID;
         }
-        if (this is not Decoration)
-        {
             netObj.Owner = localOwner;
 
-        }
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
@@ -139,11 +137,8 @@ public class Item : Selectable //Item is any that is pickable
 
 
         gotDropped(dropPosition);
-        if(this is not Decoration)
-        {
             netObj.Owner = 0;
 
-        }
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
             if (NetworkSystem.Instance.IsServer)

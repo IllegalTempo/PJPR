@@ -31,7 +31,7 @@ public class GameServer : SocketManager
             { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
 
             ,
-            { (int)packets.ClientPackets.SendDecorationInteract, ServerHandle.SendDecorationInteract }
+            { (int)packets.ClientPackets.SendInteract, ServerHandle.SendDecorationInteract }
         ,
             { (int)packets.ClientPackets.SendReadyState, ServerHandle.SendReadyState }
         
@@ -119,7 +119,7 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
-        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.Instance.FindNetworkObject.Values.Where(x => !x.InScene).ToArray());
+        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.Instance.FindNetworkObject.Values.Where(x => !x.Preset).ToArray());
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
     }
@@ -244,6 +244,8 @@ public class GameServer : SocketManager
         base.OnMessage(connection, identity, data, size, messageNum, recvTime, channel);
         byte[] bytedata = new byte[size];
         Marshal.Copy(data, bytedata, 0, size);
+        float latency = Time.realtimeSinceStartup * 1000f - recvTime;
+
         using (packet packet = new packet(bytedata))
         {
 

@@ -39,7 +39,7 @@ public class GameClient : ConnectionManager
         ,
             { (int)packets.ServerPackets.SyncNetworkObjects, ClientHandle.SyncNetworkObjects }
         ,
-            { (int)packets.ServerPackets.DistributeDecorationInteract, ClientHandle.DistributeDecorationInteract }
+            { (int)packets.ServerPackets.DistributeInteract, ClientHandle.DistributeInteract }
         
             ,
             { (int)packets.ServerPackets.DistributeVoicePacket, ClientHandle.DistributeVoicePacket }
@@ -108,6 +108,7 @@ public class GameClient : ConnectionManager
         byte* bytepointer = (byte*)data.ToPointer();
         byte[] bytedata = new byte[size];
         Marshal.Copy(data, bytedata, 0, size);
+        float latency = Time.realtimeSinceStartup * 1000f - recvTime;
         using (packet packet = new packet(bytedata))
         {
             int packetid = packet.Readint();

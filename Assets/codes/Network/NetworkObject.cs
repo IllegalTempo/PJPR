@@ -17,13 +17,13 @@ public class NetworkObject : MonoBehaviour
     public bool Sync_Transform = true;
 
     public ulong Owner = 0; //owner = 0 -> Server Authority
-    public bool InScene = false;
+    public bool Preset = false;
     private bool init = false;
     private void Start()
     {
         if (!init)
         {
-            InScene = true;
+            Preset = true;
             Identifier = gameObject.name;
             NetworkSystem.Instance.FindNetworkObject.Add(Identifier, this);
 

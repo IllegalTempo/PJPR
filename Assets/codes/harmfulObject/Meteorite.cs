@@ -103,7 +103,7 @@ public class Meteorite : HarmfulObject
         // spawning break effect
         if (breakEffect != null)
         {
-            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity);
+            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, GameCore.Instance.GetWorldReferenceTransform());
             Destroy(effect, 3f);
         }
 
