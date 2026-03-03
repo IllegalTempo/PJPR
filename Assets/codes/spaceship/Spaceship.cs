@@ -45,26 +45,16 @@ public class Spaceship : NetworkObject
         dockTarget = GameCore.Instance.Connector.connect(this,index);
 
     }
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
-        if(dockTarget != null)
-        {
-            Vector3 direction = (dockTarget.position - transform.position);
-            rb.linearVelocity = direction.normalized * 3;
-            if (direction.magnitude < 0.03f)
-            {
-                OnConnect();
-            }
-        }
-        
-    }
     private void Update()
     {
         if (dockTarget != null)
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, dockTarget.rotation, 20 * Time.deltaTime);
-
+            transform.position = Vector3.MoveTowards(transform.position, dockTarget.position, 3 * Time.deltaTime);
+            if (Vector3.Distance(dockTarget.position,transform.position) < 0.03f)
+            {
+                OnConnect();
+            }
         }
     }
     public void OnConnect()

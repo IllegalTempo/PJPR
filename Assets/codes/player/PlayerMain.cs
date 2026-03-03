@@ -293,18 +293,18 @@ public class PlayerMain : MonoBehaviour
         }
 
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if ((GameCore.Instance.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
+        if ((GameCore.Instance.Masks.MoveWith.value & (1 << other.gameObject.layer)) != 0)
         {
-            //transform.SetParent(collision.transform);
+            transform.SetParent(other.transform);
         }
     }
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider collision)
     {
         if ((GameCore.Instance.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
         {
-            //transform.SetParent(null);
+            transform.SetParent(null);
         }
     }
     public void ReceiveVoice(byte[] bytesArray)

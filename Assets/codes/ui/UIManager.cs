@@ -13,11 +13,12 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Slider progressBar;
 
+
     private void Awake()
     {
         Instance = this;
 
-        
+
     }
     private void Start()
     {
@@ -29,7 +30,7 @@ public class UIManager : MonoBehaviour
         LoadingComplete();
 
     }
-    public void ChangeLoadingStatus(string text,float progress)
+    public void ChangeLoadingStatus(string text, float progress)
     {
         loadingStatusText.text = text;
         progressBar.value = progress;
@@ -37,11 +38,12 @@ public class UIManager : MonoBehaviour
     public void ShowLoadingScreen(string text)
     {
         loadingScreenGroup.SetActive(true);
-        ChangeLoadingStatus(text,0);
+        ChangeLoadingStatus(text, 0);
     }
     public void LoadingComplete()
     {
         //loadingScreenGroup.SetActive(false);
     }
+
 
 }
