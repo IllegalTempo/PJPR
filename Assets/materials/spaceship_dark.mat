@@ -118,7 +118,7 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 0
     - _MAIN_LIGHT_SHADOWS_CASCADE: 1
-    - _Metallic: 0
+    - _Metallic: 0.832
     - _NormalStrength: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -146,8 +146,8 @@ Material:
     - _litthreshold: 0
     - _softness: 0
     m_Colors:
-    - _BaseColor: {r: 0.3207547, g: 0.30713776, b: 0.30713776, a: 1}
-    - _Color: {r: 0.32075468, g: 0.30713773, b: 0.30713773, a: 1}
+    - _BaseColor: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 1}
+    - _Color: {r: 0.37735847, g: 0.37735847, b: 0.37735847, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Offset: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 0, g: 0, b: 0, a: 0}

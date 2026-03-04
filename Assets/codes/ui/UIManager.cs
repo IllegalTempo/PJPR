@@ -42,7 +42,7 @@ public class UIManager : MonoBehaviour
     }
     public void LoadingComplete()
     {
-        //loadingScreenGroup.SetActive(false);
+        loadingScreenGroup.SetActive(false);
     }
 
 

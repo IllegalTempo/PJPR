@@ -12,7 +12,7 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMain : MonoBehaviour
 {
-    public float MoveSpeed = 0.5f;
+    public float MoveSpeed = 1f;
     public float LookSpeed = 2f;
     public float MaxSpeed = 3f; // Maximum allowed speed
     public float JetPackForce = 0.5f;
