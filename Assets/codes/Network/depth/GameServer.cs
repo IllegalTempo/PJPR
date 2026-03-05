@@ -1,3 +1,4 @@
+using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -44,6 +45,7 @@ public class GameServer : SocketManager
     public GameServer()
     {
         this.maxplayer = NetworkSystem.Instance.MaxPlayer;
+        GameCore.Instance.RandomSeed = DateTime.Now.Ticks;
         Debug.Log("Created GameServer Object");
 
     }
@@ -54,6 +56,7 @@ public class GameServer : SocketManager
         system.IsServer = true;
         GameCore.Instance.Connector.gameObject.SetActive(true);
         await system.StartAsHost();
+        
         return true;
     }
     

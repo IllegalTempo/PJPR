@@ -27,6 +27,8 @@ public class packets
         DistributeInteract = 13
     ,
         DistributeVoicePacket = 14
+    ,
+        SendMissionInfo = 15
     };
     public enum ClientPackets
     {

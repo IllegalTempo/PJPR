@@ -34,6 +34,7 @@ public class NetworkPlayerObject : MonoBehaviour
         gameObject.name = $"Player {index} ({steamid})";
 
     }
+
     public void Disconnect()
     {
         Destroy(gameObject);

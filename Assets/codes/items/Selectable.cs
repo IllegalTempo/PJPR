@@ -1,12 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(StaticOutline))]
 public partial class Selectable : MonoBehaviour
 {
 
     public StaticOutline outline;
-    public bool LookedAt = false;
+    private bool lookedAt = false;
     public float ClickTimer = 0f;
     protected virtual int Layer => 6; // Default layer for selectable objects
 
@@ -14,6 +13,8 @@ public partial class Selectable : MonoBehaviour
     {
         outline = GetComponent<StaticOutline>();
         gameObject.layer = Layer;
+        onLookedAway();
+
 
     }
 
@@ -30,18 +31,18 @@ public partial class Selectable : MonoBehaviour
             outline.OutlineWidth = 5f;
 
         }
+    }
+    public void onLookedAt()
+    {
+        lookedAt = true;
+        outline.enabled = true;
 
-        if (LookedAt)
-        {
-            
-            outline.enabled = true;
-            LookedAt = false;
-        }
-        else
-        {
-            outline.enabled = false;
+    }
+    public void onLookedAway()
+    {
+        lookedAt = false;
+        outline.enabled = false;
 
-        }
     }
     public virtual void OnClicked()
     {

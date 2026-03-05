@@ -43,6 +43,9 @@ public class GameClient : ConnectionManager
         
             ,
             { (int)packets.ServerPackets.DistributeVoicePacket, ClientHandle.DistributeVoicePacket }
+        
+            ,
+            { (int)packets.ServerPackets.SendMissionInfo, ClientHandle.SendMissionInfo }
         };
 
     public async UniTask NewPlayer(ulong who)

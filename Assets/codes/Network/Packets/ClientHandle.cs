@@ -19,10 +19,16 @@ public class ClientHandle
     public static async void test(Connection c, packet packet)
     {
         ulong NetworkID = packet.Readulong();
+        if(NetworkID != SteamClient.SteamId)
+        {
+            Debug.Log("SteamID mismatched, handshake failed");
+            NetworkSystem.Instance.Client.Close();
+            
+        }
         string text = packet.ReadstringUNICODE();
         long Servertime = packet.Readlong();
         //NetworkSystem.instance.client.NetworkID = NetworkID;
-
+        
         if (text == PacketSend.TestRandomUnicode)
         {
             Debug.Log($"{Servertime} Confirmed connected from server. delay:{(DateTime.Now.Ticks - Servertime) / 10000}ms");
@@ -31,6 +37,7 @@ public class ClientHandle
         else
         {
             Debug.Log($"Check Code Mismatched Server Message: {text}");
+            NetworkSystem.Instance.Client.Close();
 
         }
         await Task.Delay(5);
@@ -172,5 +179,13 @@ public class ClientHandle
         byte[] bytearray = packet.ReadBytesArray();
         PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;
         who.ReceiveVoice(bytearray);
+    }
+
+    public static void SendMissionInfo(Connection c, packet packet)
+    {
+        // TODO: Read packet data here
+        // var data = packet.Read...();
+        
+        // TODO: Handle the packet
     }
 }

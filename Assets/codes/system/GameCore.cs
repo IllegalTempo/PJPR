@@ -1,8 +1,10 @@
 using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
+using Steamworks.Data;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEditor.PlayerSettings;
@@ -12,7 +14,7 @@ using static UnityEngine.Rendering.DebugUI.Table;
 /// This is the brain of whole game, constants, global references and functions are stored here. It is also responsible for spawning networked objects and keeping track of local player info.
 /// </summary>
 [RequireComponent(typeof(LayerMasks))]
-public class GameCore : MonoBehaviour
+public partial class GameCore : MonoBehaviour
 {
     private const string _prefabPath = "Prefabs/";
     private const string _decorationPath = "Prefabs/Decorations/";
@@ -31,10 +33,10 @@ public class GameCore : MonoBehaviour
         { "Spaceship","Spaceships/default"},
         { "Spaceship_connector","Spaceships/connector"}
     };
-    public Dictionary<string,string> GetDecorationWithID = new Dictionary<string, string> 
+    public Dictionary<string, string> GetDecorationWithID = new Dictionary<string, string>
     {
         { "TestDecoration","testDecoration" },
-    }; 
+    };
 
 
     //Local Player Info
@@ -45,10 +47,14 @@ public class GameCore : MonoBehaviour
     private Transform[] SpaceshipSpawns;
     [SerializeField]
     public WorldReference WorldReference;
+    [SerializeField]
+    private GameObject[][] MissionManagerPrefabs;
+    public int CurrentMissionLevel = 0;
 
-
+    public long RandomSeed;
     private void Awake()
     {
+
         InitPlayerControl();
         // Convert the serialized list to dictionary
 
@@ -61,7 +67,7 @@ public class GameCore : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
-        
+
     }
     private void InitPlayerControl()
     {
@@ -77,6 +83,17 @@ public class GameCore : MonoBehaviour
     private void OnApplicationQuit()
     {
         SavePlayerPrefs();
+
+    }
+    private GameObject[] getMissionWithLevel(int level)
+    {
+        return MissionManagerPrefabs[level];
+    }
+
+    public void StartMission(int level, int missionindex)
+    {
+        GameObject missionPrefab = getMissionWithLevel(level)[missionindex];
+        GameObject.Instantiate(missionPrefab);
 
     }
     private void SavePlayerPrefs()
@@ -103,7 +120,7 @@ public class GameCore : MonoBehaviour
         await request;
         return request.asset as GameObject;
     }
-    public async UniTask SpawnDecorations(DecorationSaveData[] decs,Spaceship spaceship)
+    public async UniTask SpawnDecorations(DecorationSaveData[] decs, Spaceship spaceship)
     {
         if (decs != null)
         {
@@ -120,18 +137,19 @@ public class GameCore : MonoBehaviour
             Debug.Log("Cannot load decorations");
         }
     }
-    public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID,ulong owner,string uid,Vector3 pos,Quaternion rot,Transform parent=null) //run by both server and client 
+    public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID, ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
         GameObject prefab = await GetPrefabObject(prefabID);
 
         GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);
         NetworkObject nobj = obj.gameObject.GetComponent<NetworkObject>();
-        if (nobj == null) {
+        if (nobj == null)
+        {
             nobj = gameObject.AddComponent<NetworkObject>();
         }
-        
-        nobj.Init(uid, owner,prefabID);
+
+        nobj.Init(uid, owner, prefabID);
         nobj.SetMovement(pos, rot);
         return nobj;
     }
@@ -145,4 +163,38 @@ public class GameCore : MonoBehaviour
     }
     public Transform GetWorldReferenceTransform()
     { return WorldReference.transform; }
+    private async UniTask<Texture2D> GetIcon(ulong steamid)
+    {
+        var icon = await SteamFriends.GetMediumAvatarAsync(steamid);
+        if (icon.HasValue)
+        {
+            return Convert(icon.Value);
+        }
+        else
+        {
+            Debug.LogWarning($"Failed to get avatar for SteamID: {steamid}");
+            return null;
+        }
+    }
+    public static Texture2D Convert(Image image)
+    {
+        // Create a new Texture2D
+        var avatar = new Texture2D((int)image.Width, (int)image.Height, TextureFormat.ARGB32, false);
+
+        // Set filter type, or else its really blury
+        avatar.filterMode = FilterMode.Trilinear;
+
+        // Flip image
+        for (int x = 0; x < image.Width; x++)
+        {
+            for (int y = 0; y < image.Height; y++)
+            {
+                var p = image.GetPixel(x, y);
+                avatar.SetPixel(x, (int)image.Height - y, new UnityEngine.Color(p.r / 255.0f, p.g / 255.0f, p.b / 255.0f, p.a / 255.0f));
+            }
+        }
+
+        avatar.Apply();
+        return avatar;
+    }
 }

@@ -190,6 +190,16 @@ public class ServerSend
             return PacketSend.BroadcastPacketToReady(p, NetworkPlayer);
         }
     }
+
+    public static Result DistributeMissionInfo(int missionlevel,int missionindex)
+    {
+        using (packet p = new packet((int)ServerPackets.SendMissionInfo))
+        {
+            p.Write(missionlevel);
+            p.Write(missionindex);
+            return PacketSend.BroadcastPacketToReady(p);
+        }
+    }
 }
 
     

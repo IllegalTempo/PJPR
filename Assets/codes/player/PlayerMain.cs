@@ -134,12 +134,14 @@ public class PlayerMain : MonoBehaviour
     public void OnPickUpItem(Item Item)
     {
         holdingItem = Item;
+        UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
+
 
     }
 
     public void OnDropItem(Item Item)
     {
-
+        UIManager.Instance.HideInteraction(0);
         holdingItem = null;
 
     }
@@ -247,6 +249,7 @@ public class PlayerMain : MonoBehaviour
     private void OnDrop()
     {
         holdingItem.Drop();
+        OnDropItem(holdingItem);
 
     }
     private void PlayerControl()
@@ -269,21 +272,46 @@ public class PlayerMain : MonoBehaviour
         // Outline logic
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
-
+        Selectable before = seenObject;
         if (Physics.Raycast(ray, out hit, 100f, GameCore.Instance.Masks.SelectableItems))
         {
 
             seenObject = hit.collider.GetComponent<Selectable>();
             if (seenObject == null) return;
-            seenObject.LookedAt = true;
 
         }
         else
         {
             seenObject = null;
         }
+        UpdateSeenObject(before, before == seenObject);
 
+    }
+    private void UpdateSeenObject(Selectable before,bool lookedat)
+    {
+        if(before != null)
+        {
+            if (lookedat)
+            {
 
+                before.onLookedAt();
+                if(before is IUsable)
+                {
+                    UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(),1);
+                }
+                if(before is Item)
+                {
+                    UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
+
+                }
+            }
+            else
+            {
+                before.onLookedAway();
+                UIManager.Instance.HideAllInteraction();
+            }
+        }
+        
     }
     void Update()
     {

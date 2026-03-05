@@ -13,7 +13,13 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Slider progressBar;
 
-
+    [Header("Interaction Indicator")]
+    [SerializeField]
+    private GameObject[] interactionIndicatorGroup;
+    [SerializeField]
+    private TMP_Text[] interactionName;
+    [SerializeField]
+    private TMP_Text[] interactionKey;
     private void Awake()
     {
         Instance = this;
@@ -28,6 +34,7 @@ public class UIManager : MonoBehaviour
     private void defaultState()
     {
         LoadingComplete();
+        HideAllInteraction();
 
     }
     public void ChangeLoadingStatus(string text, float progress)
@@ -44,6 +51,23 @@ public class UIManager : MonoBehaviour
     {
         loadingScreenGroup.SetActive(false);
     }
+    public void ShowInteraction(string interactionname, string key, int index)
+    {
+        interactionIndicatorGroup[index].SetActive(true);
+        interactionName[index].text = interactionname;
+        interactionKey[index].text = key;
+    }
+    public void HideAllInteraction()
+    {
+        for (int i = 0; i < interactionIndicatorGroup.Length; i++)
+        {
+            HideInteraction(i);
+        }
+    }
+    public void HideInteraction(int index)
+    {
+        interactionIndicatorGroup[index].SetActive(false);
 
+    }
 
 }

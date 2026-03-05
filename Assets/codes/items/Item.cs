@@ -150,7 +150,6 @@ public class Item : Selectable //Item is any that is pickable
                 ClientSend.PickUpItem(netObj.Identifier, 0);
             }
         }
-        GameCore.Instance.Local_Player.OnDropItem(this);
 
     }
     public void Drop()
