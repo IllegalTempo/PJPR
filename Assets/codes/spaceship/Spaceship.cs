@@ -19,6 +19,8 @@ public class Spaceship : NetworkObject
     [SerializeField]
     private SkinnedMeshRenderer GlassRenderer;
     private Coroutine blendShapeCoroutine;
+    [SerializeField]
+    private GameObject GlassColliderGroup;
 
     private void Awake()
     {
@@ -75,11 +77,14 @@ public class Spaceship : NetworkObject
     }
     public void SwitchOnGlass()
     {
-        ShiftGlassSwitch(100);
+        ShiftGlassSwitch(0);
+        GlassColliderGroup.SetActive(true);
     }
     public void SwitchOffGlass()
     {
-        ShiftGlassSwitch(0);
+        ShiftGlassSwitch(100);
+        GlassColliderGroup.SetActive(false);
+
 
     }
     private void ShiftGlassSwitch(float targetValue = 100f)

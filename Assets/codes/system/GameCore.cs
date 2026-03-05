@@ -1,3 +1,4 @@
+using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using System;
@@ -43,7 +44,7 @@ public class GameCore : MonoBehaviour
     [SerializeField]
     private Transform[] SpaceshipSpawns;
     [SerializeField]
-    private GameObject WorldReference;
+    public WorldReference WorldReference;
 
 
     private void Awake()

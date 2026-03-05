@@ -2,6 +2,7 @@
 using System.Collections;
 using Assets.codes.items;
 using UnityEngine.Events;
+using System;
 
 namespace Assets.codes.spaceship.mechanics
 {
@@ -9,12 +10,12 @@ namespace Assets.codes.spaceship.mechanics
     {
         [SerializeField]
         private int maxlevel = 6;
+        [SerializeField]
         private int level = 0;
         [SerializeField]
         private GameObject lever;
 
-        [SerializeField]
-        private UnityEvent<int> OnChangeSpeed;
+        [SerializeField] private UnityEvent<int> OnChangeSpeed;
 
         [SerializeField]
         private float rotationSpeed = 5f;
@@ -29,7 +30,6 @@ namespace Assets.codes.spaceship.mechanics
             OnChangeSpeed.Invoke(level);
             UpdateLeverRotation();
         }
-
         private void UpdateLeverRotation()
         {
             if (lever == null) return;
@@ -44,8 +44,8 @@ namespace Assets.codes.spaceship.mechanics
 
         private IEnumerator RotateLeverCoroutine()
         {
-            float targetRotationX = Mathf.Lerp(maxRotationX, minRotationX, level / maxlevel);
-            Quaternion targetRotation = Quaternion.Euler(targetRotationX, lever.transform.localEulerAngles.y, lever.transform.localEulerAngles.z);
+            float targetRotationX = Mathf.Lerp(maxRotationX, minRotationX, ((float)level / (float)(maxlevel-1)));
+            Quaternion targetRotation = Quaternion.Euler(targetRotationX, 0, 0);
 
             while (Quaternion.Angle(lever.transform.localRotation, targetRotation) > 0.01f)
             {

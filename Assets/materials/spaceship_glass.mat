@@ -147,8 +147,8 @@ Material:
     - _litthreshold: 0
     - _softness: 0
     m_Colors:
-    - _BaseColor: {r: 0.8066038, g: 0.9569734, b: 1, a: 0.6156863}
-    - _Color: {r: 0.8066038, g: 0.9569734, b: 1, a: 0.6156863}
+    - _BaseColor: {r: 0.49038807, g: 0.6661134, b: 0.7169812, a: 0.6156863}
+    - _Color: {r: 0.49038798, g: 0.6661134, b: 0.7169812, a: 0.6156863}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Offset: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 0, g: 0, b: 0, a: 0}

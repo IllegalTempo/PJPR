@@ -169,13 +169,17 @@ public class NetworkSystem : MonoBehaviour
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
         int index = PlayerList.Count;
-        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.GetSpaceshipSpawn(index).position, Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(PlayerInstance, getPlayerSpawnPos(index), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         p.Init(steamid, index);
         PlayerList.Add(steamid, p);
 
         Debug.Log($"Spawned Player {steamid}");
 
         return p;
+    }
+    private Vector3 getPlayerSpawnPos(int index)
+    {
+        return GameCore.Instance.GetSpaceshipSpawn(index).position - new Vector3(0,1,0);
     }
     public void RemoveAllPlayerObject()
     {

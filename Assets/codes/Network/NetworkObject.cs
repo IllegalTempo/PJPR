@@ -19,7 +19,7 @@ public class NetworkObject : MonoBehaviour
     public ulong Owner = 0; //owner = 0 -> Server Authority
     public bool Preset = false;
     private bool init = false;
-    private void Start()
+    protected virtual void Start()
     {
         if (!init)
         {
