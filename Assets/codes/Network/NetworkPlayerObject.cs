@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
@@ -16,6 +17,7 @@ public class NetworkPlayerObject : MonoBehaviour
     public Quaternion NetworkBodyrot;
     public float NetworkAnimationX;
     public float NetworkAnimationY;
+    private Friend steamIdentity;
     [Header("Network Setting")]
     public bool Sync_Pos = true;
     public bool Sync_HeadRot = true;
@@ -26,13 +28,14 @@ public class NetworkPlayerObject : MonoBehaviour
     public GameObject Body;
     public PlayerMain playerControl;
     public Spaceship spaceship;
-    public void Init(ulong steamid,int index)
+    public async UniTask Init(ulong steamid,int index)
     {
         steamID = steamid;
         IsLocal = steamid == NetworkSystem.Instance.SteamID;
         this.index = index;
+        steamIdentity = new Friend(steamid);
         gameObject.name = $"Player {index} ({steamid})";
-
+        await UIManager.Instance.NewPlayerDisplay(steamid,steamIdentity.Name);
     }
 
     public void Disconnect()

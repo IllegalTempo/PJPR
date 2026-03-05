@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +21,13 @@ public class UIManager : MonoBehaviour
     private TMP_Text[] interactionName;
     [SerializeField]
     private TMP_Text[] interactionKey;
+
+
+    [Header("SocialTab")]
+    [SerializeField]
+    private GameObject playerDisplayPrefab;
+    [SerializeField]
+    private Transform playerDisplayGroup;
     private void Awake()
     {
         Instance = this;
@@ -68,6 +76,12 @@ public class UIManager : MonoBehaviour
     {
         interactionIndicatorGroup[index].SetActive(false);
 
+    }
+    public async UniTask NewPlayerDisplay(ulong steamid,string name)
+    {
+        Texture2D icon = await GameCore.Instance.GetIcon(steamid);
+        GameObject newDisplay = Instantiate(playerDisplayPrefab, playerDisplayGroup);
+        newDisplay.GetComponent<PlayerDisplay>().Init(icon, name);
     }
 
 }

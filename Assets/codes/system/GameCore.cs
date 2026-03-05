@@ -163,7 +163,7 @@ public partial class GameCore : MonoBehaviour
     }
     public Transform GetWorldReferenceTransform()
     { return WorldReference.transform; }
-    private async UniTask<Texture2D> GetIcon(ulong steamid)
+    public async UniTask<Texture2D> GetIcon(ulong steamid)
     {
         var icon = await SteamFriends.GetMediumAvatarAsync(steamid);
         if (icon.HasValue)

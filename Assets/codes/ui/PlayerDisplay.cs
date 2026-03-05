@@ -3,18 +3,15 @@ using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 
-namespace Assets.codes.ui
+public class PlayerDisplay : MonoBehaviour
 {
-	public class PlayerDisplay: MonoBehaviour
-	{
-		[SerializeField]
-		private Image playerIcon;
-		[SerializeField]
-		private TMP_Text playerName;
-		public void Init(Sprite playericon, string playername)
-		{
-			playerIcon.sprite = playericon;
-			playerName.text = playername;
-        }
-	}
+    [SerializeField]
+    private RawImage playerIcon;
+    [SerializeField]
+    private TMP_Text playerName;
+    public void Init(Texture2D playericon, string playername)
+    {
+        playerIcon.texture = playericon;
+        playerName.text = playername;
+    }
 }

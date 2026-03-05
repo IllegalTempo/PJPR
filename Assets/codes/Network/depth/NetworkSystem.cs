@@ -168,7 +168,7 @@ public partial class NetworkSystem : MonoBehaviour
         GameObject PlayerInstance = request.asset as GameObject;
         int index = PlayerList.Count;
         NetworkPlayerObject p = Instantiate(PlayerInstance, getPlayerSpawnPos(index), Quaternion.identity).GetComponent<NetworkPlayerObject>();
-        p.Init(steamid, index);
+        await p.Init(steamid, index);
         PlayerList.Add(steamid, p);
 
         Debug.Log($"Spawned Player {steamid}");
