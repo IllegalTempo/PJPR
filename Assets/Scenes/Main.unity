@@ -2772,13 +2772,15 @@ GameObject:
   - component: {fileID: 979251809}
   - component: {fileID: 979251813}
   - component: {fileID: 979251812}
+  - component: {fileID: 979251814}
+  - component: {fileID: 979251815}
   m_Layer: 0
   m_Name: Environment Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &979251808
 Transform:
   m_ObjectHideFlags: 0
@@ -2831,15 +2833,15 @@ MonoBehaviour:
   - {fileID: 3289048002020084101, guid: 5152911973c425a4a865d24a7238f186, type: 3}
   meteoritePrefabIDs: []
   spaceshipTarget: {fileID: 979251808}
-  spawnRadius: 50
+  spawnRadius: 20
   minDistanceFromTarget: 20
-  baseSpawnInterval: 3
+  baseSpawnInterval: 1
   spawnIntervalVariation: 1
-  maxMeteorites: 20
-  useWaveSystem: 0
+  maxMeteorites: 100
+  useWaveSystem: 1
   waveDuration: 30
   waveBreakTime: 10
-  meteoritesPerWave: 15
+  meteoritesPerWave: 100
   sizeRange: {x: 0.5, y: 2}
   speedRange: {x: 5, y: 15}
   aimTowardTarget: 0.7
@@ -2872,7 +2874,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 979251806}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8953d011a6650c942af1a127d0d6f0f0, type: 3}
   m_Name: 
@@ -2886,6 +2888,54 @@ MonoBehaviour:
   lineWidth: 6
   algorithmColor: {r: 0, g: 0.8, b: 1, a: 1}
   emissionIntensity: 5
+--- !u!114 &979251814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe96bcaa39686bb4fae5b7debfa071ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHoleSpawner
+  spaceshipTarget: {fileID: 719698779}
+  spawnRadius: 150
+  minSpawnDistance: 50
+  blackHolePrefab: {fileID: 4410065600927574753, guid: 78e58cdd2b7eb874691834aba6529ae4, type: 3}
+  blackHolePrefabID: 
+  firstSpawnDelay: 3
+  spawnInterval: 120
+  spawnIntervalVariation: 30
+  blackHoleLifetime: 45
+  despawnShrinkTime: 2
+  scaleRange: {x: 1.5, y: 3}
+--- !u!114 &979251815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979251806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d9d24958568e64583a81d14a898ae1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteRing
+  orbitRadius: 20
+  meteoriteCount: 12
+  ringThickness: 3
+  ringHeight: 2
+  meteoriteScaleRange: {x: 0.5, y: 1.5}
+  orbitSpeed: 15
+  randomizeOrbitOffset: 1
+  meteoritePrefabs:
+  - {fileID: 3289048002020084101, guid: 5152911973c425a4a865d24a7238f186, type: 3}
+  addSecondRing: 1
+  secondRingRadius: 30
+  secondRingCount: 8
+  secondRingOrbitSpeed: -10
 --- !u!1 &999244214
 GameObject:
   m_ObjectHideFlags: 0

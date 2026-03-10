@@ -77,6 +77,9 @@ public class MeteoriteRing : MonoBehaviour
                 rb.useGravity = false;
                 rb.isKinematic = true;
             }
+            Collider col = instance.GetComponent<Collider>();
+            if (col != null)
+                col.isTrigger = true;
         }
     }
 

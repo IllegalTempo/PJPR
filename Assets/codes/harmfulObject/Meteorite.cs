@@ -16,12 +16,19 @@ public class Meteorite : HarmfulObject
     [SerializeField] private GameObject fragmentPrefab;
     [SerializeField] private int fragmentCount = 5;
     [SerializeField] private float fragmentForce = 5f;
+    [SerializeField] private float fragmentLifetime = 5f;
     [SerializeField] private GameObject breakEffect;
     [SerializeField] private bool detachFragmentsBeforeDestroy = true;
     
     [Header("Visual Effects")]
     [SerializeField] private GameObject hitEffect;
     [SerializeField] private Material damagedMaterial;
+
+    // [Header("Thermal / Lighting Effects")]
+    // [SerializeField] private Light meteorLight;
+    // [SerializeField] private ParticleSystem thermalParticles;
+    // [SerializeField] private bool scaleLightWithSpeed = true;
+    // [SerializeField] private float maxLightIntensity = 3f;
     
     private Rigidbody rb;
     private Renderer meshRenderer;
@@ -58,6 +65,9 @@ public class Meteorite : HarmfulObject
         if (rb != null && !isBreaking)
         {
             rb.AddTorque(randomRotation * Time.fixedDeltaTime, ForceMode.VelocityChange);
+
+            // if (scaleLightWithSpeed && meteorLight != null)
+            //     meteorLight.intensity = Mathf.Lerp(0f, maxLightIntensity, rb.linearVelocity.magnitude / 20f);
         }
     }
 
@@ -89,6 +99,9 @@ public class Meteorite : HarmfulObject
     {
         if (isBreaking) return;
         isBreaking = true;
+
+        // if (thermalParticles != null)
+        //     thermalParticles.Stop();
 
         Transform fragmentRoot = null;
         if (fragmentPrefab != null)
@@ -124,14 +137,14 @@ public class Meteorite : HarmfulObject
                     fragmentRb.AddTorque(Random.insideUnitSphere * fragmentForce, ForceMode.Impulse);
                 }
 
-                // Auto-destroy fragments
-                Destroy(fragment, 5f);
+                // Auto-destroy fragments after lifetime
+                Destroy(fragment, fragmentLifetime);
             }
 
             if (fragmentRoot != null && detachFragmentsBeforeDestroy)
             {
                 fragmentRoot.SetParent(null);
-                Destroy(fragmentRoot.gameObject, 5.5f);
+                Destroy(fragmentRoot.gameObject, fragmentLifetime + 0.5f);
             }
         }
 
@@ -150,7 +163,7 @@ public class Meteorite : HarmfulObject
         TakeDamage(1f);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void HandleCollisionBreak(GameObject other)
     {
         if (damageOnAnyCollision)
         {
@@ -158,28 +171,31 @@ public class Meteorite : HarmfulObject
             return;
         }
 
-        // check-if hit spaceship idk
-        if (collision.gameObject.CompareTag("Spaceship") || collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Spaceship") || other.CompareTag("Player"))
         {
-            // apply damgae
-            Spaceship_movement spaceship = collision.gameObject.GetComponent<Spaceship_movement>();
+            Spaceship_movement spaceship = other.GetComponent<Spaceship_movement>();
             if (spaceship != null)
             {
-                // You can add spaceship damage method here
                 // spaceship.TakeDamage(damage);
             }
-
-            // meteorite takes damage from impact
             TakeDamage(health * 0.3f);
         }
-        // hit by weapon/projectile (bullet?)
-        else if (collision.gameObject.CompareTag("Projectile"))
+        else if (other.CompareTag("Projectile"))
         {
             TakeDamage(30f);
-            Destroy(collision.gameObject);
+            Destroy(other);
         }
     }
-// idk
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        HandleCollisionBreak(collision.gameObject);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        HandleCollisionBreak(other.gameObject);
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
