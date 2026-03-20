@@ -49,6 +49,7 @@ public partial class GameCore : MonoBehaviour
     //private Transform[] SpaceshipSpawns;
     [SerializeField]
     public WorldReference WorldReference;
+    private int nouidindex = 0;
     //public int CurrentMissionLevel = 0;
 
     public long RandomSeed;
@@ -72,6 +73,11 @@ public partial class GameCore : MonoBehaviour
             Destroy(this.gameObject);
         }
 
+    }
+    public string newNOUID()
+    {
+        nouidindex++;
+        return $"nouid_{nouidindex}";
     }
     private void InitPlayerControl()
     {

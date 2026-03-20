@@ -24,7 +24,7 @@ public class NetworkObject : MonoBehaviour
         if (!init)
         {
             Preset = true;
-            Identifier = gameObject.name;
+            Identifier = GameCore.Instance.newNOUID();
             NetworkSystem.Instance.FindNetworkObject.Add(Identifier, this);
 
         }

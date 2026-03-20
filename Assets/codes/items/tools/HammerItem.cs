@@ -1,7 +1,6 @@
-using Assets.codes.items;
 using UnityEngine;
 
-public class HammerItem : Item,IUsable
+public class HammerItem : tools
 {
     protected new void OnEnable()
     {
@@ -12,13 +11,13 @@ public class HammerItem : Item,IUsable
             ItemName = "Hammer";
         }
     }
-    public void OnInteract(PlayerMain who)
+    protected override void onUse(Selectable lookat)
     {
-        if (GameCore.Instance.Local_Player.seenObject is SpaceshipPart ssp)
+        base.onUse(lookat);
+        if (lookat is SpaceshipPart ssp)
         {
             ssp.Repair(10f);
         }
-
     }
 
 }
