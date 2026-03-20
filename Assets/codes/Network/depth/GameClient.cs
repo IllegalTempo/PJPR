@@ -46,6 +46,8 @@ public class GameClient : ConnectionManager
         
             ,
             { (int)packets.ServerPackets.SendMissionInfo, ClientHandle.SendMissionInfo }
+        ,
+            { (int)packets.ServerPackets.StartGameLoop, ClientHandle.StartGameLoop }
         };
 
     public async UniTask NewPlayer(ulong who)

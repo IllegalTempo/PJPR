@@ -29,6 +29,8 @@ public class packets
         DistributeVoicePacket = 14
     ,
         SendMissionInfo = 15
+    ,
+        StartGameLoop = 16
     };
     public enum ClientPackets
     {

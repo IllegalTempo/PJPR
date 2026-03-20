@@ -27,7 +27,7 @@ public class NetworkPlayerObject : MonoBehaviour
     public GameObject Head;
     public GameObject Body;
     public PlayerMain playerControl;
-    public Spaceship spaceship;
+    //public Spaceship spaceship;
     public async UniTask Init(ulong steamid,int index)
     {
         steamID = steamid;
@@ -41,8 +41,8 @@ public class NetworkPlayerObject : MonoBehaviour
     public void Disconnect()
     {
         Destroy(gameObject);
-        GameCore.Instance.Connector.disconnect(spaceship);
-        Destroy(spaceship);
+        //GameCore.Instance.Connector.disconnect(spaceship);
+        //Destroy(spaceship);
 
     }
     private void Start()

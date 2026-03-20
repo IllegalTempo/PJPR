@@ -78,51 +78,51 @@ public class Planet : HarmfulObject
         if (!IsServerAuthority) return;
 
         GameObject hit = collision.gameObject;
-        Spaceship spaceship = hit.GetComponent<Spaceship>();
-        if (spaceship == null)
-            spaceship = hit.GetComponentInParent<Spaceship>();
+        //Spaceship spaceship = hit.GetComponent<Spaceship>();
+        //if (spaceship == null)
+        //    spaceship = hit.GetComponentInParent<Spaceship>();
 
-        if (spaceship != null)
-        {
-            DamageSpaceship(spaceship, collision.contacts[0].point);
-            return;
-        }
-        SpaceshipPart part = hit.GetComponent<SpaceshipPart>();
-        if (part == null)
-            part = hit.GetComponentInParent<SpaceshipPart>();
+        //if (spaceship != null)
+        //{
+        //    DamageSpaceship(spaceship, collision.contacts[0].point);
+        //    return;
+        //}
+        //SpaceshipPart part = hit.GetComponent<SpaceshipPart>();
+        //if (part == null)
+        //    part = hit.GetComponentInParent<SpaceshipPart>();
 
-        if (part != null)
-        {
-            part.OnDamage(collisionDamageToEachPart, "Planet");
-            SpawnImpactEffect(collision.contacts[0].point);
-        }
+        //if (part != null)
+        //{
+        //    part.OnDamage(collisionDamageToEachPart, "Planet");
+        //    SpawnImpactEffect(collision.contacts[0].point);
+        //}
     }
 
-    private void DamageSpaceship(Spaceship spaceship, Vector3 contactPoint)
-    {
-        foreach (SpaceshipPart part in spaceship.Parts)
-        {
-            if (part != null)
-                part.OnDamage(collisionDamageToEachPart, "Planet");
-        }
-        SpaceshipPart[] allParts = spaceship.GetComponentsInChildren<SpaceshipPart>();
-        foreach (SpaceshipPart part in allParts)
-        {
-            if (part != null && !spaceship.Parts.Contains(part))
-                part.OnDamage(collisionDamageToEachPart * 0.5f, "Planet");
-        }
-        Connector[] connectors = spaceship.GetComponentsInChildren<Connector>();
-        foreach (Connector connector in connectors)
-        {
-            foreach (SpaceshipPart part in spaceship.Parts)
-            {
-                if (part != null)
-                    part.OnDamage(collisionDamageToEachPart * connectorDamageMultiplier, "Planet (connector shock)");
-            }
-        }
+    //private void DamageSpaceship(Spaceship spaceship, Vector3 contactPoint)
+    //{
+    //    foreach (SpaceshipPart part in spaceship.Parts)
+    //    {
+    //        if (part != null)
+    //            part.OnDamage(collisionDamageToEachPart, "Planet");
+    //    }
+    //    SpaceshipPart[] allParts = spaceship.GetComponentsInChildren<SpaceshipPart>();
+    //    foreach (SpaceshipPart part in allParts)
+    //    {
+    //        if (part != null && !spaceship.Parts.Contains(part))
+    //            part.OnDamage(collisionDamageToEachPart * 0.5f, "Planet");
+    //    }
+    //    Connector[] connectors = spaceship.GetComponentsInChildren<Connector>();
+    //    foreach (Connector connector in connectors)
+    //    {
+    //        foreach (SpaceshipPart part in spaceship.Parts)
+    //        {
+    //            if (part != null)
+    //                part.OnDamage(collisionDamageToEachPart * connectorDamageMultiplier, "Planet (connector shock)");
+    //        }
+    //    }
 
-        SpawnImpactEffect(contactPoint);
-    }
+    //    SpawnImpactEffect(contactPoint);
+    //}
 
     private void SpawnImpactEffect(Vector3 position)
     {

@@ -5,11 +5,11 @@ using Cysharp.Threading.Tasks;
 public partial class GameCore
 {
 
-    public void StartMissionLoop()
-    {
-        int index = Random.Range(0, getMissionWithLevel(CurrentMissionLevel).Length);
-        StartMission(CurrentMissionLevel, index);
-    }
+    //public void StartMissionLoop()
+    //{
+    //    //int index = Random.Range(0, getMissionWithLevel(CurrentMissionLevel).Length);
+    //    //StartMission(CurrentMissionLevel, index);
+    //}
 
     public async void onSelectPlanet(string selectedPlanetId)
     {

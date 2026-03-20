@@ -54,7 +54,6 @@ public class GameServer : SocketManager
         NetworkSystem system = NetworkSystem.Instance;
         system.IsOnline = true;
         system.IsServer = true;
-        GameCore.Instance.Connector.gameObject.SetActive(true);
         await system.StartAsHost();
         
         return true;
@@ -89,7 +88,7 @@ public class GameServer : SocketManager
         ulong steamid = info.Identity.SteamId;
         NetworkSystem system = NetworkSystem.Instance;
         NetworkUsers[steamid].player = await system.SpawnPlayer(steamid);
-        await system.SpawnSpaceShip(steamid);
+        //await system.SpawnSpaceShip(steamid);
         Debug.Log($"Player {steamid} instantiated on server.");
     }
     private async UniTask<bool> SyncPlayer(NetworkPlayer connectedPlayer)

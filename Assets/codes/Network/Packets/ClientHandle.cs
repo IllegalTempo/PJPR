@@ -188,4 +188,12 @@ public class ClientHandle
         
         // TODO: Handle the packet
     }
+
+    public static void StartGameLoop(Connection c, packet packet)
+    {
+        // TODO: Read packet data here
+        // var data = packet.Read...();
+        
+        // TODO: Handle the packet
+    }
 }

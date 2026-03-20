@@ -41,17 +41,21 @@ public partial class GameCore : MonoBehaviour
 
     //Local Player Info
     public PlayerMain Local_Player;
-    public Spaceship Local_PlayerSpaceship;
+    //public Spaceship Local_PlayerSpaceship;
     public NetworkPlayerObject Local_NetworkPlayer;
     [SerializeField]
-    private Transform[] SpaceshipSpawns;
+    private GameObject PlayerSpawn;
+    //[SerializeField]
+    //private Transform[] SpaceshipSpawns;
     [SerializeField]
     public WorldReference WorldReference;
-    [SerializeField]
-    private GameObject[][] MissionManagerPrefabs;
-    public int CurrentMissionLevel = 0;
+    //public int CurrentMissionLevel = 0;
 
     public long RandomSeed;
+    public Vector3 getPlayerSpawn()
+    {
+        return PlayerSpawn.transform.position;
+    }
     private void Awake()
     {
 
@@ -85,27 +89,23 @@ public partial class GameCore : MonoBehaviour
         SavePlayerPrefs();
 
     }
-    private GameObject[] getMissionWithLevel(int level)
-    {
-        return MissionManagerPrefabs[level];
-    }
 
-    public void StartMission(int level, int missionindex)
-    {
-        GameObject missionPrefab = getMissionWithLevel(level)[missionindex];
-        GameObject.Instantiate(missionPrefab);
+    //public void StartMission(int level, int missionindex)
+    //{
+    //    GameObject missionPrefab = getMissionWithLevel(level)[missionindex];
+    //    GameObject.Instantiate(missionPrefab);
 
-    }
+    //}
     private void SavePlayerPrefs()
     {
         string rebinds = PlayerControl.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("inputRebinds", rebinds);
         PlayerPrefs.SetString("options", Option.saveAsJSON());
     }
-    public Transform GetSpaceshipSpawn(int index)
-    {
-        return SpaceshipSpawns[index];
-    }
+    //public Transform GetSpaceshipSpawn(int index)
+    //{
+    //    return SpaceshipSpawns[index];
+    //}
     public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {
         string prefabPath = GetPrefabWithID.ContainsKey(PrefabID) ? _prefabPath + GetPrefabWithID[PrefabID] : throw new PrefabNotFound(PrefabID);
@@ -120,23 +120,23 @@ public partial class GameCore : MonoBehaviour
         await request;
         return request.asset as GameObject;
     }
-    public async UniTask SpawnDecorations(DecorationSaveData[] decs, Spaceship spaceship)
-    {
-        if (decs != null)
-        {
-            foreach (DecorationSaveData dsd in decs)
-            {
-                GameObject prefab = await GetDecoration(dsd.DecorationID);
-                Decoration obj = Instantiate(prefab, spaceship.transform).GetComponent<Decoration>();
-                obj.OnCreate(spaceship, dsd.DecorationPosition, dsd.DecorationRotation);
+    //public async UniTask SpawnDecorations(DecorationSaveData[] decs, Spaceship spaceship)
+    //{
+    //    if (decs != null)
+    //    {
+    //        foreach (DecorationSaveData dsd in decs)
+    //        {
+    //            GameObject prefab = await GetDecoration(dsd.DecorationID);
+    //            Decoration obj = Instantiate(prefab, spaceship.transform).GetComponent<Decoration>();
+    //            obj.OnCreate(spaceship, dsd.DecorationPosition, dsd.DecorationRotation);
 
-            }
-        }
-        else
-        {
-            Debug.Log("Cannot load decorations");
-        }
-    }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("Cannot load decorations");
+    //    }
+    //}
     public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID, ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");

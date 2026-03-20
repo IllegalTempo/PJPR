@@ -144,27 +144,27 @@ public class BlackHole : HarmfulObject
 
     private void TryDamageSpaceship(GameObject obj)
     {
-        Spaceship spaceship = obj.GetComponent<Spaceship>() ?? obj.GetComponentInParent<Spaceship>();
-        if (spaceship != null)
-        {
-            foreach (SpaceshipPart part in spaceship.Parts)
-            {
-                if (part != null)
-                    StartCoroutine(DamageOverTime(part, damageRateInsideHorizon, vanishDestroyDelay));
-            }
+        //Spaceship spaceship = obj.GetComponent<Spaceship>() ?? obj.GetComponentInParent<Spaceship>();
+        //if (spaceship != null)
+        //{
+        //    foreach (SpaceshipPart part in spaceship.Parts)
+        //    {
+        //        if (part != null)
+        //            StartCoroutine(DamageOverTime(part, damageRateInsideHorizon, vanishDestroyDelay));
+        //    }
 
-            SpaceshipPart[] allParts = spaceship.GetComponentsInChildren<SpaceshipPart>();
-            foreach (SpaceshipPart part in allParts)
-            {
-                if (part != null && !spaceship.Parts.Contains(part))
-                    StartCoroutine(DamageOverTime(part, damageRateInsideHorizon * 0.5f, vanishDestroyDelay));
-            }
-            return;
-        }
+        //    SpaceshipPart[] allParts = spaceship.GetComponentsInChildren<SpaceshipPart>();
+        //    foreach (SpaceshipPart part in allParts)
+        //    {
+        //        if (part != null && !spaceship.Parts.Contains(part))
+        //            StartCoroutine(DamageOverTime(part, damageRateInsideHorizon * 0.5f, vanishDestroyDelay));
+        //    }
+        //    return;
+        //}
 
-        SpaceshipPart singlePart = obj.GetComponent<SpaceshipPart>() ?? obj.GetComponentInParent<SpaceshipPart>();
-        if (singlePart != null)
-            StartCoroutine(DamageOverTime(singlePart, damageRateInsideHorizon, vanishDestroyDelay));
+        //SpaceshipPart singlePart = obj.GetComponent<SpaceshipPart>() ?? obj.GetComponentInParent<SpaceshipPart>();
+        //if (singlePart != null)
+        //    StartCoroutine(DamageOverTime(singlePart, damageRateInsideHorizon, vanishDestroyDelay));
     }
 
     private IEnumerator DamageOverTime(SpaceshipPart part, float damagePerSecond, float duration)

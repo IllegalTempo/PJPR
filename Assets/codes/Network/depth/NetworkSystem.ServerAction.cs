@@ -26,20 +26,20 @@ public partial class NetworkSystem
         return nobj;
 
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
-    {
-        if (IsOnline && !Instance.IsServer) return null;
-        NetworkPlayerObject player = PlayerList[owner];
-        Transform spawn = GameCore.Instance.GetSpaceshipSpawn(player.index);
+    //public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
+    //{
+    //    if (IsOnline && !Instance.IsServer) return null;
+    //    NetworkPlayerObject player = PlayerList[owner];
+    //    Transform spawn = GameCore.Instance.GetSpaceshipSpawn(player.index);
 
-        Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
-        await GameCore.Instance.SpawnDecorations(decs, ss);
-        //ss.OwnerPlayer = PlayerList[owner];
-        //ss.OwnerPlayer.spaceship = ss;
+    //    Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
+    //    await GameCore.Instance.SpawnDecorations(decs, ss);
+    //    //ss.OwnerPlayer = PlayerList[owner];
+    //    //ss.OwnerPlayer.spaceship = ss;
 
-        return ss;
+    //    return ss;
 
-    }
+    //}
     private async void OnLobbyCreated(Result r, Lobby l)
     {
         l.SetFriendsOnly();

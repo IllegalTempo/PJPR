@@ -173,12 +173,12 @@ public class Meteorite : HarmfulObject
 
         if (other.CompareTag("Spaceship") || other.CompareTag("Player"))
         {
-            Spaceship_movement spaceship = other.GetComponent<Spaceship_movement>();
-            if (spaceship != null)
-            {
-                // spaceship.TakeDamage(damage);
-            }
-            TakeDamage(health * 0.3f);
+            //Spaceship_movement spaceship = other.GetComponent<Spaceship_movement>();
+            //if (spaceship != null)
+            //{
+            //    // spaceship.TakeDamage(damage);
+            //}
+            //TakeDamage(health * 0.3f);
         }
         else if (other.CompareTag("Projectile"))
         {

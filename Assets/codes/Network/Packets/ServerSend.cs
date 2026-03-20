@@ -200,6 +200,17 @@ public class ServerSend
             return PacketSend.BroadcastPacketToReady(p);
         }
     }
+
+    public static Result StartGameLoop(NetworkPlayer target)
+    {
+        using (packet p = new packet((int)ServerPackets.StartGameLoop))
+        {
+            // TODO: Write packet data here
+            // p.Write(...);
+            
+            return target.SendPacket(p);
+        }
+    }
 }
 
     

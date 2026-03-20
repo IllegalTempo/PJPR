@@ -167,7 +167,7 @@ public partial class NetworkSystem : MonoBehaviour
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
         int index = PlayerList.Count;
-        NetworkPlayerObject p = Instantiate(PlayerInstance, getPlayerSpawnPos(index), Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.getPlayerSpawn(), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         await p.Init(steamid, index);
         PlayerList.Add(steamid, p);
 
@@ -175,10 +175,10 @@ public partial class NetworkSystem : MonoBehaviour
 
         return p;
     }
-    private Vector3 getPlayerSpawnPos(int index)
-    {
-        return GameCore.Instance.GetSpaceshipSpawn(index).position - new Vector3(0,1,0);
-    }
+    //private Vector3 getPlayerSpawnPos(int index)
+    //{
+    //    return GameCore.Instance.GetSpaceshipSpawn(index).position - new Vector3(0,1,0);
+    //}
     public void RemoveAllPlayerObject()
     {
         foreach (NetworkPlayerObject g in PlayerList.Values)
@@ -205,7 +205,6 @@ public partial class NetworkSystem : MonoBehaviour
         }
         else
         {
-            GameCore.Instance.Connector.gameObject.SetActive(false);
 
             await StartAsHost();
         }
@@ -237,12 +236,12 @@ public partial class NetworkSystem : MonoBehaviour
         Debug.Log("Starting as Host...");
         ulong steamid = SteamClient.SteamId;
         await SpawnPlayer(steamid); //Add the server player to the player list
-        await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
+        //await SpawnSpaceShip(SaveObject.instance.saved_decorations, steamid);
     }
-    public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
-    {
-        return await SpawnSpaceShip(null, owner);
-    }
+    //public async UniTask<Spaceship> SpawnSpaceShip(ulong owner)
+    //{
+    //    return await SpawnSpaceShip(null, owner);
+    //}
     private void RegisterCallbacks()
     {
 #if UNITY_EDITOR
