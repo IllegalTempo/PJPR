@@ -49,7 +49,7 @@ public class ClientHandle
         string itemid = packet.ReadstringUNICODE();
         ulong whopicked = packet.Readulong();
 
-        NetworkSystem.Instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onChangeOwnership(whopicked);
+        NetworkSystem.Instance.FindNetworkObject[itemid].gameObject.GetComponent<Item>().Network_onPickUPorDrop(whopicked);
         Debug.Log($"Received PickUp Item Info: {itemid} picked up by {whopicked}");
 
 

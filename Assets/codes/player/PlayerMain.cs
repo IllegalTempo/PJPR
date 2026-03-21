@@ -35,9 +35,12 @@ public class PlayerMain : MonoBehaviour
 
     public Item holdingItem = null;
 
-    public Vector3 itemHoldOffset = new Vector3(0, 2f, 15f); // Position in front of the camera for held items
+    public Transform HandTransform;
 
     PlayerInputAction control;
+
+    [SerializeField]
+    private GameObject[] LocalInvisible;
     void Start()
     {
 
@@ -59,6 +62,10 @@ public class PlayerMain : MonoBehaviour
 
     private void Initialize_local()
     {
+        foreach (GameObject obj in LocalInvisible)
+        {
+            obj.SetActive(false);
+        }
         cam.SetActive(true);
         control = GameCore.Instance.PlayerControl;
 
@@ -153,9 +160,12 @@ public class PlayerMain : MonoBehaviour
     }
     public void HoldingItem(Item item)
     {
-        item.transform.position = cam.transform.position + cam.transform.rotation * itemHoldOffset;
-        item.transform.rotation = cam.transform.rotation;
+        if(!item.lockRelativeRotation)
+        {
+            item.transform.rotation = cam.transform.rotation;
 
+        }
+        item.whenPickUp();
     }
 
 

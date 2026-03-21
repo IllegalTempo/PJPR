@@ -16,6 +16,17 @@ public class Item : Selectable //Item is any that is pickable
     protected Rigidbody rb;
     protected Collider itemCollider;
 
+    [SerializeField]
+    private Vector3 HoldOffset;
+    [SerializeField]
+    private Vector3 HoldScale;
+    [SerializeField]
+    private Vector3 HoldRotation;
+
+    private Transform originalParent;
+
+    [SerializeField]
+    public bool lockRelativeRotation = false;
     //public virtual bool IsRepairTool => isRepairTool;
 
     protected new void OnEnable()
@@ -29,6 +40,7 @@ public class Item : Selectable //Item is any that is pickable
 
         rb = GetComponent<Rigidbody>();
         itemCollider = GetComponent<Collider>();
+        originalParent = transform.parent;
     }
 
 
@@ -48,9 +60,10 @@ public class Item : Selectable //Item is any that is pickable
         PickUpItem();
 
     }
-    public void Network_onChangeOwnership(ulong newowner)
+    public void Network_onPickUPorDrop(ulong newowner)
     {
         netObj.Network_ChangeOwner(newowner);
+        PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
         if (newowner == 0)
         {
             gotDropped(transform.position);
@@ -58,12 +71,22 @@ public class Item : Selectable //Item is any that is pickable
         }
         else
         {
-            gotPickedup();
+            gotPickedup(who);
         }
     }
-    private void gotPickedup()
+    public void whenPickUp()
+    {
+        transform.localPosition = HoldOffset;
+        transform.localRotation = Quaternion.Euler(HoldRotation);
+        transform.localScale = HoldScale;
+    }
+    private void gotPickedup(PlayerMain who)
 
     {
+        transform.parent = who.HandTransform;
+        
+
+
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = false;
         outline.OutlineColor = Color.aquamarine;
@@ -74,6 +97,7 @@ public class Item : Selectable //Item is any that is pickable
     }
     private void gotDropped(Vector3 dropPosition)
     {
+        transform.parent = originalParent;
         outline.OutlineColor = Color.white;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
@@ -84,7 +108,7 @@ public class Item : Selectable //Item is any that is pickable
     protected virtual void PickUpItem() //Only Run by local
     {
 
-        gotPickedup();
+        gotPickedup(GameCore.Instance.Local_Player);
         GameCore.Instance.Local_Player.OnPickUpItem(this);
 
         ulong localOwner = 1;
@@ -134,7 +158,6 @@ public class Item : Selectable //Item is any that is pickable
     
     protected virtual void Drop(Vector3 dropPosition) //Only Run by local
     {
-
 
         gotDropped(dropPosition);
             netObj.Owner = 0;
