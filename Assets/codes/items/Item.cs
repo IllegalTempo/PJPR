@@ -19,8 +19,6 @@ public class Item : Selectable //Item is any that is pickable
     [SerializeField]
     private Vector3 HoldOffset;
     [SerializeField]
-    private Vector3 HoldScale;
-    [SerializeField]
     private Vector3 HoldRotation;
 
     private Transform originalParent;
@@ -74,18 +72,19 @@ public class Item : Selectable //Item is any that is pickable
             gotPickedup(who);
         }
     }
-    public void whenPickUp()
-    {
-        transform.localPosition = HoldOffset;
-        transform.localRotation = Quaternion.Euler(HoldRotation);
-        transform.localScale = HoldScale;
-    }
     private void gotPickedup(PlayerMain who)
 
     {
+        who.OnPickUpItem(this, netObj);
         transform.parent = who.HandTransform;
         
 
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        
+        transform.localPosition = HoldOffset;
+        transform.localRotation = Quaternion.Euler(HoldRotation);
+
+        
 
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = false;
@@ -101,6 +100,7 @@ public class Item : Selectable //Item is any that is pickable
         outline.OutlineColor = Color.white;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.None;
         this.transform.position = dropPosition;
 
         itemCollider.enabled = true;
@@ -109,28 +109,39 @@ public class Item : Selectable //Item is any that is pickable
     {
 
         gotPickedup(GameCore.Instance.Local_Player);
-        GameCore.Instance.Local_Player.OnPickUpItem(this);
 
-        ulong localOwner = 1;
-        if (GameCore.Instance != null && GameCore.Instance.Local_NetworkPlayer != null)
+
+
+
+    }
+    public NetworkObject GetNetworkObject()
+    {
+        if (netObj == null)
         {
-            localOwner = GameCore.Instance.Local_NetworkPlayer.steamID;
+            netObj = GetComponent<NetworkObject>();
         }
-            netObj.Owner = localOwner;
+        return netObj;
+    }
 
+
+
+    protected virtual void Drop(Vector3 dropPosition) //Only Run by local
+    {
+
+        gotDropped(dropPosition);
+        netObj.Owner = 0;
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
+                ServerSend.DistributePickUpItem(netObj.Identifier, 0);
             }
             else
             {
-                ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
+                ClientSend.PickUpItem(netObj.Identifier, 0);
             }
         }
-
 
     }
     protected override void Update()
@@ -152,28 +163,6 @@ public class Item : Selectable //Item is any that is pickable
         {
             GameCore.Instance.Local_Player.HoldingItem(this);
         }
-    }
-
-        
-    
-    protected virtual void Drop(Vector3 dropPosition) //Only Run by local
-    {
-
-        gotDropped(dropPosition);
-            netObj.Owner = 0;
-
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
-        {
-            if (NetworkSystem.Instance.IsServer)
-            {
-                ServerSend.DistributePickUpItem(netObj.Identifier,0);
-            }
-            else
-            {
-                ClientSend.PickUpItem(netObj.Identifier, 0);
-            }
-        }
-
     }
     public void Drop()
     {

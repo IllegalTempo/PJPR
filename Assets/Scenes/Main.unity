@@ -727,6 +727,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
       propertyPath: m_Name
       value: pickaxe
@@ -1437,7 +1441,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &330585544
 AudioListener:
   m_ObjectHideFlags: 0
@@ -1612,7 +1616,6 @@ MonoBehaviour:
   ItemDescription: 
   netObj: {fileID: 0}
   HoldOffset: {x: 0, y: 0, z: 0}
-  HoldScale: {x: 0, y: 0, z: 0}
   HoldRotation: {x: 0, y: 0, z: 0}
   lockRelativeRotation: 0
 --- !u!114 &332918751
@@ -3752,7 +3755,6 @@ MonoBehaviour:
   ItemDescription: 
   netObj: {fileID: 1212190686}
   HoldOffset: {x: 0, y: 0, z: 0}
-  HoldScale: {x: 0, y: 0, z: 0}
   HoldRotation: {x: 0, y: 0, z: 0}
   lockRelativeRotation: 0
 --- !u!114 &1212190691
@@ -4988,9 +4990,8 @@ MonoBehaviour:
   ItemName: 
   ItemDescription: 
   netObj: {fileID: 0}
-  HoldOffset: {x: 0, y: 0, z: 0}
-  HoldScale: {x: 1, y: 1, z: 1}
-  HoldRotation: {x: 0, y: 0, z: 0}
+  HoldOffset: {x: 0, y: 0.003, z: -0.005}
+  HoldRotation: {x: 0, y: 0, z: 70}
   lockRelativeRotation: 1
 --- !u!114 &1560526353
 MonoBehaviour:

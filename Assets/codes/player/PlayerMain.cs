@@ -10,7 +10,7 @@ using UnityEngine.Rendering.Universal;
 /// This is the brain of a player, most action of the player is done here, such as movement, looking around, picking up items, interacting with objects, and voice chat control. It also handles the player's camera and what they are currently looking at or holding. This script is attached to the player GameObject and requires a Rigidbody component for physics-based movement.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMain : MonoBehaviour
+public partial class PlayerMain : MonoBehaviour
 {
 
     public float MoveSpeed = 1f;
@@ -139,19 +139,66 @@ public class PlayerMain : MonoBehaviour
         cam.SetActive(false);
         rb.isKinematic = true;
     }
-    public void OnPickUpItem(Item Item)
+    public void OnPickUpItem(Item Item,NetworkObject netObj)
     {
         holdingItem = Item;
-        UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
+        if(networkinfo.IsLocal)
+        {
+            LOCAL_OnPickUpItem(Item,netObj);
+        }
 
 
     }
-
-    public void OnDropItem(Item Item)
+    private void LOCAL_OnPickUpItem(Item Item,NetworkObject netObj)
     {
-        UIManager.Instance.HideInteraction(0);
+        UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
+        ulong localOwner = 1;
+        if (GameCore.Instance != null && GameCore.Instance.Local_NetworkPlayer != null)
+        {
+            localOwner = GameCore.Instance.Local_NetworkPlayer.steamID;
+        }
+        netObj.Owner = localOwner;
+
+
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
+        {
+            if (NetworkSystem.Instance.IsServer)
+            {
+                ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
+            }
+            else
+            {
+                ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
+            }
+        }
+    }
+    public void OnDropItem(Item Item,NetworkObject netObj)
+    {
         holdingItem = null;
 
+        if (networkinfo.IsLocal)
+        {
+            UIManager.Instance.HideInteraction(0);
+            LOCAL_OnDropItem(Item, netObj);
+
+        }
+
+    }
+    private void LOCAL_OnDropItem(Item Item,NetworkObject netObj)
+    {
+        netObj.Owner = 0;
+
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
+        {
+            if (NetworkSystem.Instance.IsServer)
+            {
+                ServerSend.DistributePickUpItem(netObj.Identifier, 0);
+            }
+            else
+            {
+                ClientSend.PickUpItem(netObj.Identifier, 0);
+            }
+        }
     }
     private void onSelectObject(Selectable item)
     {
@@ -165,7 +212,7 @@ public class PlayerMain : MonoBehaviour
             item.transform.rotation = cam.transform.rotation;
 
         }
-        item.whenPickUp();
+        
     }
 
 
@@ -260,7 +307,7 @@ public class PlayerMain : MonoBehaviour
     private void OnDrop()
     {
         holdingItem.Drop();
-        OnDropItem(holdingItem);
+        OnDropItem(holdingItem,holdingItem.GetNetworkObject());
 
     }
     private void PlayerControl()
