@@ -8,8 +8,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 ///
 public class Item : Selectable //Item is any that is pickable
 {
-    public string ItemName;
-    public string ItemDescription;
+    public ItemDefinition AbstractItem;
     //[SerializeField] protected bool isRepairTool;
     [SerializeField]
     protected NetworkObject netObj;

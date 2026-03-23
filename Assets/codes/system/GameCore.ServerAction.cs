@@ -10,7 +10,17 @@ public partial class GameCore
     //    //int index = Random.Range(0, getMissionWithLevel(CurrentMissionLevel).Length);
     //    //StartMission(CurrentMissionLevel, index);
     //}
+    public Item RealizeItemDefinition(ItemDefinition itemDef, Vector3 pos,Quaternion rot)
+    {
+        if (itemDef == null)
+        {
+            Debug.LogError("ItemDefinition is null. Cannot realize item.");
+            return null;
 
+        }
+        Item item = Instantiate(itemDef.itemPrefab,pos,rot).GetComponent<Item>();
+        return item;
+    }
     public async void onSelectPlanet(string selectedPlanetId)
     {
         Debug.Log($"Planet {selectedPlanetId} selected by the party leader!");
