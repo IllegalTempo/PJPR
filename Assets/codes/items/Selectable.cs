@@ -14,12 +14,13 @@ public partial class Selectable : MonoBehaviour
         outline = GetComponent<StaticOutline>();
         gameObject.layer = Layer;
         onLookedAway();
-
-
     }
 
     protected virtual void Update()
     {
+        if (outline == null)
+            return;
+
         if (ClickTimer > 0)
         {
             ClickTimer -= Time.deltaTime;
@@ -35,13 +36,15 @@ public partial class Selectable : MonoBehaviour
     public void onLookedAt()
     {
         lookedAt = true;
-        outline.enabled = true;
+        if (outline != null)
+            outline.enabled = true;
 
     }
     public void onLookedAway()
     {
         lookedAt = false;
-        outline.enabled = false;
+        if (outline != null)
+            outline.enabled = false;
 
     }
     public virtual void OnClicked()

@@ -10,7 +10,7 @@ public class button : Selectable, IUsable
 
     [SerializeField]
     private float releaseTime = 1f; //1 second by default
-    public void OnInteract(PlayerMain who)
+    public virtual void OnInteract(PlayerMain who)
     {
         onClicked.Invoke();
 
