@@ -5,11 +5,11 @@ public class WashingMachineButton : button
     [SerializeField]
     private SplashController splashController;
 
-    [SerializeField]
-    private LiquidType liquidType = LiquidType.Water;
 
     [SerializeField]
     private bool triggerSplashOnClick = true;
+
+    private float offset = 0.05f;
 
     public override void OnInteract(PlayerMain who)
     {
@@ -18,22 +18,18 @@ public class WashingMachineButton : button
 
         if (triggerSplashOnClick && splashController != null)
         {
-            splashController.Splash(liquidType);
+            splashController.Splash();
         }
     }
 
-    public void SetLiquidType(LiquidType newLiquidType)
+    public void click()
     {
-        liquidType = newLiquidType;
+        transform.position = transform.position + transform.right * offset;
+    }
+    public void release()
+    {
+        transform.position = transform.position - transform.right * offset;
     }
 
-    public void SetSplashController(SplashController controller)
-    {
-        splashController = controller;
-    }
 
-    public LiquidType GetLiquidType()
-    {
-        return liquidType;
-    }
 }

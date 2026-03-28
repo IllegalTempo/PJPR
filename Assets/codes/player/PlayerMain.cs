@@ -207,11 +207,11 @@ public partial class PlayerMain : MonoBehaviour
     }
     public void HoldingItem(Item item)
     {
-        if(!item.lockRelativeRotation)
-        {
-            item.transform.rotation = cam.transform.rotation;
+        //if(!item.lockRelativeRotation)
+        //{
+        //    item.transform.rotation = cam.transform.rotation;
 
-        }
+        //}
         
     }
 
@@ -253,7 +253,14 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (holdingItem != null)
         {
+            Item it = holdingItem;
             OnDrop();
+            if (seenObject is slot s)
+            {
+                s.AttachItem(it);
+                return;
+            }
+            
             return;
         }
 

@@ -7,4 +7,5 @@ public class ItemDefinition : ScriptableObject
     public Sprite itemIcon;
     public GameObject itemPrefab;
     public int maxStackSize = 64;
+
 }

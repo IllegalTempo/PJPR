@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 
 public partial class GameCore
 {
@@ -20,6 +21,12 @@ public partial class GameCore
         }
         Item item = Instantiate(itemDef.itemPrefab,pos,rot).GetComponent<Item>();
         return item;
+    }
+    public ItemDefinition RemoveItemFromWorld(Item item)
+    {
+        ItemDefinition def = item.AbstractItem;
+        Destroy(item.gameObject);
+        return def;
     }
     public async void onSelectPlanet(string selectedPlanetId)
     {

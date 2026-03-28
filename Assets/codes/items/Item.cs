@@ -39,10 +39,14 @@ public class Item : Selectable //Item is any that is pickable
         itemCollider = GetComponent<Collider>();
         originalParent = transform.parent;
     }
-
-
-
-
+    public void DisableRB()
+    {
+        rb.isKinematic = true;
+    }
+    public void EnableRB()
+    {
+        rb.isKinematic = false;
+    }
     public override void OnClicked()
     {
         base.OnClicked();
@@ -75,7 +79,7 @@ public class Item : Selectable //Item is any that is pickable
 
     {
         who.OnPickUpItem(this, netObj);
-        transform.parent = who.HandTransform;
+        transform.SetParent(who.HandTransform);
         
 
         rb.constraints = RigidbodyConstraints.FreezeAll;
@@ -95,7 +99,7 @@ public class Item : Selectable //Item is any that is pickable
     }
     private void gotDropped(Vector3 dropPosition)
     {
-        transform.parent = originalParent;
+        transform.SetParent(originalParent);
         outline.OutlineColor = Color.white;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;

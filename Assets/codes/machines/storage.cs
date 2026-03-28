@@ -18,8 +18,7 @@ public class storage //This is only a data type class, used it in some thing lik
         {
             if (content[i] == null)
             {
-                content[i] = item.AbstractItem;
-                //todo: proper way to remove the item from the world, maybe add a "RemoveFromWorld" method in Item class?
+                content[i] = GameCore.Instance.RemoveItemFromWorld(item);
                 return;
             }
         }

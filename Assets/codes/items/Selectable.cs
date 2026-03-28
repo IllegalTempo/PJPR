@@ -4,9 +4,9 @@ using UnityEngine;
 public partial class Selectable : MonoBehaviour
 {
 
-    public StaticOutline outline;
+    protected StaticOutline outline;
     private bool lookedAt = false;
-    public float ClickTimer = 0f;
+    private float ClickTimer = 0f;
     protected virtual int Layer => 6; // Default layer for selectable objects
 
     protected virtual void OnEnable()
