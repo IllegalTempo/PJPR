@@ -33,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -148.20193, y: 0.7, z: -20.75814}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -218,8 +218,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b9e54b48464dad4ba8ff70851ff473a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::mineralItem
-  outline: {fileID: 0}
-  ClickTimer: 0
-  ItemName: Aetherite
-  ItemDescription: 
+  AbstractItem: {fileID: 0}
   netObj: {fileID: 0}
+  lockRelativeRotation: 0

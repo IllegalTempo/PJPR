@@ -13,10 +13,7 @@ using UnityEngine.Rendering.Universal;
 public partial class PlayerMain : MonoBehaviour
 {
 
-    public float MoveSpeed = 1f;
-    public float LookSpeed = 2f;
-    public float MaxSpeed = 3f; // Maximum allowed speed
-    public float JetPackForce = 0.5f;
+    
     public float GroundCheckDistance = 0.3f;
 
     private float yaw = 0f;
@@ -24,8 +21,7 @@ public partial class PlayerMain : MonoBehaviour
     private Rigidbody rb;
     [SerializeField]
     private AudioSource audioSource;
-    private Vector2 moveinput = Vector2.zero;
-    private Vector2 lookinput = Vector2.zero;
+    
     private bool usingvc = false;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
@@ -216,39 +212,7 @@ public partial class PlayerMain : MonoBehaviour
     }
 
 
-    private void Jetpack()
-    {
-        rb.AddForce(Vector3.up * JetPackForce, ForceMode.Impulse);
-
-    }
-    private void Move()
-    {
-
-
-        Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
-        if (move.sqrMagnitude > 1f)
-        {
-            move.Normalize();
-        }
-
-        Vector3 targetVelocity = move * MoveSpeed * MaxSpeed;
-
-        rb.linearVelocity = targetVelocity;
-        if(control.Player.jump.IsPressed())
-        {
-            Jetpack();
-        }
-    }
-    private void Look()
-    {
-        float sens = GameCore.Instance.Option.mouseSensitivity;
-        yaw += LookSpeed * lookinput.x * sens;
-        pitch -= LookSpeed * lookinput.y * sens;
-        pitch = Mathf.Clamp(pitch, -90f, 90f);
-        head.transform.eulerAngles = new Vector3(pitch, yaw, 0f);
-        transform.eulerAngles = new Vector3(0, yaw, 0f);
-
-    }
+    
     private void OnClickPickUp()
     {
         if (holdingItem != null)
@@ -317,41 +281,7 @@ public partial class PlayerMain : MonoBehaviour
         OnDropItem(holdingItem,holdingItem.GetNetworkObject());
 
     }
-    private void PlayerControl()
-    {
-        //if (settingsMenu != null && settingsMenu.IsMenuOpen)
-        //{
-        //    return;
-        //}
-
-
-        //if (IsFunctionInteractPressedThisFrame())
-        //{
-        //    OnFunctionInteract();
-        //}
-
-        Move();
-        Look();
-
-
-        // Outline logic
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-        RaycastHit hit;
-        Selectable before = seenObject;
-        if (Physics.Raycast(ray, out hit, 100f, GameCore.Instance.Masks.SelectableItems))
-        {
-
-            seenObject = hit.collider.GetComponent<Selectable>();
-            if (seenObject == null) return;
-
-        }
-        else
-        {
-            seenObject = null;
-        }
-        UpdateSeenObject(before, before == seenObject);
-
-    }
+    
     private void UpdateSeenObject(Selectable before,bool lookedat)
     {
         if(before != null)
@@ -385,6 +315,13 @@ public partial class PlayerMain : MonoBehaviour
             PlayerControl();
         }
 
+    }
+    private void FixedUpdate()
+    {
+        if (networkinfo.IsLocal)
+        {
+            Move();
+        }
     }
     private void OnTriggerEnter(Collider other)
     {

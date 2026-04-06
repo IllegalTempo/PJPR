@@ -45,6 +45,7 @@ public class UIManager : MonoBehaviour
         HideAllInteraction();
 
     }
+    public void displayInventory()
     public void ChangeLoadingStatus(string text, float progress)
     {
         loadingStatusText.text = text;

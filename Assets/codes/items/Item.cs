@@ -15,13 +15,8 @@ public class Item : Selectable //Item is any that is pickable
     protected Rigidbody rb;
     protected Collider itemCollider;
 
-    [SerializeField]
-    private Vector3 HoldOffset;
-    [SerializeField]
-    private Vector3 HoldRotation;
-
     private Transform originalParent;
-
+    private Vector3 originalScale;
     [SerializeField]
     public bool lockRelativeRotation = false;
     //public virtual bool IsRepairTool => isRepairTool;
@@ -38,6 +33,7 @@ public class Item : Selectable //Item is any that is pickable
         rb = GetComponent<Rigidbody>();
         itemCollider = GetComponent<Collider>();
         originalParent = transform.parent;
+        originalScale = transform.localScale;
     }
     public void DisableRB()
     {
@@ -80,14 +76,22 @@ public class Item : Selectable //Item is any that is pickable
     {
         who.OnPickUpItem(this, netObj);
         transform.SetParent(who.HandTransform);
-        
+
 
         rb.constraints = RigidbodyConstraints.FreezeAll;
         
-        transform.localPosition = HoldOffset;
-        transform.localRotation = Quaternion.Euler(HoldRotation);
-
+        if(AbstractItem != null)
+        {
+            transform.localPosition = AbstractItem.HoldOffset;
+            transform.localRotation = AbstractItem.HoldRotation;
+            transform.localScale = AbstractItem.HoldScale;
+        } else
+        {
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
         
+
 
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = false;
@@ -101,11 +105,12 @@ public class Item : Selectable //Item is any that is pickable
     {
         transform.SetParent(originalParent);
         outline.OutlineColor = Color.white;
+        rb.isKinematic = false;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.None;
         this.transform.position = dropPosition;
-
+        transform.localScale = originalScale;
         itemCollider.enabled = true;
     }
     protected virtual void PickUpItem() //Only Run by local
