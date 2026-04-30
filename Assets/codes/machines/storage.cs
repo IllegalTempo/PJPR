@@ -12,6 +12,15 @@ public class storage //This is only a data type class, used it in some thing lik
         this.name = name;
         content = new ItemDefinition[capacity];
     }
+    public ItemDefinition[] GetItems()
+    {
+        return content;
+
+    }
+    public string GetStorageName()
+    {
+        return name;
+    }
     public void AddItem(Item item)
     {
         for (int i = 0; i < capacity; i++)

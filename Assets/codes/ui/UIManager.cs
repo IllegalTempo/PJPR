@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,26 @@ public class UIManager : MonoBehaviour
     private GameObject playerDisplayPrefab;
     [SerializeField]
     private Transform playerDisplayGroup;
+
+
+    [Header("StorageDisplay")]
+    [SerializeField]
+    private GameObject SD_Group;
+    [SerializeField]
+    private GameObject SD_slotPrefab;
+    [SerializeField]
+    private Transform SD_slotGroup;
+
+    [Header("Detailed Item Display")]
+    [SerializeField]
+    private GameObject DID_Group;
+    [SerializeField]
+    private TMP_Text DID_itemName;
+    [SerializeField]
+    private Image DID_itemIcon;
+    [SerializeField]
+    private TMP_Text DID_itemDescription;
+    
     private void Awake()
     {
         Instance = this;
@@ -43,9 +64,41 @@ public class UIManager : MonoBehaviour
     {
         LoadingComplete();
         HideAllInteraction();
+        SD_Group.SetActive(false);
+        DID_Group.SetActive(false);
+    }
+    public void DisplayDetailedItemDisplay(ItemDefinition item)
+    {
+
+        DID_itemName.text = item.itemName;
+        DID_itemIcon.sprite = item.itemIcon;
+        DID_itemDescription.text = item.itemDescription;
+        DID_Group.SetActive(true);
+    }
+    public void HideDetailedItemDisplay()
+    {
+        DID_Group.SetActive(false);
+    }
+
+
+    public void DisplayStorage(storage srg)
+    {
+        //clear children in slot group
+        foreach (Transform child in SD_slotGroup)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach (ItemDefinition item in srg.GetItems())
+        {
+            Instantiate(SD_slotPrefab, SD_slotGroup).GetComponent<StorageSlot>().InitSlot(item.itemIcon);
+        }
+        SD_Group.SetActive(true);
 
     }
-    public void displayInventory()
+    public void HideStorage()
+    {
+        SD_Group.SetActive(false);
+    }   
     public void ChangeLoadingStatus(string text, float progress)
     {
         loadingStatusText.text = text;
@@ -53,7 +106,7 @@ public class UIManager : MonoBehaviour
     }
     public void ShowLoadingScreen(string text)
     {
-        loadingScreenGroup.SetActive(true);
+        loadingScreenGroup.SetActive(true); 
         ChangeLoadingStatus(text, 0);
     }
     public void LoadingComplete()
