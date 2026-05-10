@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using Steamworks;
 using Steamworks.Data;
 using System;
@@ -41,7 +42,7 @@ public class NetworkPlayer
         return r;
         
     }
-    public Result SendPacket(packet p)
+    public Result SendPacket(Packet p)
     {
         return SendData(p.GetPacketData());
     }
@@ -50,7 +51,7 @@ public class NetworkPlayer
     {
         player.Disconnect();
         NetworkSystem.Instance.PlayerList.Remove(steamId);
-        ServerSend.PlayerQuit(steamId);
+        NetworkRouter.Instance.DistributeMessage(steamId, new NMS_Server_PlayerQuit(steamId));
 
     }
 }

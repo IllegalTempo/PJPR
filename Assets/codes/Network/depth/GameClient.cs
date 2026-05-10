@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -12,44 +13,11 @@ using Connection = Steamworks.Data.Connection;
 
 public class GameClient : ConnectionManager
 {
-    //public int NetworkID;
-    private delegate void PacketHandle(Connection c, packet p);
-
     public GameClient()
     {
         NetworkSystem.Instance.IsServer = false;
     }
-
-    private Dictionary<int, PacketHandle> ClientPacketHandles = new Dictionary<int, PacketHandle>()
-        {
-            { (int)packets.ServerPackets.Test_Packet, ClientHandle.test },
-            { (int)packets.ServerPackets.RoomInfoOnPlayerEnterRoom, ClientHandle.SyncPlayer },
-            { (int)packets.ServerPackets.UpdatePlayerEnterRoomForExistingPlayer, ClientHandle.NewPlayerJoin },
-            { (int)packets.ServerPackets.PlayerQuit, ClientHandle.PlayerQuit },
-            { (int)packets.ServerPackets.DistributeMovement, ClientHandle.ReceivedPlayerMovement },
-            { (int)packets.ServerPackets.DistributeAnimation, ClientHandle.ReceivedPlayerAnimation },
-            { (int)packets.ServerPackets.DistributeNOInfo, ClientHandle.DistributeNOInfo },
-            { (int)packets.ServerPackets.DistributePickUpItem, ClientHandle.DistributePickUpItem },
-            
-            { (int)packets.ServerPackets.NewObject, ClientHandle.NewObject }
-
-
-            ,
-            { (int)packets.ServerPackets.DistributeNOactive, ClientHandle.DistributeNOactive }
-        ,
-            { (int)packets.ServerPackets.SyncNetworkObjects, ClientHandle.SyncNetworkObjects }
-        ,
-            { (int)packets.ServerPackets.DistributeInteract, ClientHandle.DistributeInteract }
-        
-            ,
-            { (int)packets.ServerPackets.DistributeVoicePacket, ClientHandle.DistributeVoicePacket }
-        
-            ,
-            { (int)packets.ServerPackets.SendMissionInfo, ClientHandle.SendMissionInfo }
-        ,
-            { (int)packets.ServerPackets.StartGameLoop, ClientHandle.StartGameLoop }
-        };
-
+    
     public async UniTask NewPlayer(ulong who)
     {
         Debug.Log($"Spawning Player {who} and spaceship");
@@ -114,18 +82,10 @@ public class GameClient : ConnectionManager
         byte[] bytedata = new byte[size];
         Marshal.Copy(data, bytedata, 0, size);
         float latency = Time.realtimeSinceStartup * 1000f - recvTime;
-        using (packet packet = new packet(bytedata))
+        using (Packet packet = new Packet(bytedata))
         {
-            int packetid = packet.Readint();
-            PacketHandle handle;
-            if (ClientPacketHandles.TryGetValue(packetid, out handle))
-            {
-                handle(Connection, packet);
-            }
-            else
-            {
-                Debug.Log($"Packet ID: {packetid} not found");
-            }
+            NetworkRouter.Instance.OnClientReceivePacket(packet);
+            
 
         }
     }

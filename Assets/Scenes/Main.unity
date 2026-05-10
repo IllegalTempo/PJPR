@@ -12294,6 +12294,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1923367896}
   - component: {fileID: 1923367897}
+  - component: {fileID: 1923367898}
   m_Layer: 0
   m_Name: networking
   m_TagString: Untagged
@@ -12336,6 +12337,18 @@ MonoBehaviour:
   FindNetworkObjectKey: []
   SteamID: 0
   initState: 0
+--- !u!114 &1923367898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923367895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ca52741cdda1c740b8f7315c32be06f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.Messages.NetworkRouter
 --- !u!1 &1935879527
 GameObject:
   m_ObjectHideFlags: 0

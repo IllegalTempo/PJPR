@@ -1,3 +1,5 @@
+using Assets.codes.Network.Messages;
+using Assets.codes.Network.Packets.BothMessages;
 using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -19,28 +21,6 @@ public class GameServer : SocketManager
 {
     public int maxplayer;
     public Dictionary<ulong, NetworkPlayer> NetworkUsers = new Dictionary<ulong, NetworkPlayer>(); //This does not include the server player
-    //public Dictionary<int, ulong> GetSteamID = new Dictionary<int, ulong>();
-    private delegate void PacketHandle(NetworkPlayer n, packet p);
-
-
-    private Dictionary<int, PacketHandle> ServerPacketHandles = new Dictionary<int, PacketHandle>()
-        {
-            { (int)packets.ClientPackets.Test_Packet,ServerHandle.test },
-            { (int)packets.ClientPackets.SendPosition,ServerHandle.PosUpdate},
-            { (int)packets.ClientPackets.SendAnimationState,ServerHandle.AnimationState},
-            { (int)packets.ClientPackets.SendNOInfo, ServerHandle.SendNOInfo },
-            { (int)packets.ClientPackets.PickUpItem, ServerHandle.PickUpItem }
-
-            ,
-            { (int)packets.ClientPackets.SendInteract, ServerHandle.SendDecorationInteract }
-        ,
-            { (int)packets.ClientPackets.SendReadyState, ServerHandle.SendReadyState }
-        
-            ,
-            { (int)packets.ClientPackets.VoicePacket, ServerHandle.VoicePacket }
-        };
-
-
 
     public GameServer()
     {
@@ -74,12 +54,13 @@ public class GameServer : SocketManager
     private async UniTask<bool> ClientConnectionEstablished(ConnectionInfo info)
     {
         Debug.Log("Client Connection Established.");
-        NetworkListener.RaisePlayerJoining(info);
+        NetworkSystem.Instance.NetworkListener.RaisePlayerJoining(info);
         NetworkPlayer connectedPlayer = GetPlayer(info);
 
         await InstantiatePlayerToServer(info);
         bool success = await SyncPlayer(connectedPlayer);
-        ServerSend.NewPlayerJoined(info); // Broadcast a message to inform all players that a new player has joined
+        ulong connectedSteamId = info.Identity.SteamId;
+        NetworkRouter.Instance.DistributeMessage(connectedSteamId,new NMS_Server_NewPlayerJoined(connectedSteamId));
 
         return success;
     }
@@ -108,8 +89,8 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
+        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncPlayer(NetworkSystem.Instance.Server.NetworkUsers.Keys)); //Send packet to the one who connects to the server, with room info
 
-        ServerSend.SyncPlayer(connectedPlayer, GetUserCount()); //Send packet to the one who connects to the server, with room info
         bool syncplayer = await WaitForReadyState(connectedPlayer, (int)ReadyState.SyncPlayer);
         if (syncplayer)
         {
@@ -121,22 +102,23 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
-        ServerSend.SyncNetworkObjects(connectedPlayer, NetworkSystem.Instance.FindNetworkObject.Values.Where(x => !x.Preset).ToArray());
+        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncNetworkObjects(NetworkSystem.Instance.FindNetworkObject.Values.Where(x => !x.Preset).ToArray())); //Send packet to the one who connects to the server, with room info
+
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
     }
     private async UniTask<bool> WaitForTestSuccess(NetworkPlayer connectedPlayer)
     {
-        ServerSend.test(connectedPlayer); // Send a test to the player along with his networkid
+        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Both_TestPacket(NetworkRouter.TestRandomUnicode,DateTime.Now.Ticks,connectedPlayer.steamId)); //Send packet to the one who connects to the server, with room info
 
         var network_test_pass = new UniTaskCompletionSource();
-        NetworkListener.Server_OnPlayerJoinSuccessful += onCallback;
+        NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful += onCallback;
 
 
         void onCallback(NetworkPlayer pl)
         {
             if (connectedPlayer != pl) return;
-            NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
             network_test_pass.TrySetResult();
 
         }
@@ -152,7 +134,7 @@ public class GameServer : SocketManager
         }
         finally
         {
-            NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful -= onCallback;
 
         }
 
@@ -160,14 +142,14 @@ public class GameServer : SocketManager
     private async UniTask<bool> WaitForReadyState(NetworkPlayer connectedPlayer,int readystate)
     {
         var network_test_pass = new UniTaskCompletionSource();
-        NetworkListener.Server_ReadyStateReceived += onCallback;
+        NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived += onCallback;
 
 
         void onCallback(NetworkPlayer pl,int state)
         {
             if (connectedPlayer != pl || readystate != state) return;
 
-            NetworkListener.Server_ReadyStateReceived -= onCallback;
+            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived -= onCallback;
             network_test_pass.TrySetResult();
 
         }
@@ -183,7 +165,7 @@ public class GameServer : SocketManager
         }
         finally
         {
-            NetworkListener.Server_ReadyStateReceived -= onCallback;
+            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived -= onCallback;
 
         }
 
@@ -248,10 +230,9 @@ public class GameServer : SocketManager
         Marshal.Copy(data, bytedata, 0, size);
         float latency = Time.realtimeSinceStartup * 1000f - recvTime;
 
-        using (packet packet = new packet(bytedata))
+        using (Packet packet = new Packet(bytedata))
         {
-
-            ServerPacketHandles[packet.Readint()](NetworkUsers[identity.SteamId], packet);
+            NetworkRouter.Instance.OnServerReceivePacket(packet, NetworkUsers[identity.SteamId]);
 
         }
     }

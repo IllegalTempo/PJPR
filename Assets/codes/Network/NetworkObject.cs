@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using System;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
@@ -35,7 +36,7 @@ public class NetworkObject : MonoBehaviour
         gameObject.SetActive(status);
         if (NetworkSystem.Instance.IsServer)
         {
-            ServerSend.DistributeNOactive(Identifier, status);
+            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Both_NetworkObjectActive(Identifier, status));
         }
     }
 
@@ -74,14 +75,15 @@ public class NetworkObject : MonoBehaviour
     private void SendTransform()
     {
         if (!NetworkSystem.Instance.IsOnline) return;
+        NMS_Both_NetworkObjectInfo message = new NMS_Both_NetworkObjectInfo(Identifier, transform.position, transform.rotation);
         if (NetworkSystem.Instance.IsServer)
         {
-            ServerSend.DistributeNOInfo(Identifier, transform.position, transform.rotation);
+            NetworkRouter.Instance.DistributeMessageToReady(message);
 
         }
         else if (GameCore.Instance.IsLocal(Owner))
         {
-            ClientSend.SendNOInfo(Identifier, transform.position, transform.rotation);
+            NetworkRouter.Instance.SendMessageToServer(message);
 
         }
 

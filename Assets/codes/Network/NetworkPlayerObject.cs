@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using UnityEngine;
@@ -64,13 +65,14 @@ public class NetworkPlayerObject : MonoBehaviour
         if (!NetworkSystem.Instance.IsOnline) return;
         if (IsLocal)
         {
+            NMS_Both_PositionUpdate msg = new NMS_Both_PositionUpdate(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributeMovement(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
+                NetworkRouter.Instance.DistributeMessageToReady(msg);
             }
             else
             {
-                ClientSend.Position(transform.position, Head.transform.rotation, transform.rotation);
+                NetworkRouter.Instance.SendMessageToServer(msg);
             }
         }
         

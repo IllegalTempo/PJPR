@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Assets.codes.Network.Messages;
 
 public class recording : MonoBehaviour
 {
@@ -97,13 +98,14 @@ public class recording : MonoBehaviour
             pcmBytes[i * 2 + 1] = (byte)((pcmValue >> 8) & 0xFF);
         }
 
+        NMS_Both_VoicePacket msg = new NMS_Both_VoicePacket(pcmBytes,NetworkSystem.Instance.SteamID);
         if (NetworkSystem.Instance.IsServer)
         {
-            ServerSend.DistributeVoicePacket(NetworkSystem.Instance.SteamID,pcmBytes);
+            NetworkRouter.Instance.DistributeMessageToReady(msg);
         }
         else
         {
-            ClientSend.VoicePacket(pcmBytes);
+            NetworkRouter.Instance.SendMessageToServer(msg);
         }
             lastMicPosition = currentPos;
     }

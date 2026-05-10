@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using Assets.codes.Network.Messages;
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 using System;
@@ -21,7 +22,7 @@ public partial class NetworkSystem
         string uid = Guid.NewGuid().ToString();
 
         NetworkObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
-        ServerSend.NewObject(prefabID, uid, pos, rot, owner);
+        NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, uid,  pos, rot,owner));
 
         return nobj;
 

@@ -1,48 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEditor;
 
 public class packets
 {
     
     public enum ServerPackets
     {
-        Test_Packet = 0,
-        RoomInfoOnPlayerEnterRoom = 1,
-        UpdatePlayerEnterRoomForExistingPlayer = 2,
-        PlayerQuit = 3,
-        DistributeMovement = 4,
-        DistributeAnimation = 5,
-        DistributeNOInfo = 6,
-        DistributePickUpItem = 7,
-        NewObject = 10
-    ,
-        DistributeNOactive = 11
-    ,
-        SyncNetworkObjects = 12
-    ,
-        DistributeInteract = 13
-    ,
-        DistributeVoicePacket = 14
-    ,
-        SendMissionInfo = 15
-    ,
-        StartGameLoop = 16
+        Test_Packet = 1001,
+        RoomInfoOnPlayerEnterRoom = 1002,
+        UpdatePlayerEnterRoomForExistingPlayer = 1003,
+        PlayerQuit = 1004,
+        NewObject = 1005,
+        SyncNetworkObjects = 1006,
+        DistributeVoicePacket = 1007,
+        SendMissionInfo = 1008,
+        StartGameLoop = 1009,
     };
     public enum ClientPackets
     {
-        Test_Packet = 0,
-        SendPosition = 1,
-        SendAnimationState = 3,
-        SendNOInfo = 4,
-        PickUpItem = 5,
-        SendInteract = 6,
-        SendReadyState = 7
-    ,
-        VoicePacket = 8
+        SendReadyState = 2001,
+    };
+    public enum BothPackets
+    {
+        Test = 3001,
+        PosUpdate = 3002,
+        PlayerAnimation = 3003,
+        Interact = 3004,
+        NO_Info = 3005,
+        NO_Active = 3006,
+        PickUpItem = 3007,
+        VoicePacket = 3008,
+
     };
 }
 

@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -141,13 +142,14 @@ public class Item : Selectable //Item is any that is pickable
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
+            NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identifier, 0);
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributePickUpItem(netObj.Identifier, 0);
+                NetworkRouter.Instance.DistributeMessageToReady(message);
             }
             else
             {
-                ClientSend.PickUpItem(netObj.Identifier, 0);
+                NetworkRouter.Instance.SendMessageToServer(message);
             }
         }
 

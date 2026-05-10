@@ -1,4 +1,5 @@
 
+using Assets.codes.Network.Messages;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -116,14 +117,15 @@ public partial class PlayerMain : MonoBehaviour
             if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline) return;
             NetworkObject netObj = (usable as MonoBehaviour).GetComponent<NetworkObject>();
             if (netObj == null) return;
+            NMS_Both_Interact msg = new NMS_Both_Interact(networkinfo.steamID, netObj.Identifier);
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributeInteract(networkinfo.steamID, netObj.Identifier);
+                NetworkRouter.Instance.DistributeMessageToReady(msg);
 
             }
             else
             {
-                ClientSend.SendInteract(netObj.Identifier);
+                NetworkRouter.Instance.SendMessageToServer(msg);
 
             }
         }
@@ -158,13 +160,14 @@ public partial class PlayerMain : MonoBehaviour
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
+            NMS_Both_PickUpItem msg = new NMS_Both_PickUpItem(netObj.Identifier,localOwner);   
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributePickUpItem(netObj.Identifier, netObj.Owner);
+                NetworkRouter.Instance.DistributeMessageToReady(msg);
             }
             else
             {
-                ClientSend.PickUpItem(netObj.Identifier, netObj.Owner);
+                NetworkRouter.Instance.SendMessageToServer(msg);
             }
         }
     }
@@ -186,13 +189,14 @@ public partial class PlayerMain : MonoBehaviour
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
+            NMS_Both_PickUpItem msg = new NMS_Both_PickUpItem(netObj.Identifier, 0);
             if (NetworkSystem.Instance.IsServer)
             {
-                ServerSend.DistributePickUpItem(netObj.Identifier, 0);
+                NetworkRouter.Instance.DistributeMessageToReady(msg);
             }
             else
             {
-                ClientSend.PickUpItem(netObj.Identifier, 0);
+                NetworkRouter.Instance.SendMessageToServer(msg);
             }
         }
     }

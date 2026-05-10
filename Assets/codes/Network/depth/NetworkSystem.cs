@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Triggers;
 using Steamworks;
@@ -22,6 +23,7 @@ public partial class NetworkSystem : MonoBehaviour
     [Header("NetworkData")]
     public bool Connected = false;
     public static NetworkSystem Instance;
+    public NetworkListener NetworkListener;
     public bool IsOnline = false;
     public bool IsServer = true;
     public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
@@ -42,12 +44,15 @@ public partial class NetworkSystem : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            NetworkListener = new NetworkListener();
+
         }
         else
         {
             Debug.Log("Instance Already Exist");
             Destroy(this.gameObject);
         }
+
     }
 
     private void Start()

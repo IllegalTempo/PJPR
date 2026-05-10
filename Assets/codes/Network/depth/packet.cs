@@ -1,19 +1,18 @@
 using Steamworks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public class packet : IDisposable
+public class Packet : IDisposable
 {
-    public packet(int packetid)
+    public Packet(int packetid)
     {
         buffer = new List<byte>();
         Write(packetid);
         readindex = 0;
     }
-    public packet(byte[] data)
+    public Packet(byte[] data)
     {
         readerbuffer = data;
     }
