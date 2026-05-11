@@ -11296,7 +11296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: 
+  Identifier: pickaxe
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}

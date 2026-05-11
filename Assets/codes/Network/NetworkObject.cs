@@ -28,7 +28,18 @@ public class NetworkObject : MonoBehaviour
         if (!init)
         {
             Preset = true;
-            Identifier = GameCore.Instance.newNOUID();
+            if (string.IsNullOrWhiteSpace(Identifier))
+            {
+                Identifier = GameCore.Instance.newNOUID();
+                Debug.LogWarning($"{name} has no scene NetworkObject Identifier. Generated {Identifier}, but scene objects should use a stable Identifier for multiplayer.");
+            }
+
+            if (NetworkSystem.Instance.FindNetworkObject.ContainsKey(Identifier))
+            {
+                Debug.LogError($"NetworkObject Identifier collision: {Identifier} is already registered by {NetworkSystem.Instance.FindNetworkObject[Identifier].name}. {name} will not be registered.");
+                return;
+            }
+
             NetworkSystem.Instance.FindNetworkObject.Add(Identifier, this);
 
         }
