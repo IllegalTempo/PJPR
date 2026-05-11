@@ -78,7 +78,7 @@ public class Item : Selectable //Item is any that is pickable
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
-
+        netObj.Sync_Transform = newowner == 0; //Only sync transform if dropped, not when picked up, because the player will be moving it.
         if (newowner == 0)
         {
             PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Owner].playerControl;
