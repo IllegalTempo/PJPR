@@ -29,6 +29,7 @@ public class packets
         PickUpItem = 3007,
         VoicePacket = 3008,
 
-    };
+    
+        test = 3009,};
 }
 

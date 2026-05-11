@@ -17,7 +17,10 @@ public class NetworkObject : MonoBehaviour
     [Header("Network Setting")]
     public bool Sync_Transform = true;
 
-    public ulong Owner = 0; //owner = 0 -> Server Authority
+    private ulong owner = 0; //owner = 0 -> Server Authority
+    public ulong Owner { 
+        get => owner;
+    }
     public bool Preset = false;
     private bool init = false;
     protected virtual void Start()
@@ -45,7 +48,7 @@ public class NetworkObject : MonoBehaviour
     {
         init = true;
         Identifier = uid;
-        Owner = owner;
+        this.owner = owner;
         this.PrefabID = PrefabID;
         if (!NetworkSystem.Instance.FindNetworkObject.ContainsKey(uid))
         {
@@ -81,16 +84,16 @@ public class NetworkObject : MonoBehaviour
             NetworkRouter.Instance.DistributeMessageToReady(message);
 
         }
-        else if (GameCore.Instance.IsLocal(Owner))
+        else if (GameCore.Instance.IsLocal(owner))
         {
             NetworkRouter.Instance.SendMessageToServer(message);
 
         }
 
     }
-    public void Network_ChangeOwner(ulong newowner)
+    public void ChangeOwner(ulong newowner)
     {
-        Owner = newowner;
+        owner = newowner;
     }
 
     private void Update()

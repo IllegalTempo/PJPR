@@ -31,7 +31,8 @@ namespace Assets.codes.Network.Messages
 
 
 
-        };
+        
+            { (int)packets.BothPackets.test, NMS_Both_test.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {

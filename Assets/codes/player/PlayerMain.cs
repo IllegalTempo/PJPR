@@ -34,7 +34,7 @@ public partial class PlayerMain : MonoBehaviour
 
     public Transform HandTransform;
 
-    PlayerInputAction control;
+    public PlayerInputAction control;
 
     [SerializeField]
     private GameObject[] LocalInvisible;
@@ -137,84 +137,27 @@ public partial class PlayerMain : MonoBehaviour
         cam.SetActive(false);
         rb.isKinematic = true;
     }
-    public void OnPickUpItem(Item Item,NetworkObject netObj)
+    private void Network_OnReceiveItemPickUpOrDrop()
     {
-        holdingItem = Item;
-        if(networkinfo.IsLocal)
-        {
-            LOCAL_OnPickUpItem(Item,netObj);
-        }
-
 
     }
-    private void LOCAL_OnPickUpItem(Item Item,NetworkObject netObj)
-    {
-        UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
-        ulong localOwner = 1;
-        if (GameCore.Instance != null && GameCore.Instance.Local_NetworkPlayer != null)
-        {
-            localOwner = GameCore.Instance.Local_NetworkPlayer.steamID;
-        }
-        netObj.Owner = localOwner;
-
-
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
-        {
-            NMS_Both_PickUpItem msg = new NMS_Both_PickUpItem(netObj.Identifier,localOwner);   
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(msg);
-            }
-            else
-            {
-                NetworkRouter.Instance.SendMessageToServer(msg);
-            }
-        }
-    }
-    public void OnDropItem(Item Item,NetworkObject netObj)
-    {
-        holdingItem = null;
-
-        if (networkinfo.IsLocal)
-        {
-            UIManager.Instance.HideInteraction(0);
-            LOCAL_OnDropItem(Item, netObj);
-
-        }
-
-    }
-    private void LOCAL_OnDropItem(Item Item,NetworkObject netObj)
-    {
-        netObj.Owner = 0;
-
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
-        {
-            NMS_Both_PickUpItem msg = new NMS_Both_PickUpItem(netObj.Identifier, 0);
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(msg);
-            }
-            else
-            {
-                NetworkRouter.Instance.SendMessageToServer(msg);
-            }
-        }
-    }
+    
+    //
+    
+    
+    
+    //
+    
+    
     private void onSelectObject(Selectable item)
     {
         item.OnClicked();
 
     }
-    public void HoldingItem(Item item)
+    private void SendDrop()
     {
-        //if(!item.lockRelativeRotation)
-        //{
-        //    item.transform.rotation = cam.transform.rotation;
-
-        //}
-        
+        holdingItem.Network_Send_ChangeOwnerShip(0);
     }
-
 
     
     private void OnClickPickUp()
@@ -222,7 +165,7 @@ public partial class PlayerMain : MonoBehaviour
         if (holdingItem != null)
         {
             Item it = holdingItem;
-            OnDrop();
+            SendDrop();
             if (seenObject is slot s)
             {
                 s.AttachItem(it);
@@ -279,12 +222,6 @@ public partial class PlayerMain : MonoBehaviour
     //    clickedInteractable = seenInteractable;
     //    onSelectObject(clickedInteractable);
     //}
-    private void OnDrop()
-    {
-        holdingItem.Drop();
-        OnDropItem(holdingItem,holdingItem.GetNetworkObject());
-
-    }
     
     private void UpdateSeenObject(Selectable before,bool lookedat)
     {

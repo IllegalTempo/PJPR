@@ -1,5 +1,6 @@
 using Assets.codes.Network.Messages;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
@@ -54,31 +55,49 @@ public class Item : Selectable //Item is any that is pickable
             return;
         }
 
-        // Item is not in inventory, so pick it up
-        PickUpItem();
-
+    }
+    public void Network_Send_ChangeOwnerShip(ulong newowner)
+    {
+        if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
+        {
+            return;
+        }
+        NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identifier, newowner);
+        if (NetworkSystem.Instance.IsServer)
+        {
+            NetworkRouter.Instance.DistributeMessageToReady(message);
+            Network_onPickUPorDrop(newowner);
+            //Because the server doesnt receive distribution messages, we call it directly.
+        }
+        else
+        {
+            NetworkRouter.Instance.SendMessageToServer(message);
+        }
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
-        netObj.Network_ChangeOwner(newowner);
         PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
+        bool doneByLocal = newowner == NetworkSystem.Instance.SteamID || (newowner == 0 && netObj.Owner == NetworkSystem.Instance.SteamID);
         if (newowner == 0)
         {
-            gotDropped(transform.position);
+            gotDropped(transform.position,doneByLocal);
 
         }
         else
         {
-            gotPickedup(who);
+            gotPickedup(who,doneByLocal);
         }
+        netObj.ChangeOwner(newowner);
+
     }
-    private void gotPickedup(PlayerMain who)
+    private void gotPickedup(PlayerMain who,bool local)
 
     {
-        who.OnPickUpItem(this, netObj);
+        if(local)
+        {
+            UIManager.Instance.ShowInteraction("Drop", who.control.Player.pickup.GetBindingDisplayString(), 0);
+        }
         transform.SetParent(who.HandTransform);
-
-
         rb.constraints = RigidbodyConstraints.FreezeAll;
         
         if(AbstractItem != null)
@@ -102,8 +121,13 @@ public class Item : Selectable //Item is any that is pickable
             itemCollider.enabled = false;
         }
     }
-    private void gotDropped(Vector3 dropPosition)
+    private void gotDropped(Vector3 dropPosition,bool local)
     {
+        if(local)
+        {
+            UIManager.Instance.HideInteraction(0);
+
+        }
         transform.SetParent(originalParent);
         outline.OutlineColor = Color.white;
         rb.isKinematic = false;
@@ -114,15 +138,11 @@ public class Item : Selectable //Item is any that is pickable
         transform.localScale = originalScale;
         itemCollider.enabled = true;
     }
-    protected virtual void PickUpItem() //Only Run by local
-    {
-
-        gotPickedup(GameCore.Instance.Local_Player);
 
 
 
 
-    }
+
     public NetworkObject GetNetworkObject()
     {
         if (netObj == null)
@@ -134,49 +154,15 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    protected virtual void Drop(Vector3 dropPosition) //Only Run by local
-    {
-
-        gotDropped(dropPosition);
-        netObj.Owner = 0;
-
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
-        {
-            NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identifier, 0);
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(message);
-            }
-            else
-            {
-                NetworkRouter.Instance.SendMessageToServer(message);
-            }
-        }
-
-    }
+    
     protected override void Update()
     {
         base.Update();
-
-        if (GameCore.Instance != null && GameCore.Instance.Local_Player != null && GameCore.Instance.Local_Player.holdingItem == this)
-        {
-            GameCore.Instance.Local_Player.HoldingItem(this);
-            return;
-        }
 
         if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline || netObj == null || GameCore.Instance == null || GameCore.Instance.Local_NetworkPlayer == null || GameCore.Instance.Local_Player == null)
         {
             return;
         }
 
-        if (GameCore.Instance.IsLocal(netObj.Owner))
-        {
-            GameCore.Instance.Local_Player.HoldingItem(this);
-        }
     }
-    public void Drop()
-    {
-        Drop(transform.position);
-    }
-
 }
