@@ -21,7 +21,6 @@ public partial class NetworkSystem : MonoBehaviour
     [SerializeField]
     private int _maxPlayer = 2;
     [Header("NetworkData")]
-    public bool Connected = false;
     public static NetworkSystem Instance;
     public NetworkListener NetworkListener;
     public bool IsOnline = false;

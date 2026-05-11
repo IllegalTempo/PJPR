@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
@@ -38,7 +38,26 @@ namespace Assets.codes.Network.Messages
         }
         public void ServerHandle(NetworkPlayer player)
         {
-            if (player.steamId != pickedUpBy) return;
+            if (!NetworkSystem.Instance.FindNetworkObject.TryGetValue(itemId, out NetworkObject networkObject))
+            {
+                throw new NO_Not_Found(itemId);
+            }
+
+            bool isDropRequest = pickedUpBy == 0;
+            if (isDropRequest)
+            {
+                if (networkObject.Owner != player.steamId)
+                {
+                    Debug.LogWarning($"Rejected drop for {itemId}: {player.steamId} does not own it.");
+                    return;
+                }
+            }
+            else if (player.steamId != pickedUpBy)
+            {
+                Debug.LogWarning($"Rejected pickup for {itemId}: sender {player.steamId} tried to set owner {pickedUpBy}.");
+                return;
+            }
+
             ApplyEffect();
             NetworkRouter.Instance.DistributeMessage(0, this);
         }
