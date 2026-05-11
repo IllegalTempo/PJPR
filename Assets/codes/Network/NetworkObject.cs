@@ -78,6 +78,7 @@ public class NetworkObject : MonoBehaviour
     private void SendTransform()
     {
         if (!NetworkSystem.Instance.IsOnline) return;
+        if (owner != 0 && TryGetComponent<Item>(out _)) return;
         NMS_Both_NetworkObjectInfo message = new NMS_Both_NetworkObjectInfo(Identifier, transform.position, transform.rotation);
         if (NetworkSystem.Instance.IsServer)
         {
