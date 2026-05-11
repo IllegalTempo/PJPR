@@ -30,12 +30,18 @@ namespace Assets.codes.Network.Messages
         public void ServerHandle(NetworkPlayer player)
         {
             NetworkSystem.Instance.FindNetworkObject[id].SetServerMovement(position, rotation);
-            NetworkRouter.Instance.DistributeMessageToReady(this);
+            NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);
         }
 
         public void ClientHandle()
         {
-            NetworkSystem.Instance.FindNetworkObject[id].SetServerMovement(position, rotation);
+            NetworkObject networkObject = NetworkSystem.Instance.FindNetworkObject[id];
+            if (GameCore.Instance != null && GameCore.Instance.IsLocal(networkObject.Owner))
+            {
+                return;
+            }
+
+            networkObject.SetServerMovement(position, rotation);
 
         }
     }

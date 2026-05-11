@@ -99,6 +99,7 @@ public class NetworkObject : MonoBehaviour
     private void Update()
     {
         if (NetworkSystem.Instance.IsServer) return;
+        if (GameCore.Instance != null && GameCore.Instance.IsLocal(owner)) return;
         if (Sync_Transform)
         {
             transform.position = Vector3.Lerp(transform.position, NetworkPos, Time.deltaTime * 10f);
