@@ -60,6 +60,8 @@ public class Item : Selectable //Item is any that is pickable
     {
         if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
         {
+            Network_onPickUPorDrop(newowner);
+
             return;
         }
         NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identifier, newowner);
@@ -76,41 +78,46 @@ public class Item : Selectable //Item is any that is pickable
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
-        PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
-        bool doneByLocal = newowner == NetworkSystem.Instance.SteamID || (newowner == 0 && netObj.Owner == NetworkSystem.Instance.SteamID);
+
         if (newowner == 0)
         {
-            gotDropped(transform.position,doneByLocal);
-
+            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Owner].playerControl;
+            who.holdingItem = null;
+            gotDropped(who,transform.position);
+            
         }
         else
         {
-            gotPickedup(who,doneByLocal);
+            PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
+            gotPickedup(who);
         }
         netObj.ChangeOwner(newowner);
 
     }
-    private void gotPickedup(PlayerMain who,bool local)
+    private void gotPickedup(PlayerMain who)
 
     {
-        if(local)
+        who.holdingItem = this;
+
+        if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.ShowInteraction("Drop", who.control.Player.pickup.GetBindingDisplayString(), 0);
         }
         transform.SetParent(who.HandTransform);
         rb.constraints = RigidbodyConstraints.FreezeAll;
-        
-        if(AbstractItem != null)
+
+        if (AbstractItem != null)
         {
             transform.localPosition = AbstractItem.HoldOffset;
             transform.localRotation = AbstractItem.HoldRotation;
             transform.localScale = AbstractItem.HoldScale;
-        } else
+        }
+        else
         {
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
         }
-        
+
 
 
         rb.linearVelocity = Vector3.zero;
@@ -121,9 +128,9 @@ public class Item : Selectable //Item is any that is pickable
             itemCollider.enabled = false;
         }
     }
-    private void gotDropped(Vector3 dropPosition,bool local)
+    private void gotDropped(PlayerMain who,Vector3 dropPosition)
     {
-        if(local)
+        if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.HideInteraction(0);
 
@@ -154,7 +161,7 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    
+
     protected override void Update()
     {
         base.Update();

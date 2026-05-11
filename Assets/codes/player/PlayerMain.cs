@@ -137,10 +137,6 @@ public partial class PlayerMain : MonoBehaviour
         cam.SetActive(false);
         rb.isKinematic = true;
     }
-    private void Network_OnReceiveItemPickUpOrDrop()
-    {
-
-    }
     
     //
     
@@ -158,7 +154,13 @@ public partial class PlayerMain : MonoBehaviour
     {
         holdingItem.Network_Send_ChangeOwnerShip(0);
     }
-
+    private void SendPickUP()
+    { 
+        if (seenObject is Item it)
+        {
+            it.Network_Send_ChangeOwnerShip(networkinfo.steamID);
+        }
+    }
     
     private void OnClickPickUp()
     {
@@ -174,7 +176,7 @@ public partial class PlayerMain : MonoBehaviour
             
             return;
         }
-
+        SendPickUP();
         if (seenObject == null)
         {
             return;
