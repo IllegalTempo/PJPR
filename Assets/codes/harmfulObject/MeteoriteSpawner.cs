@@ -193,28 +193,9 @@ public class MeteoriteSpawner : MonoBehaviour
         if (meteoritePrefabs != null && meteoritePrefabs.Length > 0)
         {
             GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
-            if (meteoritePrefab != null)
+            if (meteoritePrefab != null && GameCore.Instance.TryGetNetworkPrefabID(meteoritePrefab, out string prefabID))
             {
-                foreach (KeyValuePair<string, string> prefabEntry in GameCore.Instance.GetPrefabWithID)
-                {
-                    if (prefabEntry.Key == meteoritePrefab.name || prefabEntry.Value == meteoritePrefab.name)
-                    {
-                        return prefabEntry.Key;
-                    }
-                }
-            }
-        }
-
-        if (GameCore.Instance != null)
-        {
-            if (GameCore.Instance.GetPrefabWithID.ContainsKey("Meteorite_Test"))
-            {
-                return "Meteorite_Test";
-            }
-
-            if (GameCore.Instance.GetPrefabWithID.ContainsKey("Meteorite_Fragment"))
-            {
-                return "Meteorite_Fragment";
+                return prefabID;
             }
         }
 

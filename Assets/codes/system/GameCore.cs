@@ -16,7 +16,6 @@ using static UnityEngine.Rendering.DebugUI.Table;
 [RequireComponent(typeof(LayerMasks))]
 public partial class GameCore : MonoBehaviour
 {
-    private const string _prefabPath = "Prefabs/";
     private const string _decorationPath = "Prefabs/Decorations/";
 
     public static GameCore Instance;
@@ -25,14 +24,8 @@ public partial class GameCore : MonoBehaviour
     public options Option;
     public Connector Connector;
     public PlayerInputAction PlayerControl;
-    public Dictionary<string, string> GetPrefabWithID = new Dictionary<string, string> //PrefabID, Path
-    {
-        { "TestPrefab","testPrefab" },
-        { "Meteorite_Test","Meteorite_Test" },
-        { "Meteorite_Fragment","Meteorite_Fragment" },
-        { "Spaceship","Spaceships/default"},
-        { "Spaceship_connector","Spaceships/connector"}
-    };
+    [SerializeField] private NetworkPrefabRegistry prefabRegistry;
+
     public Dictionary<string, string> GetDecorationWithID = new Dictionary<string, string>
     {
         { "TestDecoration","testDecoration" },
@@ -112,12 +105,55 @@ public partial class GameCore : MonoBehaviour
     //{
     //    return SpaceshipSpawns[index];
     //}
+    public NetworkPrefabRegistry GetPrefabRegistry()
+    {
+        if (prefabRegistry == null)
+        {
+            prefabRegistry = Resources.Load<NetworkPrefabRegistry>(NetworkPrefabRegistry.ResourcesPath);
+        }
+
+        return prefabRegistry;
+    }
+
+    public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
+    {
+        NetworkPrefabRegistry registry = GetPrefabRegistry();
+        if (registry != null && registry.TryGetPrefab(prefabID, out prefab))
+        {
+            return true;
+        }
+
+        prefab = null;
+        return false;
+    }
+
+    public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
+    {
+        if (prefab == null)
+        {
+            prefabID = null;
+            return false;
+        }
+
+        NetworkPrefabRegistry registry = GetPrefabRegistry();
+        if (registry != null && registry.TryGetId(prefab, out prefabID))
+        {
+            return true;
+        }
+
+        prefabID = null;
+        return false;
+    }
+
     public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
     {
-        string prefabPath = GetPrefabWithID.ContainsKey(PrefabID) ? _prefabPath + GetPrefabWithID[PrefabID] : throw new PrefabNotFound(PrefabID);
-        ResourceRequest request = Resources.LoadAsync<GameObject>(prefabPath);
-        await request;
-        return request.asset as GameObject;
+        if (TryGetNetworkPrefab(PrefabID, out GameObject prefab))
+        {
+            await UniTask.Yield();
+            return prefab;
+        }
+
+        throw new PrefabNotFound(PrefabID);
     }
     public async UniTask<GameObject> GetDecoration(string DecorationID)
     {

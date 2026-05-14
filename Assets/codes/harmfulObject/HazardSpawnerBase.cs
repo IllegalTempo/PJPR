@@ -68,8 +68,7 @@ public abstract class HazardSpawnerBase : MonoBehaviour
             foreach (GameObject p in prefabs)
             {
                 if (p == null) continue;
-                foreach (var kv in GameCore.Instance.GetPrefabWithID)
-                    if (kv.Key == p.name || kv.Value == p.name) return kv.Key;
+                if (GameCore.Instance.TryGetNetworkPrefabID(p, out string id)) return id;
             }
         }
 
