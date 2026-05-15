@@ -5,6 +5,8 @@ using UnityEngine;
 public class GameSaveSystem : MonoBehaviour
 {
     private const string SaveFileName = "save.json";
+    private const string DefaultBoosterModuleId = "module_booster1";
+    private const string DefaultCannonModuleId = "module_cannon1";
 
     public static GameSaveSystem Instance;
 
@@ -50,8 +52,9 @@ public class GameSaveSystem : MonoBehaviour
         string savePath = string.IsNullOrWhiteSpace(path) ? DefaultSavePath : path;
         if (!File.Exists(savePath))
         {
-            Debug.LogWarning($"Save file not found at {savePath}");
-            return false;
+            Debug.LogWarning($"Save file not found at {savePath}. Loading default save.");
+            ApplySaveData(CreateDefaultSaveData());
+            return true;
         }
 
         string json = File.ReadAllText(savePath);
@@ -92,6 +95,15 @@ public class GameSaveSystem : MonoBehaviour
             }
         }
 
+        return saveData;
+    }
+
+    public static GameSaveData CreateDefaultSaveData()
+    {
+        GameSaveData saveData = new GameSaveData();
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(1, DefaultCannonModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(2, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(4, DefaultBoosterModuleId));
         return saveData;
     }
 
