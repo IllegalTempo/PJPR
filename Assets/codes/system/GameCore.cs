@@ -46,24 +46,41 @@ public partial class GameCore : MonoBehaviour
     //public int CurrentMissionLevel = 0;
 
     public long RandomSeed;
+    private bool startedGame = false;
+
     public Vector3 getPlayerSpawn()
     {
         return PlayerSpawn.transform.position;
     }
     private void Awake()
     {
-
-        InitPlayerControl();
-        // Convert the serialized list to dictionary
-
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(this.gameObject);
+            StartGame().Forget();
         }
         else
         {
             Destroy(this.gameObject);
+        }
+
+    }
+    private async UniTask StartGame()
+    {
+        if (startedGame)
+        {
+            return;
+        }
+
+        startedGame = true;
+        await InitPlayerControl();
+        await UniTask.WaitUntil(() => NetworkSystem.Instance != null);
+        await NetworkSystem.Instance.InitializeNetwork();
+
+        if (GameSaveSystem.Instance != null)
+        {
+            await GameSaveSystem.Instance.LoadGame();
         }
 
     }
@@ -72,7 +89,7 @@ public partial class GameCore : MonoBehaviour
         nouidindex++;
         return $"nouid_{nouidindex}";
     }
-    private void InitPlayerControl()
+    private async UniTask InitPlayerControl()
     {
 #if UNITY_EDITOR
         PlayerPrefs.DeleteAll();
@@ -82,6 +99,7 @@ public partial class GameCore : MonoBehaviour
         string rebinds = PlayerPrefs.GetString("inputRebinds", string.Empty);
         PlayerControl.LoadBindingOverridesFromJson(rebinds);
         PlayerControl.Enable();
+        await UniTask.CompletedTask;
     }
     private void OnApplicationQuit()
     {

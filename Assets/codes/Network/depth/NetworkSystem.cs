@@ -57,7 +57,6 @@ public partial class NetworkSystem : MonoBehaviour
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        InitializeNetwork().Forget();
 
 
 
@@ -192,7 +191,7 @@ public partial class NetworkSystem : MonoBehaviour
         PlayerList.Clear();
     }
 
-    private async UniTask InitializeNetwork()
+    public async UniTask InitializeNetwork()
     {
         if (SteamClient.IsValid)
         {
