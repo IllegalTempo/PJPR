@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class GameSaveSystem : MonoBehaviour
@@ -33,9 +34,9 @@ public class GameSaveSystem : MonoBehaviour
         SaveCurrentGame(SavePath);
     }
 
-    public bool LoadGame()
+    public async UniTask<bool> LoadGame()
     {
-        return LoadCurrentGame(SavePath);
+        return await LoadCurrentGame(SavePath);
     }
 
     public static void SaveCurrentGame(string path = null)
@@ -47,7 +48,7 @@ public class GameSaveSystem : MonoBehaviour
         Debug.Log($"Saved game to {savePath}");
     }
 
-    public static bool LoadCurrentGame(string path = null)
+    public static async UniTask<bool> LoadCurrentGame(string path = null)
     {
         string savePath = string.IsNullOrWhiteSpace(path) ? DefaultSavePath : path;
         if (!File.Exists(savePath))
@@ -57,7 +58,9 @@ public class GameSaveSystem : MonoBehaviour
             return true;
         }
 
-        string json = File.ReadAllText(savePath);
+        string json = await File.ReadAllTextAsync(savePath);
+        await UniTask.SwitchToMainThread();
+
         GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(json);
         if (saveData == null)
         {
@@ -148,8 +151,8 @@ public class GameSaveSystem : MonoBehaviour
     }
 
     [ContextMenu("Load Game")]
-    private void LoadGameFromContextMenu()
+    private async void LoadGameFromContextMenu()
     {
-        LoadGame();
+        await LoadGame();
     }
 }
