@@ -1,23 +1,25 @@
+
 using UnityEngine;
 
-public class module : MonoBehaviour
+public class module : SpaceshipPart
 {
+    protected Connector connected;
     public string PrefabID { get; private set; }
 
-    public void Init(string prefabID)
+    public void Init(string prefabID, Connector connectedTo)
     {
         PrefabID = prefabID;
+        connected = connectedTo;
+        OnInstall();
     }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    
+    public virtual void OnInstall()
     {
-        
+        // Called when the module is installed on the spaceship
+
     }
-
-    // Update is called once per frame
-    void Update()
+    public virtual void ModuleUpdate()
     {
-        
+
     }
 }

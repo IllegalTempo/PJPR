@@ -1,3 +1,4 @@
+using Assets.codes.spaceship.modules;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,20 +6,33 @@ using UnityEngine;
 
 public class Connector : NetworkObject
 {
-    //private List<Spaceship> connectedSpaceship = new List<Spaceship>();
     [SerializeField]
     private Animator animator;
-    //[SerializeField]
-    //private Transform[] dockpos;
     private int speedlevel = 0;
-    private Dictionary<int,module> slotModulePair = new Dictionary<int,module>();
+    private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();
     [SerializeField]
     private List<GameObject> slot;
+
+    [Header("Default Spaceship Parts")]
+    [SerializeField]
+    private module[] DEFAULT_MODULE;
+    private void Update()
+    {
+        foreach (module m in slotModulePair.Values)
+        {
+            m?.ModuleUpdate();
+
+        }
+        foreach (module m in DEFAULT_MODULE)
+        {
+            m?.ModuleUpdate();
+        }
+    }
     public module GetConnectedModule(int slot)
     {
         return slotModulePair.TryGetValue(slot, out module connectedModule) ? connectedModule : null;
     }
-    public void ConnectModule(int slot,string ModulePrefabName)
+    public void ConnectModule(int slot, string ModulePrefabName)
     {
         if (!GameCore.Instance.TryGetNetworkPrefab(ModulePrefabName, out GameObject prefab))
         {
@@ -51,7 +65,7 @@ public class Connector : NetworkObject
             return;
         }
 
-        connectedModule.Init(ModulePrefabName);
+        connectedModule.Init(ModulePrefabName, this);
         slotModulePair[slot] = connectedModule;
 
     }
@@ -102,30 +116,13 @@ public class Connector : NetworkObject
 
         slotModulePair.Clear();
     }
-
     public void ResetScene()
     {
         //connectedSpaceship.Clear();
     }
-    //public void disconnect(Spaceship s)
-    //{
-
-    //    connectedSpaceship.Remove(s);
-    //}
-    //public Transform connect(Spaceship s,int slot)
-    //{
-    //    connectedSpaceship.Add(s);
-    //    return dockpos[slot];
-    //}
-    public void SetSpeedLevel(int level)
-    {
-        speedlevel = level;
-        GameCore.Instance.WorldReference.SetMovement(speedlevel * transform.forward * 1);
-
-    }
     protected override void Start()
     {
         base.Start();
-        
+
     }
 }

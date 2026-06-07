@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class button : Selectable, IUsable
+public class button : Interactable
 {
     [SerializeField]
     private UnityEvent onClicked;
@@ -10,7 +10,7 @@ public class button : Selectable, IUsable
 
     [SerializeField]
     private float releaseTime = 1f; //1 second by default
-    public virtual void OnInteract(PlayerMain who)
+    public override void OnInteract(PlayerMain who)
     {
         onClicked.Invoke();
 

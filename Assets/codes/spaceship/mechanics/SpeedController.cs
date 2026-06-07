@@ -5,7 +5,7 @@ using System;
 
 namespace Assets.codes.spaceship.mechanics
 {
-    public class SpeedController : Selectable, IUsable
+    public class SpeedController : Interactable
     {
         [SerializeField]
         private int maxlevel = 6;
@@ -23,7 +23,7 @@ namespace Assets.codes.spaceship.mechanics
         private float minRotationX = 22f;
         private Coroutine rotationCoroutine;
 
-        public void OnInteract(PlayerMain who)
+        public override void OnInteract(PlayerMain who)
         {
             level = (level + 1) % maxlevel;
             OnChangeSpeed.Invoke(level);

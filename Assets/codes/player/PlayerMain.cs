@@ -35,6 +35,7 @@ public partial class PlayerMain : MonoBehaviour
     public Transform HandTransform;
 
     public PlayerInputAction control;
+    private IUsable activeUsable;
 
     [SerializeField]
     private GameObject[] LocalInvisible;
@@ -108,7 +109,8 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnInteract()
     {
-        IUsable usable = holdingItem as IUsable
+        IUsable usable = activeUsable
+                 ?? holdingItem as IUsable
                  ?? seenObject as IUsable;
 
         if (usable != null)
@@ -129,9 +131,21 @@ public partial class PlayerMain : MonoBehaviour
 
             }
         }
-        
-        
     }
+
+    public void SetActiveUsable(IUsable usable)
+    {
+        activeUsable = usable;
+    }
+
+    public void ClearActiveUsable(IUsable usable)
+    {
+        if (activeUsable == usable)
+        {
+            activeUsable = null;
+        }
+    }
+
     private void Initialize_remote()
     {
         cam.SetActive(false);

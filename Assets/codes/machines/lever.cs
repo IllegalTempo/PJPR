@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-public class lever : Selectable,IUsable
+public class lever : Interactable
 {
     [SerializeField]
     private UnityEvent onSwitch_On;
@@ -11,7 +11,7 @@ public class lever : Selectable,IUsable
     [SerializeField]
     private UnityEvent onSwitch_Off;
     private bool isOn = false;
-    public void OnInteract(PlayerMain who)
+    public override void OnInteract(PlayerMain who)
     {
         if (isOn)
         {

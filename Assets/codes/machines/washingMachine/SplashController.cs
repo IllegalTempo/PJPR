@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SplashController : machine
+public class SplashController : Interactable
 {
     [SerializeField]
     private LiquidDefinition[] LiquidDefinitionArray;
@@ -85,7 +85,6 @@ public class SplashController : machine
 
     public override void OnInteract(PlayerMain who)
     {
-        base.OnInteract(who);
         Splash();
     }
 }
