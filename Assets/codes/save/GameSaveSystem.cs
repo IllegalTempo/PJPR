@@ -104,9 +104,8 @@ public class GameSaveSystem : MonoBehaviour
     public static GameSaveData CreateDefaultSaveData()
     {
         GameSaveData saveData = new GameSaveData();
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(1, DefaultCannonModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(2, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(4, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_left, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_right, DefaultBoosterModuleId));
         return saveData;
     }
 

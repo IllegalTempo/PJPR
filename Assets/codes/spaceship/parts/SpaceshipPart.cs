@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class SpaceshipPart : Selectable
+public class SpaceshipPart : Item
 { 
 
     [Header("Identity")]

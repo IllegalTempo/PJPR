@@ -88,6 +88,26 @@ PrefabInstance:
       propertyPath: m_AABB.m_Extent.z
       value: 0.019857395
       objectReference: {fileID: 0}
+    - target: {fileID: -186059708275125108, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -186059708275125108, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -186059708275125108, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -186059708275125108, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -186059708275125108, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 180
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       propertyPath: m_Name
       value: booster1
@@ -99,6 +119,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5314643126253778031}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6552896270021073247}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8841288140222148758}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
 --- !u!1 &8382276501861436971 stripped
 GameObject:
@@ -117,3 +146,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fdba27a8f144704fb90d14122635a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::module
+  AbstractItem: {fileID: 0}
+  netObj: {fileID: 0}
+  lockRelativeRotation: 0
+  IsPickable: 1
+  partName: Hull
+  maxHealth: 100
+  currentHealth: 100
+  destroyWhenBroken: 0
+  permanentlyDestroyGameObjectOnBreak: 0
+  enableCollisionDamage: 1
+  meteoriteDamage: 25
+  fragmentDamage: 8
+  projectileDamage: 15
+  planetDamage: 50
+  blackHoleDamage: 20
+  defaultCollisionDamage: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  brokenHiddenOpacity: 0
+--- !u!114 &6552896270021073247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382276501861436971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &8841288140222148758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382276501861436971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
+  Identifier: 
+  PrefabID: 
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sync_Transform: 1
+  Preset: 0

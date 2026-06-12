@@ -32,7 +32,8 @@ namespace Assets.codes.Network.Messages
 
 
         
-            { (int)packets.BothPackets.test, NMS_Both_test.Read },};
+            { (int)packets.BothPackets.test, NMS_Both_test.Read },
+            { (int)packets.BothPackets.SyncVariable, NMS_Both_SyncVariable.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {

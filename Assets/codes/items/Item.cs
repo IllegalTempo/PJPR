@@ -21,9 +21,11 @@ public class Item : Selectable //Item is any that is pickable
     private Vector3 originalScale;
     [SerializeField]
     public bool lockRelativeRotation = false;
+
+    public bool IsPickable = true;
     //public virtual bool IsRepairTool => isRepairTool;
 
-    protected new void OnEnable()
+    protected override void OnEnable()
     {
         base.OnEnable();
 

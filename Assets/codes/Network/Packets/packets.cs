@@ -33,6 +33,7 @@ public class packets
         VoicePacket = 3008,
 
     
-        test = 3009,};
+        test = 3009,
+        SyncVariable = 3010,};
 }
 

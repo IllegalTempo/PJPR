@@ -10,7 +10,7 @@ namespace Assets.codes.spaceship.modules
 		public void setSpeedLevel(int slv)
 		{
 			speedlevel = slv;
-			GameCore.Instance.WorldReference.UpdateSourceVelocity(gameObject.GetInstanceID(), transform.forward * spl * speedlevel);
+			GameCore.Instance.WorldReference.UpdateSourceVelocity(gameObject.GetInstanceID(), transform.forward * spl * speedlevel, transform.position);
         }
 		public override void ModuleUpdate()
 		{

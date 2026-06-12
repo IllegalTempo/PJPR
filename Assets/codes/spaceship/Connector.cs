@@ -11,21 +11,14 @@ public class Connector : NetworkObject
     private int speedlevel = 0;
     private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();
     [SerializeField]
-    private List<GameObject> slot;
+    private List<ModuleSlot> slot;
 
-    [Header("Default Spaceship Parts")]
-    [SerializeField]
-    private module[] DEFAULT_MODULE;
     private void Update()
     {
         foreach (module m in slotModulePair.Values)
         {
             m?.ModuleUpdate();
 
-        }
-        foreach (module m in DEFAULT_MODULE)
-        {
-            m?.ModuleUpdate();
         }
     }
     public module GetConnectedModule(int slot)
@@ -39,8 +32,8 @@ public class Connector : NetworkObject
             Debug.LogError($"Module prefab {ModulePrefabName} not found.");
             return;
         }
-
-        if (slot < 0 || slot >= this.slot.Count || this.slot[slot] == null)
+        ModuleSlot moduleslot = this.slot[slot];
+        if (slot < 0 || slot >= this.slot.Count || moduleslot == null)
         {
             Debug.LogError($"Connector slot {slot} is invalid.");
             return;
@@ -52,12 +45,12 @@ public class Connector : NetworkObject
             slotModulePair.Remove(slot);
         }
 
-        GameObject moduleObject = Instantiate(prefab, this.slot[slot].transform);
-
-        moduleObject.transform.localPosition = Vector3.zero;
-        moduleObject.transform.localRotation = Quaternion.identity;
-
+        GameObject moduleObject = Instantiate(prefab, moduleslot.transform);
         module connectedModule = moduleObject.GetComponent<module>();
+        Transform originObject = moduleObject.transform.Find("link_" + moduleslot.type.ToString());
+        moduleObject.transform.localPosition = originObject.localPosition;
+        moduleObject.transform.localRotation = originObject.localRotation;
+
         if (connectedModule == null)
         {
             Debug.LogError($"Module prefab {ModulePrefabName} does not have a module component.");
@@ -65,7 +58,7 @@ public class Connector : NetworkObject
             return;
         }
 
-        connectedModule.Init(ModulePrefabName, this);
+        connectedModule.Init(ModulePrefabName, moduleslot);
         slotModulePair[slot] = connectedModule;
 
     }
