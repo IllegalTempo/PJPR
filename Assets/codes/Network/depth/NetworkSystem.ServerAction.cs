@@ -10,19 +10,23 @@ public partial class NetworkSystem
 {
     public GameServer Server => _server;
     private GameServer _server;
-    public async UniTask<NetworkObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, bool dontcreateinInit = false)
+    public async UniTask<NetworkObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner)
     {
-        NetworkObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform(), dontcreateinInit);
+        NetworkObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform());
         return nobj;
     }
-    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool dontcreateinInit = false) //Server Only
+    public async UniTask<NetworkObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null) //Server Only
     { //more check added
 
         if (IsOnline && !IsServer) return null;
         string uid = Guid.NewGuid().ToString();
 
         NetworkObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
-        NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, uid,  pos, rot,owner));
+        if(NetworkSystem.Instance.IsOnline)
+        {
+            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, uid, pos, rot, owner));
+
+        }
 
         return nobj;
 

@@ -1,17 +1,22 @@
 using Assets.codes.spaceship.modules;
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 
 public class Connector : NetworkObject
 {
+    public static Connector Instance { get; private set; }
     [SerializeField]
     private Animator animator;
     private int speedlevel = 0;
     private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();
     [SerializeField]
-    private List<ModuleSlot> slot;
+    private List<ModuleSlot> msts;
+
+    public Dictionary<int, ModuleSlot> slot = new Dictionary<int, ModuleSlot>();
 
     private void Update()
     {
@@ -25,60 +30,50 @@ public class Connector : NetworkObject
     {
         return slotModulePair.TryGetValue(slot, out module connectedModule) ? connectedModule : null;
     }
-    public void ConnectModule(int slot, string ModulePrefabName)
+    public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
-        if (!GameCore.Instance.TryGetNetworkPrefab(ModulePrefabName, out GameObject prefab))
-        {
-            Debug.LogError($"Module prefab {ModulePrefabName} not found.");
-            return;
-        }
-        ModuleSlot moduleslot = this.slot[slot];
-        if (slot < 0 || slot >= this.slot.Count || moduleslot == null)
-        {
-            Debug.LogError($"Connector slot {slot} is invalid.");
-            return;
-        }
+        NetworkObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
+        return nobj.GetComponent<module>(); 
 
-        if (slotModulePair.TryGetValue(slot, out module existingModule) && existingModule != null)
-        {
-            Destroy(existingModule.gameObject);
-            slotModulePair.Remove(slot);
-        }
 
-        GameObject moduleObject = Instantiate(prefab, moduleslot.transform);
-        module connectedModule = moduleObject.GetComponent<module>();
-        Transform originObject = moduleObject.transform.Find("link_" + moduleslot.type.ToString());
-        moduleObject.transform.localPosition = originObject.localPosition;
-        moduleObject.transform.localRotation = originObject.localRotation;
+    }
+    public module ConnectModule(module moduleObject, ModuleSlot moduleslot)
+    {
+        Debug.Log($"Connecting module {moduleObject.name} to slot {moduleslot.slotIndex}");
+        // Store the module's world rotation before reparenting
+        Quaternion worldRotation = moduleObject.transform.rotation;
 
-        if (connectedModule == null)
-        {
-            Debug.LogError($"Module prefab {ModulePrefabName} does not have a module component.");
-            Destroy(moduleObject);
-            return;
-        }
+        // Reparent to slot
+        moduleObject.transform.SetParent(moduleslot.transform);
 
-        connectedModule.Init(ModulePrefabName, moduleslot);
-        slotModulePair[slot] = connectedModule;
+        // Reset position to slot's origin but preserve world rotation
+        moduleObject.transform.localPosition = Vector3.zero;
+        moduleObject.transform.rotation = worldRotation;  // Restore world rotation
 
+        moduleObject.DisableRB();
+
+        moduleObject.Init(moduleslot);
+        slotModulePair[moduleslot.slotIndex] = moduleObject;
+        return moduleObject;
     }
     public List<InstalledModuleSaveData> GetInstalledModuleSaveData()
     {
         List<InstalledModuleSaveData> modules = new List<InstalledModuleSaveData>();
         foreach (KeyValuePair<int, module> pair in slotModulePair)
         {
-            if (pair.Value == null || string.IsNullOrWhiteSpace(pair.Value.PrefabID))
+            string PrefabID = pair.Value.GetNetworkObject().PrefabID;
+            if (pair.Value == null || string.IsNullOrWhiteSpace(PrefabID))
             {
                 continue;
             }
 
-            modules.Add(new InstalledModuleSaveData(pair.Key, pair.Value.PrefabID));
+            modules.Add(new InstalledModuleSaveData(pair.Key,PrefabID,pair.Value.transform.localRotation));
         }
 
         return modules;
     }
 
-    public void LoadInstalledModules(List<InstalledModuleSaveData> modules)
+    public async UniTask LoadInstalledModules(List<InstalledModuleSaveData> modules)
     {
         ClearInstalledModules();
         if (modules == null)
@@ -93,7 +88,9 @@ public class Connector : NetworkObject
                 continue;
             }
 
-            ConnectModule(moduleData.Slot, moduleData.PrefabID);
+            module md = await SpawnModuleAsync(moduleData.PrefabID, Vector3.zero, Quaternion.identity);
+            ConnectModule(md, slot[moduleData.Slot]);
+            md.transform.localRotation = moduleData.Rotation;
         }
     }
 
@@ -116,6 +113,16 @@ public class Connector : NetworkObject
     protected override void Start()
     {
         base.Start();
-
+        if(Instance != null)
+        {
+            Destroy(Instance.gameObject);
+        } else
+        {
+            Instance = this;
+        }
+        foreach (ModuleSlot mst in msts)
+        {
+            slot[mst.slotIndex] = mst;
+        }
     }
 }

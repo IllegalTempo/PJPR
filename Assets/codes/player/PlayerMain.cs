@@ -14,7 +14,7 @@ using UnityEngine.Rendering.Universal;
 public partial class PlayerMain : MonoBehaviour
 {
 
-    
+
     public float GroundCheckDistance = 0.3f;
 
     private float yaw = 0f;
@@ -22,7 +22,7 @@ public partial class PlayerMain : MonoBehaviour
     private Rigidbody rb;
     [SerializeField]
     private AudioSource audioSource;
-    
+
     private bool usingvc = false;
     public Selectable seenObject = null;
     public Selectable clickedObject = null;
@@ -74,13 +74,14 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.pickup.performed += ctx => OnClickPickUp();
         control.Player.Interact.performed += ctx => OnInteract();
         control.Player.voice.performed += ctx => OnClickVC();
+        control.Player.rotate.performed += ctx => OnClickSlotRotate();
 
 
     }
-    
+
     private void OnDisable()
     {
-        
+
 
         if (control != null)
         {
@@ -91,6 +92,7 @@ public partial class PlayerMain : MonoBehaviour
             control.Player.pickup.performed -= ctx => OnClickPickUp();
             control.Player.Interact.performed -= ctx => OnInteract();
             control.Player.voice.performed -= ctx => OnClickVC();
+            control.Player.rotate.performed -= ctx => OnClickSlotRotate();
         }
     }
     private void OnClickVC()
@@ -151,14 +153,14 @@ public partial class PlayerMain : MonoBehaviour
         cam.SetActive(false);
         rb.isKinematic = true;
     }
-    
+
     //
-    
-    
-    
+
+
+
     //
-    
-    
+
+
     private void onSelectObject(Selectable item)
     {
         item.OnClicked();
@@ -169,13 +171,42 @@ public partial class PlayerMain : MonoBehaviour
         holdingItem.Network_Send_ChangeOwnerShip(0);
     }
     private void SendPickUP()
-    { 
+    {
         if (seenObject is Item it)
         {
             it.Network_Send_ChangeOwnerShip(networkinfo.steamID);
         }
     }
-    
+    private void OnClickSlotRotate()
+    {
+        if (holdingItem != null && holdingItem.BindSlot != null)
+        {
+            // Rotate the item 90 degrees around the slot's local Y-axis (up axis)
+            // This allows the player to orient items in different rotations while bound to a slot
+            slot boundSlot = holdingItem.BindSlot;
+
+            // Calculate 90 degree rotation around the slot's local Y-axis
+            Quaternion rotationIncrement = Quaternion.AngleAxis(90f, boundSlot.transform.up);
+
+            // Apply rotation relative to slot's current rotation
+            holdingItem.transform.rotation = rotationIncrement * holdingItem.transform.rotation;
+
+            // Network sync: The item's NetworkObject has Sync_Transform enabled,
+            // so the rotation change will be automatically synchronized to other players
+            if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
+            {
+                NetworkObject netObj = holdingItem.GetNetworkObject();
+                if (netObj != null)
+                {
+                    // Rotation sync happens automatically through NetworkObject
+                    // Update NetworkRot to reflect the new rotation for consistency
+                    netObj.NetworkRot = holdingItem.transform.rotation;
+                }
+            }
+
+            Debug.Log($"Item rotated 90 degrees around {boundSlot.name}'s Y-axis");
+        }
+    }
     private void OnClickPickUp()
     {
         if (holdingItem != null)
@@ -184,10 +215,12 @@ public partial class PlayerMain : MonoBehaviour
             SendDrop();
             if (seenObject is slot s)
             {
-                s.AttachItem(it);
+
+                if (it.FitIn(s))
+                    s.AttachItem(it);
                 return;
             }
-            
+
             return;
         }
         SendPickUP();
@@ -238,32 +271,68 @@ public partial class PlayerMain : MonoBehaviour
     //    clickedInteractable = seenInteractable;
     //    onSelectObject(clickedInteractable);
     //}
-    
-    private void UpdateSeenObject(Selectable before,bool lookedat)
+
+    private void UpdateSeenObject(Selectable @new, Selectable before)
     {
-        if(before != null)
+        HandleSlotUnbinding(@new);
+
+        // Handle looking away from previous object
+        if (before != null)
         {
-            if (lookedat)
-            {
-
-                before.onLookedAt();
-                if(before is IUsable)
-                {
-                    UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(),1);
-                }
-                if(before is Item)
-                {
-                    UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
-
-                }
-            }
-            else
-            {
-                before.onLookedAway();
-                UIManager.Instance.HideAllInteraction();
-            }
+            before.onLookedAway();
+            UIManager.Instance.HideAllInteraction();
         }
+        // Handle looking at a new object
+        if (@new != null)
+        {
+            @new.onLookedAt();
+            HandleNewObjectUI(@new);
+            HandleSlotBinding(@new);
+        }
+
+        // Handle slot unbinding if we're not looking at a compatible slot
         
+    }
+
+    private void HandleNewObjectUI(Selectable @new)
+    {
+        if (@new is IUsable)
+        {
+            UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(), 1);
+        }
+
+        if (@new is Item)
+        {
+            UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
+        }
+
+        if (@new is slot s && holdingItem != null && holdingItem.FitIn(s))
+        {
+            UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
+            UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
+        }
+        else if (@new is slot)
+        {
+            UIManager.Instance.ShowInteraction("X", "", 0);
+        }
+    }
+
+    private void HandleSlotBinding(Selectable @new)
+    {
+        if (@new is slot s && holdingItem != null && holdingItem.FitIn(s))
+        {
+            holdingItem.Bind(s);
+        }
+    }
+
+    private void HandleSlotUnbinding(Selectable @new)
+    {
+        if (holdingItem == null || holdingItem.BindSlot == null) return;
+        //if (!isCompatibleSlot && holdingItem != null && holdingItem.BindSlot != null)
+        if(@new is not slot || (@new is slot s  && !holdingItem.FitIn(s)))
+        {
+            holdingItem.Unbind();
+        }
     }
     void Update()
     {

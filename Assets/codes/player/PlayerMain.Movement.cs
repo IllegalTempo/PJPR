@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public partial class PlayerMain: MonoBehaviour
 {
@@ -67,18 +68,29 @@ public partial class PlayerMain: MonoBehaviour
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
         Selectable before = seenObject;
-        if (Physics.Raycast(ray, out hit, 100f, GameCore.Instance.Masks.SelectableItems))
+        if (Physics.Raycast(ray, out hit, 100f))
         {
+            if ((GameCore.Instance.Masks.SelectableItems.value & (1 << hit.transform.gameObject.layer)) != 0)
+            {
+                seenObject = hit.collider.GetComponent<Selectable>();
 
-            seenObject = hit.collider.GetComponent<Selectable>();
-            if (seenObject == null) return;
+
+            } else
+            {
+                seenObject = null;
+            }
+
 
         }
         else
         {
             seenObject = null;
         }
-        UpdateSeenObject(before, before == seenObject);
+        if(before != seenObject)
+        {
+            UpdateSeenObject(seenObject,before);
+
+        }
 
     }
 }

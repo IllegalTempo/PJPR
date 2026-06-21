@@ -42,7 +42,7 @@ public class NetworkPlayerObject : MonoBehaviour
     public void Disconnect()
     {
         Destroy(gameObject);
-        //GameCore.Instance.Connector.disconnect(spaceship);
+        //Connector.Instance.disconnect(spaceship);
         //Destroy(spaceship);
 
     }

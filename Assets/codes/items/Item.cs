@@ -1,15 +1,45 @@
 using Assets.codes.Network.Messages;
+using System;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.UI.GridLayoutGroup;
 
-[RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
 
 ///
 /// Item is any object that can be picked up
 ///
+[Flags]
+public enum ItemType
+{
+    None = 0,
+    Generic = 1 << 0,
+    SpaceshipModule = 1 << 1,
+    All = SpaceshipModule,
+}
+/// <summary>
+/// Stores item transform state in LOCAL coordinate space.
+/// All values (position, rotation, scale) are relative to the item's parent transform.
+/// This ensures consistent behavior when the item is reparented (e.g., HandTransform when picked up).
+/// </summary>
+[System.Serializable]
+public struct ItemSnapshot
+{
+    /// <summary>Local position relative to parent transform</summary>
+    public Vector3 position;
+
+    /// <summary>Local rotation relative to parent transform</summary>
+    public Quaternion rotation;
+
+    /// <summary>Local scale relative to parent transform</summary>
+    public Vector3 scale;
+}
+[RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
+
 public class Item : Selectable //Item is any that is pickable
 {
+
     public ItemDefinition AbstractItem;
     //[SerializeField] protected bool isRepairTool;
     [SerializeField]
@@ -17,13 +47,33 @@ public class Item : Selectable //Item is any that is pickable
     protected Rigidbody rb;
     protected Collider itemCollider;
 
-    private Transform originalParent;
-    private Vector3 originalScale;
     [SerializeField]
     public bool lockRelativeRotation = false;
 
     public bool IsPickable = true;
+    public bool IsLocked = false;
+    public ItemType itemType = ItemType.Generic;
+
+    public slot BindSlot = null;
+
     //public virtual bool IsRepairTool => isRepairTool;
+
+    /// <summary>
+    /// Snapshot of the item's initial transform state (before being picked up).
+    /// Captured in OnEnable() and restored when item is dropped.
+    /// Uses LOCAL coordinate space.
+    /// </summary>
+    [SerializeField]
+    private ItemSnapshot snapshot_start;
+
+    /// <summary>
+    /// Snapshot of the item's transform state when bound to a slot.
+    /// Captured in Bind() and restored when item is unbound.
+    /// Uses LOCAL coordinate space.
+    /// </summary>
+    [SerializeField]
+    private ItemSnapshot snapshot_bind;
+    private Transform pre_bind_parent;
 
     protected override void OnEnable()
     {
@@ -36,8 +86,33 @@ public class Item : Selectable //Item is any that is pickable
 
         rb = GetComponent<Rigidbody>();
         itemCollider = GetComponent<Collider>();
-        originalParent = transform.parent;
-        originalScale = transform.localScale;
+        snapshot_start = GetSnapshot();
+    }
+    private ItemSnapshot GetSnapshot()
+    {
+        // Capture transform state in LOCAL coordinate space
+        // This ensures consistent behavior when parent transforms change
+        return new ItemSnapshot
+        {
+            position = transform.localPosition,
+            rotation = transform.localRotation,  // Use localRotation instead of world rotation
+            scale = transform.localScale,
+        };
+    }
+    private void ApplySnapshot(ItemSnapshot snapshot)
+    {
+        // Restore transform state using LOCAL coordinate space
+        // Consistent with GetSnapshot() for predictable behavior
+        transform.localPosition = snapshot.position;
+        transform.localRotation = snapshot.rotation;  // Use localRotation instead of world rotation
+        transform.localScale = snapshot.scale;
+    }
+    public bool FitIn(slot slot)
+    {
+        if (slot == null) return false;
+        if (slot.GetAttachedItem() != null) return false;
+        if (slot.AllowedItemType == ItemType.All) return true;
+        return (itemType & slot.AllowedItemType) != 0;
     }
     public void DisableRB()
     {
@@ -98,7 +173,9 @@ public class Item : Selectable //Item is any that is pickable
     }
     private void gotPickedup(PlayerMain who)
 
+
     {
+        Debug.Log($"{name} picked up by {who.name}");
         who.holdingItem = this;
 
         if (who.Equals(GameCore.Instance.Local_Player))
@@ -110,9 +187,7 @@ public class Item : Selectable //Item is any that is pickable
 
         if (AbstractItem != null)
         {
-            transform.localPosition = AbstractItem.HoldOffset;
-            transform.localRotation = AbstractItem.HoldRotation;
-            transform.localScale = AbstractItem.HoldScale;
+            ApplySnapshot(AbstractItem.holdState);
         }
         else
         {
@@ -132,19 +207,21 @@ public class Item : Selectable //Item is any that is pickable
     }
     private void gotDropped(PlayerMain who,Vector3 dropPosition)
     {
+        Debug.Log($"{name} dropped by {who.name}");
         if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.HideInteraction(0);
 
         }
-        transform.SetParent(originalParent);
+        transform.parent = null;
+
+        //ApplySnapshot(snapshot_start);
         outline.OutlineColor = Color.white;
         rb.isKinematic = false;
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.None;
-        this.transform.position = dropPosition;
-        transform.localScale = originalScale;
+        transform.position = dropPosition;
         itemCollider.enabled = true;
     }
 
@@ -161,13 +238,31 @@ public class Item : Selectable //Item is any that is pickable
         return netObj;
     }
 
+    public void Bind(slot slot)
+    {
+        pre_bind_parent = transform.parent;
+        snapshot_bind = GetSnapshot();
+        transform.parent = null;
+        transform.localScale = snapshot_start.scale;
+
+        transform.parent = slot.transform;
+        transform.localPosition = Vector3.zero;
+        transform.rotation = slot.transform.rotation;
+        BindSlot = slot;
+    }
+    public void Unbind()
+    {
+        
+        BindSlot = null;
+        transform.parent = pre_bind_parent;
+        ApplySnapshot(snapshot_bind);
+    }
 
 
 
     protected override void Update()
     {
         base.Update();
-
         if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline || netObj == null || GameCore.Instance == null || GameCore.Instance.Local_NetworkPlayer == null || GameCore.Instance.Local_Player == null)
         {
             return;

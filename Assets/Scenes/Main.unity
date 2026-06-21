@@ -623,67 +623,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.8750331, y: 3.4486554, z: 2.9657552}
   m_Center: {x: -0.023525834, y: -0.018646773, z: 0.32731727}
---- !u!1001 &71559295
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2496786460223226944, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_Name
-      value: default
-      objectReference: {fileID: 0}
-    - target: {fileID: 2496786460223226944, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 15.49309
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021227751524540154, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 8795b43f15eaef64597c6d8a39bad826, type: 3}
 --- !u!1 &76410853
 GameObject:
   m_ObjectHideFlags: 0
@@ -1837,7 +1776,6 @@ GameObject:
   - component: {fileID: 276799747}
   - component: {fileID: 276799746}
   - component: {fileID: 276799745}
-  - component: {fileID: 276799744}
   - component: {fileID: 276799743}
   - component: {fileID: 276799751}
   - component: {fileID: 276799750}
@@ -1892,18 +1830,6 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
---- !u!114 &276799744
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f93053900e1f5e43b11eac3336c721e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DecorationLight
 --- !u!114 &276799745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7762,6 +7688,17 @@ MonoBehaviour:
   netObj: {fileID: 0}
   lockRelativeRotation: 0
   IsPickable: 1
+  IsLocked: 0
+  itemType: 0
+  BindSlot: {fileID: 0}
+  snapshot_start:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
+  snapshot_bind:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
 --- !u!114 &332918751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8055,7 +7992,39 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
   m_PrefabInstance: {fileID: 1011764186}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &390726516
+--- !u!114 &390726520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390726515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
+  AllowedItemType: 2
+  slotName: 4
+--- !u!114 &390726524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390726515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &390726528
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8074,21 +8043,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.026570335, y: 0.023659714, z: 0.0016753019}
-  m_Center: {x: 0.0000000023283064, y: 0.000000013504176, z: -0.0000000095460555}
---- !u!114 &390726520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 390726515}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
+  m_Size: {x: 0.0138137415, y: 0.0016753012, z: 0.01230053}
+  m_Center: {x: -6.9849193e-10, y: 0.0000000067811925, z: -0.000000008614734}
 --- !u!1 &414516936
 GameObject:
   m_ObjectHideFlags: 0
@@ -8114,7 +8070,7 @@ Transform:
   m_GameObject: {fileID: 414516936}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.15, y: 7.97, z: 13.35}
+  m_LocalPosition: {x: -2.15, y: 7.97, z: -14.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8137,8 +8093,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
---- !u!65 &445751297
+  AllowedItemType: 2
+  slotName: 8
+--- !u!114 &445751301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445751292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &445751305
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8157,8 +8132,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.010334462, y: 0.00920238, z: 0.001312587}
-  m_Center: {x: 0, y: 0.0000000037252903, z: 0.0000000013678798}
+  m_Size: {x: 0.01033446, y: 0.0013125872, z: 0.009202382}
+  m_Center: {x: 0, y: 0.0000000019790605, z: -0.000000002561137}
 --- !u!1 &460120711
 GameObject:
   m_ObjectHideFlags: 0
@@ -8498,7 +8473,39 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
   m_PrefabInstance: {fileID: 1011764186}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &483398478
+--- !u!114 &483398482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483398477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
+  AllowedItemType: 2
+  slotName: 2
+--- !u!114 &483398486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483398477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &483398490
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8517,21 +8524,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.026570335, y: 0.023659714, z: 0.0016753019}
-  m_Center: {x: 0.000000005122274, y: 0.000000009778886, z: -0.0000000095460555}
---- !u!114 &483398482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 483398477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
+  m_Size: {x: 0.0138137415, y: 0.0016753012, z: 0.0123005295}
+  m_Center: {x: 0.0000000044237822, y: 0.000000008061761, z: -0.000000013504177}
 --- !u!1 &484933872
 GameObject:
   m_ObjectHideFlags: 0
@@ -8794,7 +8788,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameCore
   Masks: {fileID: 516030513}
   vc: {fileID: 516030515}
-  Connector: {fileID: 554790633}
   prefabRegistry: {fileID: 11400000, guid: 2105dde01aefba44ba6a212a8050ba17, type: 2}
   Local_Player: {fileID: 0}
   Local_NetworkPlayer: {fileID: 0}
@@ -8815,7 +8808,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LayerMasks
   SelectableItems:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 320
   MoveWith:
     serializedVersion: 2
     m_Bits: 128
@@ -8946,15 +8939,16 @@ MonoBehaviour:
   Sync_Transform: 1
   Preset: 0
   animator: {fileID: 0}
-  slot:
-  - {fileID: 1163447468}
-  - {fileID: 1428973124}
-  - {fileID: 483398477}
-  - {fileID: 907818303}
-  - {fileID: 390726515}
-  - {fileID: 867124048}
-  - {fileID: 776582768}
-  - {fileID: 1658476338}
+  msts:
+  - {fileID: 1163447473}
+  - {fileID: 776582773}
+  - {fileID: 1658476343}
+  - {fileID: 445751296}
+  - {fileID: 1428973129}
+  - {fileID: 483398482}
+  - {fileID: 907818308}
+  - {fileID: 390726520}
+  - {fileID: 867124053}
 --- !u!1 &582234037
 GameObject:
   m_ObjectHideFlags: 0
@@ -9669,6 +9663,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.014458704, y: 0.0023260508, z: 0.012874836}
   m_Center: {x: 0.0000000037252903, y: 0.0001484614, z: 0.0000000074505797}
+--- !u!114 &776582773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776582768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
+  AllowedItemType: 2
+  slotName: 6
+--- !u!114 &776582774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776582768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &777686832
 GameObject:
   m_ObjectHideFlags: 0
@@ -10237,7 +10263,39 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
   m_PrefabInstance: {fileID: 1011764186}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &867124049
+--- !u!114 &867124053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 867124048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
+  AllowedItemType: 2
+  slotName: 5
+--- !u!114 &867124057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 867124048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &867124061
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10256,21 +10314,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.02657033, y: 0.023659699, z: 0.001312587}
-  m_Center: {x: 0, y: 0, z: 0.0000000011932568}
---- !u!114 &867124053
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 867124048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
+  m_Size: {x: 0.010334458, y: 0.001312587, z: 0.009202382}
+  m_Center: {x: 0, y: -0.0000000038708095, z: -0.000000002561137}
 --- !u!1 &885531037
 GameObject:
   m_ObjectHideFlags: 0
@@ -10500,7 +10545,39 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
   m_PrefabInstance: {fileID: 1011764186}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &907818304
+--- !u!114 &907818308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907818303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
+  AllowedItemType: 2
+  slotName: 3
+--- !u!114 &907818312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907818303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &907818316
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10519,21 +10596,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.026570328, y: 0.023659702, z: 0.0015946624}
-  m_Center: {x: -0.000000007916242, y: -0.0009767648, z: -0.000000019237628}
---- !u!114 &907818308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 907818303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
+  m_Size: {x: 0.009678928, y: 0.0015946636, z: 0.00861866}
+  m_Center: {x: -0.0000000088475645, y: -0.0009767653, z: -0.000000019092113}
 --- !u!1 &919267269
 GameObject:
   m_ObjectHideFlags: 0
@@ -11766,48 +11830,81 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7347358685765463477, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1163447473}
+    - targetCorrespondingSourceObject: {fileID: 7347358685765463477, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1163447477}
     - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 776582769}
+    - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 776582773}
+    - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 776582774}
     - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1658476339}
-    - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 445751297}
+      addedObject: {fileID: 1658476343}
+    - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1658476344}
     - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 445751296}
-    - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1428973125}
+      addedObject: {fileID: 445751301}
+    - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 445751305}
     - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1428973129}
-    - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 483398478}
+      addedObject: {fileID: 1428973133}
+    - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1428973137}
     - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 483398482}
-    - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 907818304}
+      addedObject: {fileID: 483398486}
+    - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 483398490}
     - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 907818308}
-    - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 390726516}
+      addedObject: {fileID: 907818312}
+    - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 907818316}
     - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 390726520}
-    - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 867124049}
+      addedObject: {fileID: 390726524}
+    - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 390726528}
     - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 867124053}
+    - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 867124057}
+    - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 867124061}
     - targetCorrespondingSourceObject: {fileID: 5769484663829117588, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1011764189}
@@ -12404,6 +12501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86016ad7b37fb3846a69c913db81bc25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::slot
+  AllowedItemType: 1
 --- !u!114 &1138109530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12564,7 +12662,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 1
+  AllowedItemType: 2
+  slotName: 0
+--- !u!114 &1163447477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163447468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!4 &1178908064 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2018961099095827505, guid: 42e502b5371d8a14b8a7f9b299da0e50, type: 3}
@@ -12584,6 +12701,8 @@ GameObject:
   - component: {fileID: 1209669306}
   - component: {fileID: 1209669310}
   - component: {fileID: 1209669311}
+  - component: {fileID: 1209669313}
+  - component: {fileID: 1209669312}
   m_Layer: 6
   m_Name: Window
   m_TagString: Untagged
@@ -12718,6 +12837,17 @@ MonoBehaviour:
   netObj: {fileID: 0}
   lockRelativeRotation: 0
   IsPickable: 1
+  IsLocked: 0
+  itemType: 0
+  BindSlot: {fileID: 0}
+  snapshot_start:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
+  snapshot_bind:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
   partName: Hull
   maxHealth: 100
   currentHealth: 100
@@ -12749,6 +12879,51 @@ MonoBehaviour:
   useDirectRaycastFallback: 1
   interactionDistance: 100
   isOpen: 0
+--- !u!54 &1209669312
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209669302}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &1209669313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209669302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
+  Identifier: 
+  PrefabID: 
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sync_Transform: 1
+  Preset: 0
 --- !u!1 &1212190684
 GameObject:
   m_ObjectHideFlags: 0
@@ -12899,6 +13074,17 @@ MonoBehaviour:
   netObj: {fileID: 1212190686}
   lockRelativeRotation: 0
   IsPickable: 1
+  IsLocked: 0
+  itemType: 0
+  BindSlot: {fileID: 0}
+  snapshot_start:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
+  snapshot_bind:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
 --- !u!114 &1212190691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13992,7 +14178,39 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
   m_PrefabInstance: {fileID: 1011764186}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &1428973125
+--- !u!114 &1428973129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428973124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
+  AllowedItemType: 2
+  slotName: 1
+--- !u!114 &1428973133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428973124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &1428973137
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14011,21 +14229,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.026570328, y: 0.023659702, z: 0.0015946624}
-  m_Center: {x: 0.0000000041909516, y: -0.0009767672, z: -0.000000018015268}
---- !u!114 &1428973129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1428973124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
-  type: 0
+  m_Size: {x: 0.009678928, y: 0.0015946641, z: 0.00861866}
+  m_Center: {x: 0.000000005122274, y: -0.000976767, z: -0.00000001792796}
 --- !u!1 &1458872626
 GameObject:
   m_ObjectHideFlags: 0
@@ -14383,6 +14588,17 @@ MonoBehaviour:
   netObj: {fileID: 0}
   lockRelativeRotation: 1
   IsPickable: 1
+  IsLocked: 0
+  itemType: 0
+  BindSlot: {fileID: 0}
+  snapshot_start:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
+  snapshot_bind:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
 --- !u!114 &1560526353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15162,6 +15378,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.014458704, y: 0.0023260508, z: 0.012874836}
   m_Center: {x: 0, y: 0.0001484614, z: 0.0000000074505797}
+--- !u!114 &1658476343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658476338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2812fa858004cb64f953fe78a42b871b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
+  AllowedItemType: 2
+  slotName: 7
+--- !u!114 &1658476344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658476338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!4 &1675823964 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3196138216412401344, guid: 42e502b5371d8a14b8a7f9b299da0e50, type: 3}
@@ -23060,7 +23308,6 @@ SceneRoots:
   - {fileID: 137954285}
   - {fileID: 479126816}
   - {fileID: 5168017986115501178}
-  - {fileID: 71559295}
   - {fileID: 956797692}
   - {fileID: 979251808}
   - {fileID: 658713211}

@@ -22,7 +22,6 @@ public partial class GameCore : MonoBehaviour
     public LayerMasks Masks;
     public recording vc;
     public options Option;
-    public Connector Connector;
     public PlayerInputAction PlayerControl;
     [SerializeField] private NetworkPrefabRegistry prefabRegistry;
 
@@ -169,7 +168,7 @@ public partial class GameCore : MonoBehaviour
         {
             await UniTask.Yield();
             return prefab;
-        }
+        } 
 
         throw new PrefabNotFound(PrefabID);
     }

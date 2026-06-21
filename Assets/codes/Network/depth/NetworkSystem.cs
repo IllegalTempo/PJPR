@@ -271,7 +271,7 @@ public partial class NetworkSystem : MonoBehaviour
     {
 
         _startedAsHost = false;
-        GameCore.Instance.Connector.ResetScene();
+        Connector.Instance.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
         FindNetworkObject.Where(kvp => kvp.Value && !kvp.Value.Preset).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkObject.Remove(kvp.Key); });

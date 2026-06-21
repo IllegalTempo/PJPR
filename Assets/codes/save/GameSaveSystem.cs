@@ -16,6 +16,7 @@ public class GameSaveSystem : MonoBehaviour
     private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
     public static string DefaultSavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
 
+    
     private void Awake()
     {
         if (Instance == null)
@@ -77,9 +78,9 @@ public class GameSaveSystem : MonoBehaviour
     {
         GameSaveData saveData = new GameSaveData();
 
-        if (GameCore.Instance != null && GameCore.Instance.Connector != null)
+        if (GameCore.Instance != null && Connector.Instance != null)
         {
-            saveData.InstalledModules = GameCore.Instance.Connector.GetInstalledModuleSaveData();
+            saveData.InstalledModules = Connector.Instance.GetInstalledModuleSaveData();
         }
 
         if (NetworkSystem.Instance != null)
@@ -104,8 +105,17 @@ public class GameSaveSystem : MonoBehaviour
     public static GameSaveData CreateDefaultSaveData()
     {
         GameSaveData saveData = new GameSaveData();
+        //
         saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_left, DefaultBoosterModuleId));
         saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_right, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(0, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(1, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(2, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(3, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(4, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(5, DefaultBoosterModuleId));
+        saveData.InstalledModules.Add(new InstalledModuleSaveData(8, DefaultBoosterModuleId));
+
         return saveData;
     }
 
@@ -116,9 +126,9 @@ public class GameSaveSystem : MonoBehaviour
             return;
         }
 
-        if (GameCore.Instance != null && GameCore.Instance.Connector != null)
+        if (GameCore.Instance != null && Connector.Instance != null)
         {
-            GameCore.Instance.Connector.LoadInstalledModules(saveData.InstalledModules);
+            Connector.Instance.LoadInstalledModules(saveData.InstalledModules).Forget();
         }
 
         if (NetworkSystem.Instance == null)

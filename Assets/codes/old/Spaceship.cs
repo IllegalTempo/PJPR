@@ -50,7 +50,7 @@
 //    public void ConnectTo(int index)
 //    {
 //        Debug.Log($"{gameObject.name} connecting to dock {index}");
-//        dockTarget = GameCore.Instance.Connector.connect(this, index);
+//        dockTarget = Connector.Instance.connect(this, index);
 
 //    }
 //    private void Update()
@@ -68,7 +68,7 @@
 //    public void OnConnect()
 //    {
 //        rb.linearVelocity = Vector3.zero;
-//        Connector connector = GameCore.Instance.Connector;
+//        Connector connector = Connector.Instance;
 //        transform.SetParent(connector.transform, true);
 //        Sync_Transform = false;
 //        dockTarget = null;

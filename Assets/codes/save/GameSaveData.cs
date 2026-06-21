@@ -14,15 +14,20 @@ public class InstalledModuleSaveData
 {
     public int Slot;
     public string PrefabID;
+    public Quaternion Rotation;
 
     public InstalledModuleSaveData()
     {
     }
 
-    public InstalledModuleSaveData(int slot, string prefabID)
+    public InstalledModuleSaveData(
+    int slot,
+    string prefabID,
+    Quaternion? rotation = null)
     {
-        Slot = slot;
-        PrefabID = prefabID;
+        this.Slot = slot;
+        this.PrefabID = prefabID;
+        this.Rotation = rotation ?? Quaternion.identity;
     }
 }
 

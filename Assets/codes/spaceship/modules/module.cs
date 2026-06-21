@@ -5,11 +5,9 @@ using UnityEngine;
 public class module : SpaceshipPart
 {
     
-    public string PrefabID { get; private set; }
     private ModuleSlot ConnectedTo;
-    public void Init(string prefabID, ModuleSlot connectedTo)
+    public void Init(ModuleSlot connectedTo)
     {
-        PrefabID = prefabID;
         OnInstall(connectedTo);
     }
     
@@ -34,4 +32,5 @@ public enum ModuleSlotName
     up = 5,
     back_left = 6,
     back_right = 7,
+    below = 8,
 }

@@ -86,9 +86,9 @@ namespace Assets.codes.system
                 return movementPivot.position;
             }
 
-            if (GameCore.Instance != null && GameCore.Instance.Connector != null)
+            if (GameCore.Instance != null && Connector.Instance != null)
             {
-                return GameCore.Instance.Connector.transform.position;
+                return Connector.Instance.transform.position;
             }
 
             return transform.position;

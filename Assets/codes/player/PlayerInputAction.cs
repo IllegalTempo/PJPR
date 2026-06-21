@@ -145,6 +145,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""rotate"",
+                    ""type"": ""Button"",
+                    ""id"": ""772282db-8449-456f-9e77-6cd203ccc295"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -257,6 +266,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""voice"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c54af4f-4abf-4ba2-adc1-73d774667d41"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -271,6 +291,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_Player_pickup = m_Player.FindAction("pickup", throwIfNotFound: true);
         m_Player_jump = m_Player.FindAction("jump", throwIfNotFound: true);
         m_Player_voice = m_Player.FindAction("voice", throwIfNotFound: true);
+        m_Player_rotate = m_Player.FindAction("rotate", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -357,6 +378,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_pickup;
     private readonly InputAction m_Player_jump;
     private readonly InputAction m_Player_voice;
+    private readonly InputAction m_Player_rotate;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -392,6 +414,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/voice".
         /// </summary>
         public InputAction @voice => m_Wrapper.m_Player_voice;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/rotate".
+        /// </summary>
+        public InputAction @rotate => m_Wrapper.m_Player_rotate;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -436,6 +462,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @voice.started += instance.OnVoice;
             @voice.performed += instance.OnVoice;
             @voice.canceled += instance.OnVoice;
+            @rotate.started += instance.OnRotate;
+            @rotate.performed += instance.OnRotate;
+            @rotate.canceled += instance.OnRotate;
         }
 
         /// <summary>
@@ -465,6 +494,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @voice.started -= instance.OnVoice;
             @voice.performed -= instance.OnVoice;
             @voice.canceled -= instance.OnVoice;
+            @rotate.started -= instance.OnRotate;
+            @rotate.performed -= instance.OnRotate;
+            @rotate.canceled -= instance.OnRotate;
         }
 
         /// <summary>
@@ -547,5 +579,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnVoice(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "rotate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRotate(InputAction.CallbackContext context);
     }
 }

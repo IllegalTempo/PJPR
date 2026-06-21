@@ -21,24 +21,18 @@ namespace Assets.codes.Network.depth
         private NetworkSyncMode mode = NetworkSyncMode.OnChange;
         private bool initialized;
 
-        public T Value
+        public void SetValue(T newValue, bool sync = true)
         {
-            get => value;
-            set
+            if (Equals(value, newValue))
             {
-                if (Equals(this.value, value))
-                {
-                    return;
-                }
-
-                this.value = value;
-                if (initialized && mode == NetworkSyncMode.OnChange)
-                {
-                    Sync();
-                }
+                return;
+            }
+            value = newValue;
+            if (initialized && sync && mode == NetworkSyncMode.OnChange)
+            {
+                Sync();
             }
         }
-
         public SyncedVar()
         {
         }
