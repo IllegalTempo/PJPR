@@ -94,6 +94,7 @@ namespace Assets.codes.Network.Messages
             }
             foreach (SlotSnapshot snapshot in slotsRelationships)
             {
+                Debug.Log("Syncing Slot Relationship: " + snapshot.SlotId + " -> " + snapshot.AttachedItemId);
                 Slot slot = NetworkSystem.Instance.GetComponentOfIdentity<Slot>(snapshot.SlotId);
                 Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
                 if (slot != null && attachedItem != null)
