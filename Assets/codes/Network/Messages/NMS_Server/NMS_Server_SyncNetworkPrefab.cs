@@ -7,13 +7,14 @@ namespace Assets.codes.Network.Messages
     public class NMS_Server_SyncNetworkPrefab : NMS, IClientHandle
     {
         private readonly NetworkObjectSnapshot[] objects;
+        private readonly SlotSnapshot[] slotsRelationships;
 
         public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkObjectSnapshot> objects) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
         }
 
-        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefabIdentity> networkObjects) : base((int)packets.ServerPackets.SyncNetworkObjects) 
+        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefabIdentity> networkObjects, IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
             foreach (NetworkPrefabIdentity networkObject in networkObjects)
@@ -25,14 +26,24 @@ namespace Assets.codes.Network.Messages
                     networkObject.transform.position,
                     networkObject.transform.rotation));
             }
+            List<SlotSnapshot> slotSnapshots = new List<SlotSnapshot>();
+            foreach (Slot slot in slots)
+            {
+                slotSnapshots.Add(new SlotSnapshot
+                (
+                    slot.Identity.Identifier,
+                    slot.GetAttachedItem().GetNetworkObject().Identity.Identifier
+                ));
+            }
             objects = snapshots.ToArray();
+            slotsRelationships = slotSnapshots.ToArray();
         }
 
         public static NMS_Server_SyncNetworkPrefab Read(Packet packet)
         {
-            int length = packet.Readint();
-            NetworkObjectSnapshot[] objects = new NetworkObjectSnapshot[length];
-            for (int i = 0; i < length; i++)
+            int objectlistlength = packet.Readint();
+            NetworkObjectSnapshot[] objects = new NetworkObjectSnapshot[objectlistlength];
+            for (int i = 0; i < objectlistlength; i++)
             {
                 objects[i] = new NetworkObjectSnapshot(
                     packet.ReadstringUNICODE(),
@@ -40,6 +51,14 @@ namespace Assets.codes.Network.Messages
                     packet.ReadstringUNICODE(),
                     packet.Readvector3(),
                     packet.Readquaternion());
+            }
+            int slotlistlength = packet.Readint();
+            SlotSnapshot[] slotsRelationships = new SlotSnapshot[slotlistlength];
+            for(int i = 0; i < slotlistlength; i++)
+            {
+                slotsRelationships[i] = new SlotSnapshot(
+                    packet.ReadstringUNICODE(),
+                    packet.ReadstringUNICODE());
             }
 
             return new NMS_Server_SyncNetworkPrefab(objects);
@@ -56,6 +75,13 @@ namespace Assets.codes.Network.Messages
                 packet.Write(snapshot.Position);
                 packet.Write(snapshot.Rotation);
             }
+            packet.Write(slotsRelationships.Length);
+            foreach (SlotSnapshot snapshot in slotsRelationships)
+            {
+                packet.WriteUNICODE(snapshot.SlotId);
+                packet.WriteUNICODE(snapshot.AttachedItemId);
+            }
+
         }
 
         public void ClientHandle()
@@ -65,7 +91,15 @@ namespace Assets.codes.Network.Messages
             {
                 GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation).Forget();
             }
-
+            foreach (SlotSnapshot snapshot in slotsRelationships)
+            {
+                Slot slot = NetworkSystem.Instance.GetComponentOfIdentity<Slot>(snapshot.SlotId);
+                Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
+                if (slot != null && attachedItem != null)
+                {
+                    slot.Attach(attachedItem);
+                }
+            }
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
         }
 
@@ -76,7 +110,6 @@ namespace Assets.codes.Network.Messages
             public readonly string PrefabId;
             public readonly Vector3 Position;
             public readonly Quaternion Rotation;
-
             public NetworkObjectSnapshot(string uid, ulong owner, string prefabId, Vector3 position, Quaternion rotation)
             {
                 Uid = uid;
@@ -86,5 +119,16 @@ namespace Assets.codes.Network.Messages
                 Rotation = rotation;
             }
         }
+        public readonly struct SlotSnapshot
+        {
+            public readonly string SlotId;
+            public readonly string AttachedItemId;
+            public SlotSnapshot(string slotId, string attachedItemId)
+            {
+                SlotId = slotId;
+                AttachedItemId = attachedItemId;
+            }
+        }
+
     }
 }

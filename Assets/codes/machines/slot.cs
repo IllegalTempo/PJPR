@@ -26,4 +26,8 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     {
         return this.item; 
     }
+    private void Start()
+    {
+        NetworkSystem.Instance.Slots[Identity.Identifier] = this;
+    }
 }

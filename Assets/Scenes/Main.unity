@@ -1635,6 +1635,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1560526362}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1560526363}
   m_SourcePrefab: {fileID: 100100000, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
 --- !u!1 &260660838
 GameObject:
@@ -7375,6 +7378,7 @@ GameObject:
   - component: {fileID: 332918752}
   - component: {fileID: 332918750}
   - component: {fileID: 332918757}
+  - component: {fileID: 332918758}
   m_Layer: 6
   m_Name: Tool_Hammer
   m_TagString: Untagged
@@ -7567,6 +7571,21 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Sync_Transform: 1
+--- !u!114 &332918758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332918748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: 
 --- !u!1 &361654578
 GameObject:
   m_ObjectHideFlags: 0
@@ -12272,6 +12291,7 @@ GameObject:
   - component: {fileID: 1138109531}
   - component: {fileID: 1138109530}
   - component: {fileID: 1138109529}
+  - component: {fileID: 1138109534}
   m_Layer: 0
   m_Name: Slot
   m_TagString: Untagged
@@ -12307,7 +12327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::slot
   AllowedItemType: 1
-  Identity: {fileID: 0}
+  Identity: {fileID: 1138109534}
 --- !u!114 &1138109530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12430,6 +12450,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1138109527}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1138109534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138109527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: test_washingMachine
+  Sovereignty: 0
 --- !u!1 &1163447468 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7347358685765463477, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
@@ -12524,6 +12558,7 @@ GameObject:
   - component: {fileID: 1209669311}
   - component: {fileID: 1209669312}
   - component: {fileID: 1209669313}
+  - component: {fileID: 1209669314}
   m_Layer: 6
   m_Name: Window
   m_TagString: Untagged
@@ -12745,6 +12780,21 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Sync_Transform: 1
+--- !u!114 &1209669314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209669302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: 
 --- !u!1 &1212190684
 GameObject:
   m_ObjectHideFlags: 0
@@ -12761,6 +12811,7 @@ GameObject:
   - component: {fileID: 1212190690}
   - component: {fileID: 1212190692}
   - component: {fileID: 1212190693}
+  - component: {fileID: 1212190694}
   m_Layer: 6
   m_Name: test
   m_TagString: Untagged
@@ -12951,6 +13002,21 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Sync_Transform: 1
+--- !u!114 &1212190694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212190684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: 
 --- !u!1 &1222495713
 GameObject:
   m_ObjectHideFlags: 0
@@ -14524,6 +14590,21 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Sync_Transform: 1
+--- !u!114 &1560526363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560526351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: 
 --- !u!1 &1564436160
 GameObject:
   m_ObjectHideFlags: 0

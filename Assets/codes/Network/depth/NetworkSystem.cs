@@ -29,6 +29,7 @@ public partial class NetworkSystem : MonoBehaviour
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     //All player list
     public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
+    public Dictionary<string,Slot> Slots = new Dictionary<string, Slot>();
     public ulong SteamID;
     public int initState = 0;
     public Lobby CurrentLobby;// Start is called before the first frame update
@@ -285,6 +286,7 @@ public partial class NetworkSystem : MonoBehaviour
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
         FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefabIdentity).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });
+        Slots.Clear();
         Debug.Log("Cleaned up scene");
     }
 
