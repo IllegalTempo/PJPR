@@ -3,7 +3,7 @@ using UnityEngine;
 
 //optionally carries a MeteoriteRing child.
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(NetworkPrefab))]
 public class Planet : HarmfulObject
 {
     [Header("Planet Movement Settings")]
@@ -43,7 +43,7 @@ public class Planet : HarmfulObject
         }
 
         // We only broadcast transform if the planet moves!
-        NetworkObject netObj = GetComponent<NetworkObject>();
+        NetworkPrefab netObj = GetComponent<NetworkPrefab>();
         if (netObj != null) netObj.Sync_Transform = movementSpeed > 0;
 
         if (spawnRingOnStart && meteoriteRingPrefab != null && meteoriteRing == null)

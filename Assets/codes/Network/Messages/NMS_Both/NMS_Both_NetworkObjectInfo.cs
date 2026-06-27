@@ -29,14 +29,14 @@ namespace Assets.codes.Network.Messages
 
         public void ServerHandle(NetworkPlayer player)
         {
-            NetworkSystem.Instance.FindNetworkObject[id].SetServerMovement(position, rotation);
+            ((NetworkPrefab)NetworkSystem.Instance.FindNetworkIdentity[id]).SetServerMovement(position, rotation);
             NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);
         }
 
         public void ClientHandle()
         {
-            NetworkObject networkObject = NetworkSystem.Instance.FindNetworkObject[id];
-            if (GameCore.Instance != null && GameCore.Instance.IsLocal(networkObject.Owner))
+            NetworkPrefab networkObject = (NetworkPrefab)NetworkSystem.Instance.FindNetworkIdentity[id];
+            if (GameCore.Instance != null && GameCore.Instance.IsLocal(networkObject.Sovereignty))
             {
                 return;
             }

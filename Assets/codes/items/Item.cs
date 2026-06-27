@@ -35,7 +35,7 @@ public struct ItemSnapshot
     /// <summary>Local scale relative to parent transform</summary>
     public Vector3 scale;
 }
-[RequireComponent(typeof(NetworkObject), typeof(Rigidbody))]
+[RequireComponent(typeof(NetworkPrefab), typeof(Rigidbody))]
 
 public class Item : Selectable //Item is any that is pickable
 {
@@ -43,7 +43,7 @@ public class Item : Selectable //Item is any that is pickable
     public ItemDefinition AbstractItem;
     //[SerializeField] protected bool isRepairTool;
     [SerializeField]
-    protected NetworkObject netObj;
+    protected NetworkPrefab netObj;
     protected Rigidbody rb;
     protected Collider itemCollider;
 
@@ -54,7 +54,7 @@ public class Item : Selectable //Item is any that is pickable
     public bool IsLocked = false;
     public ItemType itemType = ItemType.Generic;
 
-    public slot BindSlot = null;
+    public Slot BindSlot = null;
 
     //public virtual bool IsRepairTool => isRepairTool;
 
@@ -81,7 +81,7 @@ public class Item : Selectable //Item is any that is pickable
 
         if (netObj == null)
         {
-            netObj = GetComponent<NetworkObject>();
+            netObj = GetComponent<NetworkPrefab>();
         }
 
         rb = GetComponent<Rigidbody>();
@@ -107,7 +107,7 @@ public class Item : Selectable //Item is any that is pickable
         transform.localRotation = snapshot.rotation;  // Use localRotation instead of world rotation
         transform.localScale = snapshot.scale;
     }
-    public bool FitIn(slot slot)
+    public bool FitIn(Slot slot)
     {
         if (slot == null) return false;
         if (slot.GetAttachedItem() != null) return false;
@@ -127,7 +127,7 @@ public class Item : Selectable //Item is any that is pickable
         base.OnClicked();
         if (netObj == null)
         {
-            netObj = GetComponent<NetworkObject>();
+            netObj = GetComponent<NetworkPrefab>();
             Debug.LogWarning($"{name} has no NetworkObject, cannot be picked up.");
             return;
         }
@@ -158,7 +158,7 @@ public class Item : Selectable //Item is any that is pickable
         netObj.Sync_Transform = newowner == 0; //Only sync transform if dropped, not when picked up, because the player will be moving it.
         if (newowner == 0)
         {
-            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Owner].playerControl;
+            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Sovereignty].playerControl;
             who.holdingItem = null;
             gotDropped(who,transform.position);
             
@@ -218,6 +218,8 @@ public class Item : Selectable //Item is any that is pickable
         //ApplySnapshot(snapshot_start);
         outline.OutlineColor = Color.white;
         rb.isKinematic = false;
+        //launch forward
+        rb.AddForce(who.head.transform.forward * 10f, ForceMode.VelocityChange);
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.None;
@@ -229,16 +231,16 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    public NetworkObject GetNetworkObject()
+    public NetworkPrefab GetNetworkObject()
     {
         if (netObj == null)
         {
-            netObj = GetComponent<NetworkObject>();
+            netObj = GetComponent<NetworkPrefab>();
         }
         return netObj;
     }
 
-    public void Bind(slot slot)
+    public void Bind(Slot slot)
     {
         pre_bind_parent = transform.parent;
         snapshot_bind = GetSnapshot();

@@ -196,21 +196,35 @@ public partial class GameCore : MonoBehaviour
     //        Debug.Log("Cannot load decorations");
     //    }
     //}
-    public async UniTask<NetworkObject> spawnNetworkPrefab(string prefabID, ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
+    public async UniTask<NetworkPrefab> spawnNetworkPrefab(string prefabID,ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
         GameObject prefab = await GetPrefabObject(prefabID);
 
         GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);
-        NetworkObject nobj = obj.gameObject.GetComponent<NetworkObject>();
+        NetworkPrefab nobj = obj.gameObject.GetComponent<NetworkPrefab>();
         if (nobj == null)
         {
-            nobj = gameObject.AddComponent<NetworkObject>();
+            nobj = gameObject.AddComponent<NetworkPrefab>();
         }
 
-        nobj.Init(uid, owner, prefabID);
+        nobj.Instantiate_Init(uid, prefabID,owner);
         nobj.SetMovement(pos, rot);
         return nobj;
+    }
+    public void DestroyNetworkIdentity(string id) //run by both server and client
+    {
+        NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;
+        if (obj == null)
+        {
+            Debug.LogWarning("Tried to destroy a null NetworkObject.");
+            return;
+        }
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(obj.Identifier))
+        {
+            NetworkSystem.Instance.FindNetworkIdentity.Remove(obj.Identifier);
+        }
+        GameObject.Destroy(obj.gameObject);
     }
     public bool IsLocal(ulong id)
     {

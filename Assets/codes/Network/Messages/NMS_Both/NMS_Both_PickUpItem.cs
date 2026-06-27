@@ -26,9 +26,9 @@ namespace Assets.codes.Network.Messages
 
         private void ApplyEffect()
         {
-            if(NetworkSystem.Instance.FindNetworkObject.ContainsKey(itemId))
+            if(NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(itemId))
             {
-                NetworkSystem.Instance.FindNetworkObject[itemId].gameObject.GetComponent<Item>().Network_onPickUPorDrop(pickedUpBy);
+                NetworkSystem.Instance.GetComponentOfIdentity<Item>(itemId).Network_onPickUPorDrop(pickedUpBy);
 
             } else
             {
@@ -38,7 +38,7 @@ namespace Assets.codes.Network.Messages
         }
         public void ServerHandle(NetworkPlayer player)
         {
-            if (!NetworkSystem.Instance.FindNetworkObject.TryGetValue(itemId, out NetworkObject networkObject))
+            if (!NetworkSystem.Instance.FindNetworkIdentity.TryGetValue(itemId, out NetworkIdentity networkObject))
             {
                 throw new NO_Not_Found(itemId);
             }
@@ -46,7 +46,7 @@ namespace Assets.codes.Network.Messages
             bool isDropRequest = pickedUpBy == 0;
             if (isDropRequest)
             {
-                if (networkObject.Owner != player.steamId)
+                if (((NetworkPrefab)networkObject).Sovereignty != player.steamId)
                 {
                     Debug.LogWarning($"Rejected drop for {itemId}: {player.steamId} does not own it.");
                     return;

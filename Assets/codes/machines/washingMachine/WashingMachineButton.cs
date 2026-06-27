@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WashingMachineButton : button
+public class WashingMachineButton : Button
 {
     [SerializeField]
     private SplashController splashController;

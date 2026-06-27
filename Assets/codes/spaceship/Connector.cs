@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-public class Connector : NetworkObject
+public class Connector : NetworkPrefab
 {
     public static Connector Instance { get; private set; }
     [SerializeField]
@@ -32,7 +32,7 @@ public class Connector : NetworkObject
     }
     public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
-        NetworkObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
+        NetworkPrefab nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
         return nobj.GetComponent<module>(); 
 
 

@@ -25,7 +25,7 @@ public partial class NetworkSystem : MonoBehaviour
     public NetworkListener NetworkListener;
     public bool IsOnline = false;
     public bool IsServer = true;
-    public Dictionary<string, NetworkObject> FindNetworkObject = new Dictionary<string, NetworkObject>();
+    public Dictionary<string, NetworkIdentity> FindNetworkIdentity = new Dictionary<string, NetworkIdentity>();
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     //All player list
     public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
@@ -53,7 +53,17 @@ public partial class NetworkSystem : MonoBehaviour
         }
 
     }
-
+    public T GetComponentOfIdentity<T>(string NetworkID)
+    {
+        NetworkIdentity identity = FindNetworkIdentity[NetworkID];
+        T component = identity.GetComponent<T>();
+        if (component == null)
+        {
+            Debug.LogError($"Component of type {typeof(T)} not found on NetworkIdentity with ID: {NetworkID}");
+            
+        }
+        return component;
+    }
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -137,7 +147,7 @@ public partial class NetworkSystem : MonoBehaviour
 #if UNITY_EDITOR
         // Sync dictionary keys to inspector for debugging
         FindNetworkObjectKey.Clear();
-        FindNetworkObjectKey.AddRange(FindNetworkObject.Keys);
+        FindNetworkObjectKey.AddRange(FindNetworkIdentity.Keys);
 #endif
     }
     public ulong GetInviteCode()
@@ -274,7 +284,7 @@ public partial class NetworkSystem : MonoBehaviour
         Connector.Instance.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
-        FindNetworkObject.Where(kvp => kvp.Value && !kvp.Value.Preset).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkObject.Remove(kvp.Key); });
+        FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefab).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });
         Debug.Log("Cleaned up scene");
     }
 

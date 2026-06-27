@@ -37,7 +37,7 @@ namespace Assets.codes.Network.Messages
         }
         private void ApplyInteraction()
         {
-            IUsable decoration = NetworkSystem.Instance.FindNetworkObject[decorationUid].GetComponent<IUsable>();
+            IUsable decoration = NetworkSystem.Instance.GetComponentOfIdentity<IUsable>(decorationUid);
             PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;
             decoration.OnInteract(who);
         }

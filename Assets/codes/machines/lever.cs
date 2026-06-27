@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-public class lever : Interactable
+public class Lever: Interactable
 {
     [SerializeField]
     private UnityEvent onSwitch_On;

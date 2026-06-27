@@ -1,20 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class storage //This is only a data type class, used it in some thing like a machine when the machine need to store something
 {
     string name;
     int capacity;
-    ItemDefinition[] content;
+    List<ItemDefinition> content;
 
     public storage(string name,int size = 1)
     {
         capacity = size;
         this.name = name;
-        content = new ItemDefinition[capacity];
+        content = new List<ItemDefinition>();
+    }
+    public bool IsFull()
+    {
+        return content.Count >= capacity;
+
     }
     public ItemDefinition[] GetItems()
     {
-        return content;
+        return content.ToArray();
 
     }
     public string GetStorageName()

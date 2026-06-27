@@ -14,7 +14,8 @@ public class packets
         SendMissionInfo = 1008,
         StartGameLoop = 1009,
         SpawnMissionProjections = 1010,
-    };
+    
+        NO_Destroy = 1011,};
     public enum ClientPackets
     {
         SendReadyState = 2001,
@@ -34,6 +35,6 @@ public class packets
 
     
         test = 3009,
-        SyncVariable = 3010,};
+        NO_Slot_Interact = 3011,};
 }
 

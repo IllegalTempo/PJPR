@@ -51,8 +51,6 @@ public class BlackHole : HarmfulObject
             rb.useGravity = false;
         }
 
-        NetworkObject netObj = GetComponent<NetworkObject>();
-        if (netObj != null) netObj.Sync_Transform = true;
     }
 
     private void FixedUpdate()

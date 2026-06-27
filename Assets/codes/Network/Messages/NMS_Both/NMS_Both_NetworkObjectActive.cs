@@ -26,9 +26,9 @@ namespace Assets.codes.Network.Messages
         }
         private void ApplyEffect()
         {
-            if (NetworkSystem.Instance.FindNetworkObject.ContainsKey(id))
+            if (NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id))
             {
-                NetworkSystem.Instance.FindNetworkObject[id].gameObject.SetActive(active);
+                NetworkSystem.Instance.FindNetworkIdentity[id].gameObject.SetActive(active);
 
             }
             else

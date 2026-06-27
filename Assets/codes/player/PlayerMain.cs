@@ -119,7 +119,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             usable.OnInteract(this);
             if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline) return;
-            NetworkObject netObj = (usable as MonoBehaviour).GetComponent<NetworkObject>();
+            NetworkPrefab netObj = (usable as MonoBehaviour).GetComponent<NetworkPrefab>();
             if (netObj == null) return;
             NMS_Both_Interact msg = new NMS_Both_Interact(networkinfo.steamID, netObj.Identifier);
             if (NetworkSystem.Instance.IsServer)
@@ -183,7 +183,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             // Rotate the item 90 degrees around the slot's local Y-axis (up axis)
             // This allows the player to orient items in different rotations while bound to a slot
-            slot boundSlot = holdingItem.BindSlot;
+            Slot boundSlot = holdingItem.BindSlot;
 
             // Calculate 90 degree rotation around the slot's local Y-axis
             Quaternion rotationIncrement = Quaternion.AngleAxis(90f, boundSlot.transform.up);
@@ -195,7 +195,7 @@ public partial class PlayerMain : MonoBehaviour
             // so the rotation change will be automatically synchronized to other players
             if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
             {
-                NetworkObject netObj = holdingItem.GetNetworkObject();
+                NetworkPrefab netObj = holdingItem.GetNetworkObject();
                 if (netObj != null)
                 {
                     // Rotation sync happens automatically through NetworkObject
@@ -213,11 +213,11 @@ public partial class PlayerMain : MonoBehaviour
         {
             Item it = holdingItem;
             SendDrop();
-            if (seenObject is slot s)
+            if (seenObject is Slot s)
             {
 
                 if (it.FitIn(s))
-                    s.AttachItem(it);
+                    s.Attach(it);
                 return;
             }
 
@@ -306,12 +306,12 @@ public partial class PlayerMain : MonoBehaviour
             UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
         }
 
-        if (@new is slot s && holdingItem != null && holdingItem.FitIn(s))
+        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s))
         {
             UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
             UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
         }
-        else if (@new is slot)
+        else if (@new is Slot)
         {
             UIManager.Instance.ShowInteraction("X", "", 0);
         }
@@ -319,7 +319,7 @@ public partial class PlayerMain : MonoBehaviour
 
     private void HandleSlotBinding(Selectable @new)
     {
-        if (@new is slot s && holdingItem != null && holdingItem.FitIn(s))
+        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s))
         {
             holdingItem.Bind(s);
         }
@@ -329,7 +329,7 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (holdingItem == null || holdingItem.BindSlot == null) return;
         //if (!isCompatibleSlot && holdingItem != null && holdingItem.BindSlot != null)
-        if(@new is not slot || (@new is slot s  && !holdingItem.FitIn(s)))
+        if(@new is not Slot || (@new is Slot s  && !holdingItem.FitIn(s)))
         {
             holdingItem.Unbind();
         }

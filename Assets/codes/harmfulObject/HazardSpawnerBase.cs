@@ -40,7 +40,7 @@ public abstract class HazardSpawnerBase : MonoBehaviour
             string id = GetPrefabID(prefabs, prefabIDs);
             if (!string.IsNullOrEmpty(id))
             {
-                NetworkObject netObj = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(id, position, rotation, 0);
+                NetworkPrefab netObj = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(id, position, rotation, 0);
                 return netObj?.gameObject;
             }
         }

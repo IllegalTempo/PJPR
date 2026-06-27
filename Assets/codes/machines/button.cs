@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class button : Interactable
+public class Button: Interactable
 {
     [SerializeField]
     private UnityEvent onClicked;

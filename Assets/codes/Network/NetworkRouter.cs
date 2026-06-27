@@ -33,7 +33,7 @@ namespace Assets.codes.Network.Messages
 
         
             { (int)packets.BothPackets.test, NMS_Both_test.Read },
-            { (int)packets.BothPackets.SyncVariable, NMS_Both_SyncVariable.Read },};
+            { (int)packets.BothPackets.NO_Slot_Interact, NMS_Both_SlotAttach.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {
@@ -41,10 +41,11 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.UpdatePlayerEnterRoomForExistingPlayer, NMS_Server_NewPlayerJoined.Read },
             { (int)packets.ServerPackets.PlayerQuit, NMS_Server_PlayerQuit.Read },
             { (int)packets.ServerPackets.NewObject, NMS_Server_NewObject.Read },
-            { (int)packets.ServerPackets.SyncNetworkObjects, NMS_Server_SyncNetworkObjects.Read },
+            { (int)packets.ServerPackets.SyncNetworkObjects, NMS_Server_SyncNetworkPrefab.Read },
             { (int)packets.ServerPackets.SendMissionInfo, NMS_Server_MissionInfo.Read },
             { (int)packets.ServerPackets.StartGameLoop, NMS_Server_StartGameLoop.Read }
-        };
+        ,
+            { (int)packets.ServerPackets.NO_Destroy, NMS_Server_NO_Destroy.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {

@@ -4,32 +4,31 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Server_SyncNetworkObjects : NMS, IClientHandle
+    public class NMS_Server_SyncNetworkPrefab : NMS, IClientHandle
     {
         private readonly NetworkObjectSnapshot[] objects;
 
-        public NMS_Server_SyncNetworkObjects(IEnumerable<NetworkObjectSnapshot> objects) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkObjectSnapshot> objects) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
         }
 
-        public NMS_Server_SyncNetworkObjects(IEnumerable<NetworkObject> networkObjects) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefab> networkObjects) : base((int)packets.ServerPackets.SyncNetworkObjects) 
         {
             List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
-            foreach (NetworkObject networkObject in networkObjects)
+            foreach (NetworkPrefab networkObject in networkObjects)
             {
                 snapshots.Add(new NetworkObjectSnapshot(
                     networkObject.Identifier,
-                    networkObject.Owner,
+                    networkObject.Sovereignty,
                     networkObject.PrefabID,
                     networkObject.transform.position,
                     networkObject.transform.rotation));
             }
-
             objects = snapshots.ToArray();
         }
 
-        public static NMS_Server_SyncNetworkObjects Read(Packet packet)
+        public static NMS_Server_SyncNetworkPrefab Read(Packet packet)
         {
             int length = packet.Readint();
             NetworkObjectSnapshot[] objects = new NetworkObjectSnapshot[length];
@@ -43,7 +42,7 @@ namespace Assets.codes.Network.Messages
                     packet.Readquaternion());
             }
 
-            return new NMS_Server_SyncNetworkObjects(objects);
+            return new NMS_Server_SyncNetworkPrefab(objects);
         }
 
         public override void Write(Packet packet)

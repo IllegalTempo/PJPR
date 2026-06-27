@@ -1,11 +1,11 @@
 using UnityEngine;
 
-[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(NetworkPrefab))]
 public class MissionTerminal : Selectable
 {
     [SerializeField] private MissionProjectionDisplay projectionDisplay;
     [SerializeField] private int missionsToShow = 3;
-    private NetworkObject networkObject;
+    private NetworkPrefab networkObject;
     private bool projectionsActive = false;
 
     protected override int Layer => 6; // Selectable layer
@@ -13,7 +13,7 @@ public class MissionTerminal : Selectable
     protected override void OnEnable()
     {
         base.OnEnable();
-        networkObject = GetComponent<NetworkObject>();
+        networkObject = GetComponent<NetworkPrefab>();
     }
 
     public override void OnClicked()
