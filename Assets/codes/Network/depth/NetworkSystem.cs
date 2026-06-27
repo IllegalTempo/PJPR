@@ -284,7 +284,7 @@ public partial class NetworkSystem : MonoBehaviour
         Connector.Instance.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
-        FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefab).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });
+        FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefabIdentity).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });
         Debug.Log("Cleaned up scene");
     }
 

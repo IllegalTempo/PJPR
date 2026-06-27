@@ -1,5 +1,6 @@
 
 using Assets.codes.Network.Messages;
+using Assets.codes.Network.SyncedIdentity;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -119,7 +120,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             usable.OnInteract(this);
             if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline) return;
-            NetworkPrefab netObj = (usable as MonoBehaviour).GetComponent<NetworkPrefab>();
+            NetworkPrefabIdentity netObj = (usable as MonoBehaviour).GetComponent<NetworkPrefabIdentity>();
             if (netObj == null) return;
             NMS_Both_Interact msg = new NMS_Both_Interact(networkinfo.steamID, netObj.Identifier);
             if (NetworkSystem.Instance.IsServer)
@@ -195,7 +196,7 @@ public partial class PlayerMain : MonoBehaviour
             // so the rotation change will be automatically synchronized to other players
             if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
             {
-                NetworkPrefab netObj = holdingItem.GetNetworkObject();
+                NetworkGameObject netObj = holdingItem.GetNetworkObject();
                 if (netObj != null)
                 {
                     // Rotation sync happens automatically through NetworkObject

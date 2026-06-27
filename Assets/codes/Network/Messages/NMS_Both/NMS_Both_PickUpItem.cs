@@ -46,7 +46,7 @@ namespace Assets.codes.Network.Messages
             bool isDropRequest = pickedUpBy == 0;
             if (isDropRequest)
             {
-                if (((NetworkPrefab)networkObject).Sovereignty != player.steamId)
+                if (((NetworkPrefabIdentity)networkObject).Sovereignty != player.steamId)
                 {
                     Debug.LogWarning($"Rejected drop for {itemId}: {player.steamId} does not own it.");
                     return;

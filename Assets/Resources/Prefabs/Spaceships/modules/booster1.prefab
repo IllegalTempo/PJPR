@@ -131,6 +131,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 390924962778511715}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8575854996173634517}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -962644019809418677}
   m_SourcePrefab: {fileID: 100100000, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
 --- !u!1 &8382276501861436971 stripped
 GameObject:
@@ -213,12 +219,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: 
-  PrefabID: 
+  Sync_Transform: 1
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Preset: 0
+  Identity: {fileID: 8575854996173634517}
 --- !u!54 &1981657392565994241
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -267,3 +271,34 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 4, y: 3.6558821, z: 10}
   m_Center: {x: 0, y: 1.3279415, z: -0.6}
+--- !u!114 &8575854996173634517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382276501861436971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: module_booster1
+--- !u!114 &-962644019809418677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382276501861436971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
+  Sync_Transform: 1
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Identity: {fileID: 8575854996173634517}

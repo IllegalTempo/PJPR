@@ -7562,10 +7562,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
   Identifier: hammer
+  Sovereignty: 0
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sovereignty: 0
   Sync_Transform: 1
 --- !u!1 &361654578
 GameObject:
@@ -7730,7 +7730,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 390726532}
   slotName: 4
 --- !u!114 &390726524
 MonoBehaviour:
@@ -7771,6 +7771,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.0138137415, y: 0.0016753012, z: 0.01230053}
   m_Center: {x: -6.9849193e-10, y: 0.0000000067811925, z: -0.000000008614734}
+--- !u!114 &390726532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390726515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_right2
+  Sovereignty: 0
 --- !u!1 &414516936
 GameObject:
   m_ObjectHideFlags: 0
@@ -7820,7 +7834,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 445751309}
   slotName: 8
 --- !u!114 &445751301
 MonoBehaviour:
@@ -7861,6 +7875,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.01033446, y: 0.0013125872, z: 0.009202382}
   m_Center: {x: 0, y: 0.0000000019790605, z: -0.000000002561137}
+--- !u!114 &445751309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445751292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_below
+  Sovereignty: 0
 --- !u!1 &460120711
 GameObject:
   m_ObjectHideFlags: 0
@@ -8213,7 +8241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 483398494}
   slotName: 2
 --- !u!114 &483398486
 MonoBehaviour:
@@ -8254,6 +8282,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.0138137415, y: 0.0016753012, z: 0.0123005295}
   m_Center: {x: 0.0000000044237822, y: 0.000000008061761, z: -0.000000013504177}
+--- !u!114 &483398494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483398477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_left2
+  Sovereignty: 0
 --- !u!1 &484933872
 GameObject:
   m_ObjectHideFlags: 0
@@ -8660,13 +8702,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d43692584734f594db64e1daefa9bd1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Connector
-  Identifier: connector
-  PrefabID: 
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sovereignty: 0
-  Sync_Transform: 1
-  animator: {fileID: 0}
   msts:
   - {fileID: 1163447473}
   - {fileID: 776582773}
@@ -9404,7 +9439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 776582778}
   slotName: 6
 --- !u!114 &776582774
 MonoBehaviour:
@@ -9424,6 +9459,20 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &776582778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776582768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_back_left
+  Sovereignty: 0
 --- !u!1 &777686832
 GameObject:
   m_ObjectHideFlags: 0
@@ -10005,7 +10054,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 867124065}
   slotName: 5
 --- !u!114 &867124057
 MonoBehaviour:
@@ -10046,6 +10095,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.010334458, y: 0.001312587, z: 0.009202382}
   m_Center: {x: 0, y: -0.0000000038708095, z: -0.000000002561137}
+--- !u!114 &867124065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 867124048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_up
+  Sovereignty: 0
 --- !u!1 &885531037
 GameObject:
   m_ObjectHideFlags: 0
@@ -10288,7 +10351,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 907818320}
   slotName: 3
 --- !u!114 &907818312
 MonoBehaviour:
@@ -10329,6 +10392,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.009678928, y: 0.0015946636, z: 0.00861866}
   m_Center: {x: -0.0000000088475645, y: -0.0009767653, z: -0.000000019092113}
+--- !u!114 &907818320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907818303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_right1
+  Sovereignty: 0
 --- !u!1 &919267269
 GameObject:
   m_ObjectHideFlags: 0
@@ -11564,6 +11641,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7347358685765463477, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1163447477}
+    - targetCorrespondingSourceObject: {fileID: 7347358685765463477, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1163447481}
     - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 776582769}
@@ -11573,6 +11653,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 776582774}
+    - targetCorrespondingSourceObject: {fileID: -2821331301298036209, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 776582778}
     - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1658476339}
@@ -11582,6 +11665,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1658476344}
+    - targetCorrespondingSourceObject: {fileID: 5750727551340563342, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1658476348}
     - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 445751296}
@@ -11591,6 +11677,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 445751305}
+    - targetCorrespondingSourceObject: {fileID: 6737418321355803164, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 445751309}
     - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1428973129}
@@ -11600,6 +11689,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1428973137}
+    - targetCorrespondingSourceObject: {fileID: 127204720085794432, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1428973141}
     - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 483398482}
@@ -11609,6 +11701,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 483398490}
+    - targetCorrespondingSourceObject: {fileID: 4817980473898124419, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 483398494}
     - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 907818308}
@@ -11618,6 +11713,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 907818316}
+    - targetCorrespondingSourceObject: {fileID: 8873687637384310821, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 907818320}
     - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 390726520}
@@ -11627,6 +11725,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 390726528}
+    - targetCorrespondingSourceObject: {fileID: -6325950639142949916, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 390726532}
     - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 867124053}
@@ -11636,6 +11737,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 867124061}
+    - targetCorrespondingSourceObject: {fileID: 3926275307340141501, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 867124065}
   m_SourcePrefab: {fileID: 100100000, guid: d32f4c02eac118b40a80f3e6ccfb68a3, type: 3}
 --- !u!4 &1011764187 stripped
 Transform:
@@ -12365,7 +12469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 1163447481}
   slotName: 0
 --- !u!114 &1163447477
 MonoBehaviour:
@@ -12385,6 +12489,20 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &1163447481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163447468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_back
+  Sovereignty: 0
 --- !u!4 &1178908064 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2018961099095827505, guid: 42e502b5371d8a14b8a7f9b299da0e50, type: 3}
@@ -12622,10 +12740,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
   Identifier: window
+  Sovereignty: 0
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sovereignty: 0
   Sync_Transform: 1
 --- !u!1 &1212190684
 GameObject:
@@ -12828,10 +12946,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
   Identifier: test_cube
+  Sovereignty: 0
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sovereignty: 0
   Sync_Transform: 1
 --- !u!1 &1222495713
 GameObject:
@@ -13894,7 +14012,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 1428973141}
   slotName: 1
 --- !u!114 &1428973133
 MonoBehaviour:
@@ -13935,6 +14053,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.009678928, y: 0.0015946641, z: 0.00861866}
   m_Center: {x: 0.000000005122274, y: -0.000976767, z: -0.00000001792796}
+--- !u!114 &1428973141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428973124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_left1
+  Sovereignty: 0
 --- !u!1 &1458872626
 GameObject:
   m_ObjectHideFlags: 0
@@ -14387,10 +14519,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
   Identifier: pickaxe1
+  Sovereignty: 0
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sovereignty: 0
   Sync_Transform: 1
 --- !u!1 &1564436160
 GameObject:
@@ -15095,7 +15227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
   AllowedItemType: 2
-  Identity: {fileID: 0}
+  Identity: {fileID: 1658476348}
   slotName: 7
 --- !u!114 &1658476344
 MonoBehaviour:
@@ -15115,6 +15247,20 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &1658476348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658476338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: connector_slot_back_right
+  Sovereignty: 0
 --- !u!4 &1675823964 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3196138216412401344, guid: 42e502b5371d8a14b8a7f9b299da0e50, type: 3}

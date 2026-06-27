@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 1123404600862782393}
   - component: {fileID: 9117220750353914942}
   - component: {fileID: 1522121709656844864}
+  - component: {fileID: 2892698409149161181}
   m_Layer: 0
   m_Name: BlackHole_Prefab
   m_TagString: Untagged
@@ -163,6 +164,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole
   harmfulObjectType: 0
   damageToShipPart: 10
+  movementSpeed: 2
+  movementDirection: {x: 0, y: 0, z: 0}
   attractionRadius: 40
   attractionForce: 20
   forceByDistance:
@@ -211,13 +214,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: 
-  PrefabID: 
+  Sync_Transform: 1
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Owner: 0
-  InScene: 0
+  Identity: {fileID: 2892698409149161181}
 --- !u!54 &1522121709656844864
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -245,3 +245,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2892698409149161181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4410065600927574753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  Identifier: 
+  Sovereignty: 0
+  PrefabID: 

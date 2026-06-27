@@ -1,3 +1,4 @@
+using Assets.codes.Network.SyncedIdentity;
 using Assets.codes.spaceship.modules;
 using Cysharp.Threading.Tasks;
 using System.Collections;
@@ -6,10 +7,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-public class Connector : NetworkPrefab
+public class Connector : MonoBehaviour
 {
     public static Connector Instance { get; private set; }
-    [SerializeField]
     private Animator animator;
     private int speedlevel = 0;
     private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();
@@ -32,7 +32,7 @@ public class Connector : NetworkPrefab
     }
     public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
-        NetworkPrefab nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
+        NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
         return nobj.GetComponent<module>(); 
 
 
@@ -61,7 +61,7 @@ public class Connector : NetworkPrefab
         List<InstalledModuleSaveData> modules = new List<InstalledModuleSaveData>();
         foreach (KeyValuePair<int, module> pair in slotModulePair)
         {
-            string PrefabID = pair.Value.GetNetworkObject().PrefabID;
+            string PrefabID = ((NetworkPrefabIdentity)pair.Value.GetNetworkObject().Identity).PrefabID;
             if (pair.Value == null || string.IsNullOrWhiteSpace(PrefabID))
             {
                 continue;
@@ -110,9 +110,8 @@ public class Connector : NetworkPrefab
     {
         //connectedSpaceship.Clear();
     }
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         if(Instance != null)
         {
             Destroy(Instance.gameObject);

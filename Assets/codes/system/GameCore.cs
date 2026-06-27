@@ -1,3 +1,4 @@
+using Assets.codes.Network.SyncedIdentity;
 using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -196,19 +197,19 @@ public partial class GameCore : MonoBehaviour
     //        Debug.Log("Cannot load decorations");
     //    }
     //}
-    public async UniTask<NetworkPrefab> spawnNetworkPrefab(string prefabID,ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
+    public async UniTask<NetworkGameObject> spawnNetworkPrefab(string prefabID,ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
         GameObject prefab = await GetPrefabObject(prefabID);
 
         GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);
-        NetworkPrefab nobj = obj.gameObject.GetComponent<NetworkPrefab>();
+        NetworkGameObject nobj = obj.gameObject.GetComponent<NetworkGameObject>();
         if (nobj == null)
         {
-            nobj = gameObject.AddComponent<NetworkPrefab>();
+            Debug.LogError($"The prefab {prefabID} does not have a NetworkPrefab component attached.");
         }
 
-        nobj.Instantiate_Init(uid, prefabID,owner);
+        nobj.OnInstantiate(uid, prefabID,owner);
         nobj.SetMovement(pos, rot);
         return nobj;
     }

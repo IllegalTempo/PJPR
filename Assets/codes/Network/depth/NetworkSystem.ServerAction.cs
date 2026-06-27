@@ -1,4 +1,5 @@
 ﻿using Assets.codes.Network.Messages;
+using Assets.codes.Network.SyncedIdentity;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -10,18 +11,18 @@ public partial class NetworkSystem
 {
     public GameServer Server => _server;
     private GameServer _server;
-    public async UniTask<NetworkPrefab> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner)
+    public async UniTask<NetworkGameObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner)
     {
-        NetworkPrefab nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform());
+        NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform());
         return nobj;
     }
-    public async UniTask<NetworkPrefab> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot,ulong owner, Transform parent = null) //Server Only
+    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot,ulong owner, Transform parent = null) //Server Only
     { //more check added
 
         if (IsOnline && !IsServer) return null;
         string uid = Guid.NewGuid().ToString();
 
-        NetworkPrefab nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner,uid, pos, rot, parent);
+        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner,uid, pos, rot, parent);
         if(NetworkSystem.Instance.IsOnline)
         {
             NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, uid, pos, rot,owner));

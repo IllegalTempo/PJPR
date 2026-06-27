@@ -1,4 +1,5 @@
 using Assets.codes.Network.Messages;
+using Assets.codes.Network.SyncedIdentity;
 using System;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -35,7 +36,7 @@ public struct ItemSnapshot
     /// <summary>Local scale relative to parent transform</summary>
     public Vector3 scale;
 }
-[RequireComponent(typeof(NetworkPrefab), typeof(Rigidbody))]
+[RequireComponent(typeof(NetworkPrefabIdentity), typeof(Rigidbody))]
 
 public class Item : Selectable //Item is any that is pickable
 {
@@ -43,7 +44,7 @@ public class Item : Selectable //Item is any that is pickable
     public ItemDefinition AbstractItem;
     //[SerializeField] protected bool isRepairTool;
     [SerializeField]
-    protected NetworkPrefab netObj;
+    protected NetworkGameObject netObj;
     protected Rigidbody rb;
     protected Collider itemCollider;
 
@@ -81,7 +82,7 @@ public class Item : Selectable //Item is any that is pickable
 
         if (netObj == null)
         {
-            netObj = GetComponent<NetworkPrefab>();
+            netObj = GetComponent<NetworkGameObject>();
         }
 
         rb = GetComponent<Rigidbody>();
@@ -127,7 +128,7 @@ public class Item : Selectable //Item is any that is pickable
         base.OnClicked();
         if (netObj == null)
         {
-            netObj = GetComponent<NetworkPrefab>();
+            netObj = GetComponent<NetworkGameObject>();
             Debug.LogWarning($"{name} has no NetworkObject, cannot be picked up.");
             return;
         }
@@ -141,7 +142,7 @@ public class Item : Selectable //Item is any that is pickable
 
             return;
         }
-        NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identifier, newowner);
+        NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identity.Identifier, newowner);
         if (NetworkSystem.Instance.IsServer)
         {
             NetworkRouter.Instance.DistributeMessageToReady(message);
@@ -158,7 +159,7 @@ public class Item : Selectable //Item is any that is pickable
         netObj.Sync_Transform = newowner == 0; //Only sync transform if dropped, not when picked up, because the player will be moving it.
         if (newowner == 0)
         {
-            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Sovereignty].playerControl;
+            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Identity.Sovereignty].playerControl;
             who.holdingItem = null;
             gotDropped(who,transform.position);
             
@@ -168,7 +169,7 @@ public class Item : Selectable //Item is any that is pickable
             PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
             gotPickedup(who);
         }
-        netObj.ChangeOwner(newowner);
+        netObj.Identity.ChangeSovereignty(newowner);
 
     }
     private void gotPickedup(PlayerMain who)
@@ -231,12 +232,8 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    public NetworkPrefab GetNetworkObject()
+    public NetworkGameObject GetNetworkObject()
     {
-        if (netObj == null)
-        {
-            netObj = GetComponent<NetworkPrefab>();
-        }
         return netObj;
     }
 

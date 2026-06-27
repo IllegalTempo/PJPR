@@ -1,3 +1,4 @@
+using Assets.codes.Network.SyncedIdentity;
 using UnityEngine;
 
 namespace Assets.codes.Network.Messages
@@ -29,14 +30,14 @@ namespace Assets.codes.Network.Messages
 
         public void ServerHandle(NetworkPlayer player)
         {
-            ((NetworkPrefab)NetworkSystem.Instance.FindNetworkIdentity[id]).SetServerMovement(position, rotation);
+            NetworkSystem.Instance.GetComponentOfIdentity<NetworkGameObject>(id).SetServerMovement(position, rotation);
             NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);
         }
 
         public void ClientHandle()
         {
-            NetworkPrefab networkObject = (NetworkPrefab)NetworkSystem.Instance.FindNetworkIdentity[id];
-            if (GameCore.Instance != null && GameCore.Instance.IsLocal(networkObject.Sovereignty))
+            NetworkGameObject networkObject = NetworkSystem.Instance.GetComponentOfIdentity<NetworkGameObject>(id);
+            if (GameCore.Instance != null && networkObject.IsLocalSovereignty())
             {
                 return;
             }

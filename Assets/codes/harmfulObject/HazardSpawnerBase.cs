@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using Assets.codes.Network.SyncedIdentity;
 
 public abstract class HazardSpawnerBase : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public abstract class HazardSpawnerBase : MonoBehaviour
             string id = GetPrefabID(prefabs, prefabIDs);
             if (!string.IsNullOrEmpty(id))
             {
-                NetworkPrefab netObj = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(id, position, rotation, 0);
+                NetworkGameObject netObj = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(id, position, rotation, 0);
                 return netObj?.gameObject;
             }
         }

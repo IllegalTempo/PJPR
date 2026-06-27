@@ -121,10 +121,10 @@ public class NetworkObjectIdWindow : EditorWindow
     private void ScanOpenScenes()
     {
         _objects.Clear();
-        NetworkPrefab[] networkObjects = Resources.FindObjectsOfTypeAll<NetworkPrefab>();
+        NetworkPrefabIdentity[] networkObjects = Resources.FindObjectsOfTypeAll<NetworkPrefabIdentity>();
         Dictionary<string, NetworkObjectInfo> firstById = new Dictionary<string, NetworkObjectInfo>();
 
-        foreach (NetworkPrefab networkObject in networkObjects)
+        foreach (NetworkPrefabIdentity networkObject in networkObjects)
         {
             if (networkObject == null || EditorUtility.IsPersistent(networkObject))
             {
@@ -182,7 +182,7 @@ public class NetworkObjectIdWindow : EditorWindow
 
         foreach (NetworkObjectInfo info in _objects)
         {
-            NetworkPrefab networkObject = info.Object;
+            NetworkPrefabIdentity networkObject = info.Object;
             if (networkObject == null)
             {
                 continue;
@@ -230,7 +230,7 @@ public class NetworkObjectIdWindow : EditorWindow
         return id.StartsWith("nouid_", StringComparison.Ordinal);
     }
 
-    private static string GenerateId(NetworkPrefab networkObject)
+    private static string GenerateId(NetworkPrefabIdentity networkObject)
     {
         string sceneName = string.IsNullOrWhiteSpace(networkObject.gameObject.scene.name)
             ? "unsaved_scene"
@@ -278,12 +278,12 @@ public class NetworkObjectIdWindow : EditorWindow
 
     private sealed class NetworkObjectInfo
     {
-        public readonly NetworkPrefab Object;
+        public readonly NetworkPrefabIdentity Object;
         public readonly string SceneName;
         public readonly string Identifier;
         public IdStatus Status;
 
-        public NetworkObjectInfo(NetworkPrefab obj, string sceneName, string identifier, IdStatus status)
+        public NetworkObjectInfo(NetworkPrefabIdentity obj, string sceneName, string identifier, IdStatus status)
         {
             Object = obj;
             SceneName = sceneName;

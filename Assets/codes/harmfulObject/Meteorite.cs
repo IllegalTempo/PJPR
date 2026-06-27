@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(NetworkPrefab))]
+[RequireComponent(typeof(NetworkPrefabIdentity))]
 public class Meteorite : HarmfulObject
 {
     [Header("Meteorite Properties")]

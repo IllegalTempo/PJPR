@@ -102,7 +102,7 @@ public class GameServer : SocketManager
             connectedPlayer.connection.Close();
             return false;
         }
-        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncNetworkPrefab(NetworkSystem.Instance.FindNetworkIdentity.Values.OfType<NetworkPrefab>().ToArray())); //Send packet to the one who connects to the server, with room info
+        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncNetworkPrefab(NetworkSystem.Instance.FindNetworkIdentity.Values.OfType<NetworkPrefabIdentity>().ToArray())); //Send packet to the one who connects to the server, with room info
 
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;

@@ -7,6 +7,11 @@ using System.Collections;
 public class NetworkIdentity : MonoBehaviour
 {
     public string Identifier;
+    public ulong Sovereignty = 0; //0 -> Server Authority
+    public void ChangeSovereignty(ulong newowner)
+    {
+        Sovereignty = newowner;
+    }
 
     protected virtual void Start()
     {

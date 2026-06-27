@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Assets.codes.Network.SyncedIdentity;
 
 public class MeteoriteSpawner : MonoBehaviour
 {
@@ -145,7 +146,7 @@ public class MeteoriteSpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = GetSpawnPosition();
-        NetworkPrefab networkObject = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(prefabID, spawnPosition, Random.rotation,0);
+        NetworkGameObject networkObject = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(prefabID, spawnPosition, Random.rotation,0);
         if (networkObject == null)
         {
             return;

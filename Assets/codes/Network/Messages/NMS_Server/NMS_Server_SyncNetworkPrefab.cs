@@ -13,10 +13,10 @@ namespace Assets.codes.Network.Messages
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
         }
 
-        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefab> networkObjects) : base((int)packets.ServerPackets.SyncNetworkObjects) 
+        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefabIdentity> networkObjects) : base((int)packets.ServerPackets.SyncNetworkObjects) 
         {
             List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
-            foreach (NetworkPrefab networkObject in networkObjects)
+            foreach (NetworkPrefabIdentity networkObject in networkObjects)
             {
                 snapshots.Add(new NetworkObjectSnapshot(
                     networkObject.Identifier,
