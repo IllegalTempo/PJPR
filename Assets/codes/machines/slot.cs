@@ -28,6 +28,14 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     }
     private void Start()
     {
-        NetworkSystem.Instance.Slots[Identity.Identifier] = this;
+        if(NetworkSystem.Instance.Slots.ContainsKey(Identity.Identifier))
+        {
+            Debug.LogError($"Slot with identifier {Identity.Identifier} already exists in NetworkSystem. Please ensure unique identifiers for each slot.");
+            return;
+        } else
+        {
+            NetworkSystem.Instance.Slots.Add(Identity.Identifier, this);
+
+        }
     }
 }
