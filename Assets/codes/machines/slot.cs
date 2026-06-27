@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 
@@ -20,22 +22,17 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     {
         Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(itemId);
         Attach(item);
-        
+
     }
     public Item GetAttachedItem()
     {
-        return this.item; 
+        return this.item;
     }
-    private void Start()
+    private IEnumerator Start()
     {
-        if(NetworkSystem.Instance.Slots.ContainsKey(Identity.Identifier))
-        {
-            Debug.LogError($"Slot with identifier {Identity.Identifier} already exists in NetworkSystem. Please ensure unique identifiers for each slot.");
-            return;
-        } else
-        {
-            NetworkSystem.Instance.Slots.Add(Identity.Identifier, this);
+        yield return null;
+        NetworkSystem.Instance.Slots.Add(Identity.Identifier, this);
+        Debug.Log($"Slot {Identity.Identifier} registered to NetworkSystem.");
 
-        }
     }
 }

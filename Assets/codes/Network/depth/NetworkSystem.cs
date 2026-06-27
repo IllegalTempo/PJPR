@@ -52,6 +52,7 @@ public partial class NetworkSystem : MonoBehaviour
             Debug.Log("Instance Already Exist");
             Destroy(this.gameObject);
         }
+        DontDestroyOnLoad(gameObject);
 
     }
     public T GetComponentOfIdentity<T>(string NetworkID)
@@ -67,7 +68,6 @@ public partial class NetworkSystem : MonoBehaviour
     }
     private void Start()
     {
-        DontDestroyOnLoad(gameObject);
 
 
 
