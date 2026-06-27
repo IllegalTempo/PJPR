@@ -9,9 +9,10 @@ namespace Assets.codes.Network.Messages
         private readonly NetworkObjectSnapshot[] objects;
         private readonly SlotSnapshot[] slotsRelationships;
 
-        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkObjectSnapshot> objects) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkObjectSnapshot> objects, IEnumerable<SlotSnapshot> sr) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
+            this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
         }
 
         public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefabIdentity> networkObjects, IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
@@ -61,7 +62,7 @@ namespace Assets.codes.Network.Messages
                     packet.ReadstringUNICODE());
             }
 
-            return new NMS_Server_SyncNetworkPrefab(objects);
+            return new NMS_Server_SyncNetworkPrefab(objects,slotsRelationships);
         }
 
         public override void Write(Packet packet)
