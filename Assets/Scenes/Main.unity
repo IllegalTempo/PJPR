@@ -997,7 +997,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1212190685}
-  - {fileID: 276799742}
   - {fileID: 332918749}
   - {fileID: 1209669303}
   m_Father: {fileID: 0}
@@ -1623,9 +1622,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1560526355}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1560526354}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
       insertIndex: -1
@@ -1636,6 +1632,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1560526359}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1560526362}
   m_SourcePrefab: {fileID: 100100000, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
 --- !u!1 &260660838
 GameObject:
@@ -1762,280 +1761,6 @@ Transform:
   - {fileID: 2138720003}
   m_Father: {fileID: 1030199489}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &276799741
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 276799742}
-  - component: {fileID: 276799749}
-  - component: {fileID: 276799748}
-  - component: {fileID: 276799747}
-  - component: {fileID: 276799746}
-  - component: {fileID: 276799745}
-  - component: {fileID: 276799743}
-  - component: {fileID: 276799751}
-  - component: {fileID: 276799750}
-  m_Layer: 6
-  m_Name: Decoration_Light
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &276799742
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.4, y: 1.464, z: 5}
-  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 137954285}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &276799743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
-  m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
-  m_CustomShadowLayers: 0
-  m_LightCookieSize: {x: 1, y: 1}
-  m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 0
-  m_RenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_ShadowRenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_Version: 4
-  m_LightLayerMask: 1
-  m_ShadowLayerMask: 1
-  m_RenderingLayers: 1
-  m_ShadowRenderingLayers: 1
---- !u!114 &276799745
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
---- !u!108 &276799746
-Light:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  serializedVersion: 12
-  m_Type: 2
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
-  m_Range: 3
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
-  m_CookieSize2D: {x: 0.5, y: 0.5}
-  m_Shadows:
-    m_Type: 0
-    m_Resolution: -1
-    m_CustomResolution: -1
-    m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
-    m_NearPlane: 0.2
-    m_CullingMatrixOverride:
-      e00: 1
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 1
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 1
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 1
-    m_UseCullingMatrixOverride: 0
-  m_Cookie: {fileID: 0}
-  m_DrawHalo: 0
-  m_Flare: {fileID: 0}
-  m_RenderMode: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingLayerMask: 1
-  m_Lightmapping: 4
-  m_LightShadowCasterMode: 0
-  m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 1
-  m_ColorTemperature: 6570
-  m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
-  m_UseBoundingSphereOverride: 0
-  m_UseViewFrustumForShadowCasterCull: 1
-  m_ForceVisible: 0
-  m_ShadowRadius: 0
-  m_ShadowAngle: 0
-  m_LightUnit: 1
-  m_LuxAtDistance: 1
-  m_EnableSpotReflector: 1
---- !u!23 &276799747
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &276799748
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &276799749
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &276799750
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &276799751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 276799741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: test_light
-  PrefabID: 
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Preset: 0
 --- !u!1 &281564587
 GameObject:
   m_ObjectHideFlags: 0
@@ -7648,8 +7373,8 @@ GameObject:
   - component: {fileID: 332918754}
   - component: {fileID: 332918753}
   - component: {fileID: 332918752}
-  - component: {fileID: 332918751}
   - component: {fileID: 332918750}
+  - component: {fileID: 332918757}
   m_Layer: 6
   m_Name: Tool_Hammer
   m_TagString: Untagged
@@ -7699,24 +7424,6 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 0}
     scale: {x: 0, y: 0, z: 0}
---- !u!114 &332918751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 332918748}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: demo_hammer_-80732
-  PrefabID: 
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Preset: 0
 --- !u!54 &332918752
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7842,6 +7549,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 332918748}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &332918757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332918748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd44dd8fa96a134ab315d711aec3a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
+  Identifier: hammer
+  PrefabID: 
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sovereignty: 0
+  Sync_Transform: 1
 --- !u!1 &361654578
 GameObject:
   m_ObjectHideFlags: 0
@@ -8005,6 +7730,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 4
 --- !u!114 &390726524
 MonoBehaviour:
@@ -8094,6 +7820,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 8
 --- !u!114 &445751301
 MonoBehaviour:
@@ -8486,6 +8213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 2
 --- !u!114 &483398486
 MonoBehaviour:
@@ -8936,8 +8664,8 @@ MonoBehaviour:
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sovereignty: 0
   Sync_Transform: 1
-  Preset: 0
   animator: {fileID: 0}
   msts:
   - {fileID: 1163447473}
@@ -9676,6 +9404,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 6
 --- !u!114 &776582774
 MonoBehaviour:
@@ -10276,6 +10005,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 5
 --- !u!114 &867124057
 MonoBehaviour:
@@ -10558,6 +10288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 3
 --- !u!114 &907818312
 MonoBehaviour:
@@ -12472,6 +12203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::slot
   AllowedItemType: 1
+  Identity: {fileID: 0}
 --- !u!114 &1138109530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12633,6 +12365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 0
 --- !u!114 &1163447477
 MonoBehaviour:
@@ -12671,8 +12404,8 @@ GameObject:
   - component: {fileID: 1209669306}
   - component: {fileID: 1209669310}
   - component: {fileID: 1209669311}
-  - component: {fileID: 1209669313}
   - component: {fileID: 1209669312}
+  - component: {fileID: 1209669313}
   m_Layer: 6
   m_Name: Window
   m_TagString: Untagged
@@ -12804,7 +12537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ship_window
   AbstractItem: {fileID: 0}
-  netObj: {fileID: 0}
+  netObj: {fileID: 1209669313}
   lockRelativeRotation: 0
   IsPickable: 1
   IsLocked: 0
@@ -12885,15 +12618,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1209669302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Script: {fileID: 11500000, guid: edd44dd8fa96a134ab315d711aec3a71, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
+  Identifier: window
   PrefabID: 
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sovereignty: 0
   Sync_Transform: 1
-  Preset: 0
 --- !u!1 &1212190684
 GameObject:
   m_ObjectHideFlags: 0
@@ -12906,10 +12639,10 @@ GameObject:
   - component: {fileID: 1212190689}
   - component: {fileID: 1212190688}
   - component: {fileID: 1212190687}
-  - component: {fileID: 1212190686}
   - component: {fileID: 1212190691}
   - component: {fileID: 1212190690}
   - component: {fileID: 1212190692}
+  - component: {fileID: 1212190693}
   m_Layer: 6
   m_Name: test
   m_TagString: Untagged
@@ -12932,24 +12665,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 137954285}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1212190686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1212190684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: test
-  PrefabID: 
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Preset: 0
 --- !u!65 &1212190687
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13041,7 +12756,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   AbstractItem: {fileID: 0}
-  netObj: {fileID: 1212190686}
+  netObj: {fileID: 0}
   lockRelativeRotation: 0
   IsPickable: 1
   IsLocked: 0
@@ -13100,6 +12815,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1212190693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212190684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd44dd8fa96a134ab315d711aec3a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
+  Identifier: test_cube
+  PrefabID: 
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sovereignty: 0
+  Sync_Transform: 1
 --- !u!1 &1222495713
 GameObject:
   m_ObjectHideFlags: 0
@@ -14161,6 +13894,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.moduleslot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 1
 --- !u!114 &1428973133
 MonoBehaviour:
@@ -14555,7 +14289,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::pickaxe
   AbstractItem: {fileID: 11400000, guid: e367f23bde83f904a88ee093a33afa71, type: 2}
-  netObj: {fileID: 0}
+  netObj: {fileID: 1560526362}
   lockRelativeRotation: 1
   IsPickable: 1
   IsLocked: 0
@@ -14614,24 +14348,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1560526355
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1560526351}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: pickaxe
-  PrefabID: 
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Preset: 0
 --- !u!4 &1560526358 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2c56b7812a7209a44b3eb39c72094706, type: 3}
@@ -14658,6 +14374,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.02, y: 0.0054930067, z: 0.018217806}
   m_Center: {x: 0, y: 0, z: 0.013491866}
+--- !u!114 &1560526362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560526351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd44dd8fa96a134ab315d711aec3a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefab
+  Identifier: pickaxe1
+  PrefabID: 
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  Sovereignty: 0
+  Sync_Transform: 1
 --- !u!1 &1564436160
 GameObject:
   m_ObjectHideFlags: 0
@@ -15361,6 +15095,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ModuleSlot
   AllowedItemType: 2
+  Identity: {fileID: 0}
   slotName: 7
 --- !u!114 &1658476344
 MonoBehaviour:
@@ -16825,7 +16560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 0
+  StartServerOnStart: 1
   _maxPlayer: 8
   IsOnline: 0
   IsServer: 1
