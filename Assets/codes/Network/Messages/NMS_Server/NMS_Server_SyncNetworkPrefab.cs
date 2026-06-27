@@ -99,6 +99,9 @@ namespace Assets.codes.Network.Messages
                 if (slot != null && attachedItem != null)
                 {
                     slot.Attach(attachedItem);
+                } else
+                {
+                    Debug.LogError($"Failed to attach item {snapshot.AttachedItemId} to slot {snapshot.SlotId}. Slot or Item not found.");
                 }
             }
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
