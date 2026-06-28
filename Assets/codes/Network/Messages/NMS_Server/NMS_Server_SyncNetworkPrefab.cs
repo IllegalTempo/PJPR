@@ -30,10 +30,11 @@ namespace Assets.codes.Network.Messages
             List<SlotSnapshot> slotSnapshots = new List<SlotSnapshot>();
             foreach (Slot slot in slots)
             {
+                string attachedItemId = slot.GetAttachedItem()?.GetNetworkObject()?.Identity?.Identifier ?? string.Empty;
                 slotSnapshots.Add(new SlotSnapshot
                 (
                     slot.Identity.Identifier,
-                    slot.GetAttachedItem().GetNetworkObject().Identity.Identifier
+                    attachedItemId
                 ));
             }
             objects = snapshots.ToArray();
@@ -94,10 +95,14 @@ namespace Assets.codes.Network.Messages
             }
             foreach (SlotSnapshot snapshot in slotsRelationships)
             {
+                if(snapshot.AttachedItemId == string.Empty)
+                {
+                    continue;
+                }
                 Debug.Log("Syncing Slot Relationship: " + snapshot.SlotId + " -> " + snapshot.AttachedItemId);
                 Slot slot = NetworkSystem.Instance.GetComponentOfIdentity<Slot>(snapshot.SlotId);
                 Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
-                if (slot != null && attachedItem != null)
+                if (attachedItem != null&&slot != null && attachedItem != null)
                 {
                     slot.Attach(attachedItem);
                 } else
