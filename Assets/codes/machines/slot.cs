@@ -28,11 +28,4 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     {
         return this.item;
     }
-    private IEnumerator Start()
-    {
-        yield return null;
-        NetworkSystem.Instance.Slots.Add(Identity.Identifier, this);
-        Debug.Log($"Slot {Identity.Identifier} registered to NetworkSystem.");
-
-    }
 }
