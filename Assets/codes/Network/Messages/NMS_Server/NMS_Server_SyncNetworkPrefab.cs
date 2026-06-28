@@ -86,12 +86,12 @@ namespace Assets.codes.Network.Messages
 
         }
 
-        public void ClientHandle()
+        public async void ClientHandle()
         {
             Debug.Log($"Syncing {objects.Length} Network Objects from Server");
             foreach (NetworkObjectSnapshot snapshot in objects)
             {
-                GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation).Forget();
+                await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);
             }
             foreach (SlotSnapshot snapshot in slotsRelationships)
             {
