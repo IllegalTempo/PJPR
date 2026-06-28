@@ -15,8 +15,21 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     public virtual void Attach(Item item)
     {
         this.item = item;
+        item.AttachedSlot = this;
         item.DisableRB();
-        item.transform.position = this.transform.position;
+        item.transform.SetParent(transform);
+
+        item.transform.localPosition = Vector3.zero;
+    }
+    public virtual void Detach()
+    {
+        if (item != null)
+        {
+            item.AttachedSlot = null;
+            item.EnableRB();
+            item.transform.SetParent(null);
+            item = null;
+        }
     }
     public void Attach(string itemId)
     {

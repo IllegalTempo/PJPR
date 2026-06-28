@@ -225,6 +225,10 @@ public partial class PlayerMain : MonoBehaviour
             return;
         }
         SendPickUP();
+        if(seenObject is Item i && i.AttachedSlot != null)
+        {
+            i.AttachedSlot.Detach();
+        }
         if (seenObject == null)
         {
             return;

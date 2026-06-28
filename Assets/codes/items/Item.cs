@@ -53,9 +53,19 @@ public class Item : Selectable //Item is any that is pickable
 
     public bool IsPickable = true;
     public bool IsLocked = false;
-    public ItemType itemType = ItemType.Generic;
 
-    public Slot BindSlot = null;
+    public ItemType itemType = ItemType.Generic;
+    public Slot AttachedSlot;
+
+
+
+
+
+
+
+
+
+    public Slot BindSlot = null; //use for visual dont mind this
 
     //public virtual bool IsRepairTool => isRepairTool;
 
