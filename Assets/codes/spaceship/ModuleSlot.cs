@@ -13,6 +13,7 @@ public class ModuleSlot : Slot
     {
         Debug.Log($"Attaching item {item.name} to slot {slotName}");
         Connector.Instance.ConnectModule((module)item, this);
+        this.item = item;
         attachedModule = (module)item;
     }
 }
