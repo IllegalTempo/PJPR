@@ -41,18 +41,7 @@ public class Connector : MonoBehaviour
     {
         Debug.Log($"Connecting module {moduleObject.name} to slot {moduleslot.slotIndex}");
         // Store the module's world rotation before reparenting
-        Quaternion worldRotation = moduleObject.transform.rotation;
-
-        // Reparent to slot
-        moduleObject.transform.SetParent(moduleslot.transform);
-
-        // Reset position to slot's origin but preserve world rotation
-        moduleObject.transform.localPosition = Vector3.zero;
-        moduleObject.transform.rotation = worldRotation;  // Restore world rotation
-
-        moduleObject.DisableRB();
-
-        moduleObject.Init(moduleslot);
+        
         slotModulePair[moduleslot.slotIndex] = moduleObject;
         return moduleObject;
     }
@@ -89,7 +78,7 @@ public class Connector : MonoBehaviour
             }
 
             module md = await SpawnModuleAsync(moduleData.PrefabID, Vector3.zero, Quaternion.identity);
-            ConnectModule(md, slot[moduleData.Slot]);
+            slot[moduleData.Slot].Attach(md);
             md.transform.localRotation = moduleData.Rotation;
         }
     }
