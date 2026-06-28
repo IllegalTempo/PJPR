@@ -97,6 +97,7 @@ namespace Assets.codes.Network.Messages
             {
                 if(snapshot.AttachedItemId == string.Empty)
                 {
+                    Debug.Log("No item attached to slot: " + snapshot.SlotId);
                     continue;
                 }
                 Debug.Log("Syncing Slot Relationship: " + snapshot.SlotId + " -> " + snapshot.AttachedItemId);
