@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Network Identity give a gameobject a unique identifier. Allow it to be found with NetworkSystem.Instance.FindNetworkIdentity[Identifier]
@@ -8,6 +9,8 @@ public class NetworkIdentity : MonoBehaviour
 {
     public string Identifier;
     public ulong Sovereignty = 0; //0 -> Server Authority
+    private readonly UniTaskCompletionSource _startTcs = new UniTaskCompletionSource();
+    public UniTask StartTask => _startTcs.Task;
     public void ChangeSovereignty(ulong newowner)
     {
         Sovereignty = newowner;
@@ -28,7 +31,7 @@ public class NetworkIdentity : MonoBehaviour
         }
 
         NetworkSystem.Instance.FindNetworkIdentity.Add(Identifier, this);
-
+        _startTcs.TrySetResult();
 
 
     }

@@ -211,6 +211,7 @@ public partial class GameCore : MonoBehaviour
 
         nobj.OnInstantiate(uid, prefabID,owner);
         nobj.SetMovement(pos, rot);
+        await nobj.Identity.StartTask;
         return nobj;
     }
     public void DestroyNetworkIdentity(string id) //run by both server and client
