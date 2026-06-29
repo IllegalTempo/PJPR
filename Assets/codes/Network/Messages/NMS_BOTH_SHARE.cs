@@ -37,7 +37,8 @@ namespace Assets.codes.Network.Messages
         {
             Debug.Log("[Handle] Received message from " + p.SteamName + "Packet: " + this.GetType().Name);
             applyaction();
-            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId);
+            //NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId); //todo is this right?
+            NetworkRouter.Instance.DistributeMessageToReady(this);
         }
     }
 }
