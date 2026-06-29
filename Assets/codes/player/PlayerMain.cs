@@ -205,7 +205,7 @@ public partial class PlayerMain : MonoBehaviour
             Item previtem = SendDrop(holdingItem);
             if (seenObject is Slot s && previtem.FitIn(s))
             {
-                s.Attach(previtem);
+                s.SendAttach(previtem);
             }
         }
         else
@@ -214,7 +214,7 @@ public partial class PlayerMain : MonoBehaviour
             {
                 if (i.AttachedSlot != null)
                 {
-                    i.AttachedSlot.Detach();
+                    i.AttachedSlot.SendDetach();
 
                 }
                 SendPickUP(i);

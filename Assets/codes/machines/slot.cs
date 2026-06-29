@@ -33,7 +33,11 @@ public class Slot : Selectable //slot is the place where items are put in to be 
         NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier);
         message.SendMessageAsServerOrClient();
     }
-    
+    public void SendDetach()
+    {
+        NMS_Both_SlotDetach message = new NMS_Both_SlotDetach(Identity.Identifier);
+        message.SendMessageAsServerOrClient();
+    }
     public void Attach(string itemId)
     {
         Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(itemId);

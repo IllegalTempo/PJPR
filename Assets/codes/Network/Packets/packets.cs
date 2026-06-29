@@ -32,6 +32,7 @@ public class packets
         NO_Active = 3006,
         PickUpItem = 3007,
         VoicePacket = 3008,
-        NO_Slot_Interact = 3011,};
+        NO_Slot_Interact = 3011,
+        SlotDetach = 3012,};
 }
 
