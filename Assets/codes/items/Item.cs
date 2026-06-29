@@ -223,13 +223,15 @@ public class Item : Selectable //Item is any that is pickable
         transform.position = dropPosition;
         itemCollider.enabled = true;
     }
-    public void AttachToSlot(Slot slot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
+    public void AttachToSlot(Slot slot,Quaternion rot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
     {
         AttachedSlot = slot;
         DisableRB();
+        transform.localScale = snapshot_start.scale;
         transform.SetParent(slot.transform);
 
         transform.localPosition = Vector3.zero;
+        transform.localRotation = rot;
         netObj.Sync_Transform = false;
     }
 

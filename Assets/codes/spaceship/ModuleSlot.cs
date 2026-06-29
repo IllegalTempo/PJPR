@@ -9,15 +9,13 @@ public class ModuleSlot : Slot
 
 
     private module attachedModule;
-    public override void Attach(Item item)
+    public override void Attach(Item item,Quaternion rot)
     {
         Debug.Log($"Attaching item {item.name} to slot {slotName}");
-        base.Attach(item);
+        base.Attach(item,rot);
         module moduleObject = (module)item;
-        Quaternion worldRotation = moduleObject.transform.rotation;
-
         // Reparent to slot
-        moduleObject.transform.rotation = worldRotation;  // Restore world rotation
+        moduleObject.transform.rotation = rot;  // Restore world rotation
 
 
         moduleObject.Init(this);

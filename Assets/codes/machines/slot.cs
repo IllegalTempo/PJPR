@@ -1,9 +1,5 @@
 using Assets.codes.Network.Messages;
-using System;
-using System.Collections;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
 
 [RequireComponent(typeof(NetworkIdentity))]
 public class Slot : Selectable //slot is the place where items are put in to be used by machines, attach this to a gameobject that is a child of a machine, when item is dropped look at it, it will attach to this slot
@@ -13,10 +9,10 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     public ItemType AllowedItemType = ItemType.All;
     [SerializeField]
     public NetworkIdentity Identity;
-    public virtual void Attach(Item item)
+    public virtual void Attach(Item item, Quaternion rot)
     {
         this.item = item;
-        item.AttachToSlot(this);
+        item.AttachToSlot(this,rot);
     }
     public virtual void Detach()
     {
@@ -30,7 +26,7 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     }
     public void SendAttach(Item item)
     {
-        NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier);
+        NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier,item.transform.rotation);
         message.SendMessageAsServerOrClient();
     }
     public void SendDetach()
@@ -38,10 +34,10 @@ public class Slot : Selectable //slot is the place where items are put in to be 
         NMS_Both_SlotDetach message = new NMS_Both_SlotDetach(Identity.Identifier);
         message.SendMessageAsServerOrClient();
     }
-    public void Attach(string itemId)
+    public void Attach(string itemId,Quaternion rot)
     {
         Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(itemId);
-        Attach(item);
+        Attach(item,rot);
 
     }
     public Item GetAttachedItem()

@@ -34,7 +34,8 @@ namespace Assets.codes.Network.Messages
                 slotSnapshots.Add(new SlotSnapshot
                 (
                     slot.Identity.Identifier,
-                    attachedItemId
+                    attachedItemId,
+                    slot.GetAttachedItem()?.transform.rotation ?? Quaternion.identity
                 ));
             }
             objects = snapshots.ToArray();
@@ -60,7 +61,10 @@ namespace Assets.codes.Network.Messages
             {
                 slotsRelationships[i] = new SlotSnapshot(
                     packet.ReadstringUNICODE(),
-                    packet.ReadstringUNICODE());
+                    packet.ReadstringUNICODE(),
+                    packet.Readquaternion()
+
+                    );
             }
 
             return new NMS_Server_SyncNetworkPrefab(objects,slotsRelationships);
@@ -82,6 +86,7 @@ namespace Assets.codes.Network.Messages
             {
                 packet.WriteUNICODE(snapshot.SlotId);
                 packet.WriteUNICODE(snapshot.AttachedItemId);
+                packet.Write(snapshot.rotation);
             }
 
         }
@@ -105,7 +110,7 @@ namespace Assets.codes.Network.Messages
                 Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
                 if (attachedItem != null&&slot != null && attachedItem != null)
                 {
-                    slot.Attach(attachedItem);
+                    slot.Attach(attachedItem,snapshot.rotation);
                 } else
                 {
                     Debug.LogError($"Failed to attach item {snapshot.AttachedItemId} to slot {snapshot.SlotId}. Slot or Item not found.");
@@ -134,10 +139,12 @@ namespace Assets.codes.Network.Messages
         {
             public readonly string SlotId;
             public readonly string AttachedItemId;
-            public SlotSnapshot(string slotId, string attachedItemId)
+            public readonly Quaternion rotation;
+            public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
             {
                 SlotId = slotId;
                 AttachedItemId = attachedItemId;
+                this.rotation = rotation;
             }
         }
 
