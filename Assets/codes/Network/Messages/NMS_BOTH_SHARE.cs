@@ -29,10 +29,13 @@ namespace Assets.codes.Network.Messages
         protected abstract void applyaction();
         public virtual void ClientHandle()
         {
+            Debug.Log("[Handle] Received message from server " + "Packet: " + this.GetType().Name);
+
             applyaction();
         }
         public virtual void ServerHandle(NetworkPlayer p)
         {
+            Debug.Log("[Handle] Received message from " + p.SteamName + "Packet: " + this.GetType().Name);
             applyaction();
             NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId);
         }
