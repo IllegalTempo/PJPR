@@ -125,6 +125,12 @@ public class Packet : IDisposable
         readindex += 8;
         return data;
     }
+    public short Readshort()
+    {
+        short data = BitConverter.ToInt16(readerbuffer, readindex);
+        readindex += 2;
+        return data;
+    }
     public ulong Readulong()
     {
         ulong data = BitConverter.ToUInt64(readerbuffer, readindex);
@@ -136,6 +142,13 @@ public class Packet : IDisposable
         bool data = BitConverter.ToBoolean(readerbuffer, readindex);
         readindex += 1;
         return data;
+    }
+    public Guid ReadGuid()
+    {
+        byte[] data = new byte[16];
+        Buffer.BlockCopy(readerbuffer, readindex, data, 0, 16);
+        readindex += 16;
+        return new Guid(data);
     }
     public string ReadstringASCII()
     {

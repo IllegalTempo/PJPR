@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_VoicePacket : NMS, IServerHandle, IClientHandle
+    public class NMS_Both_VoicePacket : NMS, IClientHandle, IServerHandle
     {
         private readonly byte[] data;
         private readonly ulong playerid; 

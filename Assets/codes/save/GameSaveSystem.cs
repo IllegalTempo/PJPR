@@ -78,9 +78,9 @@ public class GameSaveSystem : MonoBehaviour
     {
         GameSaveData saveData = new GameSaveData();
 
-        if (GameCore.Instance != null && Connector.Instance != null)
+        if (GameCore.Instance != null && MainSpaceship.Instance != null)
         {
-            saveData.InstalledModules = Connector.Instance.GetInstalledModuleSaveData();
+            saveData.InstalledModules = MainSpaceship.Instance.GetInstalledModuleSaveData();
         }
 
         if (NetworkSystem.Instance != null)
@@ -126,9 +126,9 @@ public class GameSaveSystem : MonoBehaviour
             return;
         }
 
-        if (GameCore.Instance != null && Connector.Instance != null)
+        if (GameCore.Instance != null && MainSpaceship.Instance != null)
         {
-            Connector.Instance.LoadInstalledModules(saveData.InstalledModules).Forget();
+            MainSpaceship.Instance.LoadInstalledModules(saveData.InstalledModules).Forget();
         }
 
         if (NetworkSystem.Instance == null)

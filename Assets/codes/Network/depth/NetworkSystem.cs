@@ -66,12 +66,6 @@ public partial class NetworkSystem : MonoBehaviour
         }
         return component;
     }
-    private void Start()
-    {
-
-
-
-    }
     private void Update()
     {
         ReceiveData();
@@ -282,7 +276,7 @@ public partial class NetworkSystem : MonoBehaviour
     {
 
         _startedAsHost = false;
-        Connector.Instance.ResetScene();
+        MainSpaceship.Instance.ResetScene();
         initState = (int)ReadyState.NotReady;
         RemoveAllPlayerObject();
         FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefabIdentity).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });

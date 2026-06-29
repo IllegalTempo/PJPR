@@ -50,7 +50,7 @@
 //    public void ConnectTo(int index)
 //    {
 //        Debug.Log($"{gameObject.name} connecting to dock {index}");
-//        dockTarget = Connector.Instance.connect(this, index);
+//        dockTarget = MainSpaceship.Instance.connect(this, index);
 
 //    }
 //    private void Update()
@@ -68,8 +68,8 @@
 //    public void OnConnect()
 //    {
 //        rb.linearVelocity = Vector3.zero;
-//        Connector connector = Connector.Instance;
-//        transform.SetParent(connector.transform, true);
+//        MainSpaceship MainSpaceship = MainSpaceship.Instance;
+//        transform.SetParent(MainSpaceship.transform, true);
 //        Sync_Transform = false;
 //        dockTarget = null;
 //        rb.isKinematic = true;

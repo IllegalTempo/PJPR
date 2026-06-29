@@ -144,25 +144,10 @@ public class Item : Selectable //Item is any that is pickable
         }
 
     }
-    public void Network_Send_ChangeOwnerShip(ulong newowner)
+    public void ChangeItemOwner(ulong newowner)
     {
-        if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
-        {
-            Network_onPickUPorDrop(newowner);
-
-            return;
-        }
         NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identity.Identifier, newowner);
-        if (NetworkSystem.Instance.IsServer)
-        {
-            NetworkRouter.Instance.DistributeMessageToReady(message);
-            Network_onPickUPorDrop(newowner);
-            //Because the server doesnt receive distribution messages, we call it directly.
-        }
-        else
-        {
-            NetworkRouter.Instance.SendMessageToServer(message);
-        }
+        message.SendMessageAsServerOrClient();
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
@@ -170,7 +155,6 @@ public class Item : Selectable //Item is any that is pickable
         if (newowner == 0)
         {
             PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Identity.Sovereignty].playerControl;
-            who.holdingItem = null;
             gotDropped(who,transform.position);
             
         }
@@ -209,7 +193,6 @@ public class Item : Selectable //Item is any that is pickable
 
 
         rb.linearVelocity = Vector3.zero;
-        rb.useGravity = false;
         outline.OutlineColor = Color.aquamarine;
         if (itemCollider != null)
         {
@@ -218,7 +201,10 @@ public class Item : Selectable //Item is any that is pickable
     }
     private void gotDropped(PlayerMain who,Vector3 dropPosition)
     {
+
         Debug.Log($"{name} dropped by {who.name}");
+        who.holdingItem = null;
+
         if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.HideInteraction(0);
@@ -228,16 +214,24 @@ public class Item : Selectable //Item is any that is pickable
 
         //ApplySnapshot(snapshot_start);
         outline.OutlineColor = Color.white;
-        rb.isKinematic = false;
-        //launch forward
+        EnableRB();
+        rb.constraints = RigidbodyConstraints.None;
+
         rb.AddForce(who.head.transform.forward * 10f, ForceMode.VelocityChange);
         rb.linearVelocity = Vector3.zero;
-        rb.useGravity = true;
-        rb.constraints = RigidbodyConstraints.None;
+
         transform.position = dropPosition;
         itemCollider.enabled = true;
     }
+    public void AttachToSlot(Slot slot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
+    {
+        AttachedSlot = slot;
+        DisableRB();
+        transform.SetParent(slot.transform);
 
+        transform.localPosition = Vector3.zero;
+        netObj.Sync_Transform = false;
+    }
 
 
 

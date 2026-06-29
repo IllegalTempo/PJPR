@@ -1,6 +1,6 @@
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_PlayerAnimation : NMS, IClientHandle, IServerHandle
+    public class NMS_Both_PlayerAnimation : NMS_BOTH_SHARE
     {
         private readonly ulong playerId;
         private readonly float movementX;
@@ -25,16 +25,17 @@ namespace Assets.codes.Network.Messages
             packet.Write(movementY);
         }
 
-        public void ClientHandle()
-        {
-            NetworkSystem.Instance.PlayerList[playerId].SetAnimation(movementX, movementY);
-        }
 
-        public void ServerHandle(NetworkPlayer p)
+        public override void ServerHandle(NetworkPlayer p)
         {
             if (p.steamId != playerId) return;
-            p.player.SetAnimation(movementX, movementY);
-            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId);
+            base.ServerHandle(p);
+        }
+
+        protected override void applyaction()
+        {
+            NetworkSystem.Instance.PlayerList[playerId].SetAnimation(movementX, movementY);
+
         }
     }
 }

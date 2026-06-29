@@ -23,6 +23,6 @@ public class ModuleSlot : Slot
         moduleObject.Init(this);
         attachedModule = (module)item;
 
-        Connector.Instance.ConnectModule((module)item, this);
+        MainSpaceship.Instance.ConnectModule((module)item, this);
     }
 }

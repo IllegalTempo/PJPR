@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-public class Connector : MonoBehaviour
+public class MainSpaceship: MonoBehaviour
 {
-    public static Connector Instance { get; private set; }
+    public static MainSpaceship Instance { get; private set; }
     private Animator animator;
     private int speedlevel = 0;
     private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();

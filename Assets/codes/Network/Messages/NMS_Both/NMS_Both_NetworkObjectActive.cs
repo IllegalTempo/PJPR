@@ -2,7 +2,7 @@
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_NetworkObjectActive : NMS, IServerHandle, IClientHandle
+    public class NMS_Both_NetworkObjectActive :NMS_BOTH_SHARE
     {
         private readonly string id;
         private readonly bool active;
@@ -24,7 +24,7 @@ namespace Assets.codes.Network.Messages
             packet.WriteUNICODE(id);
             packet.Write(active);
         }
-        private void ApplyEffect()
+        protected override void applyaction()
         {
             if (NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id))
             {
@@ -36,16 +36,6 @@ namespace Assets.codes.Network.Messages
                 throw new NO_Not_Found(id);
             }
         }
-        public void ServerHandle(NetworkPlayer player)
-        {
-            ApplyEffect();
-            NetworkRouter.Instance.DistributeMessageToReady(this);
-        }
 
-        public void ClientHandle()
-        {
-            ApplyEffect();
-
-        }
     }
 }

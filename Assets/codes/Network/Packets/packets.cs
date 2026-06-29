@@ -32,9 +32,6 @@ public class packets
         NO_Active = 3006,
         PickUpItem = 3007,
         VoicePacket = 3008,
-
-    
-        test = 3009,
         NO_Slot_Interact = 3011,};
 }
 

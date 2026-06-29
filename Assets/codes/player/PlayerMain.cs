@@ -72,7 +72,7 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.pickup.performed += ctx => OnClickPickUp();
+        control.Player.pickup.performed += ctx => OnClickF();
         control.Player.Interact.performed += ctx => OnInteract();
         control.Player.voice.performed += ctx => OnClickVC();
         control.Player.rotate.performed += ctx => OnClickSlotRotate();
@@ -90,7 +90,7 @@ public partial class PlayerMain : MonoBehaviour
             control.Player.Move.canceled -= ctx => moveinput = Vector2.zero;
             control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
             control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
-            control.Player.pickup.performed -= ctx => OnClickPickUp();
+            control.Player.pickup.performed -= ctx => OnClickF();
             control.Player.Interact.performed -= ctx => OnInteract();
             control.Player.voice.performed -= ctx => OnClickVC();
             control.Player.rotate.performed -= ctx => OnClickSlotRotate();
@@ -118,21 +118,10 @@ public partial class PlayerMain : MonoBehaviour
 
         if (usable != null)
         {
-            usable.OnInteract(this);
-            if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline) return;
             NetworkPrefabIdentity netObj = (usable as MonoBehaviour).GetComponent<NetworkPrefabIdentity>();
             if (netObj == null) return;
             NMS_Both_Interact msg = new NMS_Both_Interact(networkinfo.steamID, netObj.Identifier);
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(msg);
-
-            }
-            else
-            {
-                NetworkRouter.Instance.SendMessageToServer(msg);
-
-            }
+            msg.SendMessageAsServerOrClient();
         }
     }
 
@@ -167,16 +156,17 @@ public partial class PlayerMain : MonoBehaviour
         item.OnClicked();
 
     }
-    private void SendDrop()
+    private Item SendDrop(Item i)
     {
-        holdingItem.Network_Send_ChangeOwnerShip(0);
+        new NMS_Both_PickUpItem(i.GetNetworkObject().Identity.Identifier, 0).SendMessageAsServerOrClient();
+        return i;
+        
     }
-    private void SendPickUP()
+    private void SendPickUP(Item i)
     {
-        if (seenObject is Item it)
-        {
-            it.Network_Send_ChangeOwnerShip(networkinfo.steamID);
-        }
+        new NMS_Both_PickUpItem(i.GetNetworkObject().Identity.Identifier, networkinfo.steamID).SendMessageAsServerOrClient();
+
+
     }
     private void OnClickSlotRotate()
     {
@@ -208,35 +198,34 @@ public partial class PlayerMain : MonoBehaviour
             Debug.Log($"Item rotated 90 degrees around {boundSlot.name}'s Y-axis");
         }
     }
-    private void OnClickPickUp()
+    private void OnClickF()
     {
-        if (holdingItem != null)
+        if (holdingItem != null) //if holding something
         {
-            Item it = holdingItem;
-            SendDrop();
-            if (seenObject is Slot s)
+            Item previtem = SendDrop(holdingItem);
+            if (seenObject is Slot s && previtem.FitIn(s))
             {
-
-                if (it.FitIn(s))
-                    s.Attach(it);
-                return;
+                s.Attach(previtem);
             }
-
-            return;
         }
-        SendPickUP();
-        if(seenObject is Item i && i.AttachedSlot != null)
+        else
         {
-            i.AttachedSlot.Detach();
+            if (seenObject is Item i)
+            {
+                if (i.AttachedSlot != null)
+                {
+                    i.AttachedSlot.Detach();
+
+                }
+                SendPickUP(i);
+
+            }
         }
-        if (seenObject == null)
+        if (seenObject != null)
         {
-            return;
+            clickedObject = seenObject;
+            onSelectObject(clickedObject);
         }
-
-
-        clickedObject = seenObject;
-        onSelectObject(clickedObject);
     }
 
     //private bool IsHoldingRepairToolAndLookingAtRepairablePart()
@@ -296,7 +285,7 @@ public partial class PlayerMain : MonoBehaviour
         }
 
         // Handle slot unbinding if we're not looking at a compatible slot
-        
+
     }
 
     private void HandleNewObjectUI(Selectable @new)
@@ -334,7 +323,7 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (holdingItem == null || holdingItem.BindSlot == null) return;
         //if (!isCompatibleSlot && holdingItem != null && holdingItem.BindSlot != null)
-        if(@new is not Slot || (@new is Slot s  && !holdingItem.FitIn(s)))
+        if (@new is not Slot || (@new is Slot s && !holdingItem.FitIn(s)))
         {
             holdingItem.Unbind();
         }

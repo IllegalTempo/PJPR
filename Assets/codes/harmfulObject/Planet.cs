@@ -16,7 +16,7 @@ public class Planet : HarmfulObject
 
     [Header("Collision Damage")]
     [SerializeField] private float collisionDamageToEachPart = 40f;
-    [SerializeField] private float connectorDamageMultiplier = 0.5f; // relative to part damage
+    [SerializeField] private float MainSpaceshipDamageMultiplier = 0.5f; // relative to part damage
     [SerializeField] private GameObject impactEffect;
     [SerializeField] private float impactEffectDuration = 3f;
 
@@ -112,13 +112,13 @@ public class Planet : HarmfulObject
     //        if (part != null && !spaceship.Parts.Contains(part))
     //            part.OnDamage(collisionDamageToEachPart * 0.5f, "Planet");
     //    }
-    //    Connector[] connectors = spaceship.GetComponentsInChildren<Connector>();
-    //    foreach (Connector connector in connectors)
+    //    MainSpaceship[] MainSpaceships = spaceship.GetComponentsInChildren<MainSpaceship>();
+    //    foreach (MainSpaceship MainSpaceship in MainSpaceships)
     //    {
     //        foreach (SpaceshipPart part in spaceship.Parts)
     //        {
     //            if (part != null)
-    //                part.OnDamage(collisionDamageToEachPart * connectorDamageMultiplier, "Planet (connector shock)");
+    //                part.OnDamage(collisionDamageToEachPart * MainSpaceshipDamageMultiplier, "Planet (MainSpaceship shock)");
     //        }
     //    }
 

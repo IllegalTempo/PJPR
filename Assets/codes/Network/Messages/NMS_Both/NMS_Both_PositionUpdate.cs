@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_PositionUpdate : NMS, IServerHandle, IClientHandle
+    public class NMS_Both_PositionUpdate : NMS_BOTH_SHARE
     {
         ulong SourceNetworkID;
         Vector3 pos;
@@ -27,17 +27,12 @@ namespace Assets.codes.Network.Messages
             Quaternion bodyrot = packet.Readquaternion();
             return new NMS_Both_PositionUpdate(steamID, pos, headrot, bodyrot);
         }
-        public void ClientHandle()
-        {
-            NetworkSystem.Instance.PlayerList[SourceNetworkID].SetMovement(pos, headrot, bodyrot);
 
-        }
-
-        public void ServerHandle(NetworkPlayer p)
+        public override void ServerHandle(NetworkPlayer p)
         {
             if (p.steamId != SourceNetworkID) return;
-            p.player.SetMovement(pos, headrot, bodyrot);
-            NetworkRouter.Instance.DistributeMessageToReady(this,p.steamId);
+            
+            base.ServerHandle(p);
 
         }
 
@@ -47,6 +42,11 @@ namespace Assets.codes.Network.Messages
             p.Write(pos);
             p.Write(headrot);
             p.Write(bodyrot);
+        }
+
+        protected override void applyaction()
+        {
+            NetworkSystem.Instance.PlayerList[SourceNetworkID].SetMovement(pos, headrot, bodyrot);
         }
     }
 }

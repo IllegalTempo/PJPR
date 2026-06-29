@@ -1,6 +1,6 @@
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_SlotAttach : NMS, IClientHandle, IServerHandle
+    public class NMS_Both_SlotAttach : NMS_BOTH_SHARE
     {
         public string SlotId; //slot id is now the name of the slot gameobject as there will be no extra slot added to the game, if this is the case, put networkobject into slots
         public string ItemId;
@@ -22,17 +22,7 @@ namespace Assets.codes.Network.Messages
             packet.WriteUNICODE(ItemId);
         }
 
-        public void ServerHandle(NetworkPlayer player)
-        {
-            process();
-            NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);
-        }
-
-        public void ClientHandle()
-        {
-            process();
-        }
-        private void process()
+        protected override void applyaction()
         {
             Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(ItemId);
             NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).Attach(ItemId);

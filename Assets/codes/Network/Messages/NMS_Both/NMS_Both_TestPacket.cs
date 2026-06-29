@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Packets.BothMessages
 {
-    public class NMS_Both_TestPacket : NMS, IServerHandle,IClientHandle
+    public class NMS_Both_TestPacket : NMS,IClientHandle,IServerHandle
     {
         string TestString;
         long TestTime;
@@ -72,6 +72,6 @@ namespace Assets.codes.Network.Packets.BothMessages
             await Task.Delay(5);
             NetworkRouter.Instance.SendMessageToServer(new NMS_Both_TestPacket(TestString, DateTime.UtcNow.Ticks, SteamClient.SteamId));
         }
-        
+
     }
 }

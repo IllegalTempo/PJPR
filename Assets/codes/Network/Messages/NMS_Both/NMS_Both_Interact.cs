@@ -1,6 +1,6 @@
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_Interact : NMS, IClientHandle, IServerHandle
+    public class NMS_Both_Interact : NMS_BOTH_SHARE
     {
         private readonly ulong whoInteracted;
         private readonly string decorationUid;
@@ -22,20 +22,16 @@ namespace Assets.codes.Network.Messages
             packet.WriteUNICODE(decorationUid);
         }
 
-        public void ClientHandle()
-        {
-            ApplyInteraction();
-        }
 
-        public void ServerHandle(NetworkPlayer p)
+        public override void ServerHandle(NetworkPlayer p)
         {
             if (p.steamId != whoInteracted) return;
-            ApplyInteraction();
-            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId);
+            base.ServerHandle(p);
 
 
         }
-        private void ApplyInteraction()
+
+        protected override void applyaction()
         {
             IUsable decoration = NetworkSystem.Instance.GetComponentOfIdentity<IUsable>(decorationUid);
             PlayerMain who = NetworkSystem.Instance.PlayerList[whoInteracted].playerControl;

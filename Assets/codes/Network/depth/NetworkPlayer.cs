@@ -11,7 +11,7 @@ using UnityEngine;
 public enum ReadyState
 {
     NotReady,
-    SpawnConnector,
+    SpawnMainSpaceship,
     SyncPlayer,
     SyncNetworkObjects,
 }

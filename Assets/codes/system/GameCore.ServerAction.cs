@@ -32,7 +32,7 @@ public partial class GameCore
     {
         Debug.Log($"Planet {selectedPlanetId} selected by the party leader!");
         
-        // TODO: Trigger spaceship (or connector) movement/warp drive sequence towards the selected planet
+        // TODO: Trigger spaceship (or MainSpaceship) movement/warp drive sequence towards the selected planet
         
         // minigames if they are related to the selected planet ? or unrelated cuz random
         // int minigamesToPlay = Random.Range(3, 5); 

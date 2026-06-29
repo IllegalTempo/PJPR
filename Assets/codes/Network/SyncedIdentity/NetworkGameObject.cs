@@ -40,11 +40,8 @@ namespace Assets.codes.Network.SyncedIdentity
         }
         public void UpdateActive(bool status)
         {
-            gameObject.SetActive(status);
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(new NMS_Both_NetworkObjectActive(Identity.Identifier, status));
-            }
+            new NMS_Both_NetworkObjectActive(Identity.Identifier, status).SendMessageAsServerOrClient();
+            
         }
         public bool IsLocalSovereignty()
         {

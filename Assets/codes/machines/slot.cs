@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
@@ -15,11 +16,7 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     public virtual void Attach(Item item)
     {
         this.item = item;
-        item.AttachedSlot = this;
-        item.DisableRB();
-        item.transform.SetParent(transform);
-
-        item.transform.localPosition = Vector3.zero;
+        item.AttachToSlot(this);
     }
     public virtual void Detach()
     {
@@ -31,6 +28,12 @@ public class Slot : Selectable //slot is the place where items are put in to be 
             item = null;
         }
     }
+    public void SendAttach(Item item)
+    {
+        NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier);
+        message.SendMessageAsServerOrClient();
+    }
+    
     public void Attach(string itemId)
     {
         Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(itemId);

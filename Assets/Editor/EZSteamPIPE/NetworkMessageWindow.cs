@@ -15,6 +15,29 @@ public class NetworkMessageWindow : EditorWindow
         Client
     }
 
+    private enum FieldType
+    {
+        Int,
+        Float,
+        Short,
+        Long,
+        ULong,
+        Bool,
+        Guid,
+        Vector3,
+        Quaternion,
+        StringASCII,
+        StringUNICODE,
+        ByteArray
+    }
+
+    [Serializable]
+    private class MessageField
+    {
+        public FieldType Type;
+        public string Name = "";
+    }
+
     private const string PacketsPath = "Assets/codes/Network/Packets/packets.cs";
     private const string RouterPath = "Assets/codes/Network/NetworkRouter.cs";
     private const string MessagesRoot = "Assets/codes/Network/Messages";
@@ -26,13 +49,15 @@ public class NetworkMessageWindow : EditorWindow
     private bool _createMessageClass = true;
     private bool _registerInRouter = true;
     private bool _updateCsproj = true;
+    private readonly List<MessageField> _fields = new List<MessageField>();
     private Vector2 _existingMessagesScroll;
+    private Vector2 _fieldScroll;
 
     [MenuItem("Tools/Network Messages/Add Message")]
     public static void ShowWindow()
     {
         NetworkMessageWindow window = GetWindow<NetworkMessageWindow>("Add Network Message");
-        window.minSize = new Vector2(520, 520);
+        window.minSize = new Vector2(640, 700);
     }
 
     private void OnGUI()
@@ -42,6 +67,9 @@ public class NetworkMessageWindow : EditorWindow
 
         _messageName = EditorGUILayout.TextField("Message Name", _messageName);
         _direction = (MessageDirection)EditorGUILayout.EnumPopup("Direction", _direction);
+
+        EditorGUILayout.Space(6);
+        DrawFieldsSection();
 
         EditorGUILayout.Space(8);
         GUILayout.Label("Generate", EditorStyles.boldLabel);
@@ -82,7 +110,8 @@ public class NetworkMessageWindow : EditorWindow
             normalizedName = "ExampleMessage";
         }
 
-        return "Creates " + GetClassName(_direction, normalizedName) + ".cs and registers " +
+        return "Creates " + GetClassName(_direction, normalizedName) + ".cs with " +
+               _fields.Count + " field" + (_fields.Count == 1 ? "" : "s") + " and registers " +
                GetEnumName(_direction) + "." + normalizedName + ".";
     }
 
@@ -90,6 +119,11 @@ public class NetworkMessageWindow : EditorWindow
     {
         string messageName = NormalizeName(_messageName);
         if (!ValidateMessageName(messageName))
+        {
+            return;
+        }
+
+        if (!ValidateFields())
         {
             return;
         }
@@ -105,7 +139,7 @@ public class NetworkMessageWindow : EditorWindow
 
             if (_createMessageClass)
             {
-                CreateMessageClass(_direction, messageName, classPath);
+                CreateMessageClass(_direction, messageName, classPath, _fields);
             }
 
             if (_registerInRouter)
@@ -274,7 +308,76 @@ public class NetworkMessageWindow : EditorWindow
         return maxValue + 1;
     }
 
-    private static void CreateMessageClass(MessageDirection direction, string messageName, string classPath)
+    private void DrawFieldsSection()
+    {
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Fields", EditorStyles.boldLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Add Field", GUILayout.Width(90)))
+                {
+                    _fields.Add(new MessageField { Type = FieldType.Int, Name = "value" });
+                }
+            }
+
+            if (_fields.Count == 0)
+            {
+                EditorGUILayout.HelpBox("Add one or more fields to generate constructor, read, and write code.", MessageType.None);
+                return;
+            }
+
+            _fieldScroll = EditorGUILayout.BeginScrollView(_fieldScroll, GUILayout.MinHeight(120), GUILayout.MaxHeight(220));
+            for (int i = 0; i < _fields.Count; i++)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    MessageField field = _fields[i];
+                    field.Type = (FieldType)EditorGUILayout.EnumPopup(field.Type, GUILayout.Width(150));
+                    field.Name = EditorGUILayout.TextField(field.Name);
+                    if (GUILayout.Button("X", GUILayout.Width(24)))
+                    {
+                        _fields.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+            EditorGUILayout.EndScrollView();
+        }
+    }
+
+    private bool ValidateFields()
+    {
+        HashSet<string> names = new HashSet<string>(StringComparer.Ordinal);
+        for (int i = 0; i < _fields.Count; i++)
+        {
+            MessageField field = _fields[i];
+            field.Name = (field.Name ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(field.Name))
+            {
+                EditorUtility.DisplayDialog("Error", "Field names cannot be empty.", "OK");
+                return false;
+            }
+
+            if (!Regex.IsMatch(field.Name, @"^[A-Z_a-z][A-Z_a-z0-9]*$"))
+            {
+                EditorUtility.DisplayDialog("Error", "Field '" + field.Name + "' is not a valid C# identifier.", "OK");
+                return false;
+            }
+
+            if (!names.Add(field.Name))
+            {
+                EditorUtility.DisplayDialog("Error", "Field name '" + field.Name + "' is duplicated.", "OK");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void CreateMessageClass(MessageDirection direction, string messageName, string classPath, IReadOnlyList<MessageField> fields)
     {
         if (File.Exists(classPath))
         {
@@ -282,36 +385,48 @@ public class NetworkMessageWindow : EditorWindow
         }
 
         Directory.CreateDirectory(Path.GetDirectoryName(classPath));
-        File.WriteAllText(classPath, GenerateClassCode(direction, messageName));
+        File.WriteAllText(classPath, GenerateClassCode(direction, messageName, fields));
     }
 
-    private static string GenerateClassCode(MessageDirection direction, string messageName)
+    private static string GenerateClassCode(MessageDirection direction, string messageName, IReadOnlyList<MessageField> fields)
     {
         string className = GetClassName(direction, messageName);
         string enumName = GetEnumName(direction);
-        string interfaces = GetInterfaces(direction);
-        string handleMethods = GetHandleMethods(direction);
+        string baseType = direction == MessageDirection.Both ? "NMS_BOTH_SHARE" : "NMS";
+        string interfaces = direction == MessageDirection.Both ? string.Empty : ", " + GetInterfaces(direction);
 
         StringBuilder builder = new StringBuilder();
+        builder.AppendLine("using System;");
+        builder.AppendLine("using Steamworks;");
+        builder.AppendLine("using UnityEngine;");
+        builder.AppendLine();
         builder.AppendLine("namespace Assets.codes.Network.Messages");
         builder.AppendLine("{");
-        builder.AppendLine("    public class " + className + " : NMS, " + interfaces);
+        builder.AppendLine("    public class " + className + " : " + baseType + interfaces);
         builder.AppendLine("    {");
-        builder.AppendLine("        public " + className + "() : base((int)packets." + enumName + "." + messageName + ")");
+        AppendFieldDeclarations(builder, fields);
+        builder.AppendLine("        public " + className + "(" + BuildConstructorParameters(fields) + ") : base((int)packets." + enumName + "." + messageName + ")");
         builder.AppendLine("        {");
+        AppendConstructorAssignments(builder, fields);
         builder.AppendLine("        }");
         builder.AppendLine();
         builder.AppendLine("        public static " + className + " Read(Packet packet)");
         builder.AppendLine("        {");
-        builder.AppendLine("            // TODO: Read message fields from packet.");
-        builder.AppendLine("            return new " + className + "();");
+        if (fields.Count == 0)
+        {
+            builder.AppendLine("            return new " + className + "();");
+        }
+        else
+        {
+            builder.AppendLine("            return new " + className + "(" + BuildReadArguments(fields) + ");");
+        }
         builder.AppendLine("        }");
         builder.AppendLine();
         builder.AppendLine("        public override void Write(Packet packet)");
         builder.AppendLine("        {");
-        builder.AppendLine("            // TODO: Write message fields to packet.");
+        AppendWriteStatements(builder, fields);
         builder.AppendLine("        }");
-        builder.Append(handleMethods);
+        AppendHandleSection(builder, direction);
         builder.AppendLine("    }");
         builder.AppendLine("}");
         return builder.ToString();
@@ -330,32 +445,180 @@ public class NetworkMessageWindow : EditorWindow
         }
     }
 
-    private static string GetHandleMethods(MessageDirection direction)
+    private static void AppendFieldDeclarations(StringBuilder builder, IReadOnlyList<MessageField> fields)
     {
-        StringBuilder builder = new StringBuilder();
-        if (direction == MessageDirection.Both || direction == MessageDirection.Client)
+        foreach (MessageField field in fields)
+        {
+            builder.AppendLine("        private readonly " + GetCSharpType(field.Type) + " " + field.Name + ";");
+        }
+    }
+
+    private static string BuildConstructorParameters(IReadOnlyList<MessageField> fields)
+    {
+        if (fields.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        List<string> parameters = new List<string>();
+        foreach (MessageField field in fields)
+        {
+            parameters.Add(GetCSharpType(field.Type) + " " + field.Name);
+        }
+
+        return string.Join(", ", parameters);
+    }
+
+    private static void AppendConstructorAssignments(StringBuilder builder, IReadOnlyList<MessageField> fields)
+    {
+        foreach (MessageField field in fields)
+        {
+            builder.AppendLine("            this." + field.Name + " = " + field.Name + ";");
+        }
+    }
+
+    private static string BuildReadArguments(IReadOnlyList<MessageField> fields)
+    {
+        List<string> arguments = new List<string>();
+        foreach (MessageField field in fields)
+        {
+            arguments.Add(GetReadExpression(field.Type));
+        }
+
+        return string.Join(", ", arguments);
+    }
+
+    private static void AppendWriteStatements(StringBuilder builder, IReadOnlyList<MessageField> fields)
+    {
+        if (fields.Count == 0)
+        {
+            builder.AppendLine("            // No fields to write.");
+            return;
+        }
+
+        foreach (MessageField field in fields)
+        {
+            builder.AppendLine("            " + GetWriteExpression(field.Type, field.Name) + ";");
+        }
+    }
+
+    private static void AppendHandleSection(StringBuilder builder, MessageDirection direction)
+    {
+        if (direction == MessageDirection.Both)
+        {
+            builder.AppendLine();
+            builder.AppendLine("        protected override void applyaction()");
+            builder.AppendLine("        {");
+            builder.AppendLine("            // TODO: Apply shared client/server behavior.");
+            builder.AppendLine("        }");
+            return;
+        }
+
+        if (direction == MessageDirection.Client)
         {
             builder.AppendLine();
             builder.AppendLine("        public void ServerHandle(NetworkPlayer player)");
             builder.AppendLine("        {");
             builder.AppendLine("            // TODO: Apply server-side behavior.");
-            if (direction == MessageDirection.Both)
-            {
-                builder.AppendLine("            // NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);");
-            }
             builder.AppendLine("        }");
+            return;
         }
 
-        if (direction == MessageDirection.Both || direction == MessageDirection.Server)
+        builder.AppendLine();
+        builder.AppendLine("        public void ClientHandle()");
+        builder.AppendLine("        {");
+        builder.AppendLine("            // TODO: Apply client-side behavior.");
+        builder.AppendLine("        }");
+    }
+
+    private static string GetCSharpType(FieldType type)
+    {
+        switch (type)
         {
-            builder.AppendLine();
-            builder.AppendLine("        public void ClientHandle()");
-            builder.AppendLine("        {");
-            builder.AppendLine("            // TODO: Apply client-side behavior.");
-            builder.AppendLine("        }");
+            case FieldType.Int:
+                return "int";
+            case FieldType.Float:
+                return "float";
+            case FieldType.Short:
+                return "short";
+            case FieldType.Long:
+                return "long";
+            case FieldType.ULong:
+                return "ulong";
+            case FieldType.Bool:
+                return "bool";
+            case FieldType.Guid:
+                return "Guid";
+            case FieldType.Vector3:
+                return "Vector3";
+            case FieldType.Quaternion:
+                return "Quaternion";
+            case FieldType.StringASCII:
+            case FieldType.StringUNICODE:
+                return "string";
+            case FieldType.ByteArray:
+                return "byte[]";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
+    }
 
-        return builder.ToString();
+    private static string GetReadExpression(FieldType type)
+    {
+        switch (type)
+        {
+            case FieldType.Int:
+                return "packet.Readint()";
+            case FieldType.Float:
+                return "packet.Readfloat()";
+            case FieldType.Short:
+                return "packet.Readshort()";
+            case FieldType.Long:
+                return "packet.Readlong()";
+            case FieldType.ULong:
+                return "packet.Readulong()";
+            case FieldType.Bool:
+                return "packet.Readbool()";
+            case FieldType.Guid:
+                return "packet.ReadGuid()";
+            case FieldType.Vector3:
+                return "packet.Readvector3()";
+            case FieldType.Quaternion:
+                return "packet.Readquaternion()";
+            case FieldType.StringASCII:
+                return "packet.ReadstringASCII()";
+            case FieldType.StringUNICODE:
+                return "packet.ReadstringUNICODE()";
+            case FieldType.ByteArray:
+                return "packet.ReadBytesArray()";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
+    private static string GetWriteExpression(FieldType type, string fieldName)
+    {
+        switch (type)
+        {
+            case FieldType.Int:
+            case FieldType.Float:
+            case FieldType.Short:
+            case FieldType.Long:
+            case FieldType.ULong:
+            case FieldType.Bool:
+            case FieldType.Guid:
+            case FieldType.Vector3:
+            case FieldType.Quaternion:
+                return "packet.Write(" + fieldName + ")";
+            case FieldType.StringASCII:
+                return "packet.WriteASCII(" + fieldName + ")";
+            case FieldType.StringUNICODE:
+                return "packet.WriteUNICODE(" + fieldName + ")";
+            case FieldType.ByteArray:
+                return "packet.Write(" + fieldName + ")";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
     }
 
     private static void RegisterInRouter(MessageDirection direction, string messageName)

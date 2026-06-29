@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_NetworkObjectInfo : NMS, IServerHandle, IClientHandle
+    public class NMS_Both_NetworkObjectInfo : NMS_BOTH_SHARE
     {
         private readonly string id;
         private readonly Vector3 position;
@@ -28,22 +28,20 @@ namespace Assets.codes.Network.Messages
             packet.Write(rotation);
         }
 
-        public void ServerHandle(NetworkPlayer player)
-        {
-            NetworkSystem.Instance.GetComponentOfIdentity<NetworkGameObject>(id).SetServerMovement(position, rotation);
-            NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId);
-        }
 
-        public void ClientHandle()
+        public override void ClientHandle()
         {
             NetworkGameObject networkObject = NetworkSystem.Instance.GetComponentOfIdentity<NetworkGameObject>(id);
             if (GameCore.Instance != null && networkObject.IsLocalSovereignty())
             {
                 return;
             }
+            base.ClientHandle();
+        }
 
-            networkObject.SetServerMovement(position, rotation);
-
+        protected override void applyaction()
+        {
+            NetworkSystem.Instance.GetComponentOfIdentity<NetworkGameObject>(id).SetServerMovement(position, rotation);
         }
     }
 }

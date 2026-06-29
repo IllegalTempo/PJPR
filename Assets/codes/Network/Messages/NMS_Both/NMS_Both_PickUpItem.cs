@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_PickUpItem : NMS, IServerHandle, IClientHandle
+    public class NMS_Both_PickUpItem : NMS_BOTH_SHARE
     {
         private readonly string itemId;
         private readonly ulong pickedUpBy;
@@ -24,7 +24,7 @@ namespace Assets.codes.Network.Messages
             packet.Write(pickedUpBy);
         }
 
-        private void ApplyEffect()
+        protected override void applyaction()
         {
             if(NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(itemId))
             {
@@ -36,7 +36,7 @@ namespace Assets.codes.Network.Messages
             }
 
         }
-        public void ServerHandle(NetworkPlayer player)
+        public override void ServerHandle(NetworkPlayer player)
         {
             if (!NetworkSystem.Instance.FindNetworkIdentity.TryGetValue(itemId, out NetworkIdentity networkObject))
             {
@@ -58,14 +58,8 @@ namespace Assets.codes.Network.Messages
                 return;
             }
 
-            ApplyEffect();
-            NetworkRouter.Instance.DistributeMessage(0, this);
+            base.ServerHandle(player);
         }
 
-        public void ClientHandle()
-        {
-            ApplyEffect();
-
-        }
     }
 }
