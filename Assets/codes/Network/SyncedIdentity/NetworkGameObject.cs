@@ -13,11 +13,14 @@ namespace Assets.codes.Network.SyncedIdentity
         [Header("NetworkObject Setting")]
         [SerializeField]
         public bool Sync_Transform = true;
+        [SerializeField]
+        private float TransformSendInterval = 0.05f;
         public Vector3 NetworkPos;
         public Quaternion NetworkRot;
 
         private Vector3 prevPos;
         private Quaternion prevRot;
+        private float nextTransformSendTime;
 
 
 
@@ -65,16 +68,6 @@ namespace Assets.codes.Network.SyncedIdentity
         }
         protected virtual void FixedUpdate()
         {
-            if (NetworkSystem.Instance == null)
-            {
-                return;
-            }
-            if (Sync_Transform)
-            {
-                SendTransform();
-            }
-
-
         }
         private void SendTransform()
         {
@@ -97,6 +90,15 @@ namespace Assets.codes.Network.SyncedIdentity
         }
         private void Update()
         {
+            if (NetworkSystem.Instance == null)
+            {
+                return;
+            }
+            if (Sync_Transform && Time.time >= nextTransformSendTime)
+            {
+                SendTransform();
+                nextTransformSendTime = Time.time + TransformSendInterval;
+            }
             if (NetworkSystem.Instance.IsWorldManager) return;
             if (GameCore.Instance != null && GameCore.Instance.IsLocal(Identity.Sovereignty)) return;
             if (Sync_Transform)
