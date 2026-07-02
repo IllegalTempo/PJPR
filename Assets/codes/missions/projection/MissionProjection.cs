@@ -79,18 +79,19 @@ public class MissionProjection : Selectable, IUsable
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && !NetworkSystem.Instance.IsServer)
         {
-            // Client: send vote to server
             var msg = new NMS_Client_CastVote(missionIndex);
             NetworkRouter.Instance.SendMessageToServer(msg);
         }
         else
         {
-            // Server or offline: vote directly
             ulong steamId = who != null && who.networkinfo != null ? who.networkinfo.steamID : 0;
             MissionManager.Instance.CastVote(steamId, missionIndex);
         }
 
-        // Local visual feedback: flash "Voted!" briefly
+        // Tell the timer display which mission the local player voted for
+        MissionProjectionDisplay.LocalPlayerVotedMissionName = mission.missionName;
+
+        // Local visual feedback
         if (voteCountText != null)
             voteCountText.text = "Voted!";
         CancelInvoke(nameof(ClearVoteFeedback));

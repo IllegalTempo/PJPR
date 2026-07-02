@@ -30,7 +30,7 @@ namespace Assets.codes.Network.Messages
             Debug.Log($"[NMS_Server_VoteResult] Winner: index {winningMissionIndex}, name: {winningMissionName}");
             if (MissionProjectionDisplay.Instance != null)
             {
-                MissionProjectionDisplay.Instance.ShowVoteResult(winningMissionIndex);
+                MissionProjectionDisplay.Instance.ShowVoteResult(winningMissionIndex, winningMissionName);
             }
         }
     }

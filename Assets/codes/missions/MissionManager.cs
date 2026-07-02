@@ -30,6 +30,49 @@ public class MissionManager : MonoBehaviour
         Instance = this;
     }
 
+    private void OnEnable()
+    {
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful += OnPlayerJoined;
+    }
+
+    private void OnDisable()
+    {
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful -= OnPlayerJoined;
+    }
+
+    private void OnPlayerJoined(NetworkPlayer player)
+    {
+        if (!IsVotingActive || CurrentVotingMissions == null)
+            return;
+
+        // Sync the voting session (projections + timer)
+        var sessionMsg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer);
+        NetworkRouter.Instance.SendMessageToClient(player, sessionMsg);
+
+        // Sync current vote counts
+        int[] counts = GetCurrentVoteCounts();
+        var voteMsg = new NMS_Server_VoteUpdate(counts);
+        NetworkRouter.Instance.SendMessageToClient(player, voteMsg);
+
+        Debug.Log($"[MissionManager] Synced active voting session to new player {player.SteamName}");
+    }
+
+    private int[] GetCurrentVoteCounts()
+    {
+        if (CurrentVotingMissions == null)
+            return new int[0];
+
+        int[] counts = new int[CurrentVotingMissions.Length];
+        foreach (var kvp in playerVotes)
+        {
+            if (kvp.Value >= 0 && kvp.Value < counts.Length)
+                counts[kvp.Value]++;
+        }
+        return counts;
+    }
+
     private void Update()
     {
         if (!IsVotingActive)
@@ -120,21 +163,12 @@ public class MissionManager : MonoBehaviour
 
     private void BroadcastVoteUpdate()
     {
-        if (CurrentVotingMissions == null)
-            return;
-
-        int[] counts = new int[CurrentVotingMissions.Length];
-        foreach (var kvp in playerVotes)
-        {
-            if (kvp.Value >= 0 && kvp.Value < counts.Length)
-                counts[kvp.Value]++;
-        }
+        int[] counts = GetCurrentVoteCounts();
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
         {
             var msg = new NMS_Server_VoteUpdate(counts);
             NetworkRouter.Instance.DistributeMessageToReady(msg);
-            // Also update locally
             MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts);
         }
         else
@@ -156,11 +190,11 @@ public class MissionManager : MonoBehaviour
             {
                 var msg = new NMS_Server_VoteResult(-1, "");
                 NetworkRouter.Instance.DistributeMessageToReady(msg);
-                MissionProjectionDisplay.Instance?.ShowVoteResult(-1);
+                MissionProjectionDisplay.Instance?.ShowVoteResult(-1, null);
             }
             else
             {
-                MissionProjectionDisplay.Instance?.ShowVoteResult(-1);
+                MissionProjectionDisplay.Instance?.ShowVoteResult(-1, null);
             }
             return;
         }
@@ -189,11 +223,11 @@ public class MissionManager : MonoBehaviour
         {
             var msg = new NMS_Server_VoteResult(winningIndex, WinningMission.missionName);
             NetworkRouter.Instance.DistributeMessageToReady(msg);
-            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex);
+            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex, WinningMission.missionName);
         }
         else
         {
-            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex);
+            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex, WinningMission.missionName);
         }
     }
 
