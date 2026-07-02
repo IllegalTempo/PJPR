@@ -3,7 +3,7 @@ using Assets.codes.Network.Messages;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Server_SpawnMissionProjections : NMS, IClientHandle
+    public class NMS_Server_StartVotingSession : NMS, IClientHandle
     {
         private readonly int missionCount;
         private readonly string[] missionNames;
@@ -11,8 +11,9 @@ namespace Assets.codes.Network.Messages
         private readonly int[] rewardCredits;
         private readonly float[] difficulties;
         private readonly int[] durations;
+        private readonly float totalTime;
 
-        public NMS_Server_SpawnMissionProjections(Mission[] missions) : base((int)packets.ServerPackets.SpawnMissionProjections)
+        public NMS_Server_StartVotingSession(Mission[] missions, float totalTime) : base((int)packets.ServerPackets.StartVotingSession)
         {
             missionCount = missions.Length;
             missionNames = new string[missionCount];
@@ -29,9 +30,11 @@ namespace Assets.codes.Network.Messages
                 difficulties[i] = missions[i].difficulty;
                 durations[i] = missions[i].estimatedDuration;
             }
+
+            this.totalTime = totalTime;
         }
 
-        public static NMS_Server_SpawnMissionProjections Read(Packet packet)
+        public static NMS_Server_StartVotingSession Read(Packet packet)
         {
             int count = packet.Readint();
             Mission[] missions = new Mission[count];
@@ -47,7 +50,9 @@ namespace Assets.codes.Network.Messages
                 missions[i] = new Mission(name, description, reward, difficulty * 10f, duration);
             }
 
-            return new NMS_Server_SpawnMissionProjections(missions);
+            float totalTime = packet.Readfloat();
+
+            return new NMS_Server_StartVotingSession(missions, totalTime);
         }
 
         public override void Write(Packet packet)
@@ -62,6 +67,8 @@ namespace Assets.codes.Network.Messages
                 packet.Write(difficulties[i]);
                 packet.Write(durations[i]);
             }
+
+            packet.Write(totalTime);
         }
 
         public void ClientHandle()
@@ -79,7 +86,12 @@ namespace Assets.codes.Network.Messages
                         durations[i]
                     );
                 }
-                MissionProjectionDisplay.Instance.ShowMissions(missions);
+
+                MissionProjectionDisplay.Instance.ShowVotingMissions(missions, totalTime);
+            }
+            else
+            {
+                Debug.LogError("[NMS_Server_StartVotingSession] MissionProjectionDisplay.Instance is null!");
             }
         }
     }

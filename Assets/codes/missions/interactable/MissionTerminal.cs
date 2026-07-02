@@ -1,14 +1,13 @@
 using UnityEngine;
+using Assets.codes.Network.Messages;
 
 [RequireComponent(typeof(NetworkPrefabIdentity))]
-public class MissionTerminal : Selectable
+public class MissionTerminal : Selectable, IUsable
 {
-    [SerializeField] private MissionProjectionDisplay projectionDisplay;
     [SerializeField] private int missionsToShow = 3;
     private NetworkPrefabIdentity networkObject;
-    private bool projectionsActive = false;
 
-    protected override int Layer => 6; // Selectable layer
+    protected override int Layer => 6;
 
     protected override void OnEnable()
     {
@@ -16,75 +15,24 @@ public class MissionTerminal : Selectable
         networkObject = GetComponent<NetworkPrefabIdentity>();
     }
 
-    public override void OnClicked()
+    public void OnInteract(PlayerMain who)
     {
-        base.OnClicked();
-        
-        if (!projectionsActive)
+        if (MissionManager.Instance.IsVotingActive)
         {
-            ShowMissions();
-        }
-        else
-        {
-            HideMissions();
-        }
-    }
-
-    private void ShowMissions()
-    {
-        if (projectionDisplay == null)
-        {
-            Debug.LogError("MissionTerminal: No projectionDisplay assigned!");
+            Debug.Log("[MissionTerminal] Voting is already in progress.");
             return;
         }
 
-        // Get random missions from manager
-        Mission[] missions = MissionManager.Instance.GetRandomMissions(missionsToShow);
-        
-        if (missions.Length == 0)
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
         {
-            Debug.LogError("MissionTerminal: No missions available!");
-            return;
-        }
-
-        projectionDisplay.ShowMissions(missions);
-        projectionsActive = true;
-
-        // TODO: If networked, broadcast to all players
-        // BroadcastMissionDisplay(missions);
-    }
-
-    private void HideMissions()
-    {
-        if (projectionDisplay != null)
-            projectionDisplay.ClearMissions();
-
-        projectionsActive = false;
-    }
-
-    /// <summary>
-    /// Accept the selected mission (call this from UI button or after selection)
-    /// </summary>
-    public void AcceptSelectedMission()
-    {
-        Mission selectedMission = projectionDisplay.GetSelectedMission();
-        if (selectedMission != null)
-        {
-            MissionManager.Instance.AcceptMission(selectedMission);
-            HideMissions();
-
-            // TODO: If networked, send to server
-            // SendMissionAcceptanceToServer(projectionDisplay.GetSelectedMissionIndex());
+            string terminalId = networkObject != null ? networkObject.Identifier : "";
+            var msg = new NMS_Client_RequestVotingSession(terminalId, missionsToShow);
+            NetworkRouter.Instance.SendMessageToServer(msg);
         }
         else
         {
-            Debug.LogWarning("No mission selected!");
+            // Offline / single-player: start locally
+            MissionManager.Instance.StartVotingSession(missionsToShow);
         }
-    }
-
-    private void OnDestroy()
-    {
-        if (projectionsActive && projectionDisplay != null)
-            projectionDisplay.ClearMissions();
     }
 }

@@ -38,14 +38,17 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.PlayerQuit, NMS_Server_PlayerQuit.Read },
             { (int)packets.ServerPackets.NewObject, NMS_Server_NewObject.Read },
             { (int)packets.ServerPackets.SyncNetworkObjects, NMS_Server_SyncNetworkPrefab.Read },
-            { (int)packets.ServerPackets.SendMissionInfo, NMS_Server_MissionInfo.Read },
-            { (int)packets.ServerPackets.StartGameLoop, NMS_Server_StartGameLoop.Read }
-        ,
-            { (int)packets.ServerPackets.NO_Destroy, NMS_Server_NO_Destroy.Read },};
+            { (int)packets.ServerPackets.StartGameLoop, NMS_Server_StartGameLoop.Read },
+            { (int)packets.ServerPackets.NO_Destroy, NMS_Server_NO_Destroy.Read },
+            { (int)packets.ServerPackets.StartVotingSession, NMS_Server_StartVotingSession.Read },
+            { (int)packets.ServerPackets.VoteResult, NMS_Server_VoteResult.Read },
+            { (int)packets.ServerPackets.VoteUpdate, NMS_Server_VoteUpdate.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {
             { (int)packets.ClientPackets.SendReadyState, NMS_Client_ReadyState.Read },
+            { (int)packets.ClientPackets.RequestVotingSession, NMS_Client_RequestVotingSession.Read },
+            { (int)packets.ClientPackets.CastVote, NMS_Client_CastVote.Read },
         };
         public void UpdateReadyState(ReadyState state)
         {

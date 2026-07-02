@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class MissionProjectionDisplay : MonoBehaviour
 {
@@ -10,7 +11,12 @@ public class MissionProjectionDisplay : MonoBehaviour
     [SerializeField] private float verticalOffset = 2f;
     [SerializeField] private float projectionScale = 1f;
 
-    private MissionProjection[] activeProjections = new MissionProjection[3];
+    [Header("Timer Display")]
+    [SerializeField] private TextMeshProUGUI timerText;
+
+    private MissionProjection[] activeProjections;
+    private float votingTimer;
+    private bool isVotingActive;
     private int selectedMissionIndex = -1;
 
     public static MissionProjectionDisplay Instance { get; private set; }
@@ -25,23 +31,45 @@ public class MissionProjectionDisplay : MonoBehaviour
         Instance = this;
     }
 
-    /// <summary>
-    /// Display missions as 3D projections in the world
-    /// </summary>
-    public void ShowMissions(Mission[] missions)
+    private void Update()
     {
-        // Clear previous projections
+        if (!isVotingActive)
+            return;
+
+        votingTimer -= Time.deltaTime;
+        if (votingTimer < 0f)
+            votingTimer = 0f;
+
+        UpdateTimerDisplay();
+    }
+
+    private void UpdateTimerDisplay()
+    {
+        if (timerText == null)
+            return;
+
+        int seconds = Mathf.CeilToInt(votingTimer);
+        int mins = seconds / 60;
+        int secs = seconds % 60;
+        timerText.text = $"Voting: {mins:00}:{secs:00}";
+    }
+
+    public void ShowVotingMissions(Mission[] missions, float totalTime)
+    {
         ClearMissions();
 
         if (missions == null || missions.Length == 0)
         {
-            Debug.LogWarning("No missions provided to display");
+            Debug.LogWarning("[MissionProjectionDisplay] No missions provided to display.");
             return;
         }
 
-        int missionCount = Mathf.Min(missions.Length, 3);
+        int missionCount = missions.Length;
+        activeProjections = new MissionProjection[missionCount];
+        isVotingActive = true;
+        votingTimer = totalTime;
 
-        // Layout cards in an arc/row formation
+        // Layout cards in a horizontal row
         float totalWidth = (missionCount - 1) * horizontalSpacing;
         float startX = -totalWidth / 2f;
 
@@ -59,36 +87,73 @@ public class MissionProjectionDisplay : MonoBehaviour
             MissionProjection projection = projectionObj.GetComponent<MissionProjection>();
             if (projection != null)
             {
-                projection.Initialize(missions[i], i, OnMissionSelected);
+                projection.Initialize(missions[i], i);
                 activeProjections[i] = projection;
             }
         }
+
+        UpdateTimerDisplay();
+        Debug.Log($"[MissionProjectionDisplay] Displaying {missionCount} missions. Timer: {totalTime}s");
     }
 
-    private void OnMissionSelected(int missionIndex)
+    public void ShowVoteResult(int winningIndex)
     {
-        selectedMissionIndex = missionIndex;
+        isVotingActive = false;
 
-        // Update highlight states
+        if (timerText != null)
+            timerText.text = winningIndex >= 0 ? "Voting Ended!" : "No Winner";
+
+        if (activeProjections == null)
+            return;
+
         for (int i = 0; i < activeProjections.Length; i++)
         {
-            if (activeProjections[i] != null)
-                activeProjections[i].SetHighlight(i == missionIndex);
+            if (activeProjections[i] == null)
+                continue;
+
+            if (i == winningIndex)
+                activeProjections[i].ShowAsWinner();
+            else
+                activeProjections[i].ShowAsLoser();
         }
 
-        Debug.Log($"Mission selected: Index {missionIndex}");
+        selectedMissionIndex = winningIndex;
+        Debug.Log($"[MissionProjectionDisplay] Vote result: winning index = {winningIndex}");
+
+        // Clear after 5 seconds
+        Invoke(nameof(ClearMissions), 5f);
+    }
+
+    public void UpdateVoteCounts(int[] counts)
+    {
+        if (activeProjections == null || counts == null)
+            return;
+
+        for (int i = 0; i < activeProjections.Length && i < counts.Length; i++)
+        {
+            if (activeProjections[i] != null)
+                activeProjections[i].ShowVoteCount(counts[i]);
+        }
     }
 
     public void ClearMissions()
     {
-        foreach (var projection in activeProjections)
+        if (activeProjections != null)
         {
-            if (projection != null)
-                Destroy(projection.gameObject);
+            foreach (var projection in activeProjections)
+            {
+                if (projection != null)
+                    Destroy(projection.gameObject);
+            }
         }
 
-        System.Array.Clear(activeProjections, 0, activeProjections.Length);
+        activeProjections = null;
         selectedMissionIndex = -1;
+        isVotingActive = false;
+        votingTimer = 0f;
+
+        if (timerText != null)
+            timerText.text = "";
     }
 
     public int GetSelectedMissionIndex()
@@ -98,7 +163,7 @@ public class MissionProjectionDisplay : MonoBehaviour
 
     public Mission GetSelectedMission()
     {
-        if (selectedMissionIndex >= 0 && selectedMissionIndex < activeProjections.Length)
+        if (selectedMissionIndex >= 0 && activeProjections != null && selectedMissionIndex < activeProjections.Length)
         {
             if (activeProjections[selectedMissionIndex] != null)
                 return activeProjections[selectedMissionIndex].GetMission();

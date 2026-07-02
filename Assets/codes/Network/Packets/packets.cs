@@ -11,16 +11,17 @@ public class packets
         NewObject = 1005,
         SyncNetworkObjects = 1006,
         DistributeVoicePacket = 1007,
-        SendMissionInfo = 1008,
         StartGameLoop = 1009,
-        SpawnMissionProjections = 1010,
-    
-        NO_Destroy = 1011,};
+        NO_Destroy = 1011,
+        StartVotingSession = 1012,
+        VoteResult = 1013,
+        VoteUpdate = 1014,
+    };
     public enum ClientPackets
     {
         SendReadyState = 2001,
-        RequestMissions = 2002,
-        AcceptMission = 2003,
+        RequestVotingSession = 2004,
+        CastVote = 2005,
     };
     public enum BothPackets
     {

@@ -1,12 +1,24 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using Assets.codes.Network.Messages;
 
 public class MissionManager : MonoBehaviour
 {
     public static MissionManager Instance { get; private set; }
 
     [SerializeField] private MissionData[] availableMissions;
+    [SerializeField] private int missionsPerVote = 3;
+    [SerializeField] private float secondsPerMission = 15f;
+
     private List<Mission> activeMissions = new List<Mission>();
+
+    public bool IsVotingActive { get; private set; }
+    public float VotingTimer { get; private set; }
+    public Mission[] CurrentVotingMissions { get; private set; }
+    public Mission WinningMission { get; private set; }
+
+    private Dictionary<ulong, int> playerVotes = new Dictionary<ulong, int>();
 
     private void Awake()
     {
@@ -16,6 +28,19 @@ public class MissionManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    private void Update()
+    {
+        if (!IsVotingActive)
+            return;
+
+        VotingTimer -= Time.deltaTime;
+        if (VotingTimer <= 0f)
+        {
+            VotingTimer = 0f;
+            TallyVotes();
+        }
     }
 
     public Mission[] GetRandomMissions(int count = 3)
@@ -41,6 +66,135 @@ public class MissionManager : MonoBehaviour
         }
 
         return selected;
+    }
+
+    public void StartVotingSession(int missionCount)
+    {
+        if (missionCount <= 0)
+            missionCount = missionsPerVote;
+
+        missionCount = Mathf.Clamp(missionCount, 1, availableMissions.Length);
+        CurrentVotingMissions = GetRandomMissions(missionCount);
+        playerVotes.Clear();
+        IsVotingActive = true;
+        VotingTimer = missionCount * secondsPerMission;
+        WinningMission = null;
+
+        Debug.Log($"[MissionManager] Voting session started with {missionCount} missions. Timer: {VotingTimer}s");
+
+        // Broadcast to all clients
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
+        {
+            var msg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer);
+            NetworkRouter.Instance.DistributeMessageToReady(msg);
+            // Also apply locally
+            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer);
+        }
+        else
+        {
+            // Offline / single-player
+            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer);
+        }
+    }
+
+    public void CastVote(ulong steamId, int missionIndex)
+    {
+        if (!IsVotingActive)
+        {
+            Debug.LogWarning($"[MissionManager] Vote rejected: no active voting session.");
+            return;
+        }
+
+        if (missionIndex < 0 || CurrentVotingMissions == null || missionIndex >= CurrentVotingMissions.Length)
+        {
+            Debug.LogWarning($"[MissionManager] Vote rejected: invalid mission index {missionIndex}.");
+            return;
+        }
+
+        playerVotes[steamId] = missionIndex;
+        Debug.Log($"[MissionManager] Player {steamId} voted for mission {missionIndex} ({CurrentVotingMissions[missionIndex].missionName}). Total votes: {playerVotes.Count}");
+
+        // Broadcast live vote counts to all clients
+        BroadcastVoteUpdate();
+    }
+
+    private void BroadcastVoteUpdate()
+    {
+        if (CurrentVotingMissions == null)
+            return;
+
+        int[] counts = new int[CurrentVotingMissions.Length];
+        foreach (var kvp in playerVotes)
+        {
+            if (kvp.Value >= 0 && kvp.Value < counts.Length)
+                counts[kvp.Value]++;
+        }
+
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
+        {
+            var msg = new NMS_Server_VoteUpdate(counts);
+            NetworkRouter.Instance.DistributeMessageToReady(msg);
+            // Also update locally
+            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts);
+        }
+        else
+        {
+            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts);
+        }
+    }
+
+    public void TallyVotes()
+    {
+        IsVotingActive = false;
+
+        if (playerVotes.Count == 0 || CurrentVotingMissions == null || CurrentVotingMissions.Length == 0)
+        {
+            Debug.Log("[MissionManager] No votes cast. No mission selected.");
+            WinningMission = null;
+
+            if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
+            {
+                var msg = new NMS_Server_VoteResult(-1, "");
+                NetworkRouter.Instance.DistributeMessageToReady(msg);
+                MissionProjectionDisplay.Instance?.ShowVoteResult(-1);
+            }
+            else
+            {
+                MissionProjectionDisplay.Instance?.ShowVoteResult(-1);
+            }
+            return;
+        }
+
+        // Group votes by mission index
+        var voteCounts = new Dictionary<int, int>();
+        foreach (var kvp in playerVotes)
+        {
+            if (!voteCounts.ContainsKey(kvp.Value))
+                voteCounts[kvp.Value] = 0;
+            voteCounts[kvp.Value]++;
+        }
+
+        // Find max votes
+        int maxVotes = voteCounts.Values.Max();
+        var topIndices = voteCounts.Where(kvp => kvp.Value == maxVotes).Select(kvp => kvp.Key).ToList();
+
+        // Random tiebreak
+        int winningIndex = topIndices[Random.Range(0, topIndices.Count)];
+        WinningMission = CurrentVotingMissions[winningIndex];
+
+        Debug.Log($"[MissionManager] Voting ended. Winner: {WinningMission.missionName} (index {winningIndex}) with {maxVotes} vote(s).");
+
+        // Broadcast result
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
+        {
+            var msg = new NMS_Server_VoteResult(winningIndex, WinningMission.missionName);
+            NetworkRouter.Instance.DistributeMessageToReady(msg);
+            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex);
+        }
+        else
+        {
+            MissionProjectionDisplay.Instance?.ShowVoteResult(winningIndex);
+        }
     }
 
     public void AcceptMission(Mission mission)
