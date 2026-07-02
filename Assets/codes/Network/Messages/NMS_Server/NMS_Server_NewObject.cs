@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace Assets.codes.Network.Messages
 {
@@ -36,6 +37,7 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
+            Debug.Log("Received Server New Object: " + prefabId);
             GameCore.Instance.spawnNetworkPrefab(prefabId, owner, uid, spawnLocation, spawnRotation).Forget();
         }
     }
