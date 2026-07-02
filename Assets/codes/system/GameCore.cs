@@ -209,20 +209,6 @@ public partial class GameCore : MonoBehaviour
         }
         Destroy(obj.gameObject);
     }
-    public ItemDefinition DestroyNetworkItem(Item item) //run by both server and client
-    {
-        string identifier = item.GetNetworkObject().Identity.Identifier;
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(identifier))
-        {
-            NetworkSystem.Instance.FindNetworkIdentity.Remove(identifier);
-        }
-        ItemDefinition itd = item.AbstractItem;
-        if (itd == null) {
-            Debug.LogError($"Network Item {identifier} have no ItemDefinition");
-        }
-        Destroy(item.gameObject);
-        return itd;
-    }
     public bool IsLocal(ulong id)
     {
         //if (!NetworkSystem.instance.IsOnline)

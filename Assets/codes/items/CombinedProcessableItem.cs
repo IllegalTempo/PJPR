@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Assets.codes.Network.Messages;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.codes.items
 {
@@ -19,7 +20,8 @@ namespace Assets.codes.items
 		}
 		public void ServerAction_Combine(Item item)
 		{
-			GameCore.Instance.DestroyNetworkItem(item);
-		}
+            var msg = new NMS_Server_NO_Destroy(item.GetNetworkObject().Identity.Identifier);
+            NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
+        }
 	}
 }
