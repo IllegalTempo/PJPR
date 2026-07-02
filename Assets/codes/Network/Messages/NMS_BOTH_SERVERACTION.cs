@@ -14,8 +14,9 @@ namespace Assets.codes.Network.Messages
         protected abstract void serverAction();
         public override void ServerHandle(NetworkPlayer p)
         {
-            serverAction();
             base.ServerHandle(p);
+            serverAction();
+
         }
         public override void SendMessageAsServerOrClient()
         {

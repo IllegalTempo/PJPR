@@ -22,6 +22,8 @@ public class UIManager : MonoBehaviour
     private TMP_Text[] interactionName;
     [SerializeField]
     private TMP_Text[] interactionKey;
+    [SerializeField]
+    private TMP_Text GameObjectNameDisplay;
 
 
     [Header("SocialTab")]
@@ -66,6 +68,16 @@ public class UIManager : MonoBehaviour
         HideAllInteraction();
         SD_Group.SetActive(false);
         DID_Group.SetActive(false);
+        GameObjectNameDisplay.gameObject.SetActive(false);
+    }
+    public void DisplayGameObjectName(string name)
+    {
+        GameObjectNameDisplay.text = name;
+        GameObjectNameDisplay.gameObject.SetActive(true);
+    }
+    public void HideGameObjectName()
+    {
+        GameObjectNameDisplay.gameObject.SetActive(false);
     }
     public void DisplayDetailedItemDisplay(ItemDefinition item)
     {

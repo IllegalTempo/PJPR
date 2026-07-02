@@ -217,7 +217,7 @@ public partial class GameCore : MonoBehaviour
             NetworkSystem.Instance.FindNetworkIdentity.Remove(identifier);
         }
         ItemDefinition itd = item.AbstractItem;
-        if (itd != null) {
+        if (itd == null) {
             Debug.LogError($"Network Item {identifier} have no ItemDefinition");
         }
         Destroy(item.gameObject);

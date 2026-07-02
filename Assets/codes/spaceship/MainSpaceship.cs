@@ -1,4 +1,5 @@
 using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.spaceship;
 using Assets.codes.spaceship.modules;
 using Cysharp.Threading.Tasks;
 using System.Collections;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-public class MainSpaceship: MonoBehaviour
+public class MainSpaceship : MonoBehaviour
 {
     public static MainSpaceship Instance { get; private set; }
     private Animator animator;
@@ -18,6 +19,26 @@ public class MainSpaceship: MonoBehaviour
 
     public Dictionary<int, ModuleSlot> slot = new Dictionary<int, ModuleSlot>();
 
+    [SerializeField]
+    private OnSpaceshipCanvasDisplay spaceshipDisplay;
+
+
+
+
+    private int waterLevel = 0;
+    public int WaterLevel
+    {
+        set
+        {
+            waterLevel = value;
+            onUpdateWaterLevel();
+
+        }
+        get
+        {
+            return waterLevel;
+        }
+    }
     private void Update()
     {
         foreach (module m in slotModulePair.Values)
@@ -26,6 +47,11 @@ public class MainSpaceship: MonoBehaviour
 
         }
     }
+    private void onUpdateWaterLevel()
+    {
+        spaceshipDisplay.SetWaterAmount(waterLevel);
+    }
+    
     public module GetConnectedModule(int slot)
     {
         return slotModulePair.TryGetValue(slot, out module connectedModule) ? connectedModule : null;

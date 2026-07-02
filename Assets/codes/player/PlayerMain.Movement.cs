@@ -74,7 +74,7 @@ public partial class PlayerMain: MonoBehaviour
             bool isSelectableLayer = ((GameCore.Instance.Masks.SelectableItems.value & (1 << hit.transform.gameObject.layer)) != 0);
             Slot slot = hit.collider.GetComponent<Slot>();
             bool isSlotnFit = slot != null && holdingItem != null && holdingItem.FitIn(slot);
-            if (isSelectableLayer && (slot == null || isSlotnFit))
+            if (isSelectableLayer) // && (slot == null || isSlotnFit)
             {
                 seenObject = hit.collider.GetComponent<Selectable>();
 

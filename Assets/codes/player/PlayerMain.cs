@@ -259,6 +259,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             before.onLookedAway();
             UIManager.Instance.HideAllInteraction();
+            UIManager.Instance.HideGameObjectName();
         }
         // Handle looking at a new object
         if (@new != null)
@@ -274,30 +275,47 @@ public partial class PlayerMain : MonoBehaviour
 
     private void HandleNewObjectUI(Selectable @new)
     {
+        string displayname = @new.gameObject.name;
+
         if (@new is IUsable)
         {
             UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(), 1);
         }
 
-        if (@new is Item)
+        if (@new is Item item)
         {
             UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
+            displayname = item.AbstractItem.itemName;
         }
 
         if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s))
         {
-            UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
-            UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
+
+            if (s is Port)
+            {
+                UIManager.Instance.ShowInteraction("Put", control.Player.pickup.GetBindingDisplayString(), 0);
+
+            }
+            else
+            {
+                UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
+                UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
+            }
+            
         }
         else if (@new is Slot)
         {
-            UIManager.Instance.ShowInteraction("X", "", 0);
+
+            UIManager.Instance.ShowInteraction("Not Available", "", 0);
         }
+        UIManager.Instance.DisplayGameObjectName(displayname);
+
     }
+
 
     private void HandleSlotBinding(Selectable @new)
     {
-        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s))
+        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s) && s is not Port)
         {
             holdingItem.Bind(s);
         }

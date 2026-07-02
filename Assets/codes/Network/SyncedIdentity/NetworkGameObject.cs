@@ -14,7 +14,7 @@ namespace Assets.codes.Network.SyncedIdentity
         [SerializeField]
         public bool Sync_Transform = true;
         [SerializeField]
-        private float TransformSendInterval = 0.05f;
+        private float TransformSendInterval = 0.1f;
         public Vector3 NetworkPos;
         public Quaternion NetworkRot;
 

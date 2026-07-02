@@ -13,10 +13,10 @@ GameObject:
   - component: {fileID: 8560693315241799241}
   - component: {fileID: 7654441627472049708}
   - component: {fileID: 8408342509844641807}
-  - component: {fileID: 1966838199921870847}
   - component: {fileID: 8805416294591535998}
   - component: {fileID: 2927172489578457987}
   - component: {fileID: 4970903414125312380}
+  - component: {fileID: 1959766732902838900}
   m_Layer: 0
   m_Name: WaterCube
   m_TagString: Untagged
@@ -67,6 +67,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
   Sync_Transform: 1
+  TransformSendInterval: 0.05
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Identity: {fileID: 3327676935552135424}
@@ -115,34 +116,6 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
---- !u!114 &1966838199921870847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2643396718964329069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfb9e0c3552b4fc41a72ab2c2374ed65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Item
-  AbstractItem: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
-  netObj: {fileID: 8560693315241799241}
-  lockRelativeRotation: 0
-  IsPickable: 1
-  IsLocked: 0
-  itemType: 1
-  AttachedSlot: {fileID: 0}
-  BindSlot: {fileID: 0}
-  snapshot_start:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
-  snapshot_bind:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
 --- !u!65 &8805416294591535998
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -221,3 +194,31 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1959766732902838900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2643396718964329069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfb9e0c3552b4fc41a72ab2c2374ed65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  AbstractItem: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
+  netObj: {fileID: 8560693315241799241}
+  lockRelativeRotation: 0
+  IsPickable: 1
+  IsLocked: 0
+  itemType: 4
+  AttachedSlot: {fileID: 0}
+  BindSlot: {fileID: 0}
+  snapshot_start:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}
+  snapshot_bind:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    scale: {x: 0, y: 0, z: 0}

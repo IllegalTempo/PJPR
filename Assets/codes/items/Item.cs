@@ -18,7 +18,9 @@ public enum ItemType
     None = 0,
     Generic = 1 << 0,
     SpaceshipModule = 1 << 1,
-    All = SpaceshipModule,
+    Processable = 1 << 2,
+
+    All = Generic | SpaceshipModule | Processable,
 }
 /// <summary>
 /// Stores item transform state in LOCAL coordinate space.
