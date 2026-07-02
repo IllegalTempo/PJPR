@@ -19,6 +19,12 @@ public class MissionProjectionDisplay : MonoBehaviour
     private bool isVotingActive;
     private int selectedMissionIndex = -1;
 
+    /// <summary>
+    /// Set by MissionProjection.OnInteract when the local player votes.
+    /// Display uses this to show "You have voted for X".
+    /// </summary>
+    public static string LocalPlayerVotedMissionName { get; set; }
+
     public static MissionProjectionDisplay Instance { get; private set; }
 
     private void Awake()
@@ -51,7 +57,12 @@ public class MissionProjectionDisplay : MonoBehaviour
         int seconds = Mathf.CeilToInt(votingTimer);
         int mins = seconds / 60;
         int secs = seconds % 60;
-        timerText.text = $"Voting: {mins:00}:{secs:00}";
+        string timeStr = $"{mins:00}:{secs:00}";
+
+        if (!string.IsNullOrEmpty(LocalPlayerVotedMissionName))
+            timerText.text = $"You have voted for {LocalPlayerVotedMissionName} - {timeStr}";
+        else
+            timerText.text = $"Vote for a mission: {timeStr}";
     }
 
     public void ShowVotingMissions(Mission[] missions, float totalTime)
@@ -96,12 +107,20 @@ public class MissionProjectionDisplay : MonoBehaviour
         Debug.Log($"[MissionProjectionDisplay] Displaying {missionCount} missions. Timer: {totalTime}s");
     }
 
-    public void ShowVoteResult(int winningIndex)
+    public void ShowVoteResult(int winningIndex, string winningName = null)
     {
         isVotingActive = false;
+        LocalPlayerVotedMissionName = null; // Reset for next session
 
         if (timerText != null)
-            timerText.text = winningIndex >= 0 ? "Voting Ended!" : "No Winner";
+        {
+            if (winningIndex >= 0 && !string.IsNullOrEmpty(winningName))
+                timerText.text = $"Winner: {winningName}";
+            else if (winningIndex >= 0)
+                timerText.text = "Voting Ended!";
+            else
+                timerText.text = "No Winner";
+        }
 
         if (activeProjections == null)
             return;
@@ -151,6 +170,7 @@ public class MissionProjectionDisplay : MonoBehaviour
         selectedMissionIndex = -1;
         isVotingActive = false;
         votingTimer = 0f;
+        LocalPlayerVotedMissionName = null;
 
         if (timerText != null)
             timerText.text = "";
