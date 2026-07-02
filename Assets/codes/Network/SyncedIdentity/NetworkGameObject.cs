@@ -77,12 +77,12 @@ namespace Assets.codes.Network.SyncedIdentity
             NMS_Both_NetworkObjectInfo message = new NMS_Both_NetworkObjectInfo(Identity.Identifier, transform.position, transform.rotation);
             if (NetworkSystem.Instance.IsServer)
             {
-                NetworkRouter.Instance.DistributeMessageToReady(message);
+                NetworkRouter.Instance.DistributeMessageToReady(message, sendType: NetworkSendProfiles.State);
 
             }
             else if (GameCore.Instance.IsLocal(Identity.Sovereignty))
             {
-                NetworkRouter.Instance.SendMessageToServer(message);
+                NetworkRouter.Instance.SendMessageToServer(message, NetworkSendProfiles.State);
 
             }
             prevPos = transform.position;

@@ -6,24 +6,100 @@ using UnityEngine;
 
 public class Packet : IDisposable
 {
+    public const int ProtocolVersion = 1;
+    public const int HeaderSize = 16;
+
+    public NetworkPlayer sentBy;
+    public int PacketID { get; private set; }
+    public int Version { get; private set; }
+    public uint Sequence { get; private set; }
+    public int PayloadLength { get; private set; }
+    public int Length => readerbuffer?.Length ?? buffer?.Count ?? 0;
+    public int ReadIndex => readindex;
+    public int BytesRemaining => readerbuffer == null ? 0 : readerbuffer.Length - readindex;
+
     public Packet(int packetid)
     {
         buffer = new List<byte>();
-        Write(packetid);
+        PacketID = packetid;
         readindex = 0;
     }
-    public Packet(byte[] data)
+
+    public Packet(byte[] data, NetworkPlayer sentBySteamId)
     {
         readerbuffer = data;
+        this.sentBy = sentBySteamId;
+        ReadHeader();
     }
-    public byte[] GetPacketData()
+
+    public byte[] GetPacketData(uint sequence)
     {
+        byte[] payload = GetPayloadData();
+        List<byte> framedBuffer = new List<byte>(HeaderSize + payload.Length);
+        framedBuffer.AddRange(BitConverter.GetBytes(ProtocolVersion));
+        framedBuffer.AddRange(BitConverter.GetBytes(sequence));
+        framedBuffer.AddRange(BitConverter.GetBytes(PacketID));
+        framedBuffer.AddRange(BitConverter.GetBytes(payload.Length));
+        framedBuffer.AddRange(payload);
+        return framedBuffer.ToArray();
+    }
+
+    public byte[] GetPayloadData()
+    {
+        if (buffer == null)
+        {
+            throw new InvalidOperationException("Packet is not in write mode.");
+        }
+
         return buffer.ToArray();
     }
+
+    public byte[] GetPacketData()
+    {
+        return GetPacketData(0);
+    }
+
     private List<byte> buffer;
     private byte[] readerbuffer;
     private int readindex;
     private bool disposed = false;
+
+    private void ReadHeader()
+    {
+        readindex = 0;
+        Version = Readint();
+        if (Version != ProtocolVersion)
+        {
+            throw new InvalidOperationException($"Unsupported packet protocol {Version}. Expected {ProtocolVersion}.");
+        }
+
+        Sequence = Readuint();
+        PacketID = Readint();
+        PayloadLength = Readint();
+        if (PayloadLength < 0)
+        {
+            throw new InvalidOperationException($"Invalid payload length {PayloadLength}.");
+        }
+
+        if (BytesRemaining != PayloadLength)
+        {
+            throw new InvalidOperationException($"Packet payload length mismatch. Header says {PayloadLength}, buffer has {BytesRemaining}.");
+        }
+    }
+
+    private void EnsureCanRead(int byteCount)
+    {
+        if (readerbuffer == null)
+        {
+            throw new InvalidOperationException("Packet is not in read mode.");
+        }
+
+        if (byteCount < 0 || readindex + byteCount > readerbuffer.Length)
+        {
+            throw new InvalidOperationException($"Packet read overflow. Tried to read {byteCount} byte(s) at {readindex}, size {readerbuffer.Length}.");
+        }
+    }
+
     //Credit to https://stackoverflow.com/questions/151051/when-should-i-use-gc-suppressfinalize for dispose method
     protected virtual void Dispose(bool disposing)
     {
@@ -61,6 +137,10 @@ public class Packet : IDisposable
     {
         buffer.AddRange(BitConverter.GetBytes(i));
     }
+    public void Write(uint i)
+    {
+        buffer.AddRange(BitConverter.GetBytes(i));
+    }
     public void Write(Guid uuid)
     {
         buffer.AddRange(uuid.ToByteArray());
@@ -92,16 +172,19 @@ public class Packet : IDisposable
     }
     public void WriteASCII(string text)
     {
+        text ??= string.Empty;
         Write(text.Length);
         buffer.AddRange(Encoding.ASCII.GetBytes(text));
     }
     public void WriteUNICODE(string text)
     {
+        text ??= string.Empty;
         Write(text.Length * 2);
         buffer.AddRange(Encoding.Unicode.GetBytes(text));
     }
     public void Write(byte[] bytes)
     {
+        bytes ??= Array.Empty<byte>();
         Write(bytes.Length);
         buffer.AddRange(bytes);
     }
@@ -109,42 +192,56 @@ public class Packet : IDisposable
     #region Read Packet
     public int Readint()
     {
+        EnsureCanRead(4);
         int data = BitConverter.ToInt32(readerbuffer, readindex);
+        readindex += 4;
+        return data;
+    }
+    public uint Readuint()
+    {
+        EnsureCanRead(4);
+        uint data = BitConverter.ToUInt32(readerbuffer, readindex);
         readindex += 4;
         return data;
     }
     public float Readfloat()
     {
+        EnsureCanRead(4);
         float data = BitConverter.ToSingle(readerbuffer, readindex);
         readindex += 4;
         return data;
     }
     public long Readlong()
     {
+        EnsureCanRead(8);
         long data = BitConverter.ToInt64(readerbuffer, readindex);
         readindex += 8;
         return data;
     }
     public short Readshort()
     {
+        EnsureCanRead(2);
         short data = BitConverter.ToInt16(readerbuffer, readindex);
         readindex += 2;
         return data;
     }
     public ulong Readulong()
     {
+        EnsureCanRead(8);
         ulong data = BitConverter.ToUInt64(readerbuffer, readindex);
         readindex += 8;
         return data;
     }
     public bool Readbool()
     {
+        EnsureCanRead(1);
         bool data = BitConverter.ToBoolean(readerbuffer, readindex);
         readindex += 1;
         return data;
     }
     public Guid ReadGuid()
     {
+        EnsureCanRead(16);
         byte[] data = new byte[16];
         Buffer.BlockCopy(readerbuffer, readindex, data, 0, 16);
         readindex += 16;
@@ -153,13 +250,25 @@ public class Packet : IDisposable
     public string ReadstringASCII()
     {
         int stringlength = Readint();
+        if (stringlength < 0)
+        {
+            throw new InvalidOperationException($"Invalid ASCII string byte length {stringlength}.");
+        }
+
+        EnsureCanRead(stringlength);
         string data = Encoding.ASCII.GetString(readerbuffer, readindex, stringlength);
-        readindex += data.Length;
+        readindex += stringlength;
         return data;
     }
     public string ReadstringUNICODE()
     {
         int stringlength = Readint();
+        if (stringlength < 0 || stringlength % 2 != 0)
+        {
+            throw new InvalidOperationException($"Invalid unicode string byte length {stringlength}.");
+        }
+
+        EnsureCanRead(stringlength);
         string data = Encoding.Unicode.GetString(readerbuffer, readindex, stringlength);
         readindex += stringlength;
         return data;
@@ -175,6 +284,12 @@ public class Packet : IDisposable
     public byte[] ReadBytesArray()
     {
         int intlength = Readint();
+        if (intlength < 0)
+        {
+            throw new InvalidOperationException($"Invalid byte array length {intlength}.");
+        }
+
+        EnsureCanRead(intlength);
         byte[] data = new byte[intlength];
         Buffer.BlockCopy(readerbuffer, readindex, data, 0, intlength);
         readindex += intlength;

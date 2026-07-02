@@ -78,15 +78,17 @@ public class GameClient : ConnectionManager
         base.OnMessage(data, size, messageNum, recvTime, channel);
 
 
-        byte* bytepointer = (byte*)data.ToPointer();
         byte[] bytedata = new byte[size];
         Marshal.Copy(data, bytedata, 0, size);
         float latency = Time.realtimeSinceStartup * 1000f - recvTime;
-        using (Packet packet = new Packet(bytedata))
+        try
         {
-            NetworkRouter.Instance.OnClientReceivePacket(packet);
-            
-
+            Packet packet = new Packet(bytedata,null);
+            NetworkRouter.Instance.AddToPacketQueue(packet);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Rejected malformed client packet size={size}: {ex}");
         }
     }
 }

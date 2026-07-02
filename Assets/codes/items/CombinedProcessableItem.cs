@@ -7,7 +7,7 @@ namespace Assets.codes.items
 	public class CombinedProcessableItem: Item
 	{
 		public Dictionary<ItemDefinition,int> Processables = new Dictionary<ItemDefinition,int>();
-		public void CombineIntoThis(Item item)
+		public void CombineIntoThis(Item item) //run by both client and server
 		{
 			if(Processables.ContainsKey(item.AbstractItem))
 			{

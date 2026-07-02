@@ -233,10 +233,20 @@ public class GameServer : SocketManager
         Marshal.Copy(data, bytedata, 0, size);
         float latency = Time.realtimeSinceStartup * 1000f - recvTime;
 
-        using (Packet packet = new Packet(bytedata))
+        try
         {
-            NetworkRouter.Instance.OnServerReceivePacket(packet, NetworkUsers[identity.SteamId]);
+            if (!NetworkUsers.TryGetValue(identity.SteamId, out NetworkPlayer sender))
+            {
+                Debug.LogWarning($"Rejected packet from unknown SteamId {identity.SteamId}.");
+                return;
+            }
 
+            Packet packet = new Packet(bytedata, sender);
+            NetworkRouter.Instance.AddToPacketQueue(packet);    
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Rejected malformed server packet from={identity.SteamId} size={size}: {ex}");
         }
     }
 

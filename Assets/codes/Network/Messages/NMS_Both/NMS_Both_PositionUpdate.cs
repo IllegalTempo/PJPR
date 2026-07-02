@@ -34,7 +34,7 @@ namespace Assets.codes.Network.Messages
             if (p.steamId != SourceNetworkID) return;
 
             applyaction();
-            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId, SendType.Unreliable);
+            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId, NetworkSendProfiles.State);
         }
 
         public override void Write(Packet p)

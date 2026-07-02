@@ -28,7 +28,7 @@ namespace Assets.codes.Network.Messages
         {
             if (playerid != player.steamId) return;
             player.player.playerControl.ReceiveVoice(data);
-            NetworkRouter.Instance.DistributeMessageToReady(this,player.steamId);
+            NetworkRouter.Instance.DistributeMessageToReady(this, player.steamId, NetworkSendProfiles.Voice);
         }
 
         public void ClientHandle()

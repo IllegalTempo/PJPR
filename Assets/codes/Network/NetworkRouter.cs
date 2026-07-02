@@ -8,9 +8,19 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
+    public static class NetworkSendProfiles
+    {
+        public const SendType Critical = SendType.Reliable;
+        public const SendType State = SendType.Unreliable;
+        public const SendType Voice = SendType.Unreliable;
+    }
+
     public class NetworkRouter: MonoBehaviour
     {
         public static NetworkRouter Instance;
+        private readonly Queue<Packet> packetQueue = new();
+        private uint outgoingSequence;
+
         private void Awake()
         {
             Instance = this;
@@ -50,13 +60,38 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ClientPackets.RequestVotingSession, NMS_Client_RequestVotingSession.Read },
             { (int)packets.ClientPackets.CastVote, NMS_Client_CastVote.Read },
         };
+        public uint NextOutgoingSequence()
+        {
+            unchecked
+            {
+                outgoingSequence++;
+                if (outgoingSequence == 0)
+                {
+                    outgoingSequence = 1;
+                }
+
+                return outgoingSequence;
+            }
+        }
+
+        public void AddToPacketQueue(Packet packet)
+        {
+            if (packet == null)
+            {
+                return;
+            }
+
+            packetQueue.Enqueue(packet);
+        }
+
         public void UpdateReadyState(ReadyState state)
         {
             int readyState = (int)state;
             NetworkSystem.Instance.initState = readyState;
-            SendMessageToServer(new NMS_Client_ReadyState(readyState));
+            SendMessageToServer(new NMS_Client_ReadyState(readyState), NetworkSendProfiles.Critical);
         }
-        public Result SendMessageToServer(NMS message, SendType sendType = SendType.Reliable)
+
+        public Result SendMessageToServer(NMS message, SendType sendType = NetworkSendProfiles.Critical)
         {
             using (Packet p = new Packet(message.PacketID))
             {
@@ -71,7 +106,7 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result SendMessageToClient(NetworkPlayer player, NMS message, SendType sendType = SendType.Reliable)
+        public Result SendMessageToClient(NetworkPlayer player, NMS message, SendType sendType = NetworkSendProfiles.Critical)
         {
             using (Packet p = new Packet(message.PacketID))
             {
@@ -86,7 +121,7 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result DistributeMessage(ulong exclude, NMS message, SendType sendType = SendType.Reliable)
+        public Result DistributeMessage(ulong exclude, NMS message, SendType sendType = NetworkSendProfiles.Critical)
         {
             using (Packet p = new Packet(message.PacketID))
             {
@@ -101,7 +136,7 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result DistributeMessageToReady(NMS message, ulong exclude = 0, SendType sendType = SendType.Reliable)
+        public Result DistributeMessageToReady(NMS message, ulong exclude = 0, SendType sendType = NetworkSendProfiles.Critical)
         {
             using (Packet p = new Packet(message.PacketID))
             {
@@ -115,28 +150,67 @@ namespace Assets.codes.Network.Messages
                 return result;
             }
         }
-
-        public void OnServerReceivePacket(Packet packet, NetworkPlayer player)
+        private void Update()
         {
-            NMS message = GetMessageByPacketID(packet, clientMessages);
-            if (message is IServerHandle serverHandle)
+            while (packetQueue.TryDequeue(out var packet))
             {
-                serverHandle.ServerHandle(player);
+                try
+                {
+                    if(NetworkSystem.Instance.IsServer)
+                    {
+                        OnServerReceivePacket(packet);
+                    }
+                    else
+                    {
+                        OnClientReceivePacket(packet);
+                    }
+                }
+                finally
+                {
+                    packet.Dispose();
+                }
+            }
+        }
+
+        public void OnServerReceivePacket(Packet packet)
+        {
+            try
+            {
+                NMS message = GetMessageByPacketID(packet, clientMessages);
+                if (message is IServerHandle serverHandle)
+                {
+                    serverHandle.ServerHandle(packet.sentBy);
+                }
+
+                WarnIfUnreadBytes(packet);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to handle server-bound packet id={packet.PacketID} seq={packet.Sequence} from={packet.sentBy?.SteamName ?? "unknown"} size={packet.Length}: {ex}");
             }
         }
 
         public void OnClientReceivePacket(Packet packet)
         {
-            NMS message = GetMessageByPacketID(packet, serverMessages);
-            if (message is IClientHandle clientHandle)
+            try
             {
-                clientHandle.ClientHandle();
+                NMS message = GetMessageByPacketID(packet, serverMessages);
+                if (message is IClientHandle clientHandle)
+                {
+                    clientHandle.ClientHandle();
+                }
+
+                WarnIfUnreadBytes(packet);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to handle client-bound packet id={packet.PacketID} seq={packet.Sequence} size={packet.Length}: {ex}");
             }
         }
 
         private NMS GetMessageByPacketID(Packet packet, Dictionary<int, Func<Packet, NMS>> directionMessages)
         {
-            int packetID = packet.Readint();
+            int packetID = packet.PacketID;
             if (directionMessages.TryGetValue(packetID, out Func<Packet, NMS> directionFactory))
             {
                 return directionFactory(packet);
@@ -151,7 +225,15 @@ namespace Assets.codes.Network.Messages
             return null;
         }
 
-        private Result SendToServer(Packet p, SendType sendType = SendType.Reliable)
+        private void WarnIfUnreadBytes(Packet packet)
+        {
+            if (packet.BytesRemaining > 0)
+            {
+                Debug.LogWarning($"Packet id={packet.PacketID} seq={packet.Sequence} had {packet.BytesRemaining} unread byte(s).");
+            }
+        }
+
+        private Result SendToServer(Packet p, SendType sendType = NetworkSendProfiles.Critical)
         {
             Connection server = NetworkSystem.Instance.GetServerConnection();
             if (server.Equals(default(Connection)))
@@ -167,12 +249,12 @@ namespace Assets.codes.Network.Messages
             return BroadcastPacket(9999, p);
         }
 
-        public Result BroadcastPacket(ConnectionInfo info, Packet p, SendType sendType = SendType.Reliable)
+        public Result BroadcastPacket(ConnectionInfo info, Packet p, SendType sendType = NetworkSendProfiles.Critical)
         {
             return BroadcastPacket(info.Identity.SteamId, p, sendType);
         }
 
-        public Result BroadcastPacket(ulong excludeid, Packet p, SendType sendType = SendType.Reliable)
+        public Result BroadcastPacket(ulong excludeid, Packet p, SendType sendType = NetworkSendProfiles.Critical)
         {
             if (NetworkSystem.Instance == null || NetworkSystem.Instance.Server == null || NetworkSystem.Instance.Server.NetworkUsers == null)
             {
@@ -196,7 +278,7 @@ namespace Assets.codes.Network.Messages
             return Result.OK;
         }
 
-        public Result BroadcastPacketToReady(Packet p,string messagename, ulong excludeid = 0, SendType sendType = SendType.Reliable)
+        public Result BroadcastPacketToReady(Packet p,string messagename, ulong excludeid = 0, SendType sendType = NetworkSendProfiles.Critical)
         {
             if (NetworkSystem.Instance == null || NetworkSystem.Instance.Server == null || NetworkSystem.Instance.Server.NetworkUsers == null)
             {
@@ -221,9 +303,9 @@ namespace Assets.codes.Network.Messages
             return Result.OK;
         }
 
-        public Result SendPacketToConnection(Connection c, Packet p, SendType sendType = SendType.Reliable)
+        public Result SendPacketToConnection(Connection c, Packet p, SendType sendType = NetworkSendProfiles.Critical)
         {
-            byte[] data = p.GetPacketData();
+            byte[] data = p.GetPacketData(NextOutgoingSequence());
             IntPtr datapointer = Marshal.AllocHGlobal(data.Length);
             Marshal.Copy(data, 0, datapointer, data.Length);
             Result result = c.SendMessage(datapointer, data.Length, sendType);

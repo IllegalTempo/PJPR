@@ -69,11 +69,11 @@ public class NetworkPlayerObject : MonoBehaviour
             NMS_Both_PositionUpdate msg = new NMS_Both_PositionUpdate(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
             if (NetworkSystem.Instance.IsServer)
             {
-                NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: SendType.Unreliable);
+                NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.State);
             }
             else
             {
-                NetworkRouter.Instance.SendMessageToServer(msg, SendType.Unreliable);
+                NetworkRouter.Instance.SendMessageToServer(msg, NetworkSendProfiles.State);
             }
         }
         

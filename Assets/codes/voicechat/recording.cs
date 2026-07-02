@@ -101,11 +101,11 @@ public class recording : MonoBehaviour
         NMS_Both_VoicePacket msg = new NMS_Both_VoicePacket(pcmBytes,NetworkSystem.Instance.SteamID);
         if (NetworkSystem.Instance.IsServer)
         {
-            NetworkRouter.Instance.DistributeMessageToReady(msg);
+            NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Voice);
         }
         else
         {
-            NetworkRouter.Instance.SendMessageToServer(msg);
+            NetworkRouter.Instance.SendMessageToServer(msg, NetworkSendProfiles.Voice);
         }
             lastMicPosition = currentPos;
     }

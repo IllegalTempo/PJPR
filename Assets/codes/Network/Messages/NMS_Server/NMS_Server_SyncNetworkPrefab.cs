@@ -116,6 +116,7 @@ namespace Assets.codes.Network.Messages
                     Debug.LogError($"Failed to attach item {snapshot.AttachedItemId} to slot {snapshot.SlotId}. Slot or Item not found.");
                 }
             }
+
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
         }
 
