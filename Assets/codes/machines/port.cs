@@ -22,8 +22,7 @@ public abstract class Port : Slot //port are slots that will unrealize the item 
     public override void ServerActionOnAttach(Item item, Quaternion rot)
     {
         base.ServerActionOnAttach(item, rot);
-        var msg = new NMS_Server_NO_Destroy(item.GetNetworkObject().Identity.Identifier);
-        NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
+        GameCore.Instance.ServerDestroyNetworkItem(item);
     }
     public override void Detach()
     {

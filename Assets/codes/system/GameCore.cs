@@ -1,3 +1,4 @@
+using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
 using Assets.codes.system;
 using Cysharp.Threading.Tasks;
@@ -195,7 +196,15 @@ public partial class GameCore : MonoBehaviour
         await nobj.Identity.StartTask;
         return nobj;
     }
-    public void DestroyNetworkIdentity(string id) //run by both server and client
+    public void ServerDestroyNetworkItem(Item item)
+    {
+        string identifier = item.GetNetworkObject().Identity.Identifier;
+        var msg = new NMS_Server_NO_Destroy(identifier);
+        NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
+        DestroyNetworkIdentity(identifier);
+
+    }
+    public void DestroyNetworkIdentity(string id) //Dont RUN THIS
     {
         NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;
         if (obj == null)

@@ -287,7 +287,6 @@ namespace Assets.codes.Network.Messages
 
             foreach (NetworkPlayer player in NetworkSystem.Instance.Server.NetworkUsers.Values)
             {
-                Debug.Log($"[BPTR] Broadcasting packet {messagename} to player: {player.SteamName} | ReadyState: {player.ReadyState} | excludeID: {excludeid} | playerID: {player.steamId} ");
                 if (player == null || player.steamId == excludeid || player.ReadyState != (int)ReadyState.SyncNetworkObjects)
                 {
                     continue;

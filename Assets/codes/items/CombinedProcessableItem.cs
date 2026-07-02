@@ -20,8 +20,8 @@ namespace Assets.codes.items
 		}
 		public void ServerAction_Combine(Item item)
 		{
-            var msg = new NMS_Server_NO_Destroy(item.GetNetworkObject().Identity.Identifier);
-            NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
+			GameCore.Instance.ServerDestroyNetworkItem(item);
+		
         }
 	}
 }
