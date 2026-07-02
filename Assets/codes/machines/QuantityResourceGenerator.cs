@@ -27,7 +27,7 @@ namespace Assets.codes.machines
 
             if (resource != null)
 			{
-                await UniTask.Delay(1000);
+                await UniTask.Delay(100);
                 NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
 			}
 		}

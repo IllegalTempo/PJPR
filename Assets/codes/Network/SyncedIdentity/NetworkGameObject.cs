@@ -21,6 +21,7 @@ namespace Assets.codes.Network.SyncedIdentity
         private Vector3 prevPos;
         private Quaternion prevRot;
         private float nextTransformSendTime;
+        private bool initializedTransformSendDelay;
 
 
 
@@ -93,6 +94,11 @@ namespace Assets.codes.Network.SyncedIdentity
             if (NetworkSystem.Instance == null)
             {
                 return;
+            }
+            if (Sync_Transform && !initializedTransformSendDelay)
+            {
+                nextTransformSendTime = Time.time + 0.1f;
+                initializedTransformSendDelay = true;
             }
             if (Sync_Transform && Time.time >= nextTransformSendTime)
             {
