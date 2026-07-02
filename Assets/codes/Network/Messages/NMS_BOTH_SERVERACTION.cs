@@ -30,6 +30,7 @@ namespace Assets.codes.Network.Messages
             {
                 NetworkRouter.Instance.DistributeMessageToReady(this);
                 applyaction();
+                serverAction();
             }
             else
             {
