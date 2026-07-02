@@ -33,16 +33,16 @@ public class MissionManager : MonoBehaviour
     private void OnEnable()
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful += OnPlayerJoined;
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerFullySynced += OnPlayerFullySynced;
     }
 
     private void OnDisable()
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_OnPlayerJoinSuccessful -= OnPlayerJoined;
+            NetworkSystem.Instance.NetworkListener.Server_OnPlayerFullySynced -= OnPlayerFullySynced;
     }
 
-    private void OnPlayerJoined(NetworkPlayer player)
+    private void OnPlayerFullySynced(NetworkPlayer player)
     {
         if (!IsVotingActive || CurrentVotingMissions == null)
             return;
@@ -56,7 +56,7 @@ public class MissionManager : MonoBehaviour
         var voteMsg = new NMS_Server_VoteUpdate(counts);
         NetworkRouter.Instance.SendMessageToClient(player, voteMsg);
 
-        Debug.Log($"[MissionManager] Synced active voting session to new player {player.SteamName}");
+        Debug.Log($"[MissionManager] Synced active voting session to fully-synced player {player.SteamName}");
     }
 
     private int[] GetCurrentVoteCounts()

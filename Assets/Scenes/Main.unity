@@ -8891,7 +8891,7 @@ MonoBehaviour:
   horizontalSpacing: 3
   verticalOffset: 2
   projectionScale: 1
-  timerText: {fileID: 0}
+  timerText: {fileID: 1151143831}
 --- !u!4 &635301300
 Transform:
   m_ObjectHideFlags: 0
@@ -12526,7 +12526,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e59c76a03b4e6284ebac7cdf2dab8c3b, type: 2}
   m_sharedMaterial: {fileID: 6170883552276857559, guid: e59c76a03b4e6284ebac7cdf2dab8c3b, type: 2}
