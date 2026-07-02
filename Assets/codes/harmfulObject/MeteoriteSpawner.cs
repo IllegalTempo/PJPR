@@ -38,13 +38,6 @@ public class MeteoriteSpawner : MonoBehaviour
     private bool isWaveActive = false;
     private int currentWaveMeteorites = 0;
 
-    private bool IsServerAuthority
-    {
-        get
-        {
-            return NetworkSystem.Instance == null || NetworkSystem.Instance.IsServer;
-        }
-    }
     
     public enum SpawnAreaType
     {
@@ -55,7 +48,7 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void Start()
     {
-        if (!IsServerAuthority)
+        if (!NetworkSystem.Instance.IsWorldManager)
         {
             enabled = false;
             return;
@@ -85,7 +78,7 @@ public class MeteoriteSpawner : MonoBehaviour
 
     void Update()
     {
-        if (!IsServerAuthority)
+        if (!NetworkSystem.Instance.IsWorldManager)
         {
             return;
         }
@@ -137,7 +130,7 @@ public class MeteoriteSpawner : MonoBehaviour
 
     async UniTask SpawnMeteorite()
     {
-        if (!NetworkSystem.Instance.IsServer) return;
+        if (!NetworkSystem.Instance.IsWorldManager) return;
         string prefabID = GetRandomMeteoritePrefabID();
         if (string.IsNullOrEmpty(prefabID))
         {

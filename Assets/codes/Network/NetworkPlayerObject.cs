@@ -1,6 +1,7 @@
 using Assets.codes.Network.Messages;
 using Cysharp.Threading.Tasks;
 using Steamworks;
+using Steamworks.Data;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
 using static UnityEngine.GraphicsBuffer;
@@ -68,11 +69,11 @@ public class NetworkPlayerObject : MonoBehaviour
             NMS_Both_PositionUpdate msg = new NMS_Both_PositionUpdate(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
             if (NetworkSystem.Instance.IsServer)
             {
-                NetworkRouter.Instance.DistributeMessageToReady(msg);
+                NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: SendType.Unreliable);
             }
             else
             {
-                NetworkRouter.Instance.SendMessageToServer(msg);
+                NetworkRouter.Instance.SendMessageToServer(msg, SendType.Unreliable);
             }
         }
         

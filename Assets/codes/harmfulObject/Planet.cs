@@ -26,7 +26,6 @@ public class Planet : HarmfulObject
     [SerializeField] private GameObject meteoriteRingPrefab;
 
     private Rigidbody rb;
-    private bool IsServerAuthority => NetworkSystem.Instance == null || NetworkSystem.Instance.IsServer;
 
     private void Awake()
     {
@@ -61,7 +60,7 @@ public class Planet : HarmfulObject
     
     private void FixedUpdate()
     {
-        if (IsServerAuthority && rb != null && movementDirection.magnitude > 0 && movementSpeed > 0)
+        if (NetworkSystem.Instance.IsWorldManager && rb != null && movementDirection.magnitude > 0 && movementSpeed > 0)
         {
             rb.MovePosition(rb.position + movementDirection.normalized * movementSpeed * Time.fixedDeltaTime);
         }
@@ -76,7 +75,7 @@ public class Planet : HarmfulObject
     private void OnCollisionEnter(Collision collision)
     {
         // Only the server applies damage; clients just see the visual collision
-        if (!IsServerAuthority) return;
+        if (!NetworkSystem.Instance.IsWorldManager) return;
 
         GameObject hit = collision.gameObject;
         //Spaceship spaceship = hit.GetComponent<Spaceship>();

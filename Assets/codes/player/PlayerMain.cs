@@ -118,10 +118,7 @@ public partial class PlayerMain : MonoBehaviour
 
         if (usable != null)
         {
-            NetworkPrefabIdentity netObj = (usable as MonoBehaviour).GetComponent<NetworkPrefabIdentity>();
-            if (netObj == null) return;
-            NMS_Both_Interact msg = new NMS_Both_Interact(networkinfo.steamID, netObj.Identifier);
-            msg.SendMessageAsServerOrClient();
+            usable.OnInteract(this);
         }
     }
 
@@ -181,19 +178,6 @@ public partial class PlayerMain : MonoBehaviour
 
             // Apply rotation relative to slot's current rotation
             holdingItem.transform.rotation = rotationIncrement * holdingItem.transform.rotation;
-
-            // Network sync: The item's NetworkObject has Sync_Transform enabled,
-            // so the rotation change will be automatically synchronized to other players
-            if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
-            {
-                NetworkGameObject netObj = holdingItem.GetNetworkObject();
-                if (netObj != null)
-                {
-                    // Rotation sync happens automatically through NetworkObject
-                    // Update NetworkRot to reflect the new rotation for consistency
-                    netObj.NetworkRot = holdingItem.transform.rotation;
-                }
-            }
 
             Debug.Log($"Item rotated 90 degrees around {boundSlot.name}'s Y-axis");
         }

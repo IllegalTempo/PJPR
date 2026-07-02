@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6c48255ac433c4b9028e34891ab248, type: 3}
+  m_Name: WaterCube
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemName: WaterCube
+  itemDescription: Keep things cool!
+  itemIcon: {fileID: 0}
+  itemPrefab: {fileID: 2643396718964329069, guid: 35bb0f184cdc0b2498e9314725fd5ce1, type: 3}
+  prefabID: QuantityResources_WaterCube
+  maxStackSize: 64
+  holdState:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    scale: {x: 0.01, y: 0.01, z: 0.01}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_SlotAttach : NMS_BOTH_SHARE
+    public class NMS_Both_SlotAttach : NMS_BOTH_SERVERACTION
     {
         private readonly string SlotId; //slot id is now the name of the slot gameobject as there will be no extra slot added to the game, if this is the case, put networkobject into slots
         private readonly string ItemId;
@@ -33,7 +33,14 @@ namespace Assets.codes.Network.Messages
         protected override void applyaction()
         {
             Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(ItemId);
-            NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).Attach(ItemId,installedRotation);
+            NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).Attach(item,installedRotation);
+        }
+
+        protected override void serverAction()
+        {
+            Item item = NetworkSystem.Instance.GetComponentOfIdentity<Item>(ItemId);
+            NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).ServerActionOnAttach(item, installedRotation);
+
         }
     }
 }

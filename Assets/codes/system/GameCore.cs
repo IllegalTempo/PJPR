@@ -24,7 +24,6 @@ public partial class GameCore : MonoBehaviour
     public recording vc;
     public options Option;
     public PlayerInputAction PlayerControl;
-    [SerializeField] private NetworkPrefabRegistry prefabRegistry;
 
     public Dictionary<string, string> GetDecorationWithID = new Dictionary<string, string>
     {
@@ -123,20 +122,9 @@ public partial class GameCore : MonoBehaviour
     //{
     //    return SpaceshipSpawns[index];
     //}
-    public NetworkPrefabRegistry GetPrefabRegistry()
-    {
-        if (prefabRegistry == null)
-        {
-            prefabRegistry = Resources.Load<NetworkPrefabRegistry>(NetworkPrefabRegistry.ResourcesPath);
-        }
-
-        return prefabRegistry;
-    }
-
     public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
     {
-        NetworkPrefabRegistry registry = GetPrefabRegistry();
-        if (registry != null && registry.TryGetPrefab(prefabID, out prefab))
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefab(prefabID, out prefab))
         {
             return true;
         }
@@ -147,14 +135,7 @@ public partial class GameCore : MonoBehaviour
 
     public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
     {
-        if (prefab == null)
-        {
-            prefabID = null;
-            return false;
-        }
-
-        NetworkPrefabRegistry registry = GetPrefabRegistry();
-        if (registry != null && registry.TryGetId(prefab, out prefabID))
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefabID(prefab, out prefabID))
         {
             return true;
         }
@@ -219,14 +200,28 @@ public partial class GameCore : MonoBehaviour
         NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;
         if (obj == null)
         {
-            Debug.LogWarning("Tried to destroy a null NetworkObject.");
+            Debug.LogError("Tried to destroy a null NetworkObject.");
             return;
         }
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(obj.Identifier))
         {
             NetworkSystem.Instance.FindNetworkIdentity.Remove(obj.Identifier);
         }
-        GameObject.Destroy(obj.gameObject);
+        Destroy(obj.gameObject);
+    }
+    public ItemDefinition DestroyNetworkItem(Item item) //run by both server and client
+    {
+        string identifier = item.GetNetworkObject().Identity.Identifier;
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(identifier))
+        {
+            NetworkSystem.Instance.FindNetworkIdentity.Remove(identifier);
+        }
+        ItemDefinition itd = item.AbstractItem;
+        if (itd != null) {
+            Debug.LogError($"Network Item {identifier} have no ItemDefinition");
+        }
+        Destroy(item.gameObject);
+        return itd;
     }
     public bool IsLocal(ulong id)
     {

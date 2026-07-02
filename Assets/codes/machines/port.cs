@@ -6,14 +6,26 @@ public enum portType
     output,
     both
 }
-public class Port : Slot //port are slots that will unrealize the item that is attached to it
+public abstract class Port : Slot //port are slots that will unrealize the item that is attached to it
 {
-    public storage LinkedStorage;
     public portType type;
     //public override void Attach(Item item)
     //{
     //    if (LinkedStorage == null || LinkedStorage.IsFull()) return;
 
     //}
+    public override void Attach(Item item, Quaternion rot)
+    {
+
+    }
+    public override void ServerActionOnAttach(Item item, Quaternion rot)
+    {
+        base.ServerActionOnAttach(item, rot);
+        GameCore.Instance.DestroyNetworkItem(item);
+    }
+    public override void Detach()
+    {
+        
+    }
 
 }

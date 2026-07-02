@@ -152,8 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fdba27a8f144704fb90d14122635a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::module
-  AbstractItem: {fileID: 11400000, guid: 2f9dc6acd59c451438f1585d2ba08a32, type: 2}
-  netObj: {fileID: 0}
+  AbstractItem: {fileID: 11400000, guid: 832f0feb00c17d8499897aead84d8318, type: 2}
+  netObj: {fileID: 8841288140222148758}
   lockRelativeRotation: 0
   IsPickable: 1
   IsLocked: 0

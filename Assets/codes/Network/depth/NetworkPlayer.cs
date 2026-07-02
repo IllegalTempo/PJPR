@@ -33,18 +33,18 @@ public class NetworkPlayer
         this.connection = connection;
         this.steamId = steamid;
     }
-    private Result SendData(byte[] data)
+    private Result SendData(byte[] data, SendType sendType = SendType.Reliable)
     {
         IntPtr datapointer = Marshal.AllocHGlobal(data.Length);
         Marshal.Copy(data, 0, datapointer, data.Length);
-        Result r = connection.SendMessage(datapointer, data.Length,SendType.Reliable);
+        Result r = connection.SendMessage(datapointer, data.Length, sendType);
         Marshal.FreeHGlobal(datapointer);
         return r;
         
     }
-    public Result SendPacket(Packet p)
+    public Result SendPacket(Packet p, SendType sendType = SendType.Reliable)
     {
-        return SendData(p.GetPacketData());
+        return SendData(p.GetPacketData(), sendType);
     }
 
     public void Disconnect()

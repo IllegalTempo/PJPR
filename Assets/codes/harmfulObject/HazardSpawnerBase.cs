@@ -11,13 +11,11 @@ public abstract class HazardSpawnerBase : MonoBehaviour
     [SerializeField] protected float spawnRadius = 150f;
     [SerializeField] protected float minSpawnDistance = 50f;
 
-    protected bool IsServerAuthority =>
-        NetworkSystem.Instance == null || NetworkSystem.Instance.IsServer;
 
 
     protected virtual void Start()
     {
-        if (!IsServerAuthority)
+        if (!NetworkSystem.Instance.IsWorldManager)
         {
             enabled = false;
             return;
@@ -36,7 +34,7 @@ public abstract class HazardSpawnerBase : MonoBehaviour
         Vector3 position,
         Quaternion rotation)
     {
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsServer)
+        if (NetworkSystem.Instance.IsWorldManager)
         {
             string id = GetPrefabID(prefabs, prefabIDs);
             if (!string.IsNullOrEmpty(id))

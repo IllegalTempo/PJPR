@@ -5,6 +5,7 @@ using Steamworks;
 using Steamworks.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
@@ -13,6 +14,7 @@ using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
 using UnityEngine.Identifiers;
 using UnityEngine.Rendering.Universal;
+using Debug = UnityEngine.Debug;
 
 public partial class NetworkSystem : MonoBehaviour
 {
@@ -25,8 +27,11 @@ public partial class NetworkSystem : MonoBehaviour
     public NetworkListener NetworkListener;
     public bool IsOnline = false;
     public bool IsServer = true;
+    public bool IsWorldManager => !IsOnline || IsServer; //If the machine manage own world, either offline or isServer
     public Dictionary<string, NetworkIdentity> FindNetworkIdentity = new Dictionary<string, NetworkIdentity>();
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
+    private readonly Dictionary<string, GameObject> _networkPrefabsById = new Dictionary<string, GameObject>();
+    private readonly Dictionary<GameObject, string> _networkPrefabIdsByPrefab = new Dictionary<GameObject, string>();
     //All player list
     public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
     public List<Slot> Slots = new List< Slot>();
@@ -45,6 +50,7 @@ public partial class NetworkSystem : MonoBehaviour
         {
             Instance = this;
             NetworkListener = new NetworkListener();
+            RebuildNetworkPrefabLookup();
 
         }
         else
@@ -65,6 +71,64 @@ public partial class NetworkSystem : MonoBehaviour
             
         }
         return component;
+    }
+
+    public void RebuildNetworkPrefabLookup()
+    {
+        _networkPrefabsById.Clear();
+        _networkPrefabIdsByPrefab.Clear();
+
+        ItemDefinition[] itemDefinitions = Resources.LoadAll<ItemDefinition>("Prefabs");
+        foreach (ItemDefinition itemDefinition in itemDefinitions)
+        {
+            if (itemDefinition == null || itemDefinition.itemPrefab == null || string.IsNullOrWhiteSpace(itemDefinition.prefabID))
+            {
+                continue;
+            }
+
+            if (_networkPrefabsById.ContainsKey(itemDefinition.prefabID))
+            {
+                Debug.LogError($"Duplicate item prefab ID '{itemDefinition.prefabID}' found while building network prefab lookup.");
+                continue;
+            }
+
+            _networkPrefabsById.Add(itemDefinition.prefabID, itemDefinition.itemPrefab);
+            _networkPrefabIdsByPrefab[itemDefinition.itemPrefab] = itemDefinition.prefabID;
+        }
+
+        Debug.Log($"Loaded {_networkPrefabsById.Count} network prefab(s) from item definitions.");
+    }
+
+    public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
+    {
+        if (_networkPrefabsById.Count == 0)
+        {
+            RebuildNetworkPrefabLookup();
+        }
+
+        return _networkPrefabsById.TryGetValue(prefabID, out prefab);
+    }
+
+    public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
+    {
+        if (prefab == null)
+        {
+            prefabID = null;
+            return false;
+        }
+
+        if (_networkPrefabIdsByPrefab.Count == 0)
+        {
+            RebuildNetworkPrefabLookup();
+        }
+
+        return _networkPrefabIdsByPrefab.TryGetValue(prefab, out prefabID);
+    }
+    public void BecomeOnline(bool isServer)
+    {
+        IsOnline = true;
+        IsServer = isServer;
+        UnityEngine.Debug.Log(new StackTrace(true));
     }
     private void Update()
     {
@@ -339,7 +403,6 @@ public partial class NetworkSystem : MonoBehaviour
                 _server = null;
                 // Use the port returned by GetGameServer
                 _client = SteamNetworkingSockets.ConnectRelay<GameClient>(serverid, port);
-                IsOnline = true;
                 //print(client.NetworkID);
 
             }

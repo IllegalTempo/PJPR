@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 using static UnityEngine.UI.GridLayoutGroup;
 
 
@@ -120,8 +121,7 @@ public class Item : Selectable //Item is any that is pickable
     }
     public bool FitIn(Slot slot)
     {
-        if (slot == null) return false;
-        if (slot.GetAttachedItem() != null) return false;
+        if (!slot.IsEmpty()) return false;
         if (slot.AllowedItemType == ItemType.All) return true;
         return (itemType & slot.AllowedItemType) != 0;
     }
@@ -211,6 +211,7 @@ public class Item : Selectable //Item is any that is pickable
 
         }
         transform.parent = null;
+        transform.localScale = snapshot_start.scale;
 
         //ApplySnapshot(snapshot_start);
         outline.OutlineColor = Color.white;
@@ -268,10 +269,6 @@ public class Item : Selectable //Item is any that is pickable
     protected override void Update()
     {
         base.Update();
-        if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline || netObj == null || GameCore.Instance == null || GameCore.Instance.Local_NetworkPlayer == null || GameCore.Instance.Local_Player == null)
-        {
-            return;
-        }
 
     }
 }

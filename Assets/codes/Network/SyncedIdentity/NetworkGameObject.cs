@@ -16,6 +16,11 @@ namespace Assets.codes.Network.SyncedIdentity
         public Vector3 NetworkPos;
         public Quaternion NetworkRot;
 
+        private Vector3 prevPos;
+        private Quaternion prevRot;
+
+
+
         public NetworkIdentity Identity;
 
         // Use this for initialization
@@ -74,6 +79,7 @@ namespace Assets.codes.Network.SyncedIdentity
         private void SendTransform()
         {
             if (!NetworkSystem.Instance.IsOnline) return;
+            if (prevPos == transform.position && prevRot == transform.rotation) return;
             NMS_Both_NetworkObjectInfo message = new NMS_Both_NetworkObjectInfo(Identity.Identifier, transform.position, transform.rotation);
             if (NetworkSystem.Instance.IsServer)
             {
@@ -85,11 +91,13 @@ namespace Assets.codes.Network.SyncedIdentity
                 NetworkRouter.Instance.SendMessageToServer(message);
 
             }
+            prevPos = transform.position;
+            prevRot = transform.rotation;
 
         }
         private void Update()
         {
-            if (NetworkSystem.Instance.IsServer) return;
+            if (NetworkSystem.Instance.IsWorldManager) return;
             if (GameCore.Instance != null && GameCore.Instance.IsLocal(Identity.Sovereignty)) return;
             if (Sync_Transform)
             {

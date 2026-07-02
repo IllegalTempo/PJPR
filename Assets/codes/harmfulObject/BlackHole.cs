@@ -29,7 +29,6 @@ public class BlackHole : HarmfulObject
     [SerializeField] private GameObject swallowEffect;
 
     private readonly HashSet<GameObject> swallowing = new HashSet<GameObject>();
-    private bool IsServerAuthority => NetworkSystem.Instance == null || NetworkSystem.Instance.IsServer;
 
     private void Awake()
     {
@@ -56,7 +55,7 @@ public class BlackHole : HarmfulObject
     private void FixedUpdate()
     {
         // Only server drives physics
-        if (!IsServerAuthority) return;
+        if (!NetworkSystem.Instance.IsWorldManager) return;
 
         // Move the black hole
         Rigidbody rb = GetComponent<Rigidbody>();

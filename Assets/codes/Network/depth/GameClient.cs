@@ -15,7 +15,7 @@ public class GameClient : ConnectionManager
 {
     public GameClient()
     {
-        NetworkSystem.Instance.IsServer = false;
+        NetworkSystem.Instance.BecomeOnline(false);
     }
     
     public async UniTask NewPlayer(ulong who)

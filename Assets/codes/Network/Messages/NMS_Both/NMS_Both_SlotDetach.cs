@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Both_SlotDetach : NMS_BOTH_SHARE
+    public class NMS_Both_SlotDetach : NMS_BOTH_SERVERACTION
     {
         private readonly string SlotId;
         public NMS_Both_SlotDetach(string SlotId) : base((int)packets.BothPackets.SlotDetach)
@@ -25,6 +25,12 @@ namespace Assets.codes.Network.Messages
         protected override void applyaction()
         {
             NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).Detach();
+        }
+
+        protected override void serverAction()
+        {
+            NetworkSystem.Instance.GetComponentOfIdentity<Slot>(SlotId).ServerActionOnDetach();
+
         }
     }
 }

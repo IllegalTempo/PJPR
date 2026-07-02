@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.Experimental.GraphView.GraphView;
 
@@ -70,7 +71,10 @@ public partial class PlayerMain: MonoBehaviour
         Selectable before = seenObject;
         if (Physics.Raycast(ray, out hit, 100f))
         {
-            if ((GameCore.Instance.Masks.SelectableItems.value & (1 << hit.transform.gameObject.layer)) != 0)
+            bool isSelectableLayer = ((GameCore.Instance.Masks.SelectableItems.value & (1 << hit.transform.gameObject.layer)) != 0);
+            Slot slot = hit.collider.GetComponent<Slot>();
+            bool isSlotnFit = slot != null && holdingItem != null && holdingItem.FitIn(slot);
+            if (isSelectableLayer && (slot == null || isSlotnFit))
             {
                 seenObject = hit.collider.GetComponent<Selectable>();
 

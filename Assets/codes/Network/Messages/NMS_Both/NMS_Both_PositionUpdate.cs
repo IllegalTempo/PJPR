@@ -1,5 +1,6 @@
 ﻿using Assets.codes.Network.Packets.BothMessages;
 using Steamworks;
+using Steamworks.Data;
 using System.Collections;
 using UnityEngine;
 
@@ -31,9 +32,9 @@ namespace Assets.codes.Network.Messages
         public override void ServerHandle(NetworkPlayer p)
         {
             if (p.steamId != SourceNetworkID) return;
-            
-            base.ServerHandle(p);
 
+            applyaction();
+            NetworkRouter.Instance.DistributeMessageToReady(this, p.steamId, SendType.Unreliable);
         }
 
         public override void Write(Packet p)

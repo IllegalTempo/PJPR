@@ -27,12 +27,12 @@ public class packets
         Test = 3001,
         PosUpdate = 3002,
         PlayerAnimation = 3003,
-        Interact = 3004,
         NO_Info = 3005,
         NO_Active = 3006,
         PickUpItem = 3007,
         VoicePacket = 3008,
         NO_Slot_Interact = 3011,
-        SlotDetach = 3012,};
+        SlotDetach = 3012,
+        QuantityResourceProviderInteract = 3013,};
 }
 

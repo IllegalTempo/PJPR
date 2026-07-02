@@ -23,13 +23,13 @@ namespace Assets.codes.Network.Messages
             { (int)packets.BothPackets.Test, NMS_Both_TestPacket.Read },
             { (int)packets.BothPackets.PosUpdate, NMS_Both_PositionUpdate.Read },
             { (int)packets.BothPackets.PlayerAnimation, NMS_Both_PlayerAnimation.Read },
-            { (int)packets.BothPackets.Interact, NMS_Both_Interact.Read },
             { (int)packets.BothPackets.NO_Info, NMS_Both_NetworkObjectInfo.Read},
             { (int)packets.BothPackets.NO_Active, NMS_Both_NetworkObjectActive.Read},
             { (int)packets.BothPackets.PickUpItem, NMS_Both_PickUpItem.Read },
             { (int)packets.BothPackets.VoicePacket, NMS_Both_VoicePacket.Read },
             { (int)packets.BothPackets.NO_Slot_Interact, NMS_Both_SlotAttach.Read },
-            { (int)packets.BothPackets.SlotDetach, NMS_Both_SlotDetach.Read },};
+            { (int)packets.BothPackets.SlotDetach, NMS_Both_SlotDetach.Read },
+            { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {
@@ -53,12 +53,12 @@ namespace Assets.codes.Network.Messages
             NetworkSystem.Instance.initState = readyState;
             SendMessageToServer(new NMS_Client_ReadyState(readyState));
         }
-        public Result SendMessageToServer(NMS message)
+        public Result SendMessageToServer(NMS message, SendType sendType = SendType.Reliable)
         {
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);
-                Result result = SendToServer(p);
+                Result result = SendToServer(p, sendType);
                 if (result != Result.OK)
                 {
                     Debug.LogError($"Failed to send message_{message.PacketID} to server | {result}");
@@ -68,12 +68,12 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result SendMessageToClient(NetworkPlayer player, NMS message)
+        public Result SendMessageToClient(NetworkPlayer player, NMS message, SendType sendType = SendType.Reliable)
         {
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);
-                Result result = player.SendPacket(p);
+                Result result = player.SendPacket(p, sendType);
                 if (result != Result.OK)
                 {
                     Debug.LogError($"Failed to send message_{message.PacketID} to client {player.SteamName} | {result}");
@@ -83,12 +83,12 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result DistributeMessage(ulong exclude, NMS message)
+        public Result DistributeMessage(ulong exclude, NMS message, SendType sendType = SendType.Reliable)
         {
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);
-                Result result = BroadcastPacket(exclude, p);
+                Result result = BroadcastPacket(exclude, p, sendType);
                 if (result != Result.OK)
                 {
                     Debug.LogError($"Failed to distribute message_{message.PacketID} to clients | {result}");
@@ -98,12 +98,12 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public Result DistributeMessageToReady(NMS message, ulong exclude = 0)
+        public Result DistributeMessageToReady(NMS message, ulong exclude = 0, SendType sendType = SendType.Reliable)
         {
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);
-                Result result = BroadcastPacketToReady(p, exclude);
+                Result result = BroadcastPacketToReady(p, exclude, sendType);
                 if (result != Result.OK)
                 {
                     Debug.LogError($"Failed to distribute message_{message.PacketID} to ready clients | {result}");
@@ -148,7 +148,7 @@ namespace Assets.codes.Network.Messages
             return null;
         }
 
-        private Result SendToServer(Packet p)
+        private Result SendToServer(Packet p, SendType sendType = SendType.Reliable)
         {
             Connection server = NetworkSystem.Instance.GetServerConnection();
             if (server.Equals(default(Connection)))
@@ -156,7 +156,7 @@ namespace Assets.codes.Network.Messages
                 return Result.ConnectFailed;
             }
 
-            return SendPacketToConnection(server, p);
+            return SendPacketToConnection(server, p, sendType);
         }
 
         public Result BroadcastPacket(Packet p)
@@ -164,12 +164,12 @@ namespace Assets.codes.Network.Messages
             return BroadcastPacket(9999, p);
         }
 
-        public Result BroadcastPacket(ConnectionInfo info, Packet p)
+        public Result BroadcastPacket(ConnectionInfo info, Packet p, SendType sendType = SendType.Reliable)
         {
-            return BroadcastPacket(info.Identity.SteamId, p);
+            return BroadcastPacket(info.Identity.SteamId, p, sendType);
         }
 
-        public Result BroadcastPacket(ulong excludeid, Packet p)
+        public Result BroadcastPacket(ulong excludeid, Packet p, SendType sendType = SendType.Reliable)
         {
             if (NetworkSystem.Instance == null || NetworkSystem.Instance.Server == null || NetworkSystem.Instance.Server.NetworkUsers == null)
             {
@@ -183,7 +183,7 @@ namespace Assets.codes.Network.Messages
                     continue;
                 }
 
-                if (player.SendPacket(p) != Result.OK)
+                if (player.SendPacket(p, sendType) != Result.OK)
                 {
                     Debug.Log("Result Error when broadcasting packet");
                     return Result.Cancelled;
@@ -193,7 +193,7 @@ namespace Assets.codes.Network.Messages
             return Result.OK;
         }
 
-        public Result BroadcastPacketToReady(Packet p, ulong excludeid = 0)
+        public Result BroadcastPacketToReady(Packet p, ulong excludeid = 0, SendType sendType = SendType.Reliable)
         {
             if (NetworkSystem.Instance == null || NetworkSystem.Instance.Server == null || NetworkSystem.Instance.Server.NetworkUsers == null)
             {
@@ -207,7 +207,7 @@ namespace Assets.codes.Network.Messages
                     continue;
                 }
 
-                if (player.SendPacket(p) != Result.OK)
+                if (player.SendPacket(p, sendType) != Result.OK)
                 {
                     Debug.Log("Result Error when broadcasting packet");
                     return Result.Cancelled;
@@ -217,12 +217,12 @@ namespace Assets.codes.Network.Messages
             return Result.OK;
         }
 
-        public Result SendPacketToConnection(Connection c, Packet p)
+        public Result SendPacketToConnection(Connection c, Packet p, SendType sendType = SendType.Reliable)
         {
             byte[] data = p.GetPacketData();
             IntPtr datapointer = Marshal.AllocHGlobal(data.Length);
             Marshal.Copy(data, 0, datapointer, data.Length);
-            Result result = c.SendMessage(datapointer, data.Length, SendType.Reliable);
+            Result result = c.SendMessage(datapointer, data.Length, sendType);
             Marshal.FreeHGlobal(datapointer);
             return result;
         }

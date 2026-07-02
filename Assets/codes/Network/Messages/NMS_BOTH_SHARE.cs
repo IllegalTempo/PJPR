@@ -26,6 +26,9 @@ namespace Assets.codes.Network.Messages
                 NetworkRouter.Instance.SendMessageToServer(this);
             }
         }
+        /// <summary>
+        /// ApplyAction() is any action that will run on all players, server, client and offline
+        /// </summary>
         protected abstract void applyaction();
         public virtual void ClientHandle()
         {

@@ -26,14 +26,13 @@ public class GameServer : SocketManager
     {
         this.maxplayer = NetworkSystem.Instance.MaxPlayer;
         GameCore.Instance.RandomSeed = DateTime.Now.Ticks;
+        NetworkSystem.Instance.BecomeOnline(true);
         Debug.Log("Created GameServer Object");
 
     }
     public async UniTask<bool> onOnline()
     {
         NetworkSystem system = NetworkSystem.Instance;
-        system.IsOnline = true;
-        system.IsServer = true;
         await system.StartAsHost();
         
         return true;

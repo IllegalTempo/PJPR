@@ -24,6 +24,19 @@ public class Slot : Selectable //slot is the place where items are put in to be 
             item = null;
         }
     }
+    public virtual void ServerActionOnAttach(Item item, Quaternion rot)
+    {
+
+    }
+    public virtual void ServerActionOnDetach()
+    {
+
+    }
+
+
+
+
+
     public void SendAttach(Item item)
     {
         NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier,item.transform.rotation);
@@ -43,5 +56,9 @@ public class Slot : Selectable //slot is the place where items are put in to be 
     public Item GetAttachedItem()
     {
         return this.item;
+    }
+    public bool IsEmpty()
+    {
+        return item == null;
     }
 }
