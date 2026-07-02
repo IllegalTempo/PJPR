@@ -9,11 +9,12 @@ namespace Assets.codes.Network.Messages
         protected NMS_BOTH_SHARE(int pID) : base(pID)
         {
         }
-        public void SendMessageAsServerOrClient()
+        public virtual void SendMessageAsServerOrClient()
         {
             if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
             {
                 applyaction();
+
                 return;
             }
             if (NetworkSystem.Instance.IsServer)

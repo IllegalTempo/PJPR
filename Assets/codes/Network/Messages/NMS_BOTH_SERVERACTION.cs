@@ -17,6 +17,23 @@ namespace Assets.codes.Network.Messages
             serverAction();
             base.ServerHandle(p);
         }
-
+        public override void SendMessageAsServerOrClient()
+        {
+            if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
+            {
+                applyaction();
+                serverAction();
+                return;
+            }
+            if (NetworkSystem.Instance.IsServer)
+            {
+                NetworkRouter.Instance.DistributeMessageToReady(this);
+                applyaction();
+            }
+            else
+            {
+                NetworkRouter.Instance.SendMessageToServer(this);
+            }
+        }
     }
 }
