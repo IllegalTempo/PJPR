@@ -205,6 +205,7 @@ namespace Assets.codes.Network.Messages
 
             foreach (NetworkPlayer player in NetworkSystem.Instance.Server.NetworkUsers.Values)
             {
+                Debug.Log("[BPTR] Broadcasting packet to player: " + player.SteamName + " | ReadyState: " + player.ReadyState + "|excludeID: " + excludeid + "playerID: " + player.steamId);
                 if (player == null || player.steamId == excludeid || player.ReadyState != (int)ReadyState.SyncNetworkObjects)
                 {
                     Debug.LogError("Player is not ready or excluded from broadcast");

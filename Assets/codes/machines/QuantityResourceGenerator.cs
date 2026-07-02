@@ -21,11 +21,12 @@ namespace Assets.codes.machines
                 spawnpos = spawnSpot.position;
             }
         }
-        public override void ServerActionOnInteract()
+        public override async void ServerActionOnInteract()
 		{
 			if (resource != null)
 			{
-				NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
+				await UniTask.Delay(100);
+                NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
 			}
 		}
 		
