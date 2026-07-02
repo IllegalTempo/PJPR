@@ -23,7 +23,9 @@ namespace Assets.codes.machines
         }
         public override async void ServerActionOnInteract()
 		{
-			if (resource != null)
+            Debug.Log($"[WaterGen] ServerActionOnInteract — spawning {resource?.prefabID}");
+
+            if (resource != null)
 			{
                 await UniTask.Delay(1000);
                 NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
@@ -32,7 +34,9 @@ namespace Assets.codes.machines
 		
 		public override void OnInteract(PlayerMain who)
 		{
-			if (resource == null || string.IsNullOrWhiteSpace(resource.prefabID))
+            Debug.Log($"[WaterGen] OnInteract — IsServer={NetworkSystem.Instance?.IsServer}, identity={identity?.Identifier}");
+
+            if (resource == null || string.IsNullOrWhiteSpace(resource.prefabID))
 			{
 				Debug.LogWarning($"{name} has no resource prefab ID.");
 				return;

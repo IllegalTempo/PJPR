@@ -106,7 +106,7 @@ namespace Assets.codes.Network.Messages
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);
-                Result result = BroadcastPacketToReady(p, exclude, sendType);
+                Result result = BroadcastPacketToReady(p,message.GetType().Name, exclude, sendType);
                 if (result != Result.OK)
                 {
                     Debug.LogError($"Failed to distribute message_{message.PacketID} to ready clients | {result}");
@@ -196,7 +196,7 @@ namespace Assets.codes.Network.Messages
             return Result.OK;
         }
 
-        public Result BroadcastPacketToReady(Packet p, ulong excludeid = 0, SendType sendType = SendType.Reliable)
+        public Result BroadcastPacketToReady(Packet p,string messagename, ulong excludeid = 0, SendType sendType = SendType.Reliable)
         {
             if (NetworkSystem.Instance == null || NetworkSystem.Instance.Server == null || NetworkSystem.Instance.Server.NetworkUsers == null)
             {
@@ -205,10 +205,9 @@ namespace Assets.codes.Network.Messages
 
             foreach (NetworkPlayer player in NetworkSystem.Instance.Server.NetworkUsers.Values)
             {
-                Debug.Log("[BPTR] Broadcasting packet to player: " + player.SteamName + " | ReadyState: " + player.ReadyState + "|excludeID: " + excludeid + "playerID: " + player.steamId);
+                Debug.Log($"[BPTR] Broadcasting packet {messagename} to player: {player.SteamName} | ReadyState: {player.ReadyState} | excludeID: {excludeid} | playerID: {player.steamId} ");
                 if (player == null || player.steamId == excludeid || player.ReadyState != (int)ReadyState.SyncNetworkObjects)
                 {
-                    Debug.LogError("Player is not ready or excluded from broadcast");
                     continue;
                 }
 
