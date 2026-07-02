@@ -33,30 +33,30 @@ public class MissionManager : MonoBehaviour
     private void OnEnable()
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_OnPlayerFullySynced += OnPlayerFullySynced;
+            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived += OnPlayerReadyStateChanged;
     }
 
     private void OnDisable()
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_OnPlayerFullySynced -= OnPlayerFullySynced;
+            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived -= OnPlayerReadyStateChanged;
     }
 
-    private void OnPlayerFullySynced(NetworkPlayer player)
+    private void OnPlayerReadyStateChanged(NetworkPlayer player, int state)
     {
+        if (state != (int)ReadyState.SyncNetworkObjects)
+            return;
         if (!IsVotingActive || CurrentVotingMissions == null)
             return;
 
-        // Sync the voting session (projections + timer)
+        Debug.Log($"[MissionManager] Player {player.SteamName} reached SyncNetworkObjects — syncing voting session.");
+
         var sessionMsg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer);
         NetworkRouter.Instance.SendMessageToClient(player, sessionMsg);
 
-        // Sync current vote counts
         int[] counts = GetCurrentVoteCounts();
         var voteMsg = new NMS_Server_VoteUpdate(counts);
         NetworkRouter.Instance.SendMessageToClient(player, voteMsg);
-
-        Debug.Log($"[MissionManager] Synced active voting session to fully-synced player {player.SteamName}");
     }
 
     private int[] GetCurrentVoteCounts()
