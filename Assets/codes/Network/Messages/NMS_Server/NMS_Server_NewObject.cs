@@ -19,6 +19,7 @@ namespace Assets.codes.Network.Messages
             this.spawnLocation = spawnLocation;
             this.spawnRotation = spawnRotation;
             this.owner = owner;
+            Debug.Log("NEW SERVER NEW OBJECT MESSAGE GENERATED");
         }
 
         public static NMS_Server_NewObject Read(Packet packet)

@@ -25,8 +25,6 @@ namespace Assets.codes.machines
 		{
 			if (resource != null)
 			{
-				Vector3 spawnPos = transform.position;
-				
 				NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
 			}
 		}

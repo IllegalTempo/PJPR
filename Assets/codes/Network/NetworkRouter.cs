@@ -207,6 +207,7 @@ namespace Assets.codes.Network.Messages
             {
                 if (player == null || player.steamId == excludeid || player.ReadyState != (int)ReadyState.SyncNetworkObjects)
                 {
+                    Debug.LogError("Player is not ready or excluded from broadcast");
                     continue;
                 }
 
