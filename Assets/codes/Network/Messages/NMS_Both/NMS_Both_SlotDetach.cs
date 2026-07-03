@@ -19,7 +19,7 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(SlotId);
+            packet.Write(SlotId);
         }
 
         protected override void applyaction()

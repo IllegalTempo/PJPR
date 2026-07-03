@@ -61,8 +61,8 @@ namespace Assets.codes.Network.Messages
 
             for (int i = 0; i < missionCount; i++)
             {
-                packet.WriteUNICODE(missionNames[i]);
-                packet.WriteUNICODE(missionDescriptions[i]);
+                packet.Write(missionNames[i]);
+                packet.Write(missionDescriptions[i]);
                 packet.Write(rewardCredits[i]);
                 packet.Write(difficulties[i]);
                 packet.Write(durations[i]);

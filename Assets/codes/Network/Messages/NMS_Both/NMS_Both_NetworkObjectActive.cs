@@ -21,7 +21,7 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(id);
+            packet.Write(id);
             packet.Write(active);
         }
         protected override void applyaction()

@@ -20,7 +20,7 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(itemId);
+            packet.Write(itemId);
             packet.Write(pickedUpBy);
         }
 

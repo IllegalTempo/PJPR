@@ -6,7 +6,7 @@ namespace Assets.codes.Network.Messages
 {
     public class NMS_Server_SyncScene : NMS, IClientHandle
     {
-        private readonly NetworkObjectSnapshot[] objects;
+        private readonly NetworkObjectSnapshot[] sceneNetworkObjects;
         private readonly SlotSnapshot[] slotsRelationships;
 
         // Voting session data embedded for late-join sync
@@ -24,7 +24,7 @@ namespace Assets.codes.Network.Messages
             float votingTimerRemaining,
             int[] voteCounts) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
-            this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
+            this.sceneNetworkObjects = new List<NetworkObjectSnapshot>(objects).ToArray();
             this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
             this.hasVotingSession = hasVotingSession;
             this.votingMissions = votingMissions;
@@ -55,7 +55,7 @@ namespace Assets.codes.Network.Messages
                     slot.GetAttachedItem()?.transform.rotation ?? Quaternion.identity
                 ));
             }
-            objects = snapshots.ToArray();
+            sceneNetworkObjects = snapshots.ToArray();
             slotsRelationships = slotSnapshots.ToArray();
 
             MissionManager mm = MissionManager.Instance;
@@ -77,42 +77,15 @@ namespace Assets.codes.Network.Messages
 
         public static NMS_Server_SyncScene Read(Packet packet)
         {
-            int objectlistlength = packet.Readint();
-            NetworkObjectSnapshot[] objects = new NetworkObjectSnapshot[objectlistlength];
-            for (int i = 0; i < objectlistlength; i++)
-            {
-                objects[i] = new NetworkObjectSnapshot(
-                    packet.ReadstringUNICODE(),
-                    packet.Readulong(),
-                    packet.ReadstringUNICODE(),
-                    packet.Readvector3(),
-                    packet.Readquaternion());
-            }
-            int slotlistlength = packet.Readint();
-            SlotSnapshot[] slotsRelationships = new SlotSnapshot[slotlistlength];
-            for(int i = 0; i < slotlistlength; i++)
-            {
-                slotsRelationships[i] = new SlotSnapshot(
-                    packet.ReadstringUNICODE(),
-                    packet.ReadstringUNICODE(),
-                    packet.Readquaternion()
-
-                    );
-            }
+            NetworkObjectSnapshot[] objects = packet.ReadArray<NetworkObjectSnapshot>();
+            SlotSnapshot[] slotsRelationships = packet.ReadArray<SlotSnapshot>();
 
             bool hasVotingSession = packet.Readbool();
             if (hasVotingSession)
             {
-                int missionCount = packet.Readint();
-                Mission[] votingMissions = new Mission[missionCount];
-                for (int i = 0; i < missionCount; i++)
-                    votingMissions[i] = packet.ReadMission();
-
+                Mission[] votingMissions = packet.ReadArray<Mission>();
                 float votingTimerRemaining = packet.Readfloat();
-                int voteCountsLength = packet.Readint();
-                int[] voteCounts = new int[voteCountsLength];
-                for (int i = 0; i < voteCountsLength; i++)
-                    voteCounts[i] = packet.Readint();
+                int[] voteCounts = packet.ReadArray<int>();
 
                 return new NMS_Server_SyncScene(
                     objects, slotsRelationships,
@@ -127,45 +100,23 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.Write(objects.Length);
-            foreach (NetworkObjectSnapshot snapshot in objects)
-            {
-                packet.WriteUNICODE(snapshot.Uid);
-                packet.Write(snapshot.Owner);
-                packet.WriteUNICODE(snapshot.PrefabId);
-                packet.Write(snapshot.Position);
-                packet.Write(snapshot.Rotation);
-            }
-            packet.Write(slotsRelationships.Length);
-            foreach (SlotSnapshot snapshot in slotsRelationships)
-            {
-                packet.WriteUNICODE(snapshot.SlotId);
-                packet.WriteUNICODE(snapshot.AttachedItemId);
-                packet.Write(snapshot.rotation);
-            }
+            packet.Write(sceneNetworkObjects);
+            packet.Write(slotsRelationships);
 
             packet.Write(hasVotingSession);
             if (hasVotingSession)
             {
-                packet.Write(votingMissions.Length);
-                foreach (Mission m in votingMissions)
-                    packet.Write(m);
-
+                packet.Write(votingMissions);
                 packet.Write(votingTimerRemaining);
-                packet.Write(voteCounts != null ? voteCounts.Length : 0);
-                if (voteCounts != null)
-                {
-                    foreach (int count in voteCounts)
-                        packet.Write(count);
-                }
+                packet.Write(voteCounts);
             }
 
         }
 
         public async void ClientHandle()
         {
-            Debug.Log($"Syncing {objects.Length} Network Objects from Server");
-            foreach (NetworkObjectSnapshot snapshot in objects)
+            Debug.Log($"Syncing {sceneNetworkObjects.Length} Network Objects from Server");
+            foreach (NetworkObjectSnapshot snapshot in sceneNetworkObjects)
             {
                 await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);
             }
@@ -201,34 +152,35 @@ namespace Assets.codes.Network.Messages
             }
         }
 
-        public readonly struct NetworkObjectSnapshot
-        {
-            public readonly string Uid;
-            public readonly ulong Owner;
-            public readonly string PrefabId;
-            public readonly Vector3 Position;
-            public readonly Quaternion Rotation;
-            public NetworkObjectSnapshot(string uid, ulong owner, string prefabId, Vector3 position, Quaternion rotation)
-            {
-                Uid = uid;
-                Owner = owner;
-                PrefabId = prefabId;
-                Position = position;
-                Rotation = rotation;
-            }
-        }
-        public readonly struct SlotSnapshot
-        {
-            public readonly string SlotId;
-            public readonly string AttachedItemId;
-            public readonly Quaternion rotation;
-            public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
-            {
-                SlotId = slotId;
-                AttachedItemId = attachedItemId;
-                this.rotation = rotation;
-            }
-        }
+        
 
+    }
+    public readonly struct NetworkObjectSnapshot
+    {
+        public readonly string Uid;
+        public readonly ulong Owner;
+        public readonly string PrefabId;
+        public readonly Vector3 Position;
+        public readonly Quaternion Rotation;
+        public NetworkObjectSnapshot(string uid, ulong owner, string prefabId, Vector3 position, Quaternion rotation)
+        {
+            Uid = uid;
+            Owner = owner;
+            PrefabId = prefabId;
+            Position = position;
+            Rotation = rotation;
+        }
+    }
+    public readonly struct SlotSnapshot
+    {
+        public readonly string SlotId;
+        public readonly string AttachedItemId;
+        public readonly Quaternion rotation;
+        public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
+        {
+            SlotId = slotId;
+            AttachedItemId = attachedItemId;
+            this.rotation = rotation;
+        }
     }
 }

@@ -1,5 +1,7 @@
+using Assets.codes.Network.Messages;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -170,21 +172,107 @@ public class Packet : IDisposable
         Write(i.z);
         Write(i.w);
     }
+
     public void Write(Mission m)
     {
-        WriteUNICODE(m.missionName);
-        WriteUNICODE(m.missionDescription);
+        Write(m.missionName);
+        Write(m.missionDescription);
         Write(m.rewardCredits);
         Write(m.difficulty);
         Write(m.estimatedDuration);
     }
-    public void WriteASCII(string text)
+    public void Write(NetworkObjectSnapshot snapshot)
     {
-        text ??= string.Empty;
-        Write(text.Length);
-        buffer.AddRange(Encoding.ASCII.GetBytes(text));
+        Write(snapshot.Uid);
+        Write(snapshot.Owner);
+        Write(snapshot.PrefabId);
+        Write(snapshot.Position);
+        Write(snapshot.Rotation);
     }
-    public void WriteUNICODE(string text)
+    public void Write(SlotSnapshot snapshot)
+    {
+        Write(snapshot.SlotId);
+        Write(snapshot.AttachedItemId);
+        Write(snapshot.rotation);
+    }
+    public void Write(Array array)
+    {
+        if (array == null)
+        {
+            Write(-1);
+            Debug.LogError("ATTEMPTING TO WRITE FUCKING EMPTY ARRAY WTFFWTWFW ");
+            return;
+        }
+
+        Write(array.Length);
+        foreach (var item in array)
+        {
+            WriteObject(item);
+        }
+    }
+
+    private void WriteObject(object item)
+    {
+        switch (item)
+        {
+            case null:
+                throw new InvalidOperationException("Cannot write null array elements.");
+            case int value:
+                Write(value);
+                break;
+            case float value:
+                Write(value);
+                break;
+            case short value:
+                Write(value);
+                break;
+            case long value:
+                Write(value);
+                break;
+            case uint value:
+                Write(value);
+                break;
+            case bool value:
+                Write(value);
+                break;
+            case ulong value:
+                Write(value);
+                break;
+            case Guid value:
+                Write(value);
+                break;
+            case SteamId value:
+                Write(value);
+                break;
+            case Vector3 value:
+                Write(value);
+                break;
+            case Quaternion value:
+                Write(value);
+                break;
+            case Mission value:
+                Write(value);
+                break;
+            case NetworkObjectSnapshot value:
+                Write(value);
+                break;
+            case SlotSnapshot value:
+                Write(value);
+                break;
+            case string value:
+                Write(value);
+                break;
+            case byte[] value:
+                Write(value);
+                break;
+            case Array value:
+                Write(value);
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported array element type: {item.GetType()}.");
+        }
+    }
+    public void Write(string text)
     {
         text ??= string.Empty;
         Write(text.Length * 2);
@@ -255,19 +343,6 @@ public class Packet : IDisposable
         readindex += 16;
         return new Guid(data);
     }
-    public string ReadstringASCII()
-    {
-        int stringlength = Readint();
-        if (stringlength < 0)
-        {
-            throw new InvalidOperationException($"Invalid ASCII string byte length {stringlength}.");
-        }
-
-        EnsureCanRead(stringlength);
-        string data = Encoding.ASCII.GetString(readerbuffer, readindex, stringlength);
-        readindex += stringlength;
-        return data;
-    }
     public string ReadstringUNICODE()
     {
         int stringlength = Readint();
@@ -296,7 +371,7 @@ public class Packet : IDisposable
         int reward = Readint();
         float difficulty = Readfloat();
         int duration = Readint();
-        return new Mission(name, description, reward, difficulty * 10f, duration);
+        return new Mission(name, description, reward, difficulty, duration);
     }
     public byte[] ReadBytesArray()
     {
@@ -311,6 +386,52 @@ public class Packet : IDisposable
         Buffer.BlockCopy(readerbuffer, readindex, data, 0, intlength);
         readindex += intlength;
         return data;
+    }
+
+    public T[] ReadArray<T>()
+    {
+        int length = Readint();
+        if (length == -1)
+        {
+            return null;
+        }
+
+        if (length < -1)
+        {
+            throw new InvalidOperationException($"Invalid array length {length}.");
+        }
+
+        T[] data = new T[length];
+        Type elementType = typeof(T);
+
+        for (int i = 0; i < length; i++)
+        {
+            data[i] = (T)ReadArrayItem(elementType);
+        }
+
+        return data;
+    }
+
+    private object ReadArrayItem(Type elementType)
+    {
+        if (elementType == typeof(int)) return Readint();
+        if (elementType == typeof(float)) return Readfloat();
+        if (elementType == typeof(short)) return Readshort();
+        if (elementType == typeof(long)) return Readlong();
+        if (elementType == typeof(uint)) return Readuint();
+        if (elementType == typeof(bool)) return Readbool();
+        if (elementType == typeof(ulong)) return Readulong();
+        if (elementType == typeof(Guid)) return ReadGuid();
+        if (elementType == typeof(SteamId)) return new SteamId(Readulong());
+        if (elementType == typeof(Vector3)) return Readvector3();
+        if (elementType == typeof(Quaternion)) return Readquaternion();
+        if (elementType == typeof(Mission)) return ReadMission();
+        if (elementType == typeof(NetworkObjectSnapshot)) return ReadNetworkObjectSnapshot();
+        if (elementType == typeof(SlotSnapshot)) return ReadSlotSnapshot();
+        if (elementType == typeof(string)) return ReadstringUNICODE();
+        if (elementType == typeof(byte[])) return ReadBytesArray();
+
+        throw new NotSupportedException($"Unsupported array element type: {elementType}.");
     }
     #endregion
 }

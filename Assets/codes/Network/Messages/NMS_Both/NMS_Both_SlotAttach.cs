@@ -25,8 +25,8 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(SlotId);
-            packet.WriteUNICODE(ItemId);
+            packet.Write(SlotId);
+            packet.Write(ItemId);
             packet.Write(installedRotation);
         }
 

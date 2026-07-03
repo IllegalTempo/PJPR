@@ -28,7 +28,7 @@ namespace Assets.codes.Network.Packets.BothMessages
         }
         public override void Write(Packet p)
         {
-            p.WriteUNICODE(TestString);
+            p.Write(TestString);
             p.Write(TestTime);
             p.Write(clientSteamID);
         }

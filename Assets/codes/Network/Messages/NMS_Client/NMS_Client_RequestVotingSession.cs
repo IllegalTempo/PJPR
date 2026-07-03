@@ -21,7 +21,7 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(terminalNetworkObjectId);
+            packet.Write(terminalNetworkObjectId);
             packet.Write(missionCount);
         }
 

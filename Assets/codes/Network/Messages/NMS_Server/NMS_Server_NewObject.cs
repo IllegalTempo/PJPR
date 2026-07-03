@@ -29,8 +29,8 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.WriteUNICODE(prefabId);
-            packet.WriteUNICODE(uid);
+            packet.Write(prefabId);
+            packet.Write(uid);
             packet.Write(spawnLocation);
             packet.Write(spawnRotation);
             packet.Write(owner);

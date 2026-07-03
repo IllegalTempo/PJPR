@@ -22,7 +22,7 @@ namespace Assets.codes.Network.Messages
         public override void Write(Packet packet)
         {
             packet.Write(winningMissionIndex);
-            packet.WriteUNICODE(winningMissionName);
+            packet.Write(winningMissionName);
         }
 
         public void ClientHandle()
