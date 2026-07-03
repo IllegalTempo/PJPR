@@ -373,6 +373,22 @@ public class Packet : IDisposable
         int duration = Readint();
         return new Mission(name, description, reward, difficulty, duration);
     }
+    public NetworkObjectSnapshot ReadNetworkObjectSnapshot()
+    {
+        string uid = ReadstringUNICODE();
+        ulong owner = Readulong();
+        string prefabId = ReadstringUNICODE();
+        Vector3 position = Readvector3();
+        Quaternion rotation = Readquaternion();
+        return new NetworkObjectSnapshot(uid, owner, prefabId, position, rotation);
+    }
+    public SlotSnapshot ReadSlotSnapshot()
+    {
+        string slotId = ReadstringUNICODE();
+        string attachedItemId = ReadstringUNICODE();
+        Quaternion rotation = Readquaternion();
+        return new SlotSnapshot(slotId, attachedItemId, rotation);
+    }
     public byte[] ReadBytesArray()
     {
         int intlength = Readint();
@@ -422,7 +438,6 @@ public class Packet : IDisposable
         if (elementType == typeof(bool)) return Readbool();
         if (elementType == typeof(ulong)) return Readulong();
         if (elementType == typeof(Guid)) return ReadGuid();
-        if (elementType == typeof(SteamId)) return new SteamId(Readulong());
         if (elementType == typeof(Vector3)) return Readvector3();
         if (elementType == typeof(Quaternion)) return Readquaternion();
         if (elementType == typeof(Mission)) return ReadMission();
