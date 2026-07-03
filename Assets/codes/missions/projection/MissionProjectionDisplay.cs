@@ -7,6 +7,7 @@ public class MissionProjectionDisplay : MonoBehaviour
     [SerializeField] private GameObject missionProjectionPrefab;
 
     [Header("Layout Settings")]
+    [SerializeField] private Transform spawnOrigin;
     [SerializeField] private float horizontalSpacing = 3f;
     [SerializeField] private float verticalOffset = 2f;
     [SerializeField] private float projectionScale = 1f;
@@ -81,6 +82,8 @@ public class MissionProjectionDisplay : MonoBehaviour
         votingTimer = totalTime;
 
         // Layout cards in a horizontal row
+        Vector3 origin = spawnOrigin != null ? spawnOrigin.position : transform.position;
+        Transform parent = spawnOrigin != null ? spawnOrigin : transform;
         float totalWidth = (missionCount - 1) * horizontalSpacing;
         float startX = -totalWidth / 2f;
 
@@ -88,9 +91,9 @@ public class MissionProjectionDisplay : MonoBehaviour
         {
             GameObject projectionObj = Instantiate(
                 missionProjectionPrefab,
-                transform.position + new Vector3(startX + i * horizontalSpacing, verticalOffset, 0),
+                origin + new Vector3(startX + i * horizontalSpacing, verticalOffset, 0),
                 Quaternion.identity,
-                transform
+                parent
             );
 
             projectionObj.transform.localScale = Vector3.one * projectionScale;

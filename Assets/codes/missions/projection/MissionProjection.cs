@@ -91,19 +91,7 @@ public class MissionProjection : Selectable, IUsable
         // Tell the timer display which mission the local player voted for
         MissionProjectionDisplay.LocalPlayerVotedMissionName = mission.missionName;
 
-        // Local visual feedback
-        if (voteCountText != null)
-            voteCountText.text = "Voted!";
-        CancelInvoke(nameof(ClearVoteFeedback));
-        Invoke(nameof(ClearVoteFeedback), 1.5f);
-
         Debug.Log($"[MissionProjection] Voted for mission index {missionIndex}: {mission.missionName}");
-    }
-
-    private void ClearVoteFeedback()
-    {
-        if (voteCountText != null)
-            voteCountText.text = "";
     }
 
     public void ShowVoteCount(int count)
