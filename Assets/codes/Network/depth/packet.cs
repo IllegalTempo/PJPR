@@ -170,6 +170,14 @@ public class Packet : IDisposable
         Write(i.z);
         Write(i.w);
     }
+    public void Write(Mission m)
+    {
+        WriteUNICODE(m.missionName);
+        WriteUNICODE(m.missionDescription);
+        Write(m.rewardCredits);
+        Write(m.difficulty);
+        Write(m.estimatedDuration);
+    }
     public void WriteASCII(string text)
     {
         text ??= string.Empty;
@@ -280,6 +288,15 @@ public class Packet : IDisposable
     public Quaternion Readquaternion()
     {
         return new Quaternion(Readfloat(),Readfloat(),Readfloat(),Readfloat());
+    }
+    public Mission ReadMission()
+    {
+        string name = ReadstringUNICODE();
+        string description = ReadstringUNICODE();
+        int reward = Readint();
+        float difficulty = Readfloat();
+        int duration = Readint();
+        return new Mission(name, description, reward, difficulty * 10f, duration);
     }
     public byte[] ReadBytesArray()
     {

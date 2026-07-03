@@ -9,38 +9,25 @@ namespace Assets.codes.Network.Messages
         private readonly NetworkObjectSnapshot[] objects;
         private readonly SlotSnapshot[] slotsRelationships;
 
+        // Voting session data embedded for late-join sync
         private readonly bool hasVotingSession;
-        private readonly int votingMissionCount;
-        private readonly string[] missionNames;
-        private readonly string[] missionDescriptions;
-        private readonly int[] rewardCredits;
-        private readonly float[] difficulties;
-        private readonly int[] durations;
+        private readonly Mission[] votingMissions;
         private readonly float votingTimerRemaining;
         private readonly int[] voteCounts;
 
+        // Constructor used by Read() — receives all data from the packet
         public NMS_Server_SyncScene(
             IEnumerable<NetworkObjectSnapshot> objects,
             IEnumerable<SlotSnapshot> sr,
             bool hasVotingSession,
-            int votingMissionCount,
-            string[] missionNames,
-            string[] missionDescriptions,
-            int[] rewardCredits,
-            float[] difficulties,
-            int[] durations,
+            Mission[] votingMissions,
             float votingTimerRemaining,
             int[] voteCounts) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
             this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
             this.hasVotingSession = hasVotingSession;
-            this.votingMissionCount = votingMissionCount;
-            this.missionNames = missionNames;
-            this.missionDescriptions = missionDescriptions;
-            this.rewardCredits = rewardCredits;
-            this.difficulties = difficulties;
-            this.durations = durations;
+            this.votingMissions = votingMissions;
             this.votingTimerRemaining = votingTimerRemaining;
             this.voteCounts = voteCounts;
         }
@@ -75,33 +62,14 @@ namespace Assets.codes.Network.Messages
             if (mm != null && mm.IsVotingActive && mm.CurrentVotingMissions != null)
             {
                 hasVotingSession = true;
-                Mission[] missions = mm.CurrentVotingMissions;
-                votingMissionCount = missions.Length;
-                missionNames = new string[votingMissionCount];
-                missionDescriptions = new string[votingMissionCount];
-                rewardCredits = new int[votingMissionCount];
-                difficulties = new float[votingMissionCount];
-                durations = new int[votingMissionCount];
-                for (int i = 0; i < votingMissionCount; i++)
-                {
-                    missionNames[i] = missions[i].missionName;
-                    missionDescriptions[i] = missions[i].missionDescription;
-                    rewardCredits[i] = missions[i].rewardCredits;
-                    difficulties[i] = missions[i].difficulty;
-                    durations[i] = missions[i].estimatedDuration;
-                }
+                votingMissions = mm.CurrentVotingMissions;
                 votingTimerRemaining = mm.VotingTimer;
                 voteCounts = mm.GetCurrentVoteCounts();
             }
             else
             {
                 hasVotingSession = false;
-                votingMissionCount = 0;
-                missionNames = null;
-                missionDescriptions = null;
-                rewardCredits = null;
-                difficulties = null;
-                durations = null;
+                votingMissions = null;
                 votingTimerRemaining = 0f;
                 voteCounts = null;
             }
@@ -136,19 +104,10 @@ namespace Assets.codes.Network.Messages
             if (hasVotingSession)
             {
                 int missionCount = packet.Readint();
-                string[] missionNames = new string[missionCount];
-                string[] missionDescriptions = new string[missionCount];
-                int[] rewardCredits = new int[missionCount];
-                float[] difficulties = new float[missionCount];
-                int[] durations = new int[missionCount];
+                Mission[] votingMissions = new Mission[missionCount];
                 for (int i = 0; i < missionCount; i++)
-                {
-                    missionNames[i] = packet.ReadstringUNICODE();
-                    missionDescriptions[i] = packet.ReadstringUNICODE();
-                    rewardCredits[i] = packet.Readint();
-                    difficulties[i] = packet.Readfloat();
-                    durations[i] = packet.Readint();
-                }
+                    votingMissions[i] = packet.ReadMission();
+
                 float votingTimerRemaining = packet.Readfloat();
                 int voteCountsLength = packet.Readint();
                 int[] voteCounts = new int[voteCountsLength];
@@ -157,15 +116,13 @@ namespace Assets.codes.Network.Messages
 
                 return new NMS_Server_SyncScene(
                     objects, slotsRelationships,
-                    true, missionCount,
-                    missionNames, missionDescriptions, rewardCredits,
-                    difficulties, durations,
+                    true, votingMissions,
                     votingTimerRemaining, voteCounts);
             }
 
             return new NMS_Server_SyncScene(
                 objects, slotsRelationships,
-                false, 0, null, null, null, null, null, 0f, null);
+                false, null, 0f, null);
         }
 
         public override void Write(Packet packet)
@@ -190,15 +147,10 @@ namespace Assets.codes.Network.Messages
             packet.Write(hasVotingSession);
             if (hasVotingSession)
             {
-                packet.Write(votingMissionCount);
-                for (int i = 0; i < votingMissionCount; i++)
-                {
-                    packet.WriteUNICODE(missionNames[i]);
-                    packet.WriteUNICODE(missionDescriptions[i]);
-                    packet.Write(rewardCredits[i]);
-                    packet.Write(difficulties[i]);
-                    packet.Write(durations[i]);
-                }
+                packet.Write(votingMissions.Length);
+                foreach (Mission m in votingMissions)
+                    packet.Write(m);
+
                 packet.Write(votingTimerRemaining);
                 packet.Write(voteCounts != null ? voteCounts.Length : 0);
                 if (voteCounts != null)
@@ -237,27 +189,15 @@ namespace Assets.codes.Network.Messages
             }
 
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
-            
-            if (hasVotingSession && MissionProjectionDisplay.Instance != null)
-            {
-                Mission[] missions = new Mission[votingMissionCount];
-                for (int i = 0; i < votingMissionCount; i++)
-                {
-                    missions[i] = new Mission(
-                        missionNames[i],
-                        missionDescriptions[i],
-                        rewardCredits[i],
-                        difficulties[i] * 10f,
-                        durations[i]
-                    );
-                }
 
-                MissionProjectionDisplay.Instance.ShowVotingMissions(missions, votingTimerRemaining);
+            if (hasVotingSession && votingMissions != null && MissionProjectionDisplay.Instance != null)
+            {
+                MissionProjectionDisplay.Instance.ShowVotingMissions(votingMissions, votingTimerRemaining);
 
                 if (voteCounts != null)
                     MissionProjectionDisplay.Instance.UpdateVoteCounts(voteCounts);
 
-                Debug.Log($"[NMS_Server_SyncScene] Restored voting session: {votingMissionCount} missions, {votingTimerRemaining:F1}s remaining.");
+                Debug.Log($"[NMS_Server_SyncScene] Restored voting session: {votingMissions.Length} missions, {votingTimerRemaining:F1}s remaining.");
             }
         }
 
