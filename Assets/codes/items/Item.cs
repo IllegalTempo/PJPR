@@ -125,7 +125,11 @@ public class Item : Selectable //Item is any that is pickable
     {
         if (!slot.IsEmpty()) return false;
         if (slot.AllowedItemType == ItemType.All) return true;
-        return (itemType & slot.AllowedItemType) != 0;
+        return HasItemType(slot.AllowedItemType);
+    }
+    public bool HasItemType(ItemType type)
+    {
+        return (itemType & type) != 0;
     }
     public void DisableRB()
     {

@@ -26,7 +26,6 @@ public class NetworkMessageWindow : EditorWindow
         Guid,
         Vector3,
         Quaternion,
-        StringASCII,
         StringUNICODE,
         ByteArray
     }
@@ -553,7 +552,6 @@ public class NetworkMessageWindow : EditorWindow
                 return "Vector3";
             case FieldType.Quaternion:
                 return "Quaternion";
-            case FieldType.StringASCII:
             case FieldType.StringUNICODE:
                 return "string";
             case FieldType.ByteArray:
@@ -585,8 +583,6 @@ public class NetworkMessageWindow : EditorWindow
                 return "packet.Readvector3()";
             case FieldType.Quaternion:
                 return "packet.Readquaternion()";
-            case FieldType.StringASCII:
-                return "packet.ReadstringASCII()";
             case FieldType.StringUNICODE:
                 return "packet.ReadstringUNICODE()";
             case FieldType.ByteArray:
@@ -610,10 +606,8 @@ public class NetworkMessageWindow : EditorWindow
             case FieldType.Vector3:
             case FieldType.Quaternion:
                 return "packet.Write(" + fieldName + ")";
-            case FieldType.StringASCII:
-                return "packet.WriteASCII(" + fieldName + ")";
             case FieldType.StringUNICODE:
-                return "packet.WriteUNICODE(" + fieldName + ")";
+                return "packet.Write(" + fieldName + ")";
             case FieldType.ByteArray:
                 return "packet.Write(" + fieldName + ")";
             default:

@@ -39,7 +39,8 @@ namespace Assets.codes.Network.Messages
             { (int)packets.BothPackets.VoicePacket, NMS_Both_VoicePacket.Read },
             { (int)packets.BothPackets.NO_Slot_Interact, NMS_Both_SlotAttach.Read },
             { (int)packets.BothPackets.SlotDetach, NMS_Both_SlotDetach.Read },
-            { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },};
+            { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },
+            { (int)packets.BothPackets.SendCombineItem, NMS_Both_SendCombineItem.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {

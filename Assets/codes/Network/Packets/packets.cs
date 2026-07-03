@@ -15,8 +15,7 @@ public class packets
         NO_Destroy = 1011,
         StartVotingSession = 1012,
         VoteResult = 1013,
-        VoteUpdate = 1014,
-    };
+        VoteUpdate = 1014,};
     public enum ClientPackets
     {
         SendReadyState = 2001,
@@ -34,6 +33,7 @@ public class packets
         VoicePacket = 3008,
         NO_Slot_Interact = 3011,
         SlotDetach = 3012,
-        QuantityResourceProviderInteract = 3013,};
+        QuantityResourceProviderInteract = 3013,
+        SendCombineItem = 3014,};
 }
 
