@@ -54,8 +54,15 @@ namespace Assets.codes.Network.Messages
             }
             else if (player.steamId != pickedUpBy)
             {
-                Debug.LogWarning($"Rejected pickup for {itemId}: sender {player.steamId} tried to set owner {pickedUpBy}.");
+                if (NetworkSystem.Instance.FindNetworkIdentity[itemId].Sovereignty != 0)
+                {
+                    Debug.LogWarning("Item pick up by two person at the same time");
+                    return;
+                }
+                    Debug.LogWarning($"Rejected pickup for {itemId}: sender {player.steamId} tried to set owner {pickedUpBy}.");
                 return;
+                
+                
             }
 
             base.ServerHandle(player);
