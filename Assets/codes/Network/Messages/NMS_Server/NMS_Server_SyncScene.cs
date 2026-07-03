@@ -4,18 +4,18 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Server_SyncNetworkPrefab : NMS, IClientHandle
+    public class NMS_Server_SyncScene : NMS, IClientHandle
     {
         private readonly NetworkObjectSnapshot[] objects;
         private readonly SlotSnapshot[] slotsRelationships;
 
-        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkObjectSnapshot> objects, IEnumerable<SlotSnapshot> sr) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncScene(IEnumerable<NetworkObjectSnapshot> objects, IEnumerable<SlotSnapshot> sr) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.objects = new List<NetworkObjectSnapshot>(objects).ToArray();
             this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
         }
 
-        public NMS_Server_SyncNetworkPrefab(IEnumerable<NetworkPrefabIdentity> networkObjects, IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncScene(IEnumerable<NetworkPrefabIdentity> networkObjects, IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
             foreach (NetworkPrefabIdentity networkObject in networkObjects)
@@ -42,7 +42,7 @@ namespace Assets.codes.Network.Messages
             slotsRelationships = slotSnapshots.ToArray();
         }
 
-        public static NMS_Server_SyncNetworkPrefab Read(Packet packet)
+        public static NMS_Server_SyncScene Read(Packet packet)
         {
             int objectlistlength = packet.Readint();
             NetworkObjectSnapshot[] objects = new NetworkObjectSnapshot[objectlistlength];
@@ -67,7 +67,7 @@ namespace Assets.codes.Network.Messages
                     );
             }
 
-            return new NMS_Server_SyncNetworkPrefab(objects,slotsRelationships);
+            return new NMS_Server_SyncScene(objects,slotsRelationships);
         }
 
         public override void Write(Packet packet)

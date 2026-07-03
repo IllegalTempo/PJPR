@@ -44,6 +44,11 @@ namespace Assets.codes.Network.Messages
             }
 
             bool isDropRequest = pickedUpBy == 0;
+            if (!isDropRequest && NetworkSystem.Instance.FindNetworkIdentity[itemId].Sovereignty != 0)
+            {
+                Debug.LogWarning("Rejected pickup");
+                return;
+            }
             if (isDropRequest)
             {
                 if (((NetworkPrefabIdentity)networkObject).Sovereignty != player.steamId)
@@ -54,11 +59,7 @@ namespace Assets.codes.Network.Messages
             }
             else if (player.steamId != pickedUpBy)
             {
-                if (NetworkSystem.Instance.FindNetworkIdentity[itemId].Sovereignty != 0)
-                {
-                    Debug.LogWarning("Item pick up by two person at the same time");
-                    return;
-                }
+                
                     Debug.LogWarning($"Rejected pickup for {itemId}: sender {player.steamId} tried to set owner {pickedUpBy}.");
                 return;
                 

@@ -47,7 +47,7 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.UpdatePlayerEnterRoomForExistingPlayer, NMS_Server_NewPlayerJoined.Read },
             { (int)packets.ServerPackets.PlayerQuit, NMS_Server_PlayerQuit.Read },
             { (int)packets.ServerPackets.NewObject, NMS_Server_NewObject.Read },
-            { (int)packets.ServerPackets.SyncNetworkObjects, NMS_Server_SyncNetworkPrefab.Read },
+            { (int)packets.ServerPackets.SyncNetworkObjects, NMS_Server_SyncScene.Read },
             { (int)packets.ServerPackets.StartGameLoop, NMS_Server_StartGameLoop.Read },
             { (int)packets.ServerPackets.NO_Destroy, NMS_Server_NO_Destroy.Read },
             { (int)packets.ServerPackets.StartVotingSession, NMS_Server_StartVotingSession.Read },

@@ -153,8 +153,14 @@ public class Item : Selectable //Item is any that is pickable
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
-        netObj.Sync_Transform = newowner == 0; //Only sync transform if dropped, not when picked up, because the player will be moving it.
-        if (newowner == 0)
+        bool isDropAction = newowner == 0;
+        if(!isDropAction && netObj.Identity.Sovereignty != 0)
+        {
+            Debug.LogWarning($" {name} is already picked up, ignoring pickup action.");
+            return;
+        }
+        netObj.Sync_Transform = isDropAction; //Only sync transform if dropped, not when picked up, because the player will be moving it.
+        if (isDropAction)
         {
             PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Identity.Sovereignty].playerControl;
             gotDropped(who,transform.position);

@@ -102,7 +102,7 @@ public class GameServer : SocketManager
             return false;
         }
         Debug.Log("Slots:::: " + NetworkSystem.Instance.Slots.Count());
-        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncNetworkPrefab(NetworkSystem.Instance.FindNetworkIdentity.Values.OfType<NetworkPrefabIdentity>().ToArray(),NetworkSystem.Instance.Slots)); //Send packet to the one who connects to the server, with room info
+        NetworkRouter.Instance.SendMessageToClient(connectedPlayer, new NMS_Server_SyncScene(NetworkSystem.Instance.FindNetworkIdentity.Values.OfType<NetworkPrefabIdentity>().ToArray(),NetworkSystem.Instance.Slots)); //Send packet to the one who connects to the server, with room info
 
         Debug.Log($"Sent network objects to player {connectedPlayer.steamId}.");
         return true;
