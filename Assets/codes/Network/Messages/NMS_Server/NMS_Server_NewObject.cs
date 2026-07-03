@@ -67,7 +67,7 @@ namespace Assets.codes.Network.Messages
             packet.Write(replacingitem2id);
         }
 
-        public async UniTask ClientHandle()
+        public async void ClientHandle()
         {
             NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabId, owner, uid, spawnLocation, spawnRotation);
             CombinedProcessableItem combinedProcessableItem = nobj.GetComponent<CombinedProcessableItem>();
@@ -79,5 +79,6 @@ namespace Assets.codes.Network.Messages
             }
             Debug.Log("Received Server New Object: " + prefabId);
         }
+
     }
 }
