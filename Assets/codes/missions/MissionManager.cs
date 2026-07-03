@@ -30,35 +30,7 @@ public class MissionManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
-    {
-        NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived += OnPlayerReadyStateChanged;
-    }
-
-    private void OnDestroy()
-    {
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived -= OnPlayerReadyStateChanged;
-    }
-
-    private void OnPlayerReadyStateChanged(NetworkPlayer player, int state)
-    {
-        if (state != (int)ReadyState.SyncNetworkObjects)
-            return;
-        if (!IsVotingActive || CurrentVotingMissions == null)
-            return;
-
-        Debug.Log($"[MissionManager] Player {player.SteamName} reached SyncNetworkObjects — syncing voting session.");
-
-        var sessionMsg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer);
-        NetworkRouter.Instance.SendMessageToClient(player, sessionMsg);
-
-        int[] counts = GetCurrentVoteCounts();
-        var voteMsg = new NMS_Server_VoteUpdate(counts);
-        NetworkRouter.Instance.SendMessageToClient(player, voteMsg);
-    }
-
-    private int[] GetCurrentVoteCounts()
+    public int[] GetCurrentVoteCounts()
     {
         if (CurrentVotingMissions == null)
             return new int[0];
