@@ -30,13 +30,12 @@ public class MissionManager : MonoBehaviour
         Instance = this;
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
-            NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived += OnPlayerReadyStateChanged;
+        NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived += OnPlayerReadyStateChanged;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.NetworkListener != null)
             NetworkSystem.Instance.NetworkListener.Server_ReadyStateReceived -= OnPlayerReadyStateChanged;
