@@ -83,7 +83,7 @@ public class SplashController : Interactable
         currentLiquid = liquidType;
     }
 
-    public override void OnInteract(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         Splash();
     }

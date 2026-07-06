@@ -11,7 +11,7 @@ public partial class PlayerMain: MonoBehaviour
     public float JetPackForce = 2f;
     public float Gravity = 2f;
     private Vector2 moveinput = Vector2.zero;
-    private Vector2 lookinput = Vector2.zero;
+    public Vector2 lookinput = Vector2.zero;
 
     public float maxVerticalVelocity = 100f;
     private void Jetpack()

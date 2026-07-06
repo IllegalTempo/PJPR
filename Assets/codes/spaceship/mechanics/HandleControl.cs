@@ -40,7 +40,7 @@ namespace Assets.codes.spaceship.mechanics
             startLocalTopDirection = GetStartLocalTopDirection(handleTransform);
         }
 
-        public override void OnInteract(PlayerMain who)
+        public override void OnInteract_press(PlayerMain who)
         {
             if (who == null)
             {

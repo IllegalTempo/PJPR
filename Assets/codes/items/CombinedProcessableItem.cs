@@ -22,7 +22,7 @@ namespace Assets.codes.items
         }
         public void ServerAction_CombineIntoThis(Item item)
 		{
-			GameCore.Instance.ServerDestroyNetworkItem(item);
+			//GameCore.Instance.ServerDestroyNetworkItem(item);
 
 		}
 	}

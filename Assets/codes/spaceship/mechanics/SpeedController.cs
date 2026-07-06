@@ -23,7 +23,7 @@ namespace Assets.codes.spaceship.mechanics
         private float minRotationX = 22f;
         private Coroutine rotationCoroutine;
 
-        public override void OnInteract(PlayerMain who)
+        public override void OnInteract_press(PlayerMain who)
         {
             level = (level + 1) % maxlevel;
             OnChangeSpeed.Invoke(level);

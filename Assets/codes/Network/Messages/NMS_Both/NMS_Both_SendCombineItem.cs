@@ -19,14 +19,15 @@ namespace Assets.codes.Network.Messages
         {
             this.lookingItemID = lookingItemID;
             this.holdingItemID = holdingItemID;
+            lookingItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(lookingItemID);
+            holdingItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(holdingItemID);
         }
 
         public static NMS_Both_SendCombineItem Read(Packet packet)
         {
             string lookingItemID = packet.ReadstringUNICODE();
             string holdingItemID = packet.ReadstringUNICODE();
-            Item lookingItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(lookingItemID);
-            Item holdingItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(holdingItemID);
+            
             return new NMS_Both_SendCombineItem(lookingItemID, holdingItemID);
         }
 
@@ -38,6 +39,8 @@ namespace Assets.codes.Network.Messages
 
         protected override void applyaction()
         {
+            Debug.Log($"Combining {lookingItemID} and {holdingItemID}");
+
             if (lookingItem.HasItemType(ItemType.Processable) && holdingItem.HasItemType(ItemType.Processable))
             {
                 if (lookingItem is CombinedProcessableItem c)

@@ -40,6 +40,9 @@ public partial class PlayerMain : MonoBehaviour
 
     [SerializeField]
     private GameObject[] LocalInvisible;
+
+
+    private IUsable pressedUsable = null;
     void Start()
     {
 
@@ -74,6 +77,10 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
         control.Player.pickup.performed += ctx => OnClickF();
         control.Player.Interact.performed += ctx => OnInteract();
+        control.Player.Interact.canceled += ctx => OnInteract_release();
+
+
+
         control.Player.voice.performed += ctx => OnClickVC();
         control.Player.rotate.performed += ctx => OnClickSlotRotate();
 
@@ -118,7 +125,16 @@ public partial class PlayerMain : MonoBehaviour
 
         if (usable != null)
         {
-            usable.OnInteract(this);
+            usable.OnInteract_press(this);
+            pressedUsable = usable;
+        }
+
+    }
+    private void OnInteract_release()
+    {
+        if (pressedUsable != null)
+        {
+            pressedUsable.OnInteract_release(this);
         }
     }
 
@@ -192,6 +208,8 @@ public partial class PlayerMain : MonoBehaviour
                 case Item i:
                     if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
                     {
+                        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
+                        combineMessage.SendMessageAsServerOrClient();
                     }
                     break;
                 case Slot s:

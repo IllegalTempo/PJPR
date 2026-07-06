@@ -32,7 +32,7 @@ namespace Assets.codes.machines
 			}
 		}
 		
-		public override void OnInteract(PlayerMain who)
+		public override void OnInteract_press(PlayerMain who)
 		{
             Debug.Log($"[WaterGen] OnInteract — IsServer={NetworkSystem.Instance?.IsServer}, identity={identity?.Identifier}");
 

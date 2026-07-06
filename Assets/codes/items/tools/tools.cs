@@ -7,7 +7,7 @@ public class tools : Item, IUsable
     {
 
     }
-    public void OnInteract(PlayerMain who)
+    public void OnInteract_press(PlayerMain who)
     {
         if (who.seenObject != null)
         {

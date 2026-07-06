@@ -12716,7 +12716,7 @@ Transform:
   m_GameObject: {fileID: 1160611504}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 7.387, z: 18.223}
+  m_LocalPosition: {x: 0, y: 7.387, z: 15.571}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16509,6 +16509,148 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!1001 &1900254730
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.18
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 18.966658
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: m_Name
+      value: main
+      objectReference: {fileID: 0}
+    - target: {fileID: 6317578925029434746, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d4804d48320a4d245be06746b5bedce4, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900254734}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900254733}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900254732}
+  m_SourcePrefab: {fileID: 100100000, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+--- !u!1 &1900254731 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
+  m_PrefabInstance: {fileID: 1900254730}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &1900254732
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900254731}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 4
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1900254733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900254731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbed23ceb66de9546bb1814ce545115f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.mechanics.RotationController
+  rotationSpeed: 300
+  momentumDecay: 2
+--- !u!114 &1900254734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900254731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c89bf5235f6744fa1cf4fa294d8c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaticOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &1906003522
 GameObject:
   m_ObjectHideFlags: 0
@@ -16884,7 +17026,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 1
+  StartServerOnStart: 0
   _maxPlayer: 8
   IsOnline: 0
   IsServer: 1
@@ -23481,3 +23623,4 @@ SceneRoots:
   - {fileID: 2016645269}
   - {fileID: 2131475353}
   - {fileID: 1951871080}
+  - {fileID: 1900254730}

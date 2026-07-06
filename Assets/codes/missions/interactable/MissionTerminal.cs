@@ -15,7 +15,7 @@ public class MissionTerminal : Selectable, IUsable
         networkObject = GetComponent<NetworkPrefabIdentity>();
     }
 
-    public void OnInteract(PlayerMain who)
+    public void OnInteract_press(PlayerMain who)
     {
         if (MissionManager.Instance.IsVotingActive)
         {
