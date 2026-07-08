@@ -7,107 +7,37 @@ namespace Assets.codes.system
 {
     public class WorldReference : MonoBehaviour
     {
-        private Vector3 movement = Vector3.zero;
-        private Vector3 angularMovement = Vector3.zero;
-        [SerializeField] private Transform movementPivot;
-        [SerializeField] private float rotationResponse = 1f;
-        [SerializeField] private float minRotationSpeed = 0f;
-        private Dictionary<int, ThrustSource> SourceToVelocity = new Dictionary<int, ThrustSource>();
 
-        private struct ThrustSource
-        {
-            public Vector3 Velocity;
-            public Vector3 Position;
-            public bool HasPosition;
-        }
+        private Vector3 velocity;
+        private Vector3 rotation;
 
-        public void UpdateSourceVelocity(int sourceModuleInstanceID, Vector3 newVelocity)
+        public static WorldReference Instance;
+        private void OnEnable()
         {
-            SourceToVelocity[sourceModuleInstanceID] = new ThrustSource
+            if (Instance != null)
             {
-                Velocity = newVelocity,
-                Position = Vector3.zero,
-                HasPosition = false,
-            };
-
-            UpdateMovement();
-        }
-
-        public void UpdateSourceVelocity(int sourceModuleInstanceID, Vector3 newVelocity, Vector3 sourcePosition)
-        {
-            SourceToVelocity[sourceModuleInstanceID] = new ThrustSource
-            {
-                Velocity = newVelocity,
-                Position = sourcePosition,
-                HasPosition = true,
-            };
-
-            UpdateMovement();
-        }
-
-        private void UpdateMovement()
-        {
-            movement = calculateFinalVelocity();
-            angularMovement = calculateFinalAngularVelocity();
-        }
-
-        private Vector3 calculateFinalVelocity()
-        {
-            Vector3 sum = Vector3.zero;
-            foreach(ThrustSource source in SourceToVelocity.Values)
-            {
-                sum += source.Velocity;
+                Debug.LogError("Multiple instances of WorldReference detected. There should only be one instance.");
+                Destroy(this);
+                return;
             }
-            return sum;
+            Instance = this;
+
+
         }
-
-        private Vector3 calculateFinalAngularVelocity()
+        private void FixedUpdate()
         {
-            Vector3 pivot = GetPivotPosition();
-            Vector3 sum = Vector3.zero;
-            foreach (ThrustSource source in SourceToVelocity.Values)
-            {
-                if (!source.HasPosition)
-                {
-                    continue;
-                }
+            //rb.linearVelocity = velocity;
+            Quaternion deltaRotation = Quaternion.Euler(rotation * Time.fixedDeltaTime);
+            //rb.MoveRotation(rb.rotation * deltaRotation);
 
-                Vector3 offsetFromPivot = source.Position - pivot;
-                sum += Vector3.Cross(offsetFromPivot, source.Velocity) * rotationResponse;
-            }
-
-            return sum;
         }
-
-        private Vector3 GetPivotPosition()
+        public void SetVelocity(Vector3 velocity)
         {
-            if (movementPivot != null)
-            {
-                return movementPivot.position;
-            }
-
-            if (GameCore.Instance != null && MainSpaceship.Instance != null)
-            {
-                return MainSpaceship.Instance.transform.position;
-            }
-
-            return transform.position;
+            this.velocity = velocity;
         }
-
-        private void LateUpdate()
+        public void SetRotation(Vector3 rotation)
         {
-            if (movement != Vector3.zero)
-            {
-                transform.position -= movement * Time.deltaTime;
-            }
-
-            if (angularMovement.sqrMagnitude >= minRotationSpeed * minRotationSpeed)
-            {
-                float angle = angularMovement.magnitude * Time.deltaTime;
-                Vector3 pivot = GetPivotPosition();
-                transform.RotateAround(pivot, angularMovement.normalized, -angle);
-
-            }
+            this.rotation = rotation;
         }
     }
 }

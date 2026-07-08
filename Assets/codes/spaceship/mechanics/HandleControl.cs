@@ -1,211 +1,99 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.Events;
-using System;
-using Assets.codes.spaceship.modules;
+using Assets.codes.Network.Messages;
 
 namespace Assets.codes.spaceship.mechanics
 {
-    public class HandleControl : Interactable
+    public class handlecontrol : Machine
     {
-        [SerializeField]
-        private Transform handle;
-        [SerializeField]
-        private Transform handleTop;
-        [SerializeField]
-        private float rotationSpeed = 10f;
-        [SerializeField]
-        private Vector3 rotationOffset;
-        private const float MIN_ROTATION_X = 0f;
-        private const float MAX_ROTATION_X = 75f;
-        [SerializeField]
-        private int rotationSteps = 4;
-        [SerializeField]
-        private float lookDegreesForFullRotation = 25f;
-        [SerializeField]
-        private booster ControllingBooster;
-        private int currentStep = -1;
-        private Quaternion startLocalRotation;
-        private Vector3 startLocalTopDirection;
-        private float controlStartLookX;
-        private float controlStartRotationX;
-        private PlayerMain controllingPlayer;
+        private bool isGrabbed; //this is only limited to local player
 
-        protected override void OnEnable()
+        public float pitchSensitivity = 3f;
+        public float minPitch = -45f;
+        public float maxPitch = 45f;
+
+        public float rotationSmoothing = 12f;
+
+        [Header("Step Settings")]
+        [Min(2)]
+        public int stepCount = 3;
+        public int CurrentStep { get; private set; }
+
+        private float rawPitch;   // Continuous pitch tracked from mouse input, before snapping to a step.
+        private float StepAngle => (maxPitch - minPitch) / (stepCount - 1);
+
+        public override void ServerActionOnInteract()
         {
-            base.OnEnable();
-
-            Transform handleTransform = GetHandleTransform();
-            startLocalRotation = handleTransform.localRotation;
-            startLocalTopDirection = GetStartLocalTopDirection(handleTransform);
         }
 
+        public override void ShareActionOnInteract()
+        {
+        }
         public override void OnInteract_press(PlayerMain who)
         {
-            if (who == null)
-            {
-                return;
-            }
-
-            if (controllingPlayer == who)
-            {
-                controllingPlayer.ClearActiveUsable(this);
-                controllingPlayer = null;
-                return;
-            }
-
-            if (controllingPlayer != null)
-            {
-                return;
-            }
-
-            controllingPlayer = who;
-            BeginControl(who);
-            controllingPlayer.SetActiveUsable(this);
+            base.OnInteract_press(who);
+            isGrabbed = true;
         }
-
+        public override void OnInteract_release(PlayerMain who)
+        {
+            base.OnInteract_release(who);
+            isGrabbed = false;
+        }
         protected override void Update()
         {
             base.Update();
+            if (isGrabbed)
+                RotateHandle(GameCore.Instance.Local_Player);
+        }
+        private void RotateHandle(PlayerMain who)
+        {
 
-            if (controllingPlayer == null)
+            // Mouse Y movement adjusts the raw (continuous) pitch.
+            float mouseY = who.lookinput.y;
+            rawPitch = Mathf.Clamp(rawPitch - mouseY, minPitch, maxPitch);
+
+            // Snap the raw pitch to the nearest step.
+            int newStep = PitchToStep(rawPitch);
+            float steppedPitch = StepToPitch(newStep);
+
+            // Yaw follows the player's current facing direction.
+            float targetYaw = who.cam.transform.eulerAngles.y;
+
+            Quaternion targetRotation = Quaternion.Euler(steppedPitch, 0f, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSmoothing);
+
+            if (newStep != CurrentStep)
             {
-                return;
+                NMS_Both_Handle_OnReleaseUpdateLevel msg = new NMS_Both_Handle_OnReleaseUpdateLevel(identity.Identifier, newStep);
+                msg.SendMessageAsServerOrClient();
             }
-
-            RotateWithPlayerLook();
         }
 
-        private void OnDisable()
+        private int PitchToStep(float pitch)
         {
-            if (controllingPlayer != null)
-            {
-                controllingPlayer.ClearActiveUsable(this);
-                controllingPlayer = null;
-            }
+            return Mathf.Clamp(Mathf.RoundToInt((pitch - minPitch) / StepAngle), 0, stepCount - 1);
         }
 
-        private void RotateWithPlayerLook()
+        private float StepToPitch(int step)
         {
-            PlayerMain who = controllingPlayer;
-            Transform lookSource = GetLookSource(who);
-            if (lookSource == null)
-            {
-                who.ClearActiveUsable(this);
-                controllingPlayer = null;
-                return;
-            }
-
-            Transform handleTransform = GetHandleTransform();
-
-            float targetX = lookSource.rotation.eulerAngles.x;
-            targetX = GetSteppedRotationX(targetX);
-            Quaternion targetRotation = startLocalRotation * Quaternion.AngleAxis(targetX, Vector3.right);
-            handleTransform.localRotation = Quaternion.Slerp(handleTransform.localRotation, targetRotation, Time.deltaTime * rotationSpeed);
+            return minPitch + step * StepAngle;
         }
-
-        private void BeginControl(PlayerMain who)
+        
+        /// <summary>
+        /// Called whenever the handle settles on a new step. Override this in a
+        /// subclass for custom behaviour (e.g. playing a click sound, triggering
+        /// a puzzle event), or just hook up onStepChanged in the Inspector or
+        /// via code (handle.onStepChanged.AddListener(...)) instead.
+        /// </summary>
+        public virtual void OnStepChanged(int newStep)
         {
-            Transform lookSource = GetLookSource(who);
-            controlStartLookX = lookSource != null ? lookSource.rotation.eulerAngles.x : 0f;
-            controlStartRotationX = GetCurrentStepRotationX();
+            
+            CurrentStep = newStep;
+
         }
-
-        private Transform GetLookSource(PlayerMain who)
+        public virtual void OnStepChanged_Server(int newStep)
         {
-            if (who.cam != null && who.cam.activeInHierarchy)
-            {
-                return who.cam.transform;
-            }
 
-            if (who.head != null)
-            {
-                return who.head.transform;
-            }
-
-            if (who.cam != null)
-            {
-                return who.cam.transform;
-            }
-
-            return who.transform;
-        }
-
-        private Transform GetHandleTransform()
-        {
-            return handle != null ? handle : transform;
-        }
-
-        private Vector3 GetStartLocalTopDirection(Transform handleTransform)
-        {
-            if (handleTop == null)
-            {
-                return startLocalRotation * Vector3.forward;
-            }
-
-            return GetLocalDirection(handleTransform, handleTop.position - handleTransform.position);
-        }
-
-        private Vector3 GetLocalDirection(Transform target, Vector3 direction)
-        {
-            if (target.parent == null)
-            {
-                return direction;
-            }
-
-            return target.parent.InverseTransformDirection(direction);
-        }
-
-        private float GetSteppedRotationX(float targetX)
-        {
-            int stepCount = Mathf.Max(1, rotationSteps);
-            float handleRange = MAX_ROTATION_X - MIN_ROTATION_X;
-            float lookRange = Mathf.Max(0.01f, lookDegreesForFullRotation);
-            float lookDelta = Mathf.DeltaAngle(controlStartLookX, targetX);
-            float normalizedTargetX = controlStartRotationX + (lookDelta / lookRange * handleRange) + rotationOffset.x;
-            float clampedTargetX = Mathf.Clamp(normalizedTargetX, MIN_ROTATION_X, MAX_ROTATION_X);
-
-            if (stepCount == 1)
-            {
-                SetStep(0);
-                return MIN_ROTATION_X;
-            }
-
-            float stepSize = (MAX_ROTATION_X - MIN_ROTATION_X) / (stepCount - 1);
-            int step = Mathf.RoundToInt((clampedTargetX - MIN_ROTATION_X) / stepSize);
-            step = Mathf.Clamp(step, 0, stepCount - 1);
-            SetStep(step);
-
-            return MIN_ROTATION_X + (step * stepSize);
-        }
-
-        private float GetCurrentStepRotationX()
-        {
-            int stepCount = Mathf.Max(1, rotationSteps);
-            if (stepCount == 1 || currentStep < 0)
-            {
-                return MIN_ROTATION_X;
-            }
-
-            float stepSize = (MAX_ROTATION_X - MIN_ROTATION_X) / (stepCount - 1);
-            int step = Mathf.Clamp(currentStep, 0, stepCount - 1);
-            return MIN_ROTATION_X + (step * stepSize);
-        }
-
-        private void SetStep(int newstep)
-        {
-            if (currentStep == newstep)
-            {
-                return;
-            }
-
-            currentStep = newstep;
-            OnStepChange(newstep);
-        }
-
-        private void OnStepChange(int newstep)
-        {
-            ControllingBooster.setSpeedLevel(newstep);
         }
     }
 }

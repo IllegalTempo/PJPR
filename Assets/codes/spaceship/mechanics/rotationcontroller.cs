@@ -6,11 +6,15 @@ namespace Assets.codes.spaceship.mechanics
     public class RotationController : Interactable
     {
         public float rotationSpeed = 300f;
-        private Vector3 _angularVelocityAxisAngle = Vector3.zero; // axis * degrees/sec, built up while dragging
-        public float momentumDecay = 2f; // higher = stops faster
-        private bool _wasDraggingLastFrame = false;
+        public float returnSpeed = 2f;
+        private Quaternion originalRotation;
 
         private bool isDragging = false;
+        private void Awake()
+        {
+            originalRotation = transform.rotation;
+        }
+
         protected override void Update()
         {
 
@@ -37,33 +41,14 @@ namespace Assets.codes.spaceship.mechanics
                         float angleThisFrame = new Vector2(mouseX, mouseY).magnitude * rotationSpeed * Time.deltaTime;
 
                         transform.Rotate(rotationAxis, angleThisFrame, Space.World);
-
-                            _angularVelocityAxisAngle = rotationAxis * (angleThisFrame / Time.deltaTime);
-                        
                     }
                 }
-                else
-                {
-                    _angularVelocityAxisAngle = Vector3.zero;
-                }
             }
-            else if (_angularVelocityAxisAngle.sqrMagnitude > 0.0001f)
+            else
             {
-                // Continue spinning from the last "flick" and decay over time.
-                float angleThisFrame = _angularVelocityAxisAngle.magnitude * Time.deltaTime;
-                transform.Rotate(_angularVelocityAxisAngle.normalized, angleThisFrame, Space.World);
-
-                _angularVelocityAxisAngle = Vector3.Lerp(
-                    _angularVelocityAxisAngle,
-                    Vector3.zero,
-                    momentumDecay * Time.deltaTime
-                );
-
-                if (_angularVelocityAxisAngle.magnitude < 1f)
-                    _angularVelocityAxisAngle = Vector3.zero;
+                transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, returnSpeed * Time.deltaTime);
             }
 
-            _wasDraggingLastFrame = isDragging;
         }
 
         public override void OnInteract_press(PlayerMain who)

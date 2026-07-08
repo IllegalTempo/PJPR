@@ -1,6 +1,7 @@
 ﻿using Assets.codes.items;
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -16,7 +17,7 @@ public partial class NetworkSystem
     private GameServer _server;
     public async UniTask<NetworkGameObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner)
     {
-        NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, GameCore.Instance.GetWorldReferenceTransform());
+        NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, WorldReference.Instance.transform);
         return nobj;
     }
     public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false) //Server Only

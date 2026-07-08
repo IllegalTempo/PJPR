@@ -43,10 +43,10 @@ namespace Assets.codes.machines
 			}
 
 			
-
+            
 			string ResourcePrefabID = resource.prefabID;
-            NMS_Both_MachineInteract msg = new NMS_Both_MachineInteract(identity.Identifier);
-			msg.SendMessageAsServerOrClient();
+            base.OnInteract_press(who);
+            
         }
 
         public override void ShareActionOnInteract()

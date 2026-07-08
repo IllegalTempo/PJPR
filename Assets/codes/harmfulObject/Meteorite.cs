@@ -1,3 +1,4 @@
+using Assets.codes.system;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -116,7 +117,7 @@ public class Meteorite : HarmfulObject
         // spawning break effect
         if (breakEffect != null)
         {
-            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, GameCore.Instance.GetWorldReferenceTransform());
+            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, WorldReference.Instance.transform);
             Destroy(effect, 3f);
         }
 

@@ -40,8 +40,6 @@ public partial class GameCore : MonoBehaviour
     private GameObject PlayerSpawn;
     //[SerializeField]
     //private Transform[] SpaceshipSpawns;
-    [SerializeField]
-    public WorldReference WorldReference;
     private int nouidindex = 0;
     //public int CurrentMissionLevel = 0;
 
@@ -226,8 +224,6 @@ public partial class GameCore : MonoBehaviour
         //}
         return id == Local_NetworkPlayer.steamID;
     }
-    public Transform GetWorldReferenceTransform()
-    { return WorldReference.transform; }
     public async UniTask<Texture2D> GetIcon(ulong steamid)
     {
         var icon = await SteamFriends.GetMediumAvatarAsync(steamid);
