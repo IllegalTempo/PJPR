@@ -29,13 +29,13 @@ namespace Assets.codes.Network.Messages
 
         protected override void applyaction()
         {
-            handlecontrol PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<handlecontrol>(id);
+            stepcontroller PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<stepcontroller>(id);
             PacketReferencedMachine.OnStepChanged(level);
         }
 
         protected override void serverAction()
         {
-            handlecontrol PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<handlecontrol>(id);
+            stepcontroller PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<stepcontroller>(id);
             PacketReferencedMachine.OnStepChanged_Server(level);
         }
     }

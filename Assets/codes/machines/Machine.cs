@@ -9,6 +9,7 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkIdentity))]
 public abstract class Machine : Interactable //Machine should be synced
 {
+
     protected NetworkIdentity identity;
     public abstract void ServerActionOnInteract();
     public abstract void ShareActionOnInteract();

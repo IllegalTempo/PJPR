@@ -36,6 +36,10 @@ public partial class NetworkSystem
         return nobj;
 
     }
+    public async UniTask<NetworkGameObject> CreateNetworkObject(ItemDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false)
+    {
+        return await CreateNetworkObject(prefab.prefabID, pos, rot, owner, parent, isCombining);
+    }
     public async UniTask<CombinedProcessableItem> CreateNewCombinedItem(Item it1, Item it2)
     {
         if (IsOnline && !IsServer) return null;

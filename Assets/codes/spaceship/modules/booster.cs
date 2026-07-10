@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Assets.codes.spaceship.modules
 {
-	public class booster: module
+	public class Booster: module
 	{
 		private int speedlevel = 0;
 		private float spl = 1;
