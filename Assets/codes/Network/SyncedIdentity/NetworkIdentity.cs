@@ -26,6 +26,7 @@ public class NetworkIdentity : MonoBehaviour
         initWithID();
         foreach (NetworkChildIdentity childid in GetComponentsInChildren<NetworkChildIdentity>())
         {
+            if (childid.Identifier != "") return;
             childid.Identifier = GetChildIdentifier(childid.gameObject);
             childid.initWithID();
         }

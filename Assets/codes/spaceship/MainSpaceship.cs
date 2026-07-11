@@ -64,7 +64,7 @@ public class MainSpaceship : MonoBehaviour
         ItemDefinition it = module.AbstractItem;
         if(it is ModuleDefinition md)
         {
-            NetworkGameObject controller = await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefabID, ModuleControlSpawnPoint.position, ModuleControlSpawnPoint.rotation, 0);
+            NetworkGameObject controller = await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefabID, ModuleControlSpawnPoint.position, ModuleControlSpawnPoint.rotation, 0,transform);
         }
         return nobj.GetComponent<module>(); 
 
