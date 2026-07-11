@@ -54,15 +54,19 @@ namespace Assets.codes.spaceship.mechanics
             {
                 NMS_Both_Handle_OnReleaseUpdateLevel msg = new NMS_Both_Handle_OnReleaseUpdateLevel(identity.Identifier, newStep);
                 msg.SendMessageAsServerOrClient();
+
             }
         }
         public virtual void OnStepChanged(int newStep) //run by netmessage
         {
             CurrentStep = newStep;
+            VisualOnStep(newStep);
+
         }
         public virtual void OnStepChanged_Server(int newStep) //Server only when step is changed
         {
 
         }
+        public abstract void VisualOnStep(int step);
     }
 }

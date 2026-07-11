@@ -15,6 +15,16 @@ namespace Assets.codes.spaceship.mechanics
         private float rawPitch;   // Continuous pitch tracked from mouse input, before snapping to a step.
         private float StepAngle => (maxPitch - minPitch) / (stepCount - 1);
 
+        public override void VisualOnStep(int step)
+        {
+            float steppedPitch = StepToPitch(step);
+
+
+            Quaternion targetRotation = Quaternion.Euler(steppedPitch, 0f, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * smoothing);
+            
+        }
+
         protected override void DuringGrab(PlayerMain who)
         {
 
@@ -24,15 +34,8 @@ namespace Assets.codes.spaceship.mechanics
 
             // Snap the raw pitch to the nearest step.
             int newStep = PitchToStep(rawPitch);
-            float steppedPitch = StepToPitch(newStep);
-
-            // Yaw follows the player's current facing direction.
-            float targetYaw = who.cam.transform.eulerAngles.y;
-
-            Quaternion targetRotation = Quaternion.Euler(steppedPitch, 0f, 0f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * smoothing);
             CheckForStepChange(newStep);
-            
+
         }
 
         private int PitchToStep(float pitch)

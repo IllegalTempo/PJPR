@@ -28,10 +28,7 @@ namespace Assets.codes.spaceship.mechanics
             rawSlide = Mathf.Clamp(rawSlide - (mouseY * sliderSensitivity * Time.deltaTime), minSlide, maxSlide);
 
             int newStep = SlideToStep(rawSlide);
-            float steppedSlide = StepToSlide(newStep);
 
-            Vector3 targetPosition = originalLocalPosition + (slideAxis.normalized * steppedSlide);
-            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * smoothing);
             CheckForStepChange(newStep);
         }
 
@@ -45,5 +42,12 @@ namespace Assets.codes.spaceship.mechanics
             return minSlide + step * StepDistance;
         }
 
+        public override void VisualOnStep(int step)
+        {
+            float steppedSlide = StepToSlide(step);
+
+            Vector3 targetPosition = originalLocalPosition + (slideAxis.normalized * steppedSlide);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * smoothing);
+        }
     }
 }
