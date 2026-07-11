@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Assets.codes.Network.SyncedIdentity;
 
 /// <summary>
 /// Network Identity give a gameobject a unique identifier. Allow it to be found with NetworkSystem.Instance.FindNetworkIdentity[Identifier]
@@ -15,8 +16,22 @@ public class NetworkIdentity : MonoBehaviour
     {
         Sovereignty = newowner;
     }
+    private string GetChildIdentifier(GameObject child)
+    {
+        return Identifier + "_" + child.name;   
+    }
 
     protected virtual void Start()
+    {
+        initWithID();
+        foreach (NetworkChildIdentity childid in GetComponentsInChildren<NetworkChildIdentity>())
+        {
+            childid.Identifier = GetChildIdentifier(childid.gameObject);
+            childid.initWithID();
+        }
+
+    }
+    public void initWithID()
     {
         if (string.IsNullOrWhiteSpace(Identifier))
         {
@@ -32,8 +47,7 @@ public class NetworkIdentity : MonoBehaviour
 
         NetworkSystem.Instance.FindNetworkIdentity.Add(Identifier, this);
         _startTcs.TrySetResult();
-
-
     }
+
 
 }

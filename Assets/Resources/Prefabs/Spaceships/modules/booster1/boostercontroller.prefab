@@ -243,7 +243,7 @@ PrefabInstance:
       addedObject: {fileID: 2021768062989721496}
     - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 9fbfbc48cc035de41903023d57e425c5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6307808320358402752}
+      addedObject: {fileID: 3256549622313674282}
   m_SourcePrefab: {fileID: 100100000, guid: 9fbfbc48cc035de41903023d57e425c5, type: 3}
 --- !u!4 &5136955667336180762 stripped
 Transform:
@@ -312,7 +312,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.0067563, y: 5.6002135, z: 4.1458073}
   m_Center: {x: 0, y: 0.09867106, z: -1.0028464}
---- !u!114 &6307808320358402752
+--- !u!114 &3256549622313674282
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -321,9 +321,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 6964684324173290494}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc598a779da5ac1418f65053bc58ba3f, type: 3}
+  m_Script: {fileID: 11500000, guid: e45e8457605331d40941c49460fa60e7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkChildIdentity
   Identifier: 
   Sovereignty: 0
-  PrefabID: 
