@@ -23,30 +23,30 @@ public class NetworkIdentity : MonoBehaviour
 
     protected virtual void Start()
     {
-        initWithID();
+        initWithID(Identifier);
         foreach (NetworkChildIdentity childid in GetComponentsInChildren<NetworkChildIdentity>())
         {
-            if (childid.Identifier != "") return;
-            childid.Identifier = GetChildIdentifier(childid.gameObject);
-            childid.initWithID();
+            string id = GetChildIdentifier(childid.gameObject);
+            childid.Identifier = id;
+            childid.initWithID(id);
         }
 
     }
-    public void initWithID()
+    public void initWithID(string id)
     {
-        if (string.IsNullOrWhiteSpace(Identifier))
+        if (string.IsNullOrWhiteSpace(id))
         {
             Debug.LogWarning($"<!>{name} has no NetworkObject Identifier.");
             return;
         }
 
-        if (NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(Identifier))
+        if (NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id))
         {
-            Debug.LogError($"NetworkObject Identifier collision: {Identifier} is already registered by {NetworkSystem.Instance.FindNetworkIdentity[Identifier].name}. {name} will not be registered.");
+            Debug.LogError($"NetworkObject Identifier collision: {id} is already registered by {NetworkSystem.Instance.FindNetworkIdentity[id].name}. {name} will not be registered.");
             return;
         }
 
-        NetworkSystem.Instance.FindNetworkIdentity.Add(Identifier, this);
+        NetworkSystem.Instance.FindNetworkIdentity.Add(id, this);
         _startTcs.TrySetResult();
     }
 
