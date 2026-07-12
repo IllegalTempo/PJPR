@@ -194,14 +194,7 @@ public partial class GameCore : MonoBehaviour
         await nobj.Identity.StartTask;
         return nobj;
     }
-    public void ServerDestroyNetworkItem(Item item)
-    {
-        string identifier = item.GetNetworkObject().Identity.Identifier;
-        var msg = new NMS_Server_NO_Destroy(identifier);
-        NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
-        DestroyNetworkIdentity(identifier);
-
-    }
+    
     public void DestroyNetworkIdentity(string id) //Dont RUN THIS
     {
         NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;

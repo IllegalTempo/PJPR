@@ -20,11 +20,15 @@ public partial class NetworkSystem
         NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, WorldReference.Instance.transform);
         return nobj;
     }
-    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false) //Server Only
+    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string uid = null) //Server Only
     { //more check added
 
         if (IsOnline && !IsServer) return null;
-        string uid = Guid.NewGuid().ToString();
+        if(uid == null)
+        {
+            uid = Guid.NewGuid().ToString();
+
+        }
 
         NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
         if (IsOnline)
@@ -34,6 +38,15 @@ public partial class NetworkSystem
         }
 
         return nobj;
+
+
+    }
+    public void ServerDestroyNetworkItem(Item item)
+    {
+        string identifier = item.GetNetworkObject().Identity.Identifier;
+        var msg = new NMS_Server_NO_Destroy(identifier);
+        NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
+        GameCore.Instance.DestroyNetworkIdentity(identifier);
 
     }
     public async UniTask<NetworkGameObject> CreateNetworkObject(ItemDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false)

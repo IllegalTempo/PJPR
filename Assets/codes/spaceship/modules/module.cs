@@ -6,6 +6,8 @@ public class module : SpaceshipPart
 {
     
     private ModuleSlot ConnectedTo;
+
+
     public void Init(ModuleSlot connectedTo)
     {
         OnInstall(connectedTo);
@@ -19,6 +21,7 @@ public class module : SpaceshipPart
     {
         // Called when the module is installed on the spaceship
         ConnectedTo = connectedTo;
+        connectedTo.attachedModule = this;
 
     }
     public virtual void ModuleUpdate()

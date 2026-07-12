@@ -61,12 +61,8 @@ public class MainSpaceship : MonoBehaviour
     {
         NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
         module module = nobj.GetComponent<module>();
-        ItemDefinition it = module.AbstractItem;
-        if(it is ModuleDefinition md)
-        {
-            NetworkGameObject controller = await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefabID, ModuleControlSpawnPoint.position, ModuleControlSpawnPoint.rotation, 0,transform);
-        }
-        return nobj.GetComponent<module>(); 
+        
+        return module;
 
 
     }
@@ -74,6 +70,7 @@ public class MainSpaceship : MonoBehaviour
     {
         Debug.Log($"Connecting module {moduleObject.name} to slot {moduleslot.slotIndex}");
         // Store the module's world rotation before reparenting
+
         
         slotModulePair[moduleslot.slotIndex] = moduleObject;
         return moduleObject;
