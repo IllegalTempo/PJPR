@@ -156,12 +156,7 @@ public class Meteorite : HarmfulObject, IPoolable
 
         if (breakEffect != null)
         {
-<<<<<<< HEAD
-            Transform worldRef = GameCore.Instance != null ? GameCore.Instance.GetWorldReferenceTransform() : null;
-            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, worldRef);
-=======
             GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, WorldReference.Instance.transform);
->>>>>>> 04523670f29af745316121f17bbac755eb250398
             Destroy(effect, 3f);
         }
 

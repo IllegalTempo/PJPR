@@ -16,16 +16,13 @@ public class packets
         StartVotingSession = 1012,
         VoteResult = 1013,
         VoteUpdate = 1014,
-<<<<<<< HEAD
         SpawnMeteorite = 1015,
         DestroyMeteorite = 1016,
         MeteoriteWarning = 1017,
         LootDrop = 1018,
+        UpdateWorld_Velocity = 1019,
+        UpdateWorld_Rotation = 1020,
     };
-=======
-        UpdateWorld_Velocity = 1015,
-        UpdateWorld_Rotation = 1016,};
->>>>>>> 04523670f29af745316121f17bbac755eb250398
     public enum ClientPackets
     {
         SendReadyState = 2001,
