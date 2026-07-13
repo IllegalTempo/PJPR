@@ -4,6 +4,9 @@ using System.Collections;
 public interface IUsable
 {
 
-    public void OnInteract(PlayerMain who);
+    public void OnInteract_press(PlayerMain who);
+    public virtual void OnInteract_release(PlayerMain who)
+    {
 
+    }
 }

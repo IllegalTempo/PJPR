@@ -10,7 +10,7 @@ public class Button: Interactable
 
     [SerializeField]
     private float releaseTime = 1f; //1 second by default
-    public override void OnInteract(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         onClicked.Invoke();
 

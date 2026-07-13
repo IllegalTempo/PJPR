@@ -4,6 +4,7 @@ using Assets.codes.spaceship.modules;
 using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ public class MainSpaceship : MonoBehaviour
 
     [SerializeField]
     private OnSpaceshipCanvasDisplay spaceshipDisplay;
-
+    public Transform ModuleControlSpawnPoint;
 
 
 
@@ -59,7 +60,9 @@ public class MainSpaceship : MonoBehaviour
     public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
         NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
-        return nobj.GetComponent<module>(); 
+        module module = nobj.GetComponent<module>();
+        
+        return module;
 
 
     }
@@ -67,6 +70,7 @@ public class MainSpaceship : MonoBehaviour
     {
         Debug.Log($"Connecting module {moduleObject.name} to slot {moduleslot.slotIndex}");
         // Store the module's world rotation before reparenting
+
         
         slotModulePair[moduleslot.slotIndex] = moduleObject;
         return moduleObject;

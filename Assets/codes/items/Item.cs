@@ -49,7 +49,7 @@ public class Item : Selectable //Item is any that is pickable
     [SerializeField]
     protected NetworkGameObject netObj;
     protected Rigidbody rb;
-    protected Collider itemCollider;
+    protected Collider[] colliders;
 
     [SerializeField]
     public bool lockRelativeRotation = false;
@@ -99,7 +99,7 @@ public class Item : Selectable //Item is any that is pickable
         }
 
         rb = GetComponent<Rigidbody>();
-        itemCollider = GetComponent<Collider>();
+        colliders = GetComponentsInChildren<Collider>();
         snapshot_start = GetSnapshot();
     }
     private ItemSnapshot GetSnapshot()
@@ -125,7 +125,11 @@ public class Item : Selectable //Item is any that is pickable
     {
         if (!slot.IsEmpty()) return false;
         if (slot.AllowedItemType == ItemType.All) return true;
-        return (itemType & slot.AllowedItemType) != 0;
+        return HasItemType(slot.AllowedItemType);
+    }
+    public bool HasItemType(ItemType type)
+    {
+        return (itemType & type) != 0;
     }
     public void DisableRB()
     {
@@ -174,6 +178,16 @@ public class Item : Selectable //Item is any that is pickable
         netObj.Identity.ChangeSovereignty(newowner);
 
     }
+    private void SetColliders(bool enabled)
+    {
+        if (colliders != null)
+        {
+            foreach (Collider collider in colliders)
+            {
+                collider.enabled = enabled;
+            }
+        }
+    }
     private void gotPickedup(PlayerMain who)
 
 
@@ -202,10 +216,7 @@ public class Item : Selectable //Item is any that is pickable
 
         rb.linearVelocity = Vector3.zero;
         outline.OutlineColor = Color.aquamarine;
-        if (itemCollider != null)
-        {
-            itemCollider.enabled = false;
-        }
+        SetColliders(false);
     }
     private void gotDropped(PlayerMain who,Vector3 dropPosition)
     {
@@ -230,7 +241,7 @@ public class Item : Selectable //Item is any that is pickable
         rb.linearVelocity = Vector3.zero;
 
         transform.position = dropPosition;
-        itemCollider.enabled = true;
+        SetColliders(true);
     }
     public void AttachToSlot(Slot slot,Quaternion rot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
     {

@@ -5,7 +5,7 @@ using System;
 
 namespace Assets.codes.spaceship.mechanics
 {
-    public class SpeedController : Interactable
+    public class SpeedController : Machine
     {
         [SerializeField]
         private int maxlevel = 6;
@@ -14,7 +14,7 @@ namespace Assets.codes.spaceship.mechanics
         [SerializeField]
         private GameObject lever;
 
-        [SerializeField] private UnityEvent<int> OnChangeSpeed;
+        //[SerializeField] private UnityEvent<int> OnChangeSpeed;
 
         [SerializeField]
         private float rotationSpeed = 5f;
@@ -23,12 +23,6 @@ namespace Assets.codes.spaceship.mechanics
         private float minRotationX = 22f;
         private Coroutine rotationCoroutine;
 
-        public override void OnInteract(PlayerMain who)
-        {
-            level = (level + 1) % maxlevel;
-            OnChangeSpeed.Invoke(level);
-            UpdateLeverRotation();
-        }
         private void UpdateLeverRotation()
         {
             if (lever == null) return;
@@ -54,6 +48,18 @@ namespace Assets.codes.spaceship.mechanics
 
             lever.transform.localRotation = targetRotation;
             rotationCoroutine = null;
+        }
+
+        public override void ServerActionOnInteract()
+        {
+
+        }
+
+        public override void ShareActionOnInteract()
+        {
+            level = (level + 1) % maxlevel;
+            //OnChangeSpeed.Invoke(level);
+            UpdateLeverRotation();
         }
     }
 }

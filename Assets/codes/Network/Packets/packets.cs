@@ -16,11 +16,16 @@ public class packets
         StartVotingSession = 1012,
         VoteResult = 1013,
         VoteUpdate = 1014,
+<<<<<<< HEAD
         SpawnMeteorite = 1015,
         DestroyMeteorite = 1016,
         MeteoriteWarning = 1017,
         LootDrop = 1018,
     };
+=======
+        UpdateWorld_Velocity = 1015,
+        UpdateWorld_Rotation = 1016,};
+>>>>>>> 04523670f29af745316121f17bbac755eb250398
     public enum ClientPackets
     {
         SendReadyState = 2001,
@@ -38,6 +43,8 @@ public class packets
         VoicePacket = 3008,
         NO_Slot_Interact = 3011,
         SlotDetach = 3012,
-        QuantityResourceProviderInteract = 3013,};
+        QuantityResourceProviderInteract = 3013,
+        SendCombineItem = 3014,
+        Handle_OnReleaseUpdateLevel = 3015,};
 }
 

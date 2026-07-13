@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fdba27a8f144704fb90d14122635a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::module
-  AbstractItem: {fileID: 11400000, guid: 832f0feb00c17d8499897aead84d8318, type: 2}
+  AbstractItem: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
   netObj: {fileID: 8841288140222148758}
   lockRelativeRotation: 0
   IsPickable: 1
@@ -218,6 +218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
   Sync_Transform: 1
+  TransformSendInterval: 0.1
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   Identity: {fileID: 8575854996173634517}

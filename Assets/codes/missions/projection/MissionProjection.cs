@@ -75,7 +75,7 @@ public class MissionProjection : Selectable, IUsable
             durationText.text = $"Duration: ~{mission.estimatedDuration} min";
     }
 
-    public void OnInteract(PlayerMain who)
+    public void OnInteract_press(PlayerMain who)
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && !NetworkSystem.Instance.IsServer)
         {

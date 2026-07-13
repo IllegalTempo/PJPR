@@ -39,7 +39,9 @@ namespace Assets.codes.Network.Messages
             { (int)packets.BothPackets.VoicePacket, NMS_Both_VoicePacket.Read },
             { (int)packets.BothPackets.NO_Slot_Interact, NMS_Both_SlotAttach.Read },
             { (int)packets.BothPackets.SlotDetach, NMS_Both_SlotDetach.Read },
-            { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },};
+            { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },
+            { (int)packets.BothPackets.SendCombineItem, NMS_Both_SendCombineItem.Read },
+            { (int)packets.BothPackets.Handle_OnReleaseUpdateLevel, NMS_Both_Handle_OnReleaseUpdateLevel.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {
@@ -53,9 +55,14 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.StartVotingSession, NMS_Server_StartVotingSession.Read },
             { (int)packets.ServerPackets.VoteResult, NMS_Server_VoteResult.Read },
             { (int)packets.ServerPackets.VoteUpdate, NMS_Server_VoteUpdate.Read },
+<<<<<<< HEAD
             { (int)packets.ServerPackets.SpawnMeteorite, NMS_Server_SpawnMeteorite.Read },
             { (int)packets.ServerPackets.DestroyMeteorite, NMS_Server_DestroyMeteorite.Read },
             { (int)packets.ServerPackets.MeteoriteWarning, NMS_Server_MeteoriteWarning.Read },};
+=======
+            { (int)packets.ServerPackets.UpdateWorld_Velocity, NMS_Server_UpdateWorld_Velocity.Read },
+            { (int)packets.ServerPackets.UpdateWorld_Rotation, NMS_Server_UpdateWorld_Rotation.Read },};
+>>>>>>> 04523670f29af745316121f17bbac755eb250398
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {

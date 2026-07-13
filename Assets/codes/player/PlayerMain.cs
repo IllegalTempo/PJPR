@@ -40,6 +40,9 @@ public partial class PlayerMain : MonoBehaviour
 
     [SerializeField]
     private GameObject[] LocalInvisible;
+
+
+    private IUsable pressedUsable = null;
     void Start()
     {
 
@@ -74,6 +77,10 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
         control.Player.pickup.performed += ctx => OnClickF();
         control.Player.Interact.performed += ctx => OnInteract();
+        control.Player.Interact.canceled += ctx => OnInteract_release();
+
+
+
         control.Player.voice.performed += ctx => OnClickVC();
         control.Player.rotate.performed += ctx => OnClickSlotRotate();
 
@@ -118,7 +125,16 @@ public partial class PlayerMain : MonoBehaviour
 
         if (usable != null)
         {
-            usable.OnInteract(this);
+            usable.OnInteract_press(this);
+            pressedUsable = usable;
+        }
+
+    }
+    private void OnInteract_release()
+    {
+        if (pressedUsable != null)
+        {
+            pressedUsable.OnInteract_release(this);
         }
     }
 
@@ -187,9 +203,21 @@ public partial class PlayerMain : MonoBehaviour
         if (holdingItem != null) //if holding something
         {
             Item previtem = SendDrop(holdingItem);
-            if (seenObject is Slot s && previtem.FitIn(s))
+            switch (seenObject)
             {
-                s.SendAttach(previtem);
+                case Item i:
+                    if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
+                    {
+                        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
+                        combineMessage.SendMessageAsServerOrClient();
+                    }
+                    break;
+                case Slot s:
+                    if (previtem.FitIn(s))
+                    {
+                        s.SendAttach(previtem);
+                    }
+                    break;
             }
         }
         else
@@ -287,26 +315,37 @@ public partial class PlayerMain : MonoBehaviour
             UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
             displayname = item.AbstractItem.itemName;
         }
-
-        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s))
+        if (holdingItem != null)
         {
-
-            if (s is Port)
+            switch (@new)
             {
-                UIManager.Instance.ShowInteraction("Put", control.Player.pickup.GetBindingDisplayString(), 0);
+                case Slot s:
+                    if (holdingItem.FitIn(s))
+                    {
+                        if (s is Port)
+                        {
+                            UIManager.Instance.ShowInteraction("Put", control.Player.pickup.GetBindingDisplayString(), 0);
 
-            }
-            else
-            {
-                UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
-                UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
-            }
-            
-        }
-        else if (@new is Slot)
-        {
+                        }
+                        else
+                        {
+                            UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
+                            UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
+                        }
+                    }
+                    else
+                    {
+                        UIManager.Instance.ShowInteraction("Not Available", "", 0);
 
-            UIManager.Instance.ShowInteraction("Not Available", "", 0);
+                    }
+                    break;
+                case Item i:
+                    if (holdingItem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
+                    {
+                        UIManager.Instance.ShowInteraction("Combine", control.Player.pickup.GetBindingDisplayString(), 0);
+                    }
+                    break;
+            }
         }
         UIManager.Instance.DisplayGameObjectName(displayname);
 

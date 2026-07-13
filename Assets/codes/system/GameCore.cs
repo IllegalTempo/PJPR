@@ -40,8 +40,6 @@ public partial class GameCore : MonoBehaviour
     private GameObject PlayerSpawn;
     //[SerializeField]
     //private Transform[] SpaceshipSpawns;
-    [SerializeField]
-    public WorldReference WorldReference;
     private int nouidindex = 0;
     //public int CurrentMissionLevel = 0;
 
@@ -196,14 +194,7 @@ public partial class GameCore : MonoBehaviour
         await nobj.Identity.StartTask;
         return nobj;
     }
-    public void ServerDestroyNetworkItem(Item item)
-    {
-        string identifier = item.GetNetworkObject().Identity.Identifier;
-        var msg = new NMS_Server_NO_Destroy(identifier);
-        NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
-        DestroyNetworkIdentity(identifier);
-
-    }
+    
     public void DestroyNetworkIdentity(string id) //Dont RUN THIS
     {
         NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;
@@ -226,8 +217,6 @@ public partial class GameCore : MonoBehaviour
         //}
         return id == Local_NetworkPlayer.steamID;
     }
-    public Transform GetWorldReferenceTransform()
-    { return WorldReference.transform; }
     public async UniTask<Texture2D> GetIcon(ulong steamid)
     {
         var icon = await SteamFriends.GetMediumAvatarAsync(steamid);

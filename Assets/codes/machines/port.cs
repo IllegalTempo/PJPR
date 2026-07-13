@@ -22,7 +22,7 @@ public abstract class Port : Slot //port are slots that will unrealize the item 
     public override void ServerActionOnAttach(Item item, Quaternion rot)
     {
         base.ServerActionOnAttach(item, rot);
-        GameCore.Instance.ServerDestroyNetworkItem(item);
+        NetworkSystem.Instance.ServerDestroyNetworkItem(item);
     }
     public override void Detach()
     {

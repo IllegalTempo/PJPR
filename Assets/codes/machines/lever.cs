@@ -11,7 +11,7 @@ public class Lever: Interactable
     [SerializeField]
     private UnityEvent onSwitch_Off;
     private bool isOn = false;
-    public override void OnInteract(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         if (isOn)
         {

@@ -11,10 +11,10 @@ public class WashingMachineButton : Button
 
     private float offset = 0.05f;
 
-    public override void OnInteract(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
 
-        base.OnInteract(who);
+        base.OnInteract_press(who);
 
         if (triggerSplashOnClick && splashController != null)
         {
