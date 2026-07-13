@@ -52,7 +52,10 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.NO_Destroy, NMS_Server_NO_Destroy.Read },
             { (int)packets.ServerPackets.StartVotingSession, NMS_Server_StartVotingSession.Read },
             { (int)packets.ServerPackets.VoteResult, NMS_Server_VoteResult.Read },
-            { (int)packets.ServerPackets.VoteUpdate, NMS_Server_VoteUpdate.Read },};
+            { (int)packets.ServerPackets.VoteUpdate, NMS_Server_VoteUpdate.Read },
+            { (int)packets.ServerPackets.SpawnMeteorite, NMS_Server_SpawnMeteorite.Read },
+            { (int)packets.ServerPackets.DestroyMeteorite, NMS_Server_DestroyMeteorite.Read },
+            { (int)packets.ServerPackets.MeteoriteWarning, NMS_Server_MeteoriteWarning.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {

@@ -8909,6 +8909,59 @@ Transform:
   - {fileID: 662137328}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &652497425
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 652497427}
+  - component: {fileID: 652497426}
+  m_Layer: 0
+  m_Name: MeteoriteSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &652497426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652497425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87996bc8a0d3dd408dbbf12cbda568f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
+  spawnConfig: {fileID: 11400000, guid: a8859df850b4b25488c68e979a896470, type: 2}
+  smallMeteoriteDef: {fileID: 11400000, guid: 5b7d8765d4a4a164193ce1921735e550, type: 2}
+  mediumMeteoriteDef: {fileID: 11400000, guid: 0747585f100c66f42b61d098feecffcd, type: 2}
+  largeMeteoriteDef: {fileID: 11400000, guid: 3d4d3f3df7736c541be53e54203c6dc0, type: 2}
+  smallMeteoritePrefab: {fileID: 3813433807650716661, guid: a9c1d52fc16d5d24aa3b3d7b1c28af15, type: 3}
+  mediumMeteoritePrefab: {fileID: 8080907634044407302, guid: 48f457963d7e2154da90ab4168acd040, type: 3}
+  largeMeteoritePrefab: {fileID: 561597858457159885, guid: 88399790b2210834daeb8438c8f66028, type: 3}
+  meteoritePool: {fileID: 1998078750}
+  difficultyScaler: {fileID: 996538048}
+--- !u!4 &652497427
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652497425}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &658713210
 GameObject:
   m_ObjectHideFlags: 0
@@ -9605,6 +9658,58 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 777686832}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &779937239
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 779937241}
+  - component: {fileID: 779937240}
+  m_Layer: 0
+  m_Name: EscapeBlackholeMission
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &779937240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779937239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58f256c31fef4494fb8017d2d5c9a97c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeBlackholeMission
+  missionName: Escape the Blackhole
+  meteoriteSpawner: {fileID: 652497426}
+  difficultyScaler: {fileID: 996538048}
+  spawnConfig: {fileID: 11400000, guid: a8859df850b4b25488c68e979a896470, type: 2}
+  meteoritePool: {fileID: 1998078750}
+  lootDropHandler: {fileID: 1982284508}
+  warningIndicatorPrefab: {fileID: 6978015522691067216, guid: db51ba6dd7ffe464eae5ebdd00da4fb0, type: 3}
+  survivalTime: 0
+--- !u!4 &779937241
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779937239}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &799045195
 GameObject:
   m_ObjectHideFlags: 0
@@ -11019,24 +11124,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a87996bc8a0d3dd408dbbf12cbda568f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
-  meteoritePrefabs:
-  - {fileID: 3289048002020084101, guid: 5152911973c425a4a865d24a7238f186, type: 3}
-  meteoritePrefabIDs: []
-  spaceshipTarget: {fileID: 979251808}
-  spawnRadius: 20
-  minDistanceFromTarget: 20
-  baseSpawnInterval: 1
-  spawnIntervalVariation: 1
-  maxMeteorites: 100
-  useWaveSystem: 1
-  waveDuration: 30
-  waveBreakTime: 10
-  meteoritesPerWave: 100
-  sizeRange: {x: 0.5, y: 2}
-  speedRange: {x: 5, y: 15}
-  aimTowardTarget: 0.7
-  spawnAreaType: 0
-  spawnAreaSize: {x: 50, y: 30, z: 50}
+  spawnConfig: {fileID: 0}
+  smallMeteoriteDef: {fileID: 0}
+  mediumMeteoriteDef: {fileID: 0}
+  largeMeteoriteDef: {fileID: 0}
+  smallMeteoritePrefab: {fileID: 0}
+  mediumMeteoritePrefab: {fileID: 0}
+  largeMeteoritePrefab: {fileID: 0}
+  meteoritePool: {fileID: 0}
+  difficultyScaler: {fileID: 0}
 --- !u!114 &979251812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11162,6 +11258,51 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &996538047
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 996538049}
+  - component: {fileID: 996538048}
+  m_Layer: 0
+  m_Name: DifficultyScaler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &996538048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 996538047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8ec7e5604b98ca43b9c903ab178d1fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DifficultyScaler
+  spawnConfig: {fileID: 11400000, guid: a8859df850b4b25488c68e979a896470, type: 2}
+--- !u!4 &996538049
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 996538047}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1001602057
 GameObject:
   m_ObjectHideFlags: 0
@@ -13248,11 +13389,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionManager
   availableMissions:
-  - {fileID: 11400000, guid: 4af1cef45b5d37649b3976a82b2745e5, type: 2}
+  - {fileID: 11400000, guid: a9e1f2c0e318cb8428ed9b218ad60f09, type: 2}
   - {fileID: 11400000, guid: d45fafcfa9c8ae644aac1ca3dbcd8d4f, type: 2}
   - {fileID: 11400000, guid: f157782a001ea5a47a242ddc2636e029, type: 2}
-  - {fileID: 11400000, guid: 3b776fb87dc9d614b8e0cfaf6c428f1f, type: 2}
-  - {fileID: 11400000, guid: f04b93abe3918cb45ba293f29a7f1e3b, type: 2}
   missionsPerVote: 3
   secondsPerMission: 15
 --- !u!4 &1267958335
@@ -17402,6 +17541,96 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 68.148, y: 152.97, z: 117.036}
+--- !u!1 &1982284507
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1982284509}
+  - component: {fileID: 1982284508}
+  m_Layer: 0
+  m_Name: LootDropHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1982284508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982284507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be8e783a120874488290b19a991bcca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootDropHandler
+  enableLootDrops: 0
+--- !u!4 &1982284509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982284507}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1998078749
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1998078751}
+  - component: {fileID: 1998078750}
+  m_Layer: 0
+  m_Name: MeteoritePool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1998078750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998078749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7ba4761ca26be440b57564d7b5a880d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoritePool
+  poolRoot: {fileID: 0}
+--- !u!4 &1998078751
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998078749}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2005976301
 GameObject:
   m_ObjectHideFlags: 0
@@ -23481,3 +23710,8 @@ SceneRoots:
   - {fileID: 2016645269}
   - {fileID: 2131475353}
   - {fileID: 1951871080}
+  - {fileID: 996538049}
+  - {fileID: 1998078751}
+  - {fileID: 652497427}
+  - {fileID: 779937241}
+  - {fileID: 1982284509}

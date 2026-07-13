@@ -1,9 +1,14 @@
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(NetworkPrefabIdentity))]
-public class Meteorite : HarmfulObject
+public class Meteorite : HarmfulObject, IPoolable
 {
+    [Header("Meteorite Type Reference")]
+    [Tooltip("The ScriptableObject that defines this meteorite's stats. Assigned at spawn time.")]
+    [SerializeField] private MeteoriteTypeDefinition typeDefinition;
+
     [Header("Meteorite Properties")]
     [SerializeField] private float health = 100f;
     [SerializeField] private float maxHealth = 100f;
@@ -19,55 +24,101 @@ public class Meteorite : HarmfulObject
     [SerializeField] private float fragmentLifetime = 5f;
     [SerializeField] private GameObject breakEffect;
     [SerializeField] private bool detachFragmentsBeforeDestroy = true;
-    
+
     [Header("Visual Effects")]
     [SerializeField] private GameObject hitEffect;
     [SerializeField] private Material damagedMaterial;
 
-    // [Header("Thermal / Lighting Effects")]
-    // [SerializeField] private Light meteorLight;
-    // [SerializeField] private ParticleSystem thermalParticles;
-    // [SerializeField] private bool scaleLightWithSpeed = true;
-    // [SerializeField] private float maxLightIntensity = 3f;
-    
+    // Pooling
+    [NonSerialized] public string poolKey;
+    [NonSerialized] public Action<Meteorite> onReturnToPool;
+
     private Rigidbody rb;
     private Renderer meshRenderer;
     private Material originalMaterial;
     private Vector3 randomRotation;
     private bool isBreaking = false;
+    private bool isInitialized = false;
+
+    public MeteoriteTypeDefinition TypeDefinition => typeDefinition;
+    public bool IsBreaking => isBreaking;
+    public float CurrentHealth => health;
 
     protected virtual void Awake()
     {
         SetHarmfulObjectType(HarmfulObjectType.Meteorite);
+        rb = GetComponent<Rigidbody>();
+        meshRenderer = GetComponent<Renderer>();
+        if (meshRenderer != null)
+            originalMaterial = meshRenderer.material;
     }
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        meshRenderer = GetComponent<Renderer>();
-        
-        if (meshRenderer != null)
-        {
+        if (!isInitialized)
+            InitializeDefaults();
+    }
+
+    private void InitializeDefaults()
+    {
+        if (isInitialized) return;
+        isInitialized = true;
+
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        if (meshRenderer == null) meshRenderer = GetComponent<Renderer>();
+        if (meshRenderer != null && originalMaterial == null)
             originalMaterial = meshRenderer.material;
+
+        randomRotation = new Vector3(
+            UnityEngine.Random.Range(-rotationSpeed, rotationSpeed),
+            UnityEngine.Random.Range(-rotationSpeed, rotationSpeed),
+            UnityEngine.Random.Range(-rotationSpeed, rotationSpeed)
+        );
+    }
+
+    public virtual void OnSpawn()
+    {
+        isBreaking = false;
+        isInitialized = false;
+
+        if (typeDefinition != null)
+        {
+            maxHealth = typeDefinition.maxHealth;
+            damage = typeDefinition.damage;
         }
 
-        // random roatation
-        randomRotation = new Vector3(
-            Random.Range(-rotationSpeed, rotationSpeed),
-            Random.Range(-rotationSpeed, rotationSpeed),
-            Random.Range(-rotationSpeed, rotationSpeed)
-        );
+        health = maxHealth;
+
+        if (meshRenderer != null && originalMaterial != null)
+            meshRenderer.material = originalMaterial;
+
+        InitializeDefaults();
+    }
+
+    public virtual void OnDespawn()
+    {
+        isBreaking = false;
+        isInitialized = false;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = transform.GetChild(i);
+            if (child.name.EndsWith("_Fragments") || child.name.StartsWith("Fragment_"))
+                Destroy(child.gameObject);
+        }
     }
 
     void FixedUpdate()
     {
-        // constant rotation
         if (rb != null && !isBreaking)
         {
             rb.AddTorque(randomRotation * Time.fixedDeltaTime, ForceMode.VelocityChange);
-
-            // if (scaleLightWithSpeed && meteorLight != null)
-            //     meteorLight.intensity = Mathf.Lerp(0f, maxLightIntensity, rb.linearVelocity.magnitude / 20f);
         }
     }
 
@@ -77,31 +128,20 @@ public class Meteorite : HarmfulObject
 
         health -= damageAmount;
 
-        // visual feedback for damage
         if (health < maxHealth * 0.5f && meshRenderer != null && damagedMaterial != null)
-        {
             meshRenderer.material = damagedMaterial;
-        }
 
-        // hit effect show
         if (hitEffect != null)
-        {
             Instantiate(hitEffect, transform.position, Quaternion.identity);
-        }
 
         if (health <= 0)
-        {
             BreakMeteorite();
-        }
     }
 
     public void BreakMeteorite()
     {
         if (isBreaking) return;
         isBreaking = true;
-
-        // if (thermalParticles != null)
-        //     thermalParticles.Stop();
 
         Transform fragmentRoot = null;
         if (fragmentPrefab != null)
@@ -113,31 +153,28 @@ public class Meteorite : HarmfulObject
             fragmentRoot.localRotation = Quaternion.identity;
         }
 
-        // spawning break effect
         if (breakEffect != null)
         {
-            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, GameCore.Instance.GetWorldReferenceTransform());
+            Transform worldRef = GameCore.Instance != null ? GameCore.Instance.GetWorldReferenceTransform() : null;
+            GameObject effect = Instantiate(breakEffect, transform.position, Quaternion.identity, worldRef);
             Destroy(effect, 3f);
         }
 
-        // create fragments
         if (fragmentPrefab != null)
         {
             for (int i = 0; i < fragmentCount; i++)
             {
-                Vector3 randomOffset = Random.insideUnitSphere * 0.5f;
-                GameObject fragment = Instantiate(fragmentPrefab, transform.position + randomOffset, Random.rotation, fragmentRoot);
-                
-                // phy to fragments
+                Vector3 randomOffset = UnityEngine.Random.insideUnitSphere * 0.5f;
+                GameObject fragment = Instantiate(fragmentPrefab, transform.position + randomOffset, UnityEngine.Random.rotation, fragmentRoot);
+
                 Rigidbody fragmentRb = fragment.GetComponent<Rigidbody>();
                 if (fragmentRb != null)
                 {
-                    Vector3 randomDirection = Random.insideUnitSphere;
+                    Vector3 randomDirection = UnityEngine.Random.insideUnitSphere;
                     fragmentRb.AddForce(randomDirection * fragmentForce, ForceMode.Impulse);
-                    fragmentRb.AddTorque(Random.insideUnitSphere * fragmentForce, ForceMode.Impulse);
+                    fragmentRb.AddTorque(UnityEngine.Random.insideUnitSphere * fragmentForce, ForceMode.Impulse);
                 }
 
-                // Auto-destroy fragments after lifetime
                 Destroy(fragment, fragmentLifetime);
             }
 
@@ -148,7 +185,27 @@ public class Meteorite : HarmfulObject
             }
         }
 
-        Destroy(gameObject);
+        // Loot drop
+        if (LootDropHandler.Instance != null && typeDefinition != null)
+        {
+            LootDropHandler.Instance.ProcessLootDrop(typeDefinition, transform.position);
+        }
+
+        if (onReturnToPool != null)
+            onReturnToPool(this);
+        else
+            Destroy(gameObject);
+    }
+
+    public void ConfigureFromDefinition(MeteoriteTypeDefinition def)
+    {
+        typeDefinition = def;
+        if (def != null)
+        {
+            maxHealth = def.maxHealth;
+            damage = def.damage;
+            health = def.maxHealth;
+        }
     }
 
     [ContextMenu("Debug/Break Now")]
@@ -171,19 +228,14 @@ public class Meteorite : HarmfulObject
             return;
         }
 
-        if (other.CompareTag("Spaceship") || other.CompareTag("Player"))
+        // Damage from projectiles — check for a SpaceshipPart on the other object
+        // (projectiles carry this or a similar damage-dealing component).
+        // SpaceshipPart handles meteorite collision damage itself via HarmfulObjectType.
+        // If the other object has a Rigidbody and is moving fast, treat it as a damaging impact.
+        Rigidbody otherRb = other.GetComponent<Rigidbody>();
+        if (otherRb != null && otherRb.linearVelocity.magnitude > 5f)
         {
-            //Spaceship_movement spaceship = other.GetComponent<Spaceship_movement>();
-            //if (spaceship != null)
-            //{
-            //    // spaceship.TakeDamage(damage);
-            //}
-            //TakeDamage(health * 0.3f);
-        }
-        else if (other.CompareTag("Projectile"))
-        {
-            TakeDamage(30f);
-            Destroy(other);
+            TakeDamage(otherRb.linearVelocity.magnitude * 2f);
         }
     }
 
@@ -196,6 +248,7 @@ public class Meteorite : HarmfulObject
     {
         HandleCollisionBreak(other.gameObject);
     }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

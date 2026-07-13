@@ -2,48 +2,45 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.Network.Messages;
 
+/// <summary>
+/// Revamped meteorite spawner for "Escape the Blackhole" mission.
+/// Uses MeteoriteSpawnConfig SO, DifficultyScaler, MeteoritePool, and
+/// cluster-based spawning with dodge gaps.
+/// Server-authoritative via IsWorldManager guard.
+/// </summary>
 public class MeteoriteSpawner : MonoBehaviour
 {
-    [Header("Spawn Settings")]
-    [SerializeField] private GameObject[] meteoritePrefabs;
-    [SerializeField] private string[] meteoritePrefabIDs;
-    [SerializeField] private Transform spaceshipTarget;
-    [SerializeField] private float spawnRadius = 50f;
-    [SerializeField] private float minDistanceFromTarget = 20f;
-    
-    [Header("Spawn Rate")]
-    [SerializeField] private float baseSpawnInterval = 3f;
-    [SerializeField] private float spawnIntervalVariation = 1f;
-    [SerializeField] private int maxMeteorites = 20;
-    
-    [Header("Wave System")]
-    [SerializeField] private bool useWaveSystem = true;
-    [SerializeField] private float waveDuration = 30f;
-    [SerializeField] private float waveBreakTime = 10f;
-    [SerializeField] private int meteoritesPerWave = 15;
-    
-    [Header("Meteorite Properties")]
-    [SerializeField] private Vector2 sizeRange = new Vector2(0.5f, 2f);
-    [SerializeField] private Vector2 speedRange = new Vector2(5f, 15f);
-    [SerializeField] private float aimTowardTarget = 0.7f; // 0 = random 1 = always toward target
-    
-    [Header("Spawn Area Shape")]
-    [SerializeField] private SpawnAreaType spawnAreaType = SpawnAreaType.Sphere;
-    [SerializeField] private Vector3 spawnAreaSize = new Vector3(50f, 30f, 50f);
+    [Header("Configuration")]
+    [SerializeField] private MeteoriteSpawnConfig spawnConfig;
+    [SerializeField] private MeteoriteTypeDefinition smallMeteoriteDef;
+    [SerializeField] private MeteoriteTypeDefinition mediumMeteoriteDef;
+    [SerializeField] private MeteoriteTypeDefinition largeMeteoriteDef;
+    [SerializeField] private GameObject smallMeteoritePrefab;
+    [SerializeField] private GameObject mediumMeteoritePrefab;
+    [SerializeField] private GameObject largeMeteoritePrefab;
 
-    private List<GameObject> activeMeteorites = new List<GameObject>();
-    private float nextSpawnTime;
-    private bool isWaveActive = false;
-    private int currentWaveMeteorites = 0;
+    [Header("Dependencies")]
+    [SerializeField] private MeteoritePool meteoritePool;
+    [SerializeField] private DifficultyScaler difficultyScaler;
 
-    
-    public enum SpawnAreaType
+    /// <summary>Tracked active meteorites with their pool keys.</summary>
+    private readonly Dictionary<GameObject, string> activeMeteorites = new();
+    /// <summary>Currently active spawn warnings.</summary>
+    private readonly List<ActiveWarning> activeWarnings = new();
+    private Coroutine spawnLoopCoroutine;
+    private bool isMissionActive = false;
+
+    /// <summary>Total meteorites spawned this mission (for stats).</summary>
+    public int TotalSpawned { get; private set; }
+
+    private struct ActiveWarning
     {
-        Sphere,
-        Box,
-        Ring
+        public Vector3 spawnPosition;
+        public Vector3 direction;
+        public float remainingTime;
+        public string meteoriteTypeKey;
     }
 
     void Start()
@@ -54,249 +51,420 @@ public class MeteoriteSpawner : MonoBehaviour
             return;
         }
 
-        // find spaceship if not assigned eh 
-        if (spaceshipTarget == null)
+        // Validate dependencies
+        if (spawnConfig == null)
+            Debug.LogError("[MeteoriteSpawner] No MeteoriteSpawnConfig assigned!");
+        if (meteoritePool == null)
+            Debug.LogError("[MeteoriteSpawner] No MeteoritePool assigned!");
+        if (difficultyScaler == null)
+            Debug.LogError("[MeteoriteSpawner] No DifficultyScaler assigned!");
+    }
+
+    /// <summary>
+    /// Register pools and start the mission spawn loop.
+    /// Called by EscapeBlackholeMission.
+    /// </summary>
+    public void StartMission()
+    {
+        if (!NetworkSystem.Instance.IsWorldManager) return;
+
+        StopMission(); // Ensure clean state
+
+        RegisterPools();
+        difficultyScaler.StartScaling();
+        isMissionActive = true;
+        TotalSpawned = 0;
+
+        spawnLoopCoroutine = StartCoroutine(SpawnLoop());
+        Debug.Log("[MeteoriteSpawner] Mission started.");
+    }
+
+    /// <summary>
+    /// Stop the spawn loop and return all active meteorites to pool.
+    /// Called by EscapeBlackholeMission.
+    /// </summary>
+    public void StopMission()
+    {
+        isMissionActive = false;
+
+        if (spawnLoopCoroutine != null)
         {
-            GameObject spaceship = GameObject.FindGameObjectWithTag("Spaceship");
-            if (spaceship != null)
-            {
-                spaceshipTarget = spaceship.transform;
-            }
-            else
-            {
-                spaceshipTarget = transform; // fallback
-            }
+            StopCoroutine(spawnLoopCoroutine);
+            spawnLoopCoroutine = null;
         }
 
-        nextSpawnTime = Time.time + baseSpawnInterval;
+        difficultyScaler?.StopScaling();
+        ReturnAllToPool();
+        activeWarnings.Clear();
+        Debug.Log("[MeteoriteSpawner] Mission stopped.");
+    }
 
-        if (useWaveSystem)
+    private void RegisterPools()
+    {
+        if (meteoritePool == null) return;
+
+        if (smallMeteoriteDef != null && smallMeteoritePrefab != null)
+            meteoritePool.RegisterPool(smallMeteoriteDef.typeName, smallMeteoritePrefab, smallMeteoriteDef.poolSize);
+
+        if (mediumMeteoriteDef != null && mediumMeteoritePrefab != null)
+            meteoritePool.RegisterPool(mediumMeteoriteDef.typeName, mediumMeteoritePrefab, mediumMeteoriteDef.poolSize);
+
+        if (largeMeteoriteDef != null && largeMeteoritePrefab != null)
+            meteoritePool.RegisterPool(largeMeteoriteDef.typeName, largeMeteoritePrefab, largeMeteoriteDef.poolSize);
+    }
+
+    private IEnumerator SpawnLoop()
+    {
+        while (isMissionActive)
         {
-            StartCoroutine(WaveController());
+            if (difficultyScaler.IsTimeUp)
+            {
+                Debug.Log("[MeteoriteSpawner] Time limit reached. Ending spawn loop.");
+                yield break;
+            }
+
+            float interval = difficultyScaler.CurrentSpawnInterval;
+            yield return new WaitForSeconds(interval);
+
+            if (!isMissionActive) yield break;
+
+            // Spawn clusters
+            int clusters = spawnConfig.clustersPerWave;
+            for (int c = 0; c < clusters; c++)
+            {
+                if (!isMissionActive) yield break;
+                if (activeMeteorites.Count >= spawnConfig.maxActiveMeteorites)
+                {
+                    Debug.Log("[MeteoriteSpawner] Max active meteorites reached. Skipping cluster.");
+                    break;
+                }
+
+                SpawnCluster();
+            }
         }
     }
 
-    void Update()
+    private void SpawnCluster()
     {
-        if (!NetworkSystem.Instance.IsWorldManager)
+        Vector3 clusterCenter = GetClusterCenter();
+        int count = spawnConfig.meteoritesPerCluster;
+        float radius = spawnConfig.clusterRadius;
+        float gapRadius = spawnConfig.dodgeGapRadius;
+
+        List<Vector3> positions = GenerateClusterPositions(clusterCenter, count, radius, gapRadius);
+
+        foreach (Vector3 pos in positions)
         {
+            if (activeMeteorites.Count >= spawnConfig.maxActiveMeteorites)
+                break;
+
+            // Select type based on difficulty
+            MeteoriteTypeDefinition typeDef = difficultyScaler.SelectMeteoriteType(
+                smallMeteoriteDef, mediumMeteoriteDef, largeMeteoriteDef);
+
+            if (typeDef == null) continue;
+
+            // Calculate direction toward origin (ship position)
+            Vector3 directionToOrigin = (-pos).normalized;
+
+            // Queue warning (3s before spawn)
+            activeWarnings.Add(new ActiveWarning
+            {
+                spawnPosition = pos,
+                direction = directionToOrigin,
+                remainingTime = spawnConfig.warningTime,
+                meteoriteTypeKey = typeDef.typeName
+            });
+
+            // Broadcast warning to clients
+            BroadcastWarning(directionToOrigin, spawnConfig.warningTime, activeWarnings.Count);
+
+            // Spawn after warning delay
+            StartCoroutine(SpawnAfterWarning(pos, directionToOrigin, typeDef));
+        }
+    }
+
+    private IEnumerator SpawnAfterWarning(Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
+    {
+        yield return new WaitForSeconds(spawnConfig.warningTime);
+
+        if (!isMissionActive) yield break;
+
+        SpawnSingleMeteorite(position, direction, typeDef);
+    }
+
+    private void SpawnSingleMeteorite(Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
+    {
+        if (meteoritePool == null || typeDef == null) return;
+
+        string poolKey = typeDef.typeName;
+        Quaternion rotation = Quaternion.LookRotation(direction);
+
+        GameObject obj = meteoritePool.Get(poolKey, position, rotation);
+        if (obj == null)
+        {
+            Debug.LogWarning($"[MeteoriteSpawner] Failed to get '{poolKey}' from pool.");
             return;
         }
 
-        // clean
-        activeMeteorites.RemoveAll(item => item == null);
-
-        // keep spawning if not using wave system
-        if (!useWaveSystem && Time.time >= nextSpawnTime && activeMeteorites.Count < maxMeteorites)
+        // Configure meteorite
+        Meteorite meteorite = obj.GetComponent<Meteorite>();
+        if (meteorite != null)
         {
-            SpawnMeteorite().Forget();
-            nextSpawnTime = Time.time + baseSpawnInterval + Random.Range(-spawnIntervalVariation, spawnIntervalVariation);
+            meteorite.ConfigureFromDefinition(typeDef);
+            meteorite.poolKey = poolKey;
+            meteorite.onReturnToPool = OnMeteoriteReturnToPool;
+
+            // Apply scale
+            float scale = typeDef.GetRandomScale();
+            obj.transform.localScale = Vector3.one * scale;
+
+            // Meteorites stay at their spawn positions (static obstacles).
+            // Only apply tumbling rotation — no linear velocity.
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Random.insideUnitSphere * 2f;
+            }
+        }
+
+        activeMeteorites[obj] = poolKey;
+        TotalSpawned++;
+
+        // Network: if online, broadcast spawn to clients (Phase 5)
+        BroadcastMeteoriteSpawn(obj, position, direction, typeDef);
+
+        // Start distance checker
+        StartCoroutine(CheckMeteoriteDistance(obj));
+    }
+
+    private void OnMeteoriteReturnToPool(Meteorite meteorite)
+    {
+        if (meteorite == null) return;
+        GameObject obj = meteorite.gameObject;
+
+        if (activeMeteorites.TryGetValue(obj, out string poolKey))
+        {
+            activeMeteorites.Remove(obj);
+            meteorite.onReturnToPool = null;
+
+            // Network: broadcast destroy to clients (Phase 5)
+            BroadcastMeteoriteDestroy(obj);
+
+            meteoritePool.Return(obj, poolKey);
         }
     }
 
-    IEnumerator WaveController()
-    {
-        while (true)
-        {
-            // start wave
-            isWaveActive = true;
-            currentWaveMeteorites = 0;
-            Debug.Log("Meteorite wave starting!");
+    // ---- Cluster position generation ----
 
-            float waveEndTime = Time.time + waveDuration;
-            
-            while (Time.time < waveEndTime && currentWaveMeteorites < meteoritesPerWave)
+    private Vector3 GetClusterCenter()
+    {
+        float distance = Random.Range(spawnConfig.spawnDistanceMin, spawnConfig.spawnDistanceMax);
+        Vector3 direction = Random.onUnitSphere;
+        return direction * distance; // Relative to origin (ship at 0,0,0)
+    }
+
+    /// <summary>
+    /// Generates meteorite positions in a 3D Gaussian cluster around the center,
+    /// with a cylindrical gap oriented toward the origin (ship) for dodging.
+    /// </summary>
+    private List<Vector3> GenerateClusterPositions(Vector3 center, int count, float radius, float gapRadius)
+    {
+        List<Vector3> positions = new List<Vector3>(count);
+        Vector3 towardOrigin = (-center).normalized; // Direction from cluster center to ship
+
+        int attempts = 0;
+        int maxAttempts = count * 3;
+
+        while (positions.Count < count && attempts < maxAttempts)
+        {
+            attempts++;
+
+            // 3D Gaussian-like distribution (Box-Muller in 3D)
+            Vector3 offset = new Vector3(
+                GaussianRandom() * radius,
+                GaussianRandom() * radius,
+                GaussianRandom() * radius
+            );
+
+            Vector3 candidate = center + offset;
+
+            // Check distance from origin
+            float distFromOrigin = candidate.magnitude;
+            if (distFromOrigin < spawnConfig.spawnDistanceMin * 0.5f)
+                continue;
+
+            // Check gap: measure perpendicular distance from candidate to the toward-origin axis
+            Vector3 toCandidate = candidate - center;
+            float alongAxis = Vector3.Dot(toCandidate, towardOrigin);
+            Vector3 projected = towardOrigin * alongAxis;
+            float perpendicularDist = (toCandidate - projected).magnitude;
+
+            // If the point is in front of the center AND within the gap cylinder, skip
+            if (alongAxis > 0f && perpendicularDist < gapRadius)
+                continue;
+
+            positions.Add(candidate);
+        }
+
+        // If we didn't get enough valid positions, reduce gap and retry
+        if (positions.Count < Mathf.CeilToInt(count * spawnConfig.minValidPositionFraction))
+        {
+            float reducedGap = gapRadius * 0.5f;
+            attempts = 0;
+            while (positions.Count < count && attempts < maxAttempts)
             {
-                if (activeMeteorites.Count < maxMeteorites)
+                attempts++;
+                Vector3 offset = new Vector3(
+                    GaussianRandom() * radius,
+                    GaussianRandom() * radius,
+                    GaussianRandom() * radius
+                );
+                Vector3 candidate = center + offset;
+
+                float distFromOrigin = candidate.magnitude;
+                if (distFromOrigin < spawnConfig.spawnDistanceMin * 0.5f)
+                    continue;
+
+                Vector3 toCandidate = candidate - center;
+                float alongAxis = Vector3.Dot(toCandidate, towardOrigin);
+                float perpendicularDist = (toCandidate - towardOrigin * alongAxis).magnitude;
+
+                if (alongAxis > 0f && perpendicularDist < reducedGap)
+                    continue;
+
+                positions.Add(candidate);
+            }
+        }
+
+        return positions;
+    }
+
+    /// <summary>Box-Muller Gaussian random (mean 0, stddev 1).</summary>
+    private float GaussianRandom()
+    {
+        float u1 = 1f - Random.value; // Avoid log(0)
+        float u2 = Random.value;
+        return Mathf.Sqrt(-2f * Mathf.Log(Mathf.Max(u1, 0.0001f))) * Mathf.Sin(2f * Mathf.PI * u2);
+    }
+
+    // ---- Distance cleanup ----
+
+    private IEnumerator CheckMeteoriteDistance(GameObject meteorite)
+    {
+        while (meteorite != null && activeMeteorites.ContainsKey(meteorite))
+        {
+            float distance = meteorite.transform.position.magnitude; // Distance from origin
+
+            // Despawn once the ship has passed the meteorite (it's now close behind the ship).
+            // Since meteorites are static and the world scrolls via WorldReference, a meteorite
+            // that started far away will eventually reach the origin as the world moves.
+            if (distance < spawnConfig.spawnDistanceMin * 0.15f)
+            {
+                Meteorite m = meteorite.GetComponent<Meteorite>();
+                if (m != null)
                 {
-                    SpawnMeteorite().Forget();
-                    currentWaveMeteorites++;
-                    
-                    float waveSpawnInterval = waveDuration / meteoritesPerWave;
-                    yield return new WaitForSeconds(waveSpawnInterval + Random.Range(-0.5f, 0.5f));
+                    OnMeteoriteReturnToPool(m);
                 }
                 else
                 {
-                    yield return new WaitForSeconds(1f);
+                    if (activeMeteorites.TryGetValue(meteorite, out string pk))
+                    {
+                        activeMeteorites.Remove(meteorite);
+                        meteoritePool.Return(meteorite, pk);
+                    }
                 }
-            }
-
-            // Wave break
-            isWaveActive = false;
-            Debug.Log($"Wave complete! Break for {waveBreakTime} seconds.");
-            yield return new WaitForSeconds(waveBreakTime);
-        }
-    }
-
-    async UniTask SpawnMeteorite()
-    {
-        if (!NetworkSystem.Instance.IsWorldManager) return;
-        string prefabID = GetRandomMeteoritePrefabID();
-        if (string.IsNullOrEmpty(prefabID))
-        {
-            Debug.LogWarning("No meteorite prefab IDs configured for network spawn!");
-            return;
-        }
-
-        Vector3 spawnPosition = GetSpawnPosition();
-        NetworkGameObject networkObject = await NetworkSystem.Instance.CreateWorldReferenceNetworkObject(prefabID, spawnPosition, Random.rotation,0);
-        if (networkObject == null)
-        {
-            return;
-        }
-
-        GameObject meteorite = networkObject.gameObject;
-        float scale = Random.Range(sizeRange.x, sizeRange.y);
-        meteorite.transform.localScale = Vector3.one * scale;
-        Rigidbody rb = meteorite.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Vector3 directionToTarget = (spaceshipTarget.position - spawnPosition).normalized;
-            Vector3 randomDirection = Random.onUnitSphere;
-            Vector3 finalDirection = Vector3.Lerp(randomDirection, directionToTarget, aimTowardTarget).normalized;
-            
-            float speed = Random.Range(speedRange.x, speedRange.y);
-            rb.linearVelocity = finalDirection * speed;
-            rb.angularVelocity = Random.insideUnitSphere * 2f;
-        }
-
-        activeMeteorites.Add(meteorite);
-        // clean when too far
-        StartCoroutine(CheckMeteoriteDistance(meteorite));
-    }
-
-    string GetRandomMeteoritePrefabID()
-    {
-        if (meteoritePrefabIDs != null && meteoritePrefabIDs.Length > 0)
-        {
-            List<string> validIDs = new List<string>();
-            foreach (string prefabID in meteoritePrefabIDs)
-            {
-                if (!string.IsNullOrWhiteSpace(prefabID))
-                {
-                    validIDs.Add(prefabID);
-                }
-            }
-
-            if (validIDs.Count > 0)
-            {
-                return validIDs[Random.Range(0, validIDs.Count)];
-            }
-        }
-
-        if (meteoritePrefabs != null && meteoritePrefabs.Length > 0)
-        {
-            GameObject meteoritePrefab = meteoritePrefabs[Random.Range(0, meteoritePrefabs.Length)];
-            if (meteoritePrefab != null && GameCore.Instance.TryGetNetworkPrefabID(meteoritePrefab, out string prefabID))
-            {
-                return prefabID;
-            }
-        }
-
-        return string.Empty;
-    }
-
-    Vector3 GetSpawnPosition()
-    {
-        Vector3 spawnPos = Vector3.zero;
-        int maxAttempts = 10;
-        
-        for (int i = 0; i < maxAttempts; i++)
-        {
-            switch (spawnAreaType)
-            {
-                case SpawnAreaType.Sphere:
-                    spawnPos = spaceshipTarget.position + Random.onUnitSphere * spawnRadius;
-                    break;
-                    
-                case SpawnAreaType.Box:
-                    spawnPos = spaceshipTarget.position + new Vector3(
-                        Random.Range(-spawnAreaSize.x, spawnAreaSize.x),
-                        Random.Range(-spawnAreaSize.y, spawnAreaSize.y),
-                        Random.Range(-spawnAreaSize.z, spawnAreaSize.z)
-                    );
-                    break;
-                    
-                case SpawnAreaType.Ring:
-                    Vector2 randomCircle = Random.insideUnitCircle.normalized * spawnRadius;
-                    spawnPos = spaceshipTarget.position + new Vector3(randomCircle.x, Random.Range(-10f, 10f), randomCircle.y);
-                    break;
-            }
-
-            if (Vector3.Distance(spawnPos, spaceshipTarget.position) >= minDistanceFromTarget)
-            {
-                return spawnPos;
-            }
-        }
-        
-        return spawnPos;
-    }
-
-    IEnumerator CheckMeteoriteDistance(GameObject meteorite)
-    {
-        while (meteorite != null)
-        {
-            float distance = Vector3.Distance(meteorite.transform.position, spaceshipTarget.position);
-            
-            if (distance > spawnRadius * 3f)
-            {
-                activeMeteorites.Remove(meteorite);
-                Destroy(meteorite);
                 yield break;
             }
-            
+
             yield return new WaitForSeconds(2f);
         }
     }
 
-    public void StartSpawning()
+    private void ReturnAllToPool()
     {
-        enabled = true;
-    }
-
-    public void StopSpawning()
-    {
-        enabled = false;
-    }
-
-    public void ClearAllMeteorites()
-    {
-        foreach (GameObject meteorite in activeMeteorites)
+        foreach (var kvp in new Dictionary<GameObject, string>(activeMeteorites))
         {
-            if (meteorite != null)
+            GameObject obj = kvp.Key;
+            string poolKey = kvp.Value;
+
+            if (obj != null)
             {
-                Destroy(meteorite);
+                Meteorite m = obj.GetComponent<Meteorite>();
+                if (m != null)
+                    m.onReturnToPool = null;
+
+                BroadcastMeteoriteDestroy(obj);
+                meteoritePool.Return(obj, poolKey);
             }
         }
+
         activeMeteorites.Clear();
     }
 
+    // ---- Network (Phase 5) ----
+
+    private int nextSpawnID = 0;
+
+    private void BroadcastMeteoriteSpawn(GameObject obj, Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
+    {
+        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
+
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        Vector3 velocity = Vector3.zero; // Meteorites are static — no linear movement
+        Vector3 angularVelocity = rb != null ? rb.angularVelocity : Vector3.zero;
+        float scale = obj.transform.localScale.x;
+        int spawnID = ++nextSpawnID;
+
+        var msg = new Assets.codes.Network.Messages.NMS_Server_SpawnMeteorite(
+            typeDef.typeName, position, velocity, angularVelocity, scale, spawnID);
+        NetworkRouter.Instance.DistributeMessageToReady(msg);
+    }
+
+    private void BroadcastMeteoriteDestroy(GameObject obj)
+    {
+        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
+
+        Meteorite m = obj.GetComponent<Meteorite>();
+        string poolKey = m != null ? m.poolKey : "Small";
+
+        var msg = new Assets.codes.Network.Messages.NMS_Server_DestroyMeteorite(poolKey, 0);
+        NetworkRouter.Instance.DistributeMessageToReady(msg);
+    }
+
+    /// <summary>
+    /// Broadcast a warning indicator to all clients.
+    /// </summary>
+    public void BroadcastWarning(Vector3 direction, float duration, int warningID)
+    {
+        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
+
+        var msg = new Assets.codes.Network.Messages.NMS_Server_MeteoriteWarning(direction, duration, warningID);
+        NetworkRouter.Instance.DistributeMessageToReady(msg);
+    }
+
+    // ---- Editor visualization ----
+
     private void OnDrawGizmosSelected()
     {
-        Transform target = spaceshipTarget != null ? spaceshipTarget : transform;
+        if (spawnConfig == null) return;
 
+        // Draw spawn sphere bounds
+        Gizmos.color = new Color(1f, 0.8f, 0f, 0.3f);
+        Gizmos.DrawWireSphere(Vector3.zero, spawnConfig.spawnDistanceMin);
+        Gizmos.DrawWireSphere(Vector3.zero, spawnConfig.spawnDistanceMax);
+
+        // Draw a sample cluster
+        Vector3 sampleCenter = Vector3.forward * ((spawnConfig.spawnDistanceMin + spawnConfig.spawnDistanceMax) * 0.5f);
         Gizmos.color = Color.yellow;
-        switch (spawnAreaType)
-        {
-            case SpawnAreaType.Sphere:
-                Gizmos.DrawWireSphere(target.position, spawnRadius);
-                break;
-            case SpawnAreaType.Box:
-                Gizmos.DrawWireCube(target.position, spawnAreaSize * 2f);
-                break;
-            case SpawnAreaType.Ring:
-                int segments = 32;
-                for (int i = 0; i < segments; i++)
-                {
-                    float angle1 = (i / (float)segments) * Mathf.PI * 2f;
-                    float angle2 = ((i + 1) / (float)segments) * Mathf.PI * 2f;
-                    Vector3 p1 = target.position + new Vector3(Mathf.Cos(angle1), 0, Mathf.Sin(angle1)) * spawnRadius;
-                    Vector3 p2 = target.position + new Vector3(Mathf.Cos(angle2), 0, Mathf.Sin(angle2)) * spawnRadius;
-                    Gizmos.DrawLine(p1, p2);
-                }
-                break;
-        }
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(target.position, minDistanceFromTarget);
+        Gizmos.DrawWireSphere(sampleCenter, spawnConfig.clusterRadius);
+
+        // Draw gap cylinder direction
+        Gizmos.color = Color.green;
+        Vector3 towardOrigin = (-sampleCenter).normalized;
+        Gizmos.DrawRay(sampleCenter, towardOrigin * spawnConfig.clusterRadius);
+        Gizmos.DrawWireSphere(sampleCenter + towardOrigin * (spawnConfig.clusterRadius * 0.5f), spawnConfig.dodgeGapRadius);
     }
 }
+
