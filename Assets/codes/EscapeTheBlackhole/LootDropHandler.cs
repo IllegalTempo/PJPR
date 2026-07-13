@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Stub loot drop handler — rolls on LootTableDefinition and logs results.
-/// Physical item spawning is deferred.
-/// </summary>
 public class LootDropHandler : MonoBehaviour
 {
     public static LootDropHandler Instance { get; private set; }
@@ -23,10 +19,6 @@ public class LootDropHandler : MonoBehaviour
         Instance = this;
     }
 
-    /// <summary>
-    /// Process a loot drop for a meteorite type at a given position.
-    /// Called from Meteorite.BreakMeteorite() or MeteoriteSpawner.
-    /// </summary>
     public void ProcessLootDrop(MeteoriteTypeDefinition typeDef, Vector3 position)
     {
         if (!enableLootDrops) return;

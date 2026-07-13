@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    /// <summary>
-    /// Server tells clients to show a meteorite warning indicator.
-    /// </summary>
     public class NMS_Server_MeteoriteWarning : NMS, IClientHandle
     {
         private readonly Vector3 direction;
@@ -43,7 +40,6 @@ namespace Assets.codes.Network.Messages
                 return;
             }
 
-            // Get a warning indicator from the pool and show it
             GameObject warningObj = MeteoritePool.Instance.Get("Warning", Vector3.zero, Quaternion.identity);
             if (warningObj != null)
             {

@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Configurable spawn parameters and difficulty curves for the meteorite spawning system.
-/// Create via: Assets → Create → Escape Blackhole → Spawn Config
-/// </summary>
 [CreateAssetMenu(fileName = "MeteoriteSpawnConfig", menuName = "Escape Blackhole/Spawn Config")]
 public class MeteoriteSpawnConfig : ScriptableObject
 {

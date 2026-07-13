@@ -189,6 +189,8 @@ public class MissionManager : MonoBehaviour
 
         Debug.Log($"[MissionManager] Voting ended. Winner: {WinningMission.missionName} (index {winningIndex}) with {maxVotes} vote(s).");
 
+        EscapeBlackholeMission.OnMissionVoteWon(WinningMission.missionName);
+
         // Broadcast result
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
         {

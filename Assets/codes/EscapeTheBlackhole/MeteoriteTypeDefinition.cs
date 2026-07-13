@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Defines a meteorite type (Small, Medium, Large) with its stats and loot table.
-/// Create via: Assets → Create → Escape Blackhole → Meteorite Type
-/// </summary>
 [CreateAssetMenu(fileName = "MeteoriteType", menuName = "Escape Blackhole/Meteorite Type")]
 public class MeteoriteTypeDefinition : ScriptableObject
 {
@@ -43,9 +39,6 @@ public class MeteoriteTypeDefinition : ScriptableObject
     }
 }
 
-/// <summary>
-/// Meteorite size categories used for damage lookup.
-/// </summary>
 public enum MeteoriteSize
 {
     Small,

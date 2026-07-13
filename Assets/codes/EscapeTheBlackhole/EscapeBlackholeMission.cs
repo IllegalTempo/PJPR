@@ -2,11 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Assets.codes.Network.Messages;
 
-/// <summary>
-/// Mission controller for "Escape the Blackhole".
-/// Hooks into MissionManager to start/stop the meteorite spawning system.
-/// Attach this to a GameObject in the scene and wire references.
-/// </summary>
 public class EscapeBlackholeMission : MonoBehaviour
 {
     public static EscapeBlackholeMission Instance { get; private set; }
@@ -27,16 +22,11 @@ public class EscapeBlackholeMission : MonoBehaviour
     [Tooltip("Survive this many seconds to win (0 = use spawnConfig.missionTimeLimit)")]
     [SerializeField] private float survivalTime = 0f;
 
-    /// <summary>Whether the mission is currently active.</summary>
     public bool IsMissionActive { get; private set; }
-
-    /// <summary>Elapsed time since mission started.</summary>
     public float ElapsedTime => difficultyScaler != null ? difficultyScaler.ElapsedTime : 0f;
 
-    /// <summary>Whether the mission has been won (survived the time limit).</summary>
     public bool HasWon { get; private set; }
 
-    /// <summary>Total meteorites spawned this session.</summary>
     public int TotalMeteoritesSpawned => meteoriteSpawner != null ? meteoriteSpawner.TotalSpawned : 0;
 
     private float effectiveTimeLimit;
@@ -54,18 +44,12 @@ public class EscapeBlackholeMission : MonoBehaviour
 
     private void Start()
     {
-        // Register warning indicator pool
         if (meteoritePool != null && warningIndicatorPrefab != null)
         {
             meteoritePool.RegisterPool("Warning", warningIndicatorPrefab, 10);
         }
     }
 
-    /// <summary>
-    /// Start the Escape the Blackhole mission.
-    /// Called when this mission wins the vote (or manually for testing).
-    /// Right-click this component in the Inspector → "Start Mission" to test in Play Mode.
-    /// </summary>
     [ContextMenu("Start Mission")]
     public void StartMission()
     {
@@ -88,10 +72,6 @@ public class EscapeBlackholeMission : MonoBehaviour
         Debug.Log($"[EscapeBlackholeMission] '{missionName}' started! Survive {effectiveTimeLimit}s.");
     }
 
-    /// <summary>
-    /// End the mission (win or lose).
-    /// Right-click this component in the Inspector → "End Mission (Win)" or "End Mission (Lose)".
-    /// </summary>
     [ContextMenu("End Mission (Win)")]
     public void DebugEndMissionWin()
     {
@@ -128,7 +108,6 @@ public class EscapeBlackholeMission : MonoBehaviour
 
     private void Update()
     {
-        // Debug shortcut: press F5 to start the mission in Play Mode
         if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame && !IsMissionActive)
         {
             StartMission();
@@ -150,10 +129,8 @@ public class EscapeBlackholeMission : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Called by MissionManager when "Escape the Blackhole" wins the vote.
-    /// Match by mission name.
-    /// </summary>
+    /// Match by mission name. (change after ig)
     public static void OnMissionVoteWon(string winningMissionName)
     {
         if (Instance != null && Instance.missionName == winningMissionName)

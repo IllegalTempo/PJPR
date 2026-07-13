@@ -1,12 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Visual warning indicator that appears before meteorites spawn.
-/// Shows an arrow pointing in the incoming meteorite direction,
-/// with a color transition from green (safe) to red (imminent).
-/// Managed by MeteoritePool.
-/// </summary>
 [RequireComponent(typeof(Image))]
 public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
 {
@@ -38,30 +32,20 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
         canvasGroup.alpha = 0f;
     }
 
-    /// <summary>
-    /// Show the warning indicator pointing in the given direction.
-    /// </summary>
     public void Show(Vector3 direction, float duration)
     {
         warningDuration = duration;
         elapsedTime = 0f;
         isActive = true;
 
-        // Position at fixed distance from origin in the warning direction
         transform.position = direction.normalized * indicatorDistance;
 
-        // Orient arrow to point inward (toward origin)
-        // The arrow points "up" by default; rotate to point along the direction
         transform.rotation = Quaternion.LookRotation(direction);
 
-        // Fade in
         StopAllCoroutines();
         StartCoroutine(FadeIn());
     }
 
-    /// <summary>
-    /// Hide the indicator and return to pool.
-    /// </summary>
     public void Hide()
     {
         isActive = false;
@@ -97,7 +81,6 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
 
         canvasGroup.alpha = 0f;
 
-        // Return to pool
         if (MeteoritePool.Instance != null)
         {
             MeteoritePool.Instance.Return(gameObject, "Warning");
@@ -115,7 +98,6 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
         elapsedTime += Time.deltaTime;
         float progress = Mathf.Clamp01(elapsedTime / warningDuration);
 
-        // Color transition: green → yellow → red
         if (progress < 0.5f)
         {
             arrowImage.color = Color.Lerp(safeColor, warningColor, progress * 2f);

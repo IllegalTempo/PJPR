@@ -1,11 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Type-keyed object pool for meteorites, fragments, and warning indicators.
-/// Pre-warms pools based on MeteoriteTypeDefinition.poolSize.
-/// Attach to a persistent GameObject in the scene.
-/// </summary>
 public class MeteoritePool : MonoBehaviour
 {
     public static MeteoritePool Instance { get; private set; }
@@ -14,13 +9,10 @@ public class MeteoritePool : MonoBehaviour
     [Tooltip("Parent transform to hold all pooled objects (created automatically if null)")]
     [SerializeField] private Transform poolRoot;
 
-    /// <summary>Keyed by unique pool key (e.g. "Small", "Medium", "Large", "Fragment", "Warning")</summary>
     private readonly Dictionary<string, Queue<GameObject>> pools = new();
 
-    /// <summary>Maps pool key → prefab used to instantiate more when pool is exhausted.</summary>
     private readonly Dictionary<string, GameObject> prefabMap = new();
 
-    /// <summary>Maps pool key → pool size for pre-warming.</summary>
     private readonly Dictionary<string, int> poolSizes = new();
 
     private void Awake()
@@ -42,9 +34,6 @@ public class MeteoritePool : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Register a prefab for a pool key and pre-warm the pool.
-    /// </summary>
     public void RegisterPool(string poolKey, GameObject prefab, int prewarmSize)
     {
         if (string.IsNullOrEmpty(poolKey) || prefab == null)
@@ -64,9 +53,6 @@ public class MeteoritePool : MonoBehaviour
         PreWarm(poolKey, prewarmSize);
     }
 
-    /// <summary>
-    /// Register a MeteoriteTypeDefinition as a pool.
-    /// </summary>
     public void RegisterPool(MeteoriteTypeDefinition typeDef, GameObject prefab)
     {
         if (typeDef == null || prefab == null)
@@ -122,9 +108,6 @@ public class MeteoritePool : MonoBehaviour
         return obj;
     }
 
-    /// <summary>
-    /// Get an object from the pool. Expands pool if empty.
-    /// </summary>
     public GameObject Get(string poolKey, Vector3 position, Quaternion rotation)
     {
         if (!pools.TryGetValue(poolKey, out Queue<GameObject> queue))
@@ -141,7 +124,6 @@ public class MeteoritePool : MonoBehaviour
         }
         else
         {
-            // Expand pool
             if (!prefabMap.TryGetValue(poolKey, out GameObject prefab))
             {
                 Debug.LogError($"[MeteoritePool] Cannot expand pool '{poolKey}': no prefab.");
@@ -165,9 +147,6 @@ public class MeteoritePool : MonoBehaviour
         return obj;
     }
 
-    /// <summary>
-    /// Return an object to the pool.
-    /// </summary>
     public void Return(GameObject obj, string poolKey)
     {
         if (obj == null) return;
@@ -179,7 +158,6 @@ public class MeteoritePool : MonoBehaviour
             return;
         }
 
-        // Notify IPoolable components before deactivating
         var poolables = obj.GetComponentsInChildren<IPoolable>(includeInactive: false);
         foreach (var p in poolables)
         {
@@ -191,9 +169,6 @@ public class MeteoritePool : MonoBehaviour
         queue.Enqueue(obj);
     }
 
-    /// <summary>
-    /// Clear all pools and destroy all pooled objects.
-    /// </summary>
     public void ClearAll()
     {
         foreach (var kvp in pools)
@@ -215,9 +190,6 @@ public class MeteoritePool : MonoBehaviour
         Debug.Log("[MeteoritePool] All pools cleared.");
     }
 
-    /// <summary>
-    /// Returns the active count for a pool (total instantiated minus currently queued).
-    /// </summary>
     public int GetActiveCount(string poolKey)
     {
         if (!pools.TryGetValue(poolKey, out Queue<GameObject> queue))

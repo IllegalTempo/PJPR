@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
 /// Defines loot entries and their drop probabilities for a meteorite type.
 /// Create via: Assets → Create → Escape Blackhole → Loot Table
-/// </summary>
 [CreateAssetMenu(fileName = "LootTable", menuName = "Escape Blackhole/Loot Table")]
 public class LootTableDefinition : ScriptableObject
 {
@@ -11,10 +9,6 @@ public class LootTableDefinition : ScriptableObject
     [Tooltip("List of possible loot drops with probabilities")]
     public LootEntry[] entries;
 
-    /// <summary>
-    /// Rolls the loot table and returns the names of items that dropped.
-    /// Logs results to console (physical drop spawning is deferred).
-    /// </summary>
     public string[] RollLoot()
     {
         if (entries == null || entries.Length == 0)
@@ -48,9 +42,6 @@ public class LootTableDefinition : ScriptableObject
     }
 }
 
-/// <summary>
-/// A single loot entry with probability and count range.
-/// </summary>
 [System.Serializable]
 public struct LootEntry
 {

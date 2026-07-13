@@ -4,12 +4,6 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Assets.codes.Network.Messages;
 
-/// <summary>
-/// Revamped meteorite spawner for "Escape the Blackhole" mission.
-/// Uses MeteoriteSpawnConfig SO, DifficultyScaler, MeteoritePool, and
-/// cluster-based spawning with dodge gaps.
-/// Server-authoritative via IsWorldManager guard.
-/// </summary>
 public class MeteoriteSpawner : MonoBehaviour
 {
     [Header("Configuration")]
@@ -32,7 +26,6 @@ public class MeteoriteSpawner : MonoBehaviour
     private Coroutine spawnLoopCoroutine;
     private bool isMissionActive = false;
 
-    /// <summary>Total meteorites spawned this mission (for stats).</summary>
     public int TotalSpawned { get; private set; }
 
     private struct ActiveWarning
@@ -60,10 +53,6 @@ public class MeteoriteSpawner : MonoBehaviour
             Debug.LogError("[MeteoriteSpawner] No DifficultyScaler assigned!");
     }
 
-    /// <summary>
-    /// Register pools and start the mission spawn loop.
-    /// Called by EscapeBlackholeMission.
-    /// </summary>
     public void StartMission()
     {
         if (!NetworkSystem.Instance.IsWorldManager) return;
@@ -79,10 +68,6 @@ public class MeteoriteSpawner : MonoBehaviour
         Debug.Log("[MeteoriteSpawner] Mission started.");
     }
 
-    /// <summary>
-    /// Stop the spawn loop and return all active meteorites to pool.
-    /// Called by EscapeBlackholeMission.
-    /// </summary>
     public void StopMission()
     {
         isMissionActive = false;
@@ -158,16 +143,13 @@ public class MeteoriteSpawner : MonoBehaviour
             if (activeMeteorites.Count >= spawnConfig.maxActiveMeteorites)
                 break;
 
-            // Select type based on difficulty
             MeteoriteTypeDefinition typeDef = difficultyScaler.SelectMeteoriteType(
                 smallMeteoriteDef, mediumMeteoriteDef, largeMeteoriteDef);
 
             if (typeDef == null) continue;
 
-            // Calculate direction toward origin (ship position)
             Vector3 directionToOrigin = (-pos).normalized;
 
-            // Queue warning (3s before spawn)
             activeWarnings.Add(new ActiveWarning
             {
                 spawnPosition = pos,
@@ -176,7 +158,6 @@ public class MeteoriteSpawner : MonoBehaviour
                 meteoriteTypeKey = typeDef.typeName
             });
 
-            // Broadcast warning to clients
             BroadcastWarning(directionToOrigin, spawnConfig.warningTime, activeWarnings.Count);
 
             // Spawn after warning delay
@@ -215,12 +196,9 @@ public class MeteoriteSpawner : MonoBehaviour
             meteorite.poolKey = poolKey;
             meteorite.onReturnToPool = OnMeteoriteReturnToPool;
 
-            // Apply scale
             float scale = typeDef.GetRandomScale();
             obj.transform.localScale = Vector3.one * scale;
 
-            // Meteorites stay at their spawn positions (static obstacles).
-            // Only apply tumbling rotation — no linear velocity.
             Rigidbody rb = obj.GetComponent<Rigidbody>();
             if (rb != null)
             {
@@ -232,10 +210,8 @@ public class MeteoriteSpawner : MonoBehaviour
         activeMeteorites[obj] = poolKey;
         TotalSpawned++;
 
-        // Network: if online, broadcast spawn to clients (Phase 5)
         BroadcastMeteoriteSpawn(obj, position, direction, typeDef);
 
-        // Start distance checker
         StartCoroutine(CheckMeteoriteDistance(obj));
     }
 
@@ -249,14 +225,12 @@ public class MeteoriteSpawner : MonoBehaviour
             activeMeteorites.Remove(obj);
             meteorite.onReturnToPool = null;
 
-            // Network: broadcast destroy to clients (Phase 5)
             BroadcastMeteoriteDestroy(obj);
 
             meteoritePool.Return(obj, poolKey);
         }
     }
 
-    // ---- Cluster position generation ----
 
     private Vector3 GetClusterCenter()
     {
@@ -265,14 +239,10 @@ public class MeteoriteSpawner : MonoBehaviour
         return direction * distance; // Relative to origin (ship at 0,0,0)
     }
 
-    /// <summary>
-    /// Generates meteorite positions in a 3D Gaussian cluster around the center,
-    /// with a cylindrical gap oriented toward the origin (ship) for dodging.
-    /// </summary>
     private List<Vector3> GenerateClusterPositions(Vector3 center, int count, float radius, float gapRadius)
     {
         List<Vector3> positions = new List<Vector3>(count);
-        Vector3 towardOrigin = (-center).normalized; // Direction from cluster center to ship
+        Vector3 towardOrigin = (-center).normalized; 
 
         int attempts = 0;
         int maxAttempts = count * 3;
@@ -281,7 +251,6 @@ public class MeteoriteSpawner : MonoBehaviour
         {
             attempts++;
 
-            // 3D Gaussian-like distribution (Box-Muller in 3D)
             Vector3 offset = new Vector3(
                 GaussianRandom() * radius,
                 GaussianRandom() * radius,
@@ -290,25 +259,21 @@ public class MeteoriteSpawner : MonoBehaviour
 
             Vector3 candidate = center + offset;
 
-            // Check distance from origin
             float distFromOrigin = candidate.magnitude;
             if (distFromOrigin < spawnConfig.spawnDistanceMin * 0.5f)
                 continue;
 
-            // Check gap: measure perpendicular distance from candidate to the toward-origin axis
             Vector3 toCandidate = candidate - center;
             float alongAxis = Vector3.Dot(toCandidate, towardOrigin);
             Vector3 projected = towardOrigin * alongAxis;
             float perpendicularDist = (toCandidate - projected).magnitude;
 
-            // If the point is in front of the center AND within the gap cylinder, skip
             if (alongAxis > 0f && perpendicularDist < gapRadius)
                 continue;
 
             positions.Add(candidate);
         }
 
-        // If we didn't get enough valid positions, reduce gap and retry
         if (positions.Count < Mathf.CeilToInt(count * spawnConfig.minValidPositionFraction))
         {
             float reducedGap = gapRadius * 0.5f;
@@ -341,7 +306,6 @@ public class MeteoriteSpawner : MonoBehaviour
         return positions;
     }
 
-    /// <summary>Box-Muller Gaussian random (mean 0, stddev 1).</summary>
     private float GaussianRandom()
     {
         float u1 = 1f - Random.value; // Avoid log(0)
@@ -349,7 +313,6 @@ public class MeteoriteSpawner : MonoBehaviour
         return Mathf.Sqrt(-2f * Mathf.Log(Mathf.Max(u1, 0.0001f))) * Mathf.Sin(2f * Mathf.PI * u2);
     }
 
-    // ---- Distance cleanup ----
 
     private IEnumerator CheckMeteoriteDistance(GameObject meteorite)
     {
@@ -357,9 +320,6 @@ public class MeteoriteSpawner : MonoBehaviour
         {
             float distance = meteorite.transform.position.magnitude; // Distance from origin
 
-            // Despawn once the ship has passed the meteorite (it's now close behind the ship).
-            // Since meteorites are static and the world scrolls via WorldReference, a meteorite
-            // that started far away will eventually reach the origin as the world moves.
             if (distance < spawnConfig.spawnDistanceMin * 0.15f)
             {
                 Meteorite m = meteorite.GetComponent<Meteorite>();
@@ -403,7 +363,6 @@ public class MeteoriteSpawner : MonoBehaviour
         activeMeteorites.Clear();
     }
 
-    // ---- Network (Phase 5) ----
 
     private int nextSpawnID = 0;
 
@@ -433,9 +392,6 @@ public class MeteoriteSpawner : MonoBehaviour
         NetworkRouter.Instance.DistributeMessageToReady(msg);
     }
 
-    /// <summary>
-    /// Broadcast a warning indicator to all clients.
-    /// </summary>
     public void BroadcastWarning(Vector3 direction, float duration, int warningID)
     {
         if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
@@ -444,23 +400,19 @@ public class MeteoriteSpawner : MonoBehaviour
         NetworkRouter.Instance.DistributeMessageToReady(msg);
     }
 
-    // ---- Editor visualization ----
 
     private void OnDrawGizmosSelected()
     {
         if (spawnConfig == null) return;
 
-        // Draw spawn sphere bounds
         Gizmos.color = new Color(1f, 0.8f, 0f, 0.3f);
         Gizmos.DrawWireSphere(Vector3.zero, spawnConfig.spawnDistanceMin);
         Gizmos.DrawWireSphere(Vector3.zero, spawnConfig.spawnDistanceMax);
 
-        // Draw a sample cluster
         Vector3 sampleCenter = Vector3.forward * ((spawnConfig.spawnDistanceMin + spawnConfig.spawnDistanceMax) * 0.5f);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(sampleCenter, spawnConfig.clusterRadius);
 
-        // Draw gap cylinder direction
         Gizmos.color = Color.green;
         Vector3 towardOrigin = (-sampleCenter).normalized;
         Gizmos.DrawRay(sampleCenter, towardOrigin * spawnConfig.clusterRadius);

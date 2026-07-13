@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace Assets.codes.Network.Messages
 {
-    /// <summary>
-    /// Server tells clients to spawn a meteorite from the pool.
-    /// </summary>
     public class NMS_Server_SpawnMeteorite : NMS, IClientHandle
     {
         private readonly string poolKey;
@@ -73,7 +70,6 @@ namespace Assets.codes.Network.Messages
             if (meteorite != null)
             {
                 meteorite.poolKey = poolKey;
-                // On client, returning to pool doesn't need to broadcast since server is authoritative
                 meteorite.onReturnToPool = (m) =>
                 {
                     MeteoritePool.Instance.Return(m.gameObject, m.poolKey);
