@@ -64,11 +64,24 @@ public partial class PlayerMain : MonoBehaviour
 
     private void Initialize_local()
     {
+        PlayerMain[] players = FindObjectsByType<PlayerMain>(FindObjectsSortMode.None);
+        foreach (PlayerMain player in players)
+        {
+            if (player != this && player.networkinfo != null && player.networkinfo.IsLocal && player.cam != null)
+            {
+                player.cam.SetActive(false);
+            }
+        }
+
         foreach (GameObject obj in LocalInvisible)
         {
             obj.SetActive(false);
         }
-        cam.SetActive(true);
+        if (cam != null)
+        {
+            cam.SetActive(true);
+        }
+
         control = GameCore.Instance.PlayerControl;
 
         control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
@@ -153,7 +166,11 @@ public partial class PlayerMain : MonoBehaviour
 
     private void Initialize_remote()
     {
-        cam.SetActive(false);
+        if (cam != null)
+        {
+            cam.SetActive(false);
+        }
+
         rb.isKinematic = true;
     }
 

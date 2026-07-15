@@ -35,6 +35,7 @@ public class ModuleSlot : Slot
     public override async void ServerActionOnAttach(Item item, Quaternion rot)
     {
         base.ServerActionOnAttach(item, rot);
+        Debug.Log($"ServerActionOnAttach called for item {item.name} on slot {slotName}");
         module moduleObject = (module)item;
 
         ItemDefinition it = moduleObject.AbstractItem;

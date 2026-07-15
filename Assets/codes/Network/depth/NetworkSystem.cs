@@ -235,13 +235,19 @@ public partial class NetworkSystem : MonoBehaviour
     //Spawn the network Player
     public async UniTask<NetworkPlayerObject> SpawnPlayer(ulong steamid)
     {
+        if (PlayerList.TryGetValue(steamid, out NetworkPlayerObject existingPlayer))
+        {
+            Debug.LogWarning($"Player {steamid} is already spawned. Reusing existing player object.");
+            return existingPlayer;
+        }
+
         ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
         int index = PlayerList.Count;
         NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.getPlayerSpawn(), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         await p.Init(steamid, index);
-        PlayerList.Add(steamid, p);
+        PlayerList[steamid] = p;
 
         Debug.Log($"Spawned Player {steamid}");
 

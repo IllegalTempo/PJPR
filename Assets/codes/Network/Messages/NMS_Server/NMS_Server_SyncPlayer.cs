@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Assets.codes.Network.Messages
@@ -10,7 +11,7 @@ namespace Assets.codes.Network.Messages
 
         public NMS_Server_SyncPlayer(IEnumerable<ulong> playerIds) : base((int)packets.ServerPackets.RoomInfoOnPlayerEnterRoom)
         {
-            this.playerIds = new List<ulong>(playerIds).ToArray();
+            this.playerIds = new HashSet<ulong>(playerIds).ToArray();
         }
 
         public static NMS_Server_SyncPlayer Read(Packet packet)
@@ -27,9 +28,14 @@ namespace Assets.codes.Network.Messages
 
         public override void Write(Packet packet)
         {
-            packet.Write(playerIds.Length + 1);
-            packet.Write(NetworkSystem.Instance.SteamID);
-            foreach (ulong playerId in playerIds)
+            ulong localSteamId = NetworkSystem.Instance.SteamID;
+            ulong[] uniquePlayerIds = playerIds
+                .Prepend(localSteamId)
+                .Distinct()
+                .ToArray();
+
+            packet.Write(uniquePlayerIds.Length);
+            foreach (ulong playerId in uniquePlayerIds)
             {
                 packet.Write(playerId);
             }
