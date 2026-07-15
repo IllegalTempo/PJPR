@@ -108,7 +108,9 @@ public class MainSpaceship : MonoBehaviour
             }
 
             module md = await SpawnModuleAsync(moduleData.PrefabID, Vector3.zero, Quaternion.identity);
-            slot[moduleData.Slot].Attach(md,Quaternion.identity);
+            slot[moduleData.Slot].SendAttach(md);
+
+
             md.transform.localRotation = moduleData.Rotation;
         }
     }
