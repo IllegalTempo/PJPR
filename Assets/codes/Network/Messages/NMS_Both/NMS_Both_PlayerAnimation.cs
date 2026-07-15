@@ -34,7 +34,10 @@ namespace Assets.codes.Network.Messages
 
         protected override void applyaction()
         {
-            NetworkSystem.Instance.PlayerList[playerId].SetAnimation(movementX, movementY);
+            if (NetworkSystem.Instance.PlayerList.TryGetValue(playerId, out NetworkPlayerObject player))
+            {
+                player.SetAnimation(movementX, movementY);
+            }
 
         }
     }

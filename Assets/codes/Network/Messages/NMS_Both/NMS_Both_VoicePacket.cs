@@ -33,8 +33,10 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
-            PlayerMain who = NetworkSystem.Instance.PlayerList[playerid].playerControl;
-            who.ReceiveVoice(data);
+            if (NetworkSystem.Instance.PlayerList.TryGetValue(playerid, out NetworkPlayerObject player))
+            {
+                player.playerControl.ReceiveVoice(data);
+            }
 
         }
     }
