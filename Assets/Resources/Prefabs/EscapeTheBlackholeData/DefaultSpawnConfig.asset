@@ -120,3 +120,8 @@ MonoBehaviour:
   maxActiveMeteorites: 200
   missionTimeLimit: 180
   baseSpeedRange: {x: 4, y: 8}
+  waveSpawnDistanceAhead: 60
+  wavePassedThreshold: 20
+  waveDriftSpeed: 3
+  minWaveSeparation: 100
+  maxWaves: 0

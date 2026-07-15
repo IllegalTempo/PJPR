@@ -67,4 +67,25 @@ public class MeteoriteSpawnConfig : ScriptableObject
     [Header("Speed")]
     [Tooltip("Base speed range for meteorites moving toward origin (x = min, y = max)")]
     public Vector2 baseSpeedRange = new Vector2(8f, 16f);
+
+    [Header("Wave System")]
+    [Tooltip("Distance ahead of the ship to spawn each wave")]
+    [Min(5f)]
+    public float waveSpawnDistanceAhead = 100f;
+
+    [Tooltip("How far past the ship a wave must be (ship Z > wave Z + threshold) to despawn")]
+    [Min(1f)]
+    public float wavePassedThreshold = 20f;
+
+    [Tooltip("Speed at which waves slowly drift toward the ship (-Z, no X/Y)")]
+    [Min(0f)]
+    public float waveDriftSpeed = 2f;
+
+    [Tooltip("Minimum Z distance between consecutive wave spawns")]
+    [Min(10f)]
+    public float minWaveSeparation = 100f;
+
+    [Tooltip("Maximum number of waves for this mission (0 = unlimited, spawns until timer ends)")]
+    [Min(0)]
+    public int maxWaves = 0;
 }

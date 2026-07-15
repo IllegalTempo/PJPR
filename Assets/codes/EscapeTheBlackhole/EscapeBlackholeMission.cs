@@ -91,8 +91,8 @@ public class EscapeBlackholeMission : MonoBehaviour
         IsMissionActive = false;
         HasWon = won;
 
-        meteoriteSpawner?.StopMission();
-        difficultyScaler?.StopScaling();
+        if (meteoriteSpawner != null) meteoriteSpawner.StopMission();
+        if (difficultyScaler != null) difficultyScaler.StopScaling();
 
         if (won)
         {
@@ -116,14 +116,18 @@ public class EscapeBlackholeMission : MonoBehaviour
         if (!IsMissionActive) return;
         if (!NetworkSystem.Instance.IsWorldManager) return;
 
-        // Check win condition
         if (ElapsedTime >= effectiveTimeLimit)
         {
             EndMission(true);
         }
 
-        // Check if time is up via difficulty scaler
         if (difficultyScaler != null && difficultyScaler.IsTimeUp)
+        {
+            EndMission(true);
+        }
+
+        // Win by surviving all waves (when maxWaves > 0)
+        if (meteoriteSpawner != null && meteoriteSpawner.AllWavesCompleted)
         {
             EndMission(true);
         }

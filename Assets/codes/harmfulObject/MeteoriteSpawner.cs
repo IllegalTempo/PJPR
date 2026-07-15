@@ -26,7 +26,14 @@ public class MeteoriteSpawner : MonoBehaviour
     private Coroutine spawnLoopCoroutine;
     private bool isMissionActive = false;
 
+    // Wave system
+    private GameObject currentWaveRoot;
+    private bool hasActiveWave = false;
+    private int wavesSpawned = 0;
+
     public int TotalSpawned { get; private set; }
+
+    public bool AllWavesCompleted { get; private set; }
 
     private struct ActiveWarning
     {
@@ -57,20 +64,27 @@ public class MeteoriteSpawner : MonoBehaviour
     {
         if (!NetworkSystem.Instance.IsWorldManager) return;
 
-        StopMission(); // Ensure clean state
+        StopMission(); 
 
         RegisterPools();
         difficultyScaler.StartScaling();
         isMissionActive = true;
         TotalSpawned = 0;
+        wavesSpawned = 0;
+        AllWavesCompleted = false;
 
-        spawnLoopCoroutine = StartCoroutine(SpawnLoop());
-        Debug.Log("[MeteoriteSpawner] Mission started.");
+        hasActiveWave = false;
+
+        Debug.Log("[MeteoriteSpawner] Mission started (wave mode).");
     }
 
     public void StopMission()
     {
+        if (this == null) return;
+
         isMissionActive = false;
+        hasActiveWave = false;
+        AllWavesCompleted = false;
 
         if (spawnLoopCoroutine != null)
         {
@@ -81,6 +95,13 @@ public class MeteoriteSpawner : MonoBehaviour
         difficultyScaler?.StopScaling();
         ReturnAllToPool();
         activeWarnings.Clear();
+
+        if (currentWaveRoot != null)
+        {
+            Destroy(currentWaveRoot);
+            currentWaveRoot = null;
+        }
+
         Debug.Log("[MeteoriteSpawner] Mission stopped.");
     }
 
@@ -98,40 +119,71 @@ public class MeteoriteSpawner : MonoBehaviour
             meteoritePool.RegisterPool(largeMeteoriteDef.typeName, largeMeteoritePrefab, largeMeteoriteDef.poolSize);
     }
 
-    private IEnumerator SpawnLoop()
+    private float GetShipZPosition()
     {
-        while (isMissionActive)
+        return 0f;
+    }
+
+    private void Update()
+    {
+        if (!isMissionActive) return;
+
+        float shipZ = GetShipZPosition();
+
+        bool canSpawnMore = spawnConfig.maxWaves <= 0 || wavesSpawned < spawnConfig.maxWaves;
+        if (!hasActiveWave && canSpawnMore)
         {
-            if (difficultyScaler.IsTimeUp)
+            SpawnWave(shipZ + spawnConfig.waveSpawnDistanceAhead);
+            hasActiveWave = true;
+        }
+
+        if (hasActiveWave && currentWaveRoot != null)
+        {
+            if ((shipZ - currentWaveRoot.transform.position.z) > spawnConfig.wavePassedThreshold)
             {
-                Debug.Log("[MeteoriteSpawner] Time limit reached. Ending spawn loop.");
-                yield break;
-            }
+                DespawnCurrentWave();
+                hasActiveWave = false;
 
-            float interval = difficultyScaler.CurrentSpawnInterval;
-            yield return new WaitForSeconds(interval);
-
-            if (!isMissionActive) yield break;
-
-            // Spawn clusters
-            int clusters = spawnConfig.clustersPerWave;
-            for (int c = 0; c < clusters; c++)
-            {
-                if (!isMissionActive) yield break;
-                if (activeMeteorites.Count >= spawnConfig.maxActiveMeteorites)
+                if (spawnConfig.maxWaves > 0 && wavesSpawned >= spawnConfig.maxWaves)
                 {
-                    Debug.Log("[MeteoriteSpawner] Max active meteorites reached. Skipping cluster.");
-                    break;
+                    AllWavesCompleted = true;
+                    Debug.Log("[MeteoriteSpawner] All waves completed!");
                 }
-
-                SpawnCluster();
             }
+        }
+
+        if (hasActiveWave && currentWaveRoot != null)
+        {
+            Vector3 drift = Vector3.back * spawnConfig.waveDriftSpeed * Time.deltaTime;
+            currentWaveRoot.transform.position += drift;
         }
     }
 
-    private void SpawnCluster()
+    private void SpawnWave(float waveZ)
     {
-        Vector3 clusterCenter = GetClusterCenter();
+        currentWaveRoot = new GameObject($"Wave_{waveZ:F0}");
+        currentWaveRoot.transform.position = new Vector3(0f, 0f, waveZ);
+
+        int clusters = spawnConfig.clustersPerWave;
+        for (int c = 0; c < clusters; c++)
+        {
+            if (!isMissionActive) break;
+            if (activeMeteorites.Count >= spawnConfig.maxActiveMeteorites)
+            {
+                Debug.Log("[MeteoriteSpawner] Max active meteorites reached. Skipping remaining clusters.");
+                break;
+            }
+
+            SpawnClusterAtWave(waveZ);
+        }
+
+        wavesSpawned++;
+        Debug.Log($"[MeteoriteSpawner] Wave {wavesSpawned} spawned at Z={waveZ:F0} with {clusters} clusters.");
+    }
+
+    private void SpawnClusterAtWave(float waveZ)
+    {
+        Vector3 clusterCenter = GetWaveClusterCenter(waveZ);
         int count = spawnConfig.meteoritesPerCluster;
         float radius = spawnConfig.clusterRadius;
         float gapRadius = spawnConfig.dodgeGapRadius;
@@ -148,21 +200,57 @@ public class MeteoriteSpawner : MonoBehaviour
 
             if (typeDef == null) continue;
 
-            Vector3 directionToOrigin = (-pos).normalized;
+            Vector3 directionToShip = Vector3.back;
 
             activeWarnings.Add(new ActiveWarning
             {
                 spawnPosition = pos,
-                direction = directionToOrigin,
+                direction = directionToShip,
                 remainingTime = spawnConfig.warningTime,
                 meteoriteTypeKey = typeDef.typeName
             });
 
-            BroadcastWarning(directionToOrigin, spawnConfig.warningTime, activeWarnings.Count);
+            BroadcastWarning(directionToShip, spawnConfig.warningTime, activeWarnings.Count);
 
-            // Spawn after warning delay
-            StartCoroutine(SpawnAfterWarning(pos, directionToOrigin, typeDef));
+            StartCoroutine(SpawnAfterWarning(pos, directionToShip, typeDef));
         }
+    }
+
+    private Vector3 GetWaveClusterCenter(float waveZ)
+    {
+        float halfWidth = spawnConfig.spawnDistanceMax * 0.5f;
+        float x = Random.Range(-halfWidth, halfWidth);
+        float y = Random.Range(-halfWidth, halfWidth);
+        // Z stays at the wave plane, with small variation for visual depth
+        float z = waveZ + Random.Range(-spawnConfig.clusterRadius * 0.3f, spawnConfig.clusterRadius * 0.3f);
+        return new Vector3(x, y, z);
+    }
+
+    private void DespawnCurrentWave()
+    {
+        if (currentWaveRoot == null) return;
+
+        List<Meteorite> toReturn = new List<Meteorite>();
+        foreach (var kvp in activeMeteorites)
+        {
+            if (kvp.Key != null)
+            {
+                Meteorite m = kvp.Key.GetComponent<Meteorite>();
+                if (m != null)
+                    toReturn.Add(m);
+            }
+        }
+
+        foreach (var m in toReturn)
+        {
+            if (m != null)
+                OnMeteoriteReturnToPool(m);
+        }
+
+        Destroy(currentWaveRoot);
+        currentWaveRoot = null;
+
+        Debug.Log("[MeteoriteSpawner] Wave despawned (passed by ship).");
     }
 
     private IEnumerator SpawnAfterWarning(Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
@@ -202,10 +290,14 @@ public class MeteoriteSpawner : MonoBehaviour
             Rigidbody rb = obj.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.linearVelocity = Vector3.zero;
+                // Apply wave drift velocity (-Z direction, no X/Y)
+                rb.linearVelocity = Vector3.back * spawnConfig.waveDriftSpeed;
                 rb.angularVelocity = Random.insideUnitSphere * 2f;
             }
         }
+
+        if (currentWaveRoot != null)
+            obj.transform.SetParent(currentWaveRoot.transform, true);
 
         activeMeteorites[obj] = poolKey;
         TotalSpawned++;
@@ -232,17 +324,10 @@ public class MeteoriteSpawner : MonoBehaviour
     }
 
 
-    private Vector3 GetClusterCenter()
-    {
-        float distance = Random.Range(spawnConfig.spawnDistanceMin, spawnConfig.spawnDistanceMax);
-        Vector3 direction = Random.onUnitSphere;
-        return direction * distance; // Relative to origin (ship at 0,0,0)
-    }
-
     private List<Vector3> GenerateClusterPositions(Vector3 center, int count, float radius, float gapRadius)
     {
         List<Vector3> positions = new List<Vector3>(count);
-        Vector3 towardOrigin = (-center).normalized; 
+        Vector3 towardShip = Vector3.back;
 
         int attempts = 0;
         int maxAttempts = count * 3;
@@ -264,8 +349,8 @@ public class MeteoriteSpawner : MonoBehaviour
                 continue;
 
             Vector3 toCandidate = candidate - center;
-            float alongAxis = Vector3.Dot(toCandidate, towardOrigin);
-            Vector3 projected = towardOrigin * alongAxis;
+            float alongAxis = Vector3.Dot(toCandidate, towardShip);
+            Vector3 projected = towardShip * alongAxis;
             float perpendicularDist = (toCandidate - projected).magnitude;
 
             if (alongAxis > 0f && perpendicularDist < gapRadius)
@@ -293,8 +378,8 @@ public class MeteoriteSpawner : MonoBehaviour
                     continue;
 
                 Vector3 toCandidate = candidate - center;
-                float alongAxis = Vector3.Dot(toCandidate, towardOrigin);
-                float perpendicularDist = (toCandidate - towardOrigin * alongAxis).magnitude;
+                float alongAxis = Vector3.Dot(toCandidate, towardShip);
+                float perpendicularDist = (toCandidate - towardShip * alongAxis).magnitude;
 
                 if (alongAxis > 0f && perpendicularDist < reducedGap)
                     continue;
