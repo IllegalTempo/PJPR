@@ -37,7 +37,12 @@ public class NetworkPlayerObject : MonoBehaviour
         this.index = index;
         steamIdentity = new Friend(steamid);
         gameObject.name = $"Player {index} ({steamid})";
-        await UIManager.Instance.NewPlayerDisplay(steamid,steamIdentity.Name);
+        await UIManager.Instance.NewPlayerDisplay(steamid,Getname());
+    }
+
+    public string Getname()
+    {
+        return (steamIdentity.Name);
     }
 
     public void Disconnect()
