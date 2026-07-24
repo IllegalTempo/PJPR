@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MeteoriteType", menuName = "Escape Blackhole/Meteorite Type")]
-public class MeteoriteTypeDefinition : ScriptableObject
+public class MeteoriteTypeDefinition : ScriptableObject //TODO: Inherit it from PrefabDefinition!!!!!
 {
     [Header("Identity")]
     [Tooltip("Display name, e.g. 'Small', 'Medium', 'Large'")]

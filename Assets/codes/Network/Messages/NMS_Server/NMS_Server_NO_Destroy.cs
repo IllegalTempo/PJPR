@@ -12,7 +12,6 @@ namespace Assets.codes.Network.Messages
 
         public static NMS_Server_NO_Destroy Read(Packet packet)
         {
-            // TODO: Read message fields from packet.
             return new NMS_Server_NO_Destroy(packet.ReadstringUNICODE());
         }
 

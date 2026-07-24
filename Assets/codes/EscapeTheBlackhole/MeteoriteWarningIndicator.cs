@@ -81,14 +81,14 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
 
         canvasGroup.alpha = 0f;
 
-        if (MeteoritePool.Instance != null)
-        {
-            MeteoritePool.Instance.Return(gameObject, "Warning");
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        //if (MeteoritePool.Instance != null)
+        //{
+        //    MeteoritePool.Instance.Return(gameObject, "Warning");
+        //}
+        //else
+        //{
+        //    Destroy(gameObject);
+        //}
     }
 
     private void Update()

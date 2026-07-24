@@ -14,7 +14,7 @@ public class EscapeBlackholeMission : MonoBehaviour
     [SerializeField] private MeteoriteSpawner meteoriteSpawner;
     [SerializeField] private DifficultyScaler difficultyScaler;
     [SerializeField] private MeteoriteSpawnConfig spawnConfig;
-    [SerializeField] private MeteoritePool meteoritePool;
+    //[SerializeField] private MeteoritePool meteoritePool;
     [SerializeField] private LootDropHandler lootDropHandler;
     [SerializeField] private GameObject warningIndicatorPrefab;
 
@@ -44,10 +44,10 @@ public class EscapeBlackholeMission : MonoBehaviour
 
     private void Start()
     {
-        if (meteoritePool != null && warningIndicatorPrefab != null)
-        {
-            meteoritePool.RegisterPool("Warning", warningIndicatorPrefab, 10);
-        }
+        //if (meteoritePool != null && warningIndicatorPrefab != null)
+        //{
+        //    meteoritePool.RegisterPool("Warning", warningIndicatorPrefab, 10);
+        //}
     }
 
     [ContextMenu("Start Mission")]
