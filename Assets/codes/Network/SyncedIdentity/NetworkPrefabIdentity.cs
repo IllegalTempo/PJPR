@@ -1,6 +1,7 @@
 using Assets.codes.Network.Messages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -18,7 +19,14 @@ public class NetworkPrefabIdentity : NetworkIdentity
         this.PrefabID = PrefabID;
         this.Sovereignty = sovereignty;
     }
-
-
+    public static List<NetworkPrefabIdentity> GetNetworkPrefabInScene()
+    {
+        return NetworkSystem.Instance.FindNetworkIdentity.Values.OfType<NetworkPrefabIdentity>().ToList();
+    }
+    
+    public NetworkObjectSnapshot GetSnapshot()
+    {
+        return new NetworkObjectSnapshot(Identifier, Sovereignty, PrefabID, transform.position, transform.rotation);
+    }
 
 }

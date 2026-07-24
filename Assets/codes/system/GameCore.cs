@@ -74,13 +74,18 @@ public partial class GameCore : MonoBehaviour
         startedGame = true;
         await InitPlayerControl();
         await UniTask.WaitUntil(() => NetworkSystem.Instance != null);
-        await NetworkSystem.Instance.InitializeNetwork();
 
-        if (GameSaveSystem.Instance != null)
+        GameInitManager initManager = GameInitManager.Instance;
+        if (initManager == null)
         {
-            await GameSaveSystem.Instance.LoadGame();
+            initManager = gameObject.AddComponent<GameInitManager>();
         }
 
+        await initManager.InitializeGameAsync(new GameInitManager.GameInitOptions
+        {
+            LoadSave = true,
+            NetworkSyncTimeoutSeconds = NetworkSystem.TIMEOUTSECONDS
+        });
     }
     public string newNOUID()
     {

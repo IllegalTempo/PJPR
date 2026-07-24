@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -16,7 +17,7 @@ public class GameSaveSystem : MonoBehaviour
     private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
     public static string DefaultSavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
 
-    
+    public static GameSaveData SaveData;
     private void Awake()
     {
         if (Instance == null)
@@ -55,7 +56,7 @@ public class GameSaveSystem : MonoBehaviour
         if (!File.Exists(savePath))
         {
             Debug.LogWarning($"Save file not found at {savePath}. Loading default save.");
-            ApplySaveData(CreateDefaultSaveData());
+            SaveData = CreateDefaultSaveData();
             return true;
         }
 
@@ -69,89 +70,34 @@ public class GameSaveSystem : MonoBehaviour
             return false;
         }
 
-        ApplySaveData(saveData);
+        SaveData = saveData;
         Debug.Log($"Loaded game from {savePath}");
         return true;
     }
 
     public static GameSaveData CaptureSaveData()
     {
-        GameSaveData saveData = new GameSaveData();
-
-        if (GameCore.Instance != null && MainSpaceship.Instance != null)
-        {
-            saveData.InstalledModules = MainSpaceship.Instance.GetInstalledModuleSaveData();
-        }
-
-        if (NetworkSystem.Instance != null)
-        {
-            foreach (NetworkPlayerObject player in NetworkSystem.Instance.PlayerList.Values)
-            {
-                if (player == null)
-                {
-                    continue;
-                }
-
-                saveData.PlayerLocations.Add(new PlayerLocationSaveData(
-                    player.steamID.ToString(),
-                    player.transform.position,
-                    player.transform.rotation));
-            }
-        }
-
+        GameSaveData saveData = new GameSaveData(NetworkSystem.Instance.GetPlayerData(), NetworkObjectSnapshot.GetNetworkPrefabSnapshotInScene(), MainSpaceship.Instance.GetSlotsSnapshot());
         return saveData;
     }
 
     public static GameSaveData CreateDefaultSaveData()
     {
-        GameSaveData saveData = new GameSaveData();
+        GameSaveData saveData = new GameSaveData(new List<PlayerData>(), new List<NetworkObjectSnapshot>(), new List<SlotSnapshot>());
         //
-        saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_left, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_right, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(0, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(1, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(2, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(3, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(4, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(5, DefaultBoosterModuleId));
-        saveData.InstalledModules.Add(new InstalledModuleSaveData(8, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_left, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_right, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(0, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(1, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(2, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(3, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(4, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(5, DefaultBoosterModuleId));
+        //saveData.InstalledModules.Add(new InstalledModuleSaveData(8, DefaultBoosterModuleId));
 
         return saveData;
     }
 
-    public static void ApplySaveData(GameSaveData saveData)
-    {
-        if (saveData == null)
-        {
-            return;
-        }
-
-        if (GameCore.Instance != null && MainSpaceship.Instance != null)
-        {
-            MainSpaceship.Instance.LoadInstalledModules(saveData.InstalledModules).Forget();
-        }
-
-        if (NetworkSystem.Instance == null)
-        {
-            return;
-        }
-
-        foreach (PlayerLocationSaveData playerLocation in saveData.PlayerLocations)
-        {
-            if (playerLocation == null || !ulong.TryParse(playerLocation.SteamID, out ulong steamID))
-            {
-                continue;
-            }
-
-            if (!NetworkSystem.Instance.PlayerList.TryGetValue(steamID, out NetworkPlayerObject player) || player == null)
-            {
-                continue;
-            }
-
-            player.transform.SetPositionAndRotation(playerLocation.Position, playerLocation.Rotation);
-            player.SetMovement(playerLocation.Position, player.NetworkHeadRot, playerLocation.Rotation);
-        }
-    }
 
     [ContextMenu("Save Game")]
     private void SaveGameFromContextMenu()

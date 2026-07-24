@@ -20,9 +20,19 @@ public partial class NetworkSystem
         NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, WorldReference.Instance.transform);
         return nobj;
     }
-    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string uid = null) //Server Only
-    { //more check added
-
+    /// <summary>
+    /// Creates a networked object on the server and distributes it to all clients. This method should only be called on the server.
+    /// </summary>
+    /// <param name="prefabID"></param>
+    /// <param name="pos"></param>
+    /// <param name="rot"></param>
+    /// <param name="owner"></param>
+    /// <param name="parent"></param>
+    /// <param name="isCombining"></param>
+    /// <param name="uid"></param>
+    /// <returns></returns>
+    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string uid = null)
+    { 
         if (IsOnline && !IsServer) return null;
         if(uid == null)
         {

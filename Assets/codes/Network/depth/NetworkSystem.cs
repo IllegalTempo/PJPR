@@ -61,6 +61,13 @@ public partial class NetworkSystem : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
     }
+    public List<PlayerData> GetPlayerData()
+    {
+        return PlayerList.Values.Select(p => new PlayerData(
+            p.steamID.ToString(),
+            p.transform.position,
+            p.transform.rotation)).ToList();
+    }
     public T GetComponentOfIdentity<T>(string NetworkID)
     {
         NetworkIdentity identity = FindNetworkIdentity[NetworkID];

@@ -5,47 +5,79 @@ using UnityEngine;
 [Serializable]
 public class GameSaveData
 {
-    public List<InstalledModuleSaveData> InstalledModules = new List<InstalledModuleSaveData>();
-    public List<PlayerLocationSaveData> PlayerLocations = new List<PlayerLocationSaveData>();
-}
+    public List<PlayerData> PlayerLocations = new List<PlayerData>(); //Player data is updated upon player join
+    public List<NetworkObjectSnapshot> NetworkObjects = new List<NetworkObjectSnapshot>();
+    public List<SlotSnapshot> SlotRelationships = new List<SlotSnapshot>();
 
-[Serializable]
-public class InstalledModuleSaveData
-{
-    public int Slot;
-    public string PrefabID;
-    public Quaternion Rotation;
-
-    public InstalledModuleSaveData()
+    public GameSaveData()
     {
     }
 
-    public InstalledModuleSaveData(
-    int slot,
-    string prefabID,
-    Quaternion? rotation = null)
+    public GameSaveData(List<PlayerData> playerDatas, List<NetworkObjectSnapshot> networkObjectSnapshots, List<SlotSnapshot> slotSnapshots)
     {
-        this.Slot = slot;
-        this.PrefabID = prefabID;
-        this.Rotation = rotation ?? Quaternion.identity;
+        PlayerLocations = playerDatas ?? new List<PlayerData>();
+        NetworkObjects = networkObjectSnapshots ?? new List<NetworkObjectSnapshot>();
+        SlotRelationships = slotSnapshots ?? new List<SlotSnapshot>();
     }
 }
 
+
 [Serializable]
-public class PlayerLocationSaveData
+public class PlayerData
 {
     public string SteamID;
     public Vector3 Position;
     public Quaternion Rotation;
 
-    public PlayerLocationSaveData()
+    public PlayerData()
     {
     }
 
-    public PlayerLocationSaveData(string steamID, Vector3 position, Quaternion rotation)
+    public PlayerData(string steamID, Vector3 position, Quaternion rotation)
     {
         SteamID = steamID;
         Position = position;
         Rotation = rotation;
+    }
+}
+[Serializable]
+public struct NetworkObjectSnapshot
+{
+    public string Uid;
+    public ulong Owner;
+    public string PrefabId;
+    public Vector3 Position;
+    public Quaternion Rotation;
+
+    public NetworkObjectSnapshot(string uid, ulong owner, string prefabId, Vector3 position, Quaternion rotation)
+    {
+        Uid = uid;
+        Owner = owner;
+        PrefabId = prefabId;
+        Position = position;
+        Rotation = rotation;
+    }
+    public static List<NetworkObjectSnapshot> GetNetworkPrefabSnapshotInScene()
+    {
+        List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
+        foreach (NetworkPrefabIdentity networkObject in NetworkPrefabIdentity.GetNetworkPrefabInScene())
+        {
+            snapshots.Add(networkObject.GetSnapshot());
+        }
+        return snapshots;
+    }
+}
+[Serializable]
+public struct SlotSnapshot
+{
+    public string SlotId;
+    public string AttachedItemId;
+    public Quaternion rotation;
+
+    public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
+    {
+        SlotId = slotId;
+        AttachedItemId = attachedItemId;
+        this.rotation = rotation;
     }
 }

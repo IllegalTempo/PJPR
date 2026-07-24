@@ -22,12 +22,15 @@ public class packets
         LootDrop = 1018,
         UpdateWorld_Velocity = 1019,
         UpdateWorld_Rotation = 1020,
+        WorldInitBegin = 1021,
+        WorldInitComplete = 1022,
     };
     public enum ClientPackets
     {
         SendReadyState = 2001,
         RequestVotingSession = 2004,
         CastVote = 2005,
+        RequestWorldState = 2006,
     };
     public enum BothPackets
     {

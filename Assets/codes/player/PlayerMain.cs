@@ -362,6 +362,9 @@ public partial class PlayerMain : MonoBehaviour
                         UIManager.Instance.ShowInteraction("Combine", control.Player.pickup.GetBindingDisplayString(), 0);
                     }
                     break;
+                default:
+                    UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
+                    break;
             }
         }
         UIManager.Instance.DisplayGameObjectName(displayname);

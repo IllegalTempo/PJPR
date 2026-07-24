@@ -32,18 +32,8 @@ namespace Assets.codes.Network.Messages
             this.voteCounts = voteCounts;
         }
 
-        public NMS_Server_SyncScene(IEnumerable<NetworkPrefabIdentity> networkObjects, IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
+        public NMS_Server_SyncScene( IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
-            List<NetworkObjectSnapshot> snapshots = new List<NetworkObjectSnapshot>();
-            foreach (NetworkPrefabIdentity networkObject in networkObjects)
-            {
-                snapshots.Add(new NetworkObjectSnapshot(
-                    networkObject.Identifier,
-                    networkObject.Sovereignty,
-                    networkObject.PrefabID,
-                    networkObject.transform.position,
-                    networkObject.transform.rotation));
-            }
             List<SlotSnapshot> slotSnapshots = new List<SlotSnapshot>();
             foreach (Slot slot in slots)
             {
@@ -55,7 +45,7 @@ namespace Assets.codes.Network.Messages
                     slot.GetAttachedItem()?.transform.rotation ?? Quaternion.identity
                 ));
             }
-            sceneNetworkObjects = snapshots.ToArray();
+            sceneNetworkObjects = NetworkObjectSnapshot.GetNetworkPrefabSnapshotInScene().ToArray();
             slotsRelationships = slotSnapshots.ToArray();
 
             MissionManager mm = MissionManager.Instance;
@@ -74,7 +64,10 @@ namespace Assets.codes.Network.Messages
                 voteCounts = null;
             }
         }
-
+        private List<NetworkObjectSnapshot> GetSceneNetworkObjects()
+        {
+            return new List<NetworkObjectSnapshot>(sceneNetworkObjects);
+        }
         public static NMS_Server_SyncScene Read(Packet packet)
         {
             NetworkObjectSnapshot[] objects = packet.ReadArray<NetworkObjectSnapshot>();
@@ -120,24 +113,7 @@ namespace Assets.codes.Network.Messages
             {
                 await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);
             }
-            foreach (SlotSnapshot snapshot in slotsRelationships)
-            {
-                if(snapshot.AttachedItemId == string.Empty)
-                {
-                    Debug.Log("No item attached to slot: " + snapshot.SlotId);
-                    continue;
-                }
-                Debug.Log("Syncing Slot Relationship: " + snapshot.SlotId + " -> " + snapshot.AttachedItemId);
-                Slot slot = NetworkSystem.Instance.GetComponentOfIdentity<Slot>(snapshot.SlotId);
-                Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
-                if (attachedItem != null&&slot != null && attachedItem != null)
-                {
-                    slot.Attach(attachedItem,snapshot.rotation);
-                } else
-                {
-                    Debug.LogError($"Failed to attach item {snapshot.AttachedItemId} to slot {snapshot.SlotId}. Slot or Item not found.");
-                }
-            }
+            GameInitManager.Instance.InitSlotRelationFromSave(slotsRelationships);
 
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
 
@@ -155,32 +131,5 @@ namespace Assets.codes.Network.Messages
         
 
     }
-    public readonly struct NetworkObjectSnapshot
-    {
-        public readonly string Uid;
-        public readonly ulong Owner;
-        public readonly string PrefabId;
-        public readonly Vector3 Position;
-        public readonly Quaternion Rotation;
-        public NetworkObjectSnapshot(string uid, ulong owner, string prefabId, Vector3 position, Quaternion rotation)
-        {
-            Uid = uid;
-            Owner = owner;
-            PrefabId = prefabId;
-            Position = position;
-            Rotation = rotation;
-        }
-    }
-    public readonly struct SlotSnapshot
-    {
-        public readonly string SlotId;
-        public readonly string AttachedItemId;
-        public readonly Quaternion rotation;
-        public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
-        {
-            SlotId = slotId;
-            AttachedItemId = attachedItemId;
-            this.rotation = rotation;
-        }
-    }
+    
 }

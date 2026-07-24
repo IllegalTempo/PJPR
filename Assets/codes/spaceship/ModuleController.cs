@@ -6,15 +6,29 @@ namespace Assets.codes.spaceship
 {
 	public class ModuleController:MonoBehaviour
 	{
-		public ModuleSlot ConnectTo;
+        public ModuleSlot ConnectTo;
         private NetworkGameObject networkObject;
+        private void Awake()
+        {
+            networkObject = GetComponent<NetworkGameObject>();
+        }
+
         private void Start()
         {
+            if (networkObject == null || networkObject.Identity == null)
+            {
+                Debug.LogWarning($"ModuleController {name} has no NetworkGameObject identity.");
+                return;
+            }
+
             string id = networkObject.Identity.Identifier;
             if(TryGetSlotIndexFromUid(id, out int slotIndex))
             {
-                ConnectTo = MainSpaceship.Instance.slot[slotIndex];
-                ConnectTo.moduleController = this;
+                ConnectTo = MainSpaceship.Instance.GetModuleSlot(slotIndex);
+                if (ConnectTo != null)
+                {
+                    ConnectTo.moduleController = this;
+                }
             }
             else
             {

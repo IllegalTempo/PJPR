@@ -14,11 +14,10 @@ public class MainSpaceship : MonoBehaviour
     public static MainSpaceship Instance { get; private set; }
     private Animator animator;
     private int speedlevel = 0;
-    private Dictionary<int, module> slotModulePair = new Dictionary<int, module>();
     [SerializeField]
     private List<ModuleSlot> msts;
 
-    public Dictionary<int, ModuleSlot> slot = new Dictionary<int, ModuleSlot>();
+    public Dictionary<string, ModuleSlot> slots = new Dictionary<string, ModuleSlot>();
 
     [SerializeField]
     private OnSpaceshipCanvasDisplay spaceshipDisplay;
@@ -40,23 +39,11 @@ public class MainSpaceship : MonoBehaviour
             return waterLevel;
         }
     }
-    private void Update()
-    {
-        foreach (module m in slotModulePair.Values)
-        {
-            m?.ModuleUpdate();
-
-        }
-    }
     private void onUpdateWaterLevel()
     {
         spaceshipDisplay.SetWaterAmount(waterLevel);
     }
     
-    public module GetConnectedModule(int slot)
-    {
-        return slotModulePair.TryGetValue(slot, out module connectedModule) ? connectedModule : null;
-    }
     public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
         NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
@@ -66,67 +53,48 @@ public class MainSpaceship : MonoBehaviour
 
 
     }
-    public module ConnectModule(module moduleObject, ModuleSlot moduleslot)
+    public List<SlotSnapshot> GetSlotsSnapshot()
     {
-        Debug.Log($"Connecting module {moduleObject.name} to slot {moduleslot.slotIndex}");
-        // Store the module's world rotation before reparenting
-
-        
-        slotModulePair[moduleslot.slotIndex] = moduleObject;
-        return moduleObject;
-    }
-    public List<InstalledModuleSaveData> GetInstalledModuleSaveData()
-    {
-        List<InstalledModuleSaveData> modules = new List<InstalledModuleSaveData>();
-        foreach (KeyValuePair<int, module> pair in slotModulePair)
+        List<SlotSnapshot> slotSnapshots = new List<SlotSnapshot>();
+        foreach (var slot in slots.Values)
         {
-            string PrefabID = ((NetworkPrefabIdentity)pair.Value.GetNetworkObject().Identity).PrefabID;
-            if (pair.Value == null || string.IsNullOrWhiteSpace(PrefabID))
-            {
-                continue;
-            }
-
-            modules.Add(new InstalledModuleSaveData(pair.Key,PrefabID,pair.Value.transform.localRotation));
+            string attachedItemId = slot.GetAttachedItem()?.GetNetworkObject()?.Identity?.Identifier ?? string.Empty;
+            slotSnapshots.Add(new SlotSnapshot
+            (
+                slot.Identity.Identifier,
+                attachedItemId,
+                slot.GetAttachedItem()?.transform.rotation ?? Quaternion.identity
+            ));
         }
-
-        return modules;
+        return slotSnapshots;
     }
 
-    public async UniTask LoadInstalledModules(List<InstalledModuleSaveData> modules)
+    public void ConnectModule(module module, ModuleSlot slot)
     {
-        ClearInstalledModules();
-        if (modules == null)
+        if (module == null || slot == null)
         {
             return;
         }
 
-        foreach (InstalledModuleSaveData moduleData in modules)
-        {
-            if (moduleData == null || string.IsNullOrWhiteSpace(moduleData.PrefabID))
-            {
-                continue;
-            }
-
-            module md = await SpawnModuleAsync(moduleData.PrefabID, Vector3.zero, Quaternion.identity);
-            slot[moduleData.Slot].SendAttach(md);
-
-
-            md.transform.localRotation = moduleData.Rotation;
-        }
+        slot.attachedModule = module;
+        slots[slot.Identity.Identifier] = slot;
     }
 
-    public void ClearInstalledModules()
+    public int GetModuleSlotIndex(ModuleSlot slot)
     {
-        foreach (module connectedModule in slotModulePair.Values)
+        return msts != null ? msts.IndexOf(slot) : -1;
+    }
+
+    public ModuleSlot GetModuleSlot(int index)
+    {
+        if (msts == null || index < 0 || index >= msts.Count)
         {
-            if (connectedModule != null)
-            {
-                Destroy(connectedModule.gameObject);
-            }
+            return null;
         }
 
-        slotModulePair.Clear();
+        return msts[index];
     }
+
     public void ResetScene()
     {
         //connectedSpaceship.Clear();
@@ -142,7 +110,7 @@ public class MainSpaceship : MonoBehaviour
         }
         foreach (ModuleSlot mst in msts)
         {
-            slot[mst.slotIndex] = mst;
+            slots[mst.Identity.Identifier] = mst;
         }
     }
 }

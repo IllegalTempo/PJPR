@@ -6,9 +6,6 @@ using System;
 
 public class ModuleSlot : Slot
 {
-    [SerializeField]
-    private ModuleSlotName slotName;
-    public int slotIndex => (int)slotName;
 
 
     public module attachedModule;
@@ -17,7 +14,6 @@ public class ModuleSlot : Slot
 
     public override void Attach(Item item,Quaternion rot)
     {
-        Debug.Log($"Attaching item {item.name} to slot {slotName}");
         base.Attach(item,rot);
         module moduleObject = (module)item;
         // Reparent to slot
@@ -35,12 +31,18 @@ public class ModuleSlot : Slot
     public override async void ServerActionOnAttach(Item item, Quaternion rot)
     {
         base.ServerActionOnAttach(item, rot);
-        Debug.Log($"ServerActionOnAttach called for item {item.name} on slot {slotName}");
         module moduleObject = (module)item;
 
         ItemDefinition it = moduleObject.AbstractItem;
         if (it is ModuleDefinition md)
         {
+            int slotIndex = MainSpaceship.Instance.GetModuleSlotIndex(this);
+            if (slotIndex < 0)
+            {
+                Debug.LogWarning($"Module slot {Identity.Identifier} is not registered on MainSpaceship. Cannot spawn control prefab.");
+                return;
+            }
+
             moduleController = (await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefabID, GetModuleControlSpawnPoint(), Quaternion.identity, 0, uid:$"ModuleSlot_{slotIndex}_{it.itemName}_{Guid.NewGuid()}")).GetComponent<ModuleController>();
         }
         else

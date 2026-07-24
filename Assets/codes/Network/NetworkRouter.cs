@@ -59,13 +59,16 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.DestroyMeteorite, NMS_Server_DestroyMeteorite.Read },
             { (int)packets.ServerPackets.MeteoriteWarning, NMS_Server_MeteoriteWarning.Read },
             { (int)packets.ServerPackets.UpdateWorld_Velocity, NMS_Server_UpdateWorld_Velocity.Read },
-            { (int)packets.ServerPackets.UpdateWorld_Rotation, NMS_Server_UpdateWorld_Rotation.Read },};
+            { (int)packets.ServerPackets.UpdateWorld_Rotation, NMS_Server_UpdateWorld_Rotation.Read },
+            { (int)packets.ServerPackets.WorldInitBegin, NMS_Server_WorldInitBegin.Read },
+            { (int)packets.ServerPackets.WorldInitComplete, NMS_Server_WorldInitComplete.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {
             { (int)packets.ClientPackets.SendReadyState, NMS_Client_ReadyState.Read },
             { (int)packets.ClientPackets.RequestVotingSession, NMS_Client_RequestVotingSession.Read },
             { (int)packets.ClientPackets.CastVote, NMS_Client_CastVote.Read },
+            { (int)packets.ClientPackets.RequestWorldState, NMS_Client_RequestWorldState.Read },
         };
         public uint NextOutgoingSequence()
         {
