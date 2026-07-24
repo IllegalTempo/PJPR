@@ -41,6 +41,10 @@ public class NetworkIdentity : MonoBehaviour
 
     protected virtual void Start()
     {
+        Register();
+    }
+    public void Register()
+    {
         initWithID(Identifier);
         foreach (NetworkChildIdentity childid in GetComponentsInChildren<NetworkChildIdentity>())
         {

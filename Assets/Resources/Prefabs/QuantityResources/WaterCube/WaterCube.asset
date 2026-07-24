@@ -23,4 +23,4 @@ MonoBehaviour:
   holdState:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 1}
-    scale: {x: 0.02, y: 0.02, z: 0.02}
+    scale: {x: 0.01, y: 0.01, z: 0.01}

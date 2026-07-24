@@ -61,10 +61,12 @@ public partial class NetworkSystem
         string uid = Guid.NewGuid().ToString();
         string it1id = it1.GetNetworkObject().Identity.Identifier;
         string it2id = it2.GetNetworkObject().Identity.Identifier;
-        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab("QuantityResources_CombinedProcessableItem", 0, uid, it1.transform.position, it1.transform.rotation, null);
+
+        string spawningprefabID = "CPI";
+        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(spawningprefabID, 0, uid, it1.transform.position, it1.transform.rotation, null);
         if (IsOnline)
         {
-            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject("QuantityResources_CombinedProcessableItem", uid, it1.transform.position, it1.transform.rotation, 0, true, it1id, it2id));
+            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(spawningprefabID, uid, it1.transform.position, it1.transform.rotation, 0, true, it1id, it2id));
 
         }
         CombinedProcessableItem cpi = nobj.GetComponent<CombinedProcessableItem>();

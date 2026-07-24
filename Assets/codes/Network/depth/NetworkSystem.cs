@@ -372,7 +372,22 @@ public partial class NetworkSystem : MonoBehaviour
         CurrentNetworkInstance.CleanupScene();
         CurrentNetworkInstance = new NetworkInstance();
         Slots = FindObjectsByType<Slot>(FindObjectsSortMode.None).ToList();
+        RegisterSceneNetworkIdentities();
         Debug.Log("Created new network instance");
+    }
+
+    private void RegisterSceneNetworkIdentities()
+    {
+        NetworkIdentity[] sceneIdentities = FindObjectsByType<NetworkIdentity>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (NetworkIdentity identity in sceneIdentities)
+        {
+            if (identity == null || identity is NetworkPrefabIdentity)
+            {
+                continue;
+            }
+
+            identity.Register();
+        }
     }
 
 

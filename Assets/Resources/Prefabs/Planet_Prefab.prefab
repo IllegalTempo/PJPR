@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3614892922127896178}
   - component: {fileID: 8956942797531521590}
   - component: {fileID: 6881066804489142798}
-  - component: {fileID: 735345644962625045}
+  - component: {fileID: 8924605429628631502}
   m_Layer: 0
   m_Name: Planet_Prefab
   m_TagString: Untagged
@@ -154,14 +154,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObject
-  Identifier: 
-  PrefabID: 
+  Sync_Transform: 1
+  TransformSendInterval: 0.1
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  Sync_Transform: 1
-  Owner: 0
-  InScene: 0
---- !u!114 &735345644962625045
+  AbstractObject: {fileID: 0}
+  Identity: {fileID: 8924605429628631502}
+--- !u!114 &8924605429628631502
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -170,19 +169,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 5034288764167464366}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b58af8b131e9e454a9e7063c37d77aee, type: 3}
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Planet
-  harmfulObjectType: 0
-  damageToShipPart: 10
-  movementSpeed: 2
-  movementDirection: {x: 0, y: 0, z: 0}
-  rotationSpeed: 5
-  rotationAxis: {x: 0, y: 1, z: 0}
-  collisionDamageToEachPart: 40
-  connectorDamageMultiplier: 0.5
-  impactEffect: {fileID: 0}
-  impactEffectDuration: 3
-  meteoriteRing: {fileID: 0}
-  spawnRingOnStart: 0
-  meteoriteRingPrefab: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: 
+  Sovereignty: 0

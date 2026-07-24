@@ -8434,10 +8434,8 @@ GameObject:
   m_Component:
   - component: {fileID: 979251808}
   - component: {fileID: 979251810}
-  - component: {fileID: 979251809}
   - component: {fileID: 979251813}
   - component: {fileID: 979251812}
-  - component: {fileID: 979251814}
   - component: {fileID: 979251815}
   m_Layer: 0
   m_Name: Environment Manager
@@ -8461,27 +8459,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &979251809
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 979251806}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a391e3f282c4d242b6f23af0e897339, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlanetSpawner
-  spaceshipTarget: {fileID: 979251808}
-  spawnRadius: 150
-  minSpawnDistance: 50
-  planetPrefabs:
-  - {fileID: 5034288764167464366, guid: b5cd604f549bb304fa88169139658726, type: 3}
-  planetPrefabIDs: []
-  planetCount: 3
-  scaleRange: {x: 8, y: 20}
-  spawnOnStart: 1
 --- !u!114 &979251810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8544,29 +8521,6 @@ MonoBehaviour:
   lineWidth: 6
   algorithmColor: {r: 0, g: 0.8, b: 1, a: 1}
   emissionIntensity: 5
---- !u!114 &979251814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 979251806}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe96bcaa39686bb4fae5b7debfa071ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BlackHoleSpawner
-  spaceshipTarget: {fileID: 0}
-  spawnRadius: 150
-  minSpawnDistance: 50
-  blackHolePrefab: {fileID: 4410065600927574753, guid: 78e58cdd2b7eb874691834aba6529ae4, type: 3}
-  blackHolePrefabID: 
-  firstSpawnDelay: 3
-  spawnInterval: 120
-  spawnIntervalVariation: 30
-  blackHoleLifetime: 45
-  despawnShrinkTime: 2
-  scaleRange: {x: 1.5, y: 3}
 --- !u!114 &979251815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12158,12 +12112,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 0
+  StartServerOnStart: 1
   _maxPlayer: 8
   IsOnline: 0
   IsServer: 1
   FindNetworkObjectKey: []
-  Slots: []
   SteamID: 0
   initState: 0
 --- !u!114 &1923367898

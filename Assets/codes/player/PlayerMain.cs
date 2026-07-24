@@ -39,6 +39,12 @@ public partial class PlayerMain : MonoBehaviour
     [SerializeField]
     private float tapDropPlaceDistance = 1.2f;
     [SerializeField]
+    private float dropCollisionRadius = 0.35f;
+    [SerializeField]
+    private float dropCollisionPadding = 0.05f;
+    [SerializeField]
+    private LayerMask dropCollisionMask = Physics.DefaultRaycastLayers;
+    [SerializeField]
     private float throwHoldThreshold = 0.25f;
     [SerializeField]
     private float throwFullChargeTime = 1.5f;
@@ -216,7 +222,7 @@ public partial class PlayerMain : MonoBehaviour
     }
     private Item SendDrop(Item i, float throwForce)
     {
-        Vector3 dropPosition = head.transform.position + head.transform.forward * tapDropPlaceDistance;
+        Vector3 dropPosition = GetSafeDropPosition();
         new NMS_Both_PickUpItem(
             i.GetNetworkObject().Identity.Identifier,
             0,
@@ -226,6 +232,48 @@ public partial class PlayerMain : MonoBehaviour
             throwForce).SendMessageAsServerOrClient();
         return i;
         
+    }
+    private Vector3 GetSafeDropPosition()
+    {
+        Vector3 origin = head.transform.position;
+        Vector3 direction = head.transform.forward;
+        float radius = Mathf.Max(0.01f, dropCollisionRadius);
+        float padding = Mathf.Max(0f, dropCollisionPadding);
+        float maxDistance = tapDropPlaceDistance + radius + padding;
+        float safeDistance = tapDropPlaceDistance;
+
+        RaycastHit[] hits = Physics.SphereCastAll(origin, radius, direction, maxDistance, dropCollisionMask, QueryTriggerInteraction.Ignore);
+        foreach (RaycastHit hit in hits)
+        {
+            if (!IsDropPlacementBlocker(hit.collider))
+            {
+                continue;
+            }
+
+            safeDistance = Mathf.Min(safeDistance, Mathf.Max(0f, hit.distance - padding));
+        }
+
+        return origin + direction * safeDistance;
+    }
+
+    private bool IsDropPlacementBlocker(Collider collider)
+    {
+        if (collider == null)
+        {
+            return false;
+        }
+
+        if (collider.transform.IsChildOf(transform))
+        {
+            return false;
+        }
+
+        if (holdingItem != null && collider.transform.IsChildOf(holdingItem.transform))
+        {
+            return false;
+        }
+
+        return true;
     }
     private void SendPickUP(Item i)
     {
