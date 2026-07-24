@@ -16,6 +16,24 @@ public class NetworkIdentity : MonoBehaviour
     {
         Sovereignty = newowner;
     }
+    public void Unregister()
+    {
+        if (NetworkSystem.Instance == null || string.IsNullOrWhiteSpace(Identifier))
+        {
+            return;
+        }
+
+        if (NetworkSystem.Instance.FindNetworkIdentity.TryGetValue(Identifier, out NetworkIdentity registeredIdentity) && registeredIdentity == this)
+        {
+            NetworkSystem.Instance.FindNetworkIdentity.Remove(Identifier);
+        }
+    }
+    public void Reinitialize(string id)
+    {
+        Unregister();
+        Identifier = id;
+        initWithID(id);
+    }
     private string GetChildIdentifier(GameObject child)
     {
         return Identifier + "_" + child.name;   
@@ -42,6 +60,12 @@ public class NetworkIdentity : MonoBehaviour
 
         if (NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id))
         {
+            if (NetworkSystem.Instance.FindNetworkIdentity[id] == this)
+            {
+                _startTcs.TrySetResult();
+                return;
+            }
+
             Debug.LogError($"NetworkObject Identifier collision: {id} is already registered by {NetworkSystem.Instance.FindNetworkIdentity[id].name}. {name} will not be registered.");
             return;
         }

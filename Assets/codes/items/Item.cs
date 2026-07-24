@@ -44,7 +44,6 @@ public struct ItemSnapshot
 public class Item : Selectable //Item is any that is pickable
 {
 
-    public ItemDefinition AbstractItem;
     //[SerializeField] protected bool isRepairTool;
     [SerializeField]
     protected NetworkGameObject netObj;
@@ -79,6 +78,8 @@ public class Item : Selectable //Item is any that is pickable
     /// </summary>
     [SerializeField]
     private ItemSnapshot snapshot_start;
+    private Quaternion originalWorldRotation;
+    public Quaternion OriginalRotation => originalWorldRotation;
 
     /// <summary>
     /// Snapshot of the item's transform state when bound to a slot.
@@ -101,6 +102,7 @@ public class Item : Selectable //Item is any that is pickable
         rb = GetComponent<Rigidbody>();
         colliders = GetComponentsInChildren<Collider>();
         snapshot_start = GetSnapshot();
+        originalWorldRotation = transform.rotation;
     }
     private ItemSnapshot GetSnapshot()
     {
@@ -157,6 +159,11 @@ public class Item : Selectable //Item is any that is pickable
     }
     public void Network_onPickUPorDrop(ulong newowner)
     {
+        Network_onPickUPorDrop(newowner, transform.position, OriginalRotation, Vector3.zero, 0f);
+    }
+
+    public void Network_onPickUPorDrop(ulong newowner, Vector3 dropPosition, Quaternion dropRotation, Vector3 throwDirection, float throwForce)
+    {
         bool isDropAction = newowner == 0;
         if(!isDropAction && netObj.Identity.Sovereignty != 0)
         {
@@ -167,7 +174,7 @@ public class Item : Selectable //Item is any that is pickable
         if (isDropAction)
         {
             PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Identity.Sovereignty].playerControl;
-            gotDropped(who,transform.position);
+            gotDropped(who, dropPosition, dropRotation, throwDirection, throwForce);
             
         }
         else
@@ -202,9 +209,9 @@ public class Item : Selectable //Item is any that is pickable
         transform.SetParent(who.HandTransform);
         rb.constraints = RigidbodyConstraints.FreezeAll;
 
-        if (AbstractItem != null)
+        if (netObj.AbstractObject != null)
         {
-            ApplySnapshot(AbstractItem.holdState);
+            ApplySnapshot(netObj.AbstractObject.holdState);
         }
         else
         {
@@ -218,7 +225,7 @@ public class Item : Selectable //Item is any that is pickable
         outline.OutlineColor = Color.aquamarine;
         SetColliders(false);
     }
-    private void gotDropped(PlayerMain who,Vector3 dropPosition)
+    private void gotDropped(PlayerMain who, Vector3 dropPosition, Quaternion dropRotation, Vector3 throwDirection, float throwForce)
     {
 
         Debug.Log($"{name} dropped by {who.name}");
@@ -237,10 +244,15 @@ public class Item : Selectable //Item is any that is pickable
         EnableRB();
         rb.constraints = RigidbodyConstraints.None;
 
-        rb.AddForce(who.head.transform.forward * 10f, ForceMode.VelocityChange);
         rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
 
         transform.position = dropPosition;
+        transform.rotation = dropRotation;
+        if (throwForce > 0f && throwDirection.sqrMagnitude > 0.001f)
+        {
+            rb.AddForce(throwDirection.normalized * throwForce, ForceMode.VelocityChange);
+        }
         SetColliders(true);
     }
     public void AttachToSlot(Slot slot,Quaternion rot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use

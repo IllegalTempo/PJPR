@@ -23,7 +23,7 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
-            GameCore.Instance.DestroyNetworkIdentity(id);
+            GameCore.Instance.DestroyNetworkObject(id);
         }
     }
 }

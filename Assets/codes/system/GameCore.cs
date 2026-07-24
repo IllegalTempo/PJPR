@@ -1,16 +1,11 @@
-using Assets.codes.Network.Messages;
+using Assets.codes.Network;
 using Assets.codes.Network.SyncedIdentity;
-using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
-using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 /// <summary>
 /// This is the brain of whole game, constants, global references and functions are stored here. It is also responsible for spawning networked objects and keeping track of local player info.
@@ -126,38 +121,38 @@ public partial class GameCore : MonoBehaviour
     //{
     //    return SpaceshipSpawns[index];
     //}
-    public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
-    {
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefab(prefabID, out prefab))
-        {
-            return true;
-        }
+    //public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
+    //{
+    //    if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefab(prefabID, out prefab))
+    //    {
+    //        return true;
+    //    }
 
-        prefab = null;
-        return false;
-    }
+    //    prefab = null;
+    //    return false;
+    //}
 
-    public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
-    {
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefabID(prefab, out prefabID))
-        {
-            return true;
-        }
+    //public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
+    //{
+    //    if (NetworkSystem.Instance != null && NetworkSystem.Instance.TryGetNetworkPrefabID(prefab, out prefabID))
+    //    {
+    //        return true;
+    //    }
 
-        prefabID = null;
-        return false;
-    }
+    //    prefabID = null;
+    //    return false;
+    //}
 
-    public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
-    {
-        if (TryGetNetworkPrefab(PrefabID, out GameObject prefab))
-        {
-            await UniTask.Yield();
-            return prefab;
-        } 
+    //public async UniTask<GameObject> GetPrefabObject(string PrefabID) //Get the gameobject reference using the PrefabID
+    //{
+    //    if (TryGetNetworkPrefab(PrefabID, out GameObject prefab))
+    //    {
+    //        await UniTask.Yield();
+    //        return prefab;
+    //    } 
 
-        throw new PrefabNotFound(PrefabID);
-    }
+    //    throw new PrefabNotFound(PrefabID);
+    //}
     public async UniTask<GameObject> GetDecoration(string DecorationID)
     {
         string decPath = GetDecorationWithID.ContainsKey(DecorationID) ? _decorationPath + GetDecorationWithID[DecorationID] : throw new PrefabNotFound(DecorationID);
@@ -185,13 +180,24 @@ public partial class GameCore : MonoBehaviour
     public async UniTask<NetworkGameObject> spawnNetworkPrefab(string prefabID,ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
-        GameObject prefab = await GetPrefabObject(prefabID);
-
-        GameObject obj = GameObject.Instantiate(prefab, pos, rot, parent);
-        NetworkGameObject nobj = obj.gameObject.GetComponent<NetworkGameObject>();
+        PrefabDefinition prefabDef = NetworkSystem.Instance.GetPrefabDefinition(prefabID);
+        GameObject prefab = prefabDef.itemPrefab;
+        bool isPoolPrefab = prefabDef.IsPoolPrefab;
+        GameObject obj = null;
+        NetworkGameObject nobj = null;
+        if (isPoolPrefab)
+        {
+            nobj = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(prefabDef).InstantiatePoolNetworkPrefab(uid, pos, rot, parent);
+        }
+        if (nobj == null)
+        {
+            obj = GameObject.Instantiate(prefab, pos, rot, parent);
+            nobj = obj.gameObject.GetComponent<NetworkGameObject>();
+        }
         if (nobj == null)
         {
             Debug.LogError($"The prefab {prefabID} does not have a NetworkPrefab component attached.");
+            return null;
         }
 
         nobj.OnInstantiate(uid, prefabID,owner);
@@ -200,17 +206,22 @@ public partial class GameCore : MonoBehaviour
         return nobj;
     }
     
-    public void DestroyNetworkIdentity(string id) //Dont RUN THIS
+    public void DestroyNetworkObject(string id) //Dont RUN THIS
     {
-        NetworkIdentity obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id] : null;
+        NetworkGameObject obj = NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(id) ? NetworkSystem.Instance.FindNetworkIdentity[id].GetComponent<NetworkGameObject>() : null;
         if (obj == null)
         {
             Debug.LogError("Tried to destroy a null NetworkObject.");
             return;
         }
-        if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(obj.Identifier))
+        if(obj.AbstractObject.IsPoolPrefab)
         {
-            NetworkSystem.Instance.FindNetworkIdentity.Remove(obj.Identifier);
+            NetworkSystem.Instance.CurrentNetworkInstance.GetPool(obj.AbstractObject).Return(obj);
+            return;
+        }
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.FindNetworkIdentity.ContainsKey(obj.Identity.Identifier))
+        {
+            NetworkSystem.Instance.FindNetworkIdentity.Remove(obj.Identity.Identifier);
         }
         Destroy(obj.gameObject);
     }

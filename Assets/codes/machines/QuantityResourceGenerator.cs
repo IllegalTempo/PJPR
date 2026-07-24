@@ -1,14 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
-using Assets.codes.Network.Messages;
-using JetBrains.Annotations;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets.codes.machines
 {
 	public class QuantityResourceGenerator: Machine
 	{
-		[SerializeField] private ItemDefinition resource;
+		[SerializeField] private PrefabDefinition resource;
 		Vector3 spawnpos;
         protected override void Start()
         {

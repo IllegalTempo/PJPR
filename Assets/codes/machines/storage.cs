@@ -5,20 +5,20 @@ public class storage //This is only a data type class, used it in some thing lik
 {
     string name;
     int capacity;
-    List<ItemDefinition> content;
+    List<PrefabDefinition> content;
 
     public storage(string name,int size = 1)
     {
         capacity = size;
         this.name = name;
-        content = new List<ItemDefinition>();
+        content = new List<PrefabDefinition>();
     }
     public bool IsFull()
     {
         return content.Count >= capacity;
 
     }
-    public ItemDefinition[] GetItems()
+    public PrefabDefinition[] GetItems()
     {
         return content.ToArray();
 
@@ -33,7 +33,7 @@ public class storage //This is only a data type class, used it in some thing lik
         {
             if (content[i] == null)
             {
-                content[i] = GameCore.Instance.RemoveItemFromWorld(item);
+                content[i] = GameCore.Instance.RemoveItemFromWorld(item.GetNetworkObject());
                 return;
             }
         }

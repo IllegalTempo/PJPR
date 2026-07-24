@@ -1,10 +1,12 @@
 using UnityEngine;
+using Assets.codes.Network.SyncedIdentity;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Game/Item")]
-public class ItemDefinition : ScriptableObject
+public class PrefabDefinition : ScriptableObject
 {
     public string itemName;
     public string itemDescription;
@@ -12,6 +14,11 @@ public class ItemDefinition : ScriptableObject
     public GameObject itemPrefab;
     public string prefabID;
     public int maxStackSize = 64;
+
+
+    [Header("Pool Setting")]
+    public bool IsPoolPrefab = false;
+    public int poolSize = 10;
 
     // Transform state to apply when item is picked up and held by player
     // Uses LOCAL coordinate space (relative to HandTransform parent)
@@ -38,11 +45,11 @@ public class ItemDefinition : ScriptableObject
             EditorUtility.SetDirty(itemPrefab);
         }
 
-        Item item = itemPrefab.GetComponent<Item>();
-        if (item != null && item.AbstractItem != this)
+        NetworkGameObject nobj = itemPrefab.GetComponent<NetworkGameObject>();
+        if (nobj != null && nobj.AbstractObject != this)
         {
-            item.AbstractItem = this;
-            EditorUtility.SetDirty(item);
+            nobj.AbstractObject = this;
+            EditorUtility.SetDirty(nobj);
             EditorUtility.SetDirty(itemPrefab);
         }
     }

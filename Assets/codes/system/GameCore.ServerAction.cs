@@ -2,6 +2,7 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using Unity.VisualScripting;
+using Assets.codes.Network.SyncedIdentity;
 
 public partial class GameCore
 {
@@ -11,7 +12,7 @@ public partial class GameCore
     //    //int index = Random.Range(0, getMissionWithLevel(CurrentMissionLevel).Length);
     //    //StartMission(CurrentMissionLevel, index);
     //}
-    public Item RealizeItemDefinition(ItemDefinition itemDef, Vector3 pos,Quaternion rot)
+    public Item RealizeItemDefinition(PrefabDefinition itemDef, Vector3 pos,Quaternion rot)
     {
         if (itemDef == null)
         {
@@ -22,10 +23,10 @@ public partial class GameCore
         Item item = Instantiate(itemDef.itemPrefab,pos,rot).GetComponent<Item>();
         return item;
     }
-    public ItemDefinition RemoveItemFromWorld(Item item)
+    public PrefabDefinition RemoveItemFromWorld(NetworkGameObject obj)
     {
-        ItemDefinition def = item.AbstractItem;
-        Destroy(item.gameObject);
+        PrefabDefinition def = obj.AbstractObject;
+        Destroy(obj.gameObject);
         return def;
     }
     public async void onSelectPlanet(string selectedPlanetId)

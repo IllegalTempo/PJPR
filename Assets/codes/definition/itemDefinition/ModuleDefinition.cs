@@ -1,8 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Module", menuName = "Game/Module")]
-public class ModuleDefinition : ItemDefinition
+public class ModuleDefinition : PrefabDefinition
 {
-    public string controlPrefabID;
+    public PrefabDefinition controlPrefab;
 
 }

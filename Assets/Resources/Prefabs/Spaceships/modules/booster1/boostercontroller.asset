@@ -9,16 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c6c48255ac433c4b9028e34891ab248, type: 3}
+  m_Script: {fileID: 11500000, guid: 7487a15f02d21b14a8c192f44a96c817, type: 3}
   m_Name: boostercontroller
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
-  itemName: boostercontroller
-  itemDescription: Boost.
+  itemName: Booster Controller
+  itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 7370891376704099619, guid: a1b0b1aed084bdc47ae8f3d7ada49f8e, type: 3}
   prefabID: controllers_boostercontroller
   maxStackSize: 64
+  IsPoolPrefab: 0
+  poolSize: 10
   holdState:
-    position: {x: 0, y: 0.01, z: 0.01}
-    rotation: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-    scale: {x: 0.01, y: 0.01, z: 0.01}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    scale: {x: 0.02, y: 0.02, z: 0.02}

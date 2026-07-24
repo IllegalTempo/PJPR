@@ -1,6 +1,5 @@
-using Assets.codes.Network.Messages;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.Triggers;
+using Assets.codes.Network;
 using Steamworks;
 using Steamworks.Data;
 using System;
@@ -8,12 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
-using UnityEngine.Identifiers;
-using UnityEngine.Rendering.Universal;
 using Debug = UnityEngine.Debug;
 
 public partial class NetworkSystem : MonoBehaviour
@@ -28,13 +23,18 @@ public partial class NetworkSystem : MonoBehaviour
     public bool IsOnline = false;
     public bool IsServer = true;
     public bool IsWorldManager => !IsOnline || IsServer; //If the machine manage own world, either offline or isServer
-    public Dictionary<string, NetworkIdentity> FindNetworkIdentity = new Dictionary<string, NetworkIdentity>();
+    public NetworkInstance CurrentNetworkInstance { get; private set; } = new NetworkInstance();
+    public Dictionary<string, NetworkIdentity> FindNetworkIdentity => CurrentNetworkInstance.FindNetworkIdentity;
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
-    private readonly Dictionary<string, GameObject> _networkPrefabsById = new Dictionary<string, GameObject>();
-    private readonly Dictionary<GameObject, string> _networkPrefabIdsByPrefab = new Dictionary<GameObject, string>();
+    private readonly Dictionary<string, PrefabDefinition> _networkPrefabsById = new Dictionary<string, PrefabDefinition>();
+    //private readonly Dictionary<GameObject, string> _networkPrefabIdsByPrefab = new Dictionary<GameObject, string>();
     //All player list
-    public Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
-    public List<Slot> Slots = new List< Slot>();
+    public Dictionary<ulong, NetworkPlayerObject> PlayerList => CurrentNetworkInstance.PlayerList;
+    public List<Slot> Slots
+    {
+        get => CurrentNetworkInstance.Slots;
+        set => CurrentNetworkInstance.Slots = value;
+    }
     public ulong SteamID;
     public int initState = 0;
     public Lobby CurrentLobby;// Start is called before the first frame update
@@ -61,6 +61,18 @@ public partial class NetworkSystem : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
     }
+    public PrefabDefinition GetPrefabDefinition(string prefabID)
+    {
+        if (_networkPrefabsById.TryGetValue(prefabID, out PrefabDefinition prefab))
+        {
+            return prefab;
+        }
+        else
+        {
+            Debug.LogError($"PrefabDefinition with ID '{prefabID}' not found.");
+            return null;
+        }
+    }
     public List<PlayerData> GetPlayerData()
     {
         return PlayerList.Values.Select(p => new PlayerData(
@@ -83,10 +95,10 @@ public partial class NetworkSystem : MonoBehaviour
     public void RebuildNetworkPrefabLookup()
     {
         _networkPrefabsById.Clear();
-        _networkPrefabIdsByPrefab.Clear();
+        //_networkPrefabIdsByPrefab.Clear();
 
-        ItemDefinition[] itemDefinitions = Resources.LoadAll<ItemDefinition>("Prefabs");
-        foreach (ItemDefinition itemDefinition in itemDefinitions)
+        PrefabDefinition[] itemDefinitions = Resources.LoadAll<PrefabDefinition>("Prefabs");
+        foreach (PrefabDefinition itemDefinition in itemDefinitions)
         {
             if (itemDefinition == null || itemDefinition.itemPrefab == null || string.IsNullOrWhiteSpace(itemDefinition.prefabID))
             {
@@ -99,38 +111,38 @@ public partial class NetworkSystem : MonoBehaviour
                 continue;
             }
 
-            _networkPrefabsById.Add(itemDefinition.prefabID, itemDefinition.itemPrefab);
-            _networkPrefabIdsByPrefab[itemDefinition.itemPrefab] = itemDefinition.prefabID;
+            _networkPrefabsById.Add(itemDefinition.prefabID, itemDefinition);
+            //_networkPrefabIdsByPrefab[itemDefinition.itemPrefab] = itemDefinition.prefabID;
         }
 
         Debug.Log($"Loaded {_networkPrefabsById.Count} network prefab(s) from item definitions.");
     }
 
-    public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
-    {
-        if (_networkPrefabsById.Count == 0)
-        {
-            RebuildNetworkPrefabLookup();
-        }
+    //public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)
+    //{
+    //    if (_networkPrefabsById.Count == 0)
+    //    {
+    //        RebuildNetworkPrefabLookup();
+    //    }
 
-        return _networkPrefabsById.TryGetValue(prefabID, out prefab);
-    }
+    //    return _networkPrefabsById.TryGetValue(prefabID, out prefab);
+    //}
 
-    public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
-    {
-        if (prefab == null)
-        {
-            prefabID = null;
-            return false;
-        }
+    //public bool TryGetNetworkPrefabID(GameObject prefab, out string prefabID)
+    //{
+    //    if (prefab == null)
+    //    {
+    //        prefabID = null;
+    //        return false;
+    //    }
 
-        if (_networkPrefabIdsByPrefab.Count == 0)
-        {
-            RebuildNetworkPrefabLookup();
-        }
+    //    if (_networkPrefabIdsByPrefab.Count == 0)
+    //    {
+    //        RebuildNetworkPrefabLookup();
+    //    }
 
-        return _networkPrefabIdsByPrefab.TryGetValue(prefab, out prefabID);
-    }
+    //    return _networkPrefabIdsByPrefab.TryGetValue(prefab, out prefabID);
+    //}
     public void BecomeOnline(bool isServer)
     {
         IsOnline = true;
@@ -349,16 +361,18 @@ public partial class NetworkSystem : MonoBehaviour
         SteamFriends.OnGameLobbyJoinRequested -= OnFriendJoinLobby;
         Debug.Log("Network Callback unregistered.");
     }
-    private void ResetScene()
+    public void CreateNewNetworkInstance()
     {
-
         _startedAsHost = false;
-        MainSpaceship.Instance.ResetScene();
+        if (MainSpaceship.Instance != null)
+        {
+            MainSpaceship.Instance.ResetScene();
+        }
         initState = (int)ReadyState.NotReady;
-        RemoveAllPlayerObject();
-        FindNetworkIdentity.Where(kvp => kvp.Value && kvp.Value is NetworkPrefabIdentity).ToList().ForEach(kvp => { Destroy(kvp.Value.gameObject); FindNetworkIdentity.Remove(kvp.Key); });
+        CurrentNetworkInstance.CleanupScene();
+        CurrentNetworkInstance = new NetworkInstance();
         Slots = FindObjectsByType<Slot>(FindObjectsSortMode.None).ToList();
-        Debug.Log("Cleaned up scene");
+        Debug.Log("Created new network instance");
     }
 
 
@@ -398,7 +412,7 @@ public partial class NetworkSystem : MonoBehaviour
     private async void OnLobbyEntered(Lobby l)
     {
         if (l.Owner.Id == SteamID) { return; }
-        ResetScene();
+        CreateNewNetworkInstance();
 
         if (_client == null)
         {

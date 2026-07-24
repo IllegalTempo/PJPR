@@ -11,7 +11,7 @@ public class module : SpaceshipPart
     public void Init(ModuleSlot connectedTo)
     {
         OnInstall(connectedTo);
-        if(AbstractItem is not ModuleDefinition)
+        if(netObj.AbstractObject is not ModuleDefinition)
         {
             Debug.LogError("<!> AbstractItem is not a ModuleDefinition");
         }

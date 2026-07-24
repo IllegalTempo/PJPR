@@ -9,16 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c6c48255ac433c4b9028e34891ab248, type: 3}
+  m_Script: {fileID: 11500000, guid: 7487a15f02d21b14a8c192f44a96c817, type: 3}
   m_Name: WaterCube
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
-  itemName: WaterCube
-  itemDescription: Keep things cool!
+  itemName: Water Cube
+  itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 2643396718964329069, guid: 35bb0f184cdc0b2498e9314725fd5ce1, type: 3}
-  prefabID: QuantityResources_WaterCube
+  prefabID: qr_watercube
   maxStackSize: 64
+  IsPoolPrefab: 1
+  poolSize: 10
   holdState:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 1}
-    scale: {x: 0.01, y: 0.01, z: 0.01}
+    scale: {x: 0.02, y: 0.02, z: 0.02}

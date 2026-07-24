@@ -53,7 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
   Identifier: 
   Sovereignty: 0
-  PrefabID: QuantityResources_WaterCube
+  PrefabID: qr_watercube
 --- !u!114 &8560693315241799241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,6 +70,7 @@ MonoBehaviour:
   TransformSendInterval: 0.05
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  AbstractObject: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
   Identity: {fileID: 3327676935552135424}
 --- !u!54 &7654441627472049708
 Rigidbody:
@@ -206,7 +207,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfb9e0c3552b4fc41a72ab2c2374ed65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  AbstractItem: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
   netObj: {fileID: 8560693315241799241}
   lockRelativeRotation: 0
   IsPickable: 1

@@ -22,6 +22,7 @@ namespace Assets.codes.Network.SyncedIdentity
         private Quaternion prevRot;
         private float nextTransformSendTime;
         private bool initializedTransformSendDelay;
+        public PrefabDefinition AbstractObject;
 
 
 
@@ -38,9 +39,15 @@ namespace Assets.codes.Network.SyncedIdentity
         }
         public void OnInstantiate(string uid, string PrefabID, ulong sovereignty)
         {
+            if (Identity == null)
+            {
+                FindIdentity();
+            }
+
             if(Identity is NetworkPrefabIdentity i)
             {
                 i.OnInstantiate(uid, PrefabID, sovereignty);
+                Identity.Reinitialize(uid);
 
             } else
             {

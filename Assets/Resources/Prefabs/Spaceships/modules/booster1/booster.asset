@@ -18,8 +18,10 @@ MonoBehaviour:
   itemPrefab: {fileID: 8382276501861436971, guid: 079c460b211d1ce41a06a13d9577e08f, type: 3}
   prefabID: module_booster1
   maxStackSize: 64
+  IsPoolPrefab: 0
+  poolSize: 10
   holdState:
     position: {x: 0, y: 0, z: 0.02}
     rotation: {x: 0.49999997, y: 0.49999997, z: 0.49999997, w: 0.49999997}
     scale: {x: 0.02, y: 0.02, z: 0.02}
-  controlPrefabID: controllers_boostercontroller
+  controlPrefab: {fileID: 11400000, guid: 151d386c6b153e84e8b7b98536dd4d0a, type: 2}

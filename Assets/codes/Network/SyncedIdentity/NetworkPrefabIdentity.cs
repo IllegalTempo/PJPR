@@ -13,6 +13,7 @@ public class NetworkPrefabIdentity : NetworkIdentity
     [HideInInspector]
     public string PrefabID;
 
+
     public virtual void OnInstantiate(string uid, string PrefabID, ulong sovereignty) //when a new object is created, server will send a packet to all client, this method is run by client
     {
         Identifier = uid;

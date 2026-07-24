@@ -2,6 +2,7 @@
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
 using Steamworks;
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -35,6 +36,19 @@ public partial class PlayerMain : MonoBehaviour
 
     public Transform HandTransform;
 
+    [SerializeField]
+    private float tapDropPlaceDistance = 1.2f;
+    [SerializeField]
+    private float throwHoldThreshold = 0.25f;
+    [SerializeField]
+    private float throwFullChargeTime = 1.5f;
+    [SerializeField]
+    private float maxThrowForce = 10f;
+    [SerializeField]
+    private float throwChargeFieldOfView = 45f;
+    [SerializeField]
+    private float throwCameraZoomTransitionSpeed = 60f;
+
     public PlayerInputAction control;
     private IUsable activeUsable;
 
@@ -43,6 +57,12 @@ public partial class PlayerMain : MonoBehaviour
 
 
     private IUsable pressedUsable = null;
+    private bool isChargingDrop;
+    private float dropChargeStartedAt;
+    private Item chargingDropItem;
+    private Camera localCamera;
+    private float normalCameraFieldOfView;
+    private float targetCameraFieldOfView;
     void Start()
     {
 
@@ -80,6 +100,12 @@ public partial class PlayerMain : MonoBehaviour
         if (cam != null)
         {
             cam.SetActive(true);
+            localCamera = cam.GetComponent<Camera>() ?? cam.GetComponentInChildren<Camera>();
+            if (localCamera != null)
+            {
+                normalCameraFieldOfView = localCamera.fieldOfView;
+                targetCameraFieldOfView = normalCameraFieldOfView;
+            }
         }
 
         control = GameCore.Instance.PlayerControl;
@@ -88,7 +114,8 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
         control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
         control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
-        control.Player.pickup.performed += ctx => OnClickF();
+        control.Player.pickup.started += OnPickupStarted;
+        control.Player.pickup.canceled += OnPickupCanceled;
         control.Player.Interact.performed += ctx => OnInteract();
         control.Player.Interact.canceled += ctx => OnInteract_release();
 
@@ -102,7 +129,7 @@ public partial class PlayerMain : MonoBehaviour
 
     private void OnDisable()
     {
-
+        ResetThrowCameraZoom();
 
         if (control != null)
         {
@@ -110,7 +137,8 @@ public partial class PlayerMain : MonoBehaviour
             control.Player.Move.canceled -= ctx => moveinput = Vector2.zero;
             control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
             control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
-            control.Player.pickup.performed -= ctx => OnClickF();
+            control.Player.pickup.started -= OnPickupStarted;
+            control.Player.pickup.canceled -= OnPickupCanceled;
             control.Player.Interact.performed -= ctx => OnInteract();
             control.Player.voice.performed -= ctx => OnClickVC();
             control.Player.rotate.performed -= ctx => OnClickSlotRotate();
@@ -186,9 +214,16 @@ public partial class PlayerMain : MonoBehaviour
         item.OnClicked();
 
     }
-    private Item SendDrop(Item i)
+    private Item SendDrop(Item i, float throwForce)
     {
-        new NMS_Both_PickUpItem(i.GetNetworkObject().Identity.Identifier, 0).SendMessageAsServerOrClient();
+        Vector3 dropPosition = head.transform.position + head.transform.forward * tapDropPlaceDistance;
+        new NMS_Both_PickUpItem(
+            i.GetNetworkObject().Identity.Identifier,
+            0,
+            dropPosition,
+            i.OriginalRotation,
+            head.transform.forward,
+            throwForce).SendMessageAsServerOrClient();
         return i;
         
     }
@@ -215,26 +250,128 @@ public partial class PlayerMain : MonoBehaviour
             Debug.Log($"Item rotated 90 degrees around {boundSlot.name}'s Y-axis");
         }
     }
-    private void OnClickF()
+    private void OnPickupStarted(InputAction.CallbackContext ctx)
+    {
+        if (holdingItem == null)
+        {
+            OnClickF(0f);
+            return;
+        }
+
+        isChargingDrop = true;
+        dropChargeStartedAt = Time.time;
+        chargingDropItem = holdingItem;
+        UIManager.Instance.ShowThrowForce(0f);
+        UpdateThrowCameraZoom(0f);
+    }
+
+    private void OnPickupCanceled(InputAction.CallbackContext ctx)
+    {
+        if (!isChargingDrop || holdingItem == null || holdingItem != chargingDropItem)
+        {
+            isChargingDrop = false;
+            chargingDropItem = null;
+            UIManager.Instance.HideThrowForce();
+            ResetThrowCameraZoom();
+            return;
+        }
+
+        float charge = CalculateThrowCharge01();
+        float throwForce = charge * maxThrowForce;
+
+        isChargingDrop = false;
+        chargingDropItem = null;
+        UIManager.Instance.HideThrowForce();
+        ResetThrowCameraZoom();
+        OnClickF(throwForce);
+    }
+
+    private float CalculateThrowCharge01()
+    {
+        float heldTime = Time.time - dropChargeStartedAt;
+        if (heldTime < throwHoldThreshold)
+        {
+            return 0f;
+        }
+
+        return Mathf.InverseLerp(throwHoldThreshold, throwFullChargeTime, heldTime);
+    }
+
+    private float CalculateThrowCameraZoom01()
+    {
+        float heldTime = Time.time - dropChargeStartedAt;
+        return Mathf.InverseLerp(0f, throwFullChargeTime, heldTime);
+    }
+
+    private void UpdateThrowForceUI()
+    {
+        if (!isChargingDrop)
+        {
+            return;
+        }
+
+        float charge = CalculateThrowCharge01();
+        UIManager.Instance.ShowThrowForce(charge);
+        UpdateThrowCameraZoom(CalculateThrowCameraZoom01());
+    }
+
+    private void UpdateThrowCameraZoom(float charge)
+    {
+        if (localCamera == null)
+        {
+            return;
+        }
+
+        float zoomedFieldOfView = Mathf.Min(normalCameraFieldOfView, throwChargeFieldOfView);
+        targetCameraFieldOfView = Mathf.Lerp(normalCameraFieldOfView, zoomedFieldOfView, Mathf.Clamp01(charge));
+    }
+
+    private void ResetThrowCameraZoom()
+    {
+        if (localCamera == null)
+        {
+            return;
+        }
+
+        targetCameraFieldOfView = normalCameraFieldOfView;
+    }
+
+    private void UpdateThrowCameraTransition()
+    {
+        if (localCamera == null)
+        {
+            return;
+        }
+
+        localCamera.fieldOfView = Mathf.MoveTowards(
+            localCamera.fieldOfView,
+            targetCameraFieldOfView,
+            throwCameraZoomTransitionSpeed * Time.deltaTime);
+    }
+
+    private void OnClickF(float throwForce)
     {
         if (holdingItem != null) //if holding something
         {
-            Item previtem = SendDrop(holdingItem);
-            switch (seenObject)
+            Item previtem = SendDrop(holdingItem, throwForce);
+            if (throwForce <= 0f)
             {
-                case Item i:
-                    if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
-                    {
-                        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
-                        combineMessage.SendMessageAsServerOrClient();
-                    }
-                    break;
-                case Slot s:
-                    if (previtem.FitIn(s))
-                    {
-                        s.SendAttach(previtem);
-                    }
-                    break;
+                switch (seenObject)
+                {
+                    case Item i:
+                        if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
+                        {
+                            NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
+                            combineMessage.SendMessageAsServerOrClient();
+                        }
+                        break;
+                    case Slot s:
+                        if (previtem.FitIn(s))
+                        {
+                            s.SendAttach(previtem);
+                        }
+                        break;
+                }
             }
         }
         else
@@ -321,7 +458,10 @@ public partial class PlayerMain : MonoBehaviour
     private void HandleNewObjectUI(Selectable @new)
     {
         string displayname = @new.gameObject.name;
-
+        if(@new.GetComponent<NetworkGameObject>())
+        {
+            displayname = @new.GetComponent<NetworkGameObject>().AbstractObject.itemName;
+        }
         if (@new is IUsable)
         {
             UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(), 1);
@@ -330,7 +470,6 @@ public partial class PlayerMain : MonoBehaviour
         if (@new is Item item)
         {
             UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
-            displayname = item.AbstractItem.itemName;
         }
         if (holdingItem != null)
         {
@@ -393,6 +532,8 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (networkinfo.IsLocal)
         {
+            UpdateThrowForceUI();
+            UpdateThrowCameraTransition();
             PlayerControl();
         }
 

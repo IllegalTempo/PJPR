@@ -6,7 +6,7 @@ public class NetworkPrefabRegistryWindow : EditorWindow
 {
     private const string PrefabRoot = "Assets/Resources/Prefabs";
 
-    private readonly List<ItemDefinition> _itemDefinitions = new List<ItemDefinition>();
+    private readonly List<PrefabDefinition> _itemDefinitions = new List<PrefabDefinition>();
     private Vector2 _scroll;
 
     [MenuItem("Tools/Network Objects/Prefab Lookup")]
@@ -54,7 +54,7 @@ public class NetworkPrefabRegistryWindow : EditorWindow
         foreach (string guid in guids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            ItemDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<ItemDefinition>(assetPath);
+            PrefabDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<PrefabDefinition>(assetPath);
             if (itemDefinition != null)
             {
                 _itemDefinitions.Add(itemDefinition);
@@ -72,7 +72,7 @@ public class NetworkPrefabRegistryWindow : EditorWindow
         int duplicateIdCount = 0;
         HashSet<string> seenIds = new HashSet<string>();
 
-        foreach (ItemDefinition itemDefinition in _itemDefinitions)
+        foreach (PrefabDefinition itemDefinition in _itemDefinitions)
         {
             if (string.IsNullOrWhiteSpace(itemDefinition.prefabID))
             {
@@ -108,12 +108,12 @@ public class NetworkPrefabRegistryWindow : EditorWindow
         }
 
         _scroll = EditorGUILayout.BeginScrollView(_scroll);
-        foreach (ItemDefinition itemDefinition in _itemDefinitions)
+        foreach (PrefabDefinition itemDefinition in _itemDefinitions)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.SelectableLabel(itemDefinition.prefabID, GUILayout.Width(220), GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                EditorGUILayout.ObjectField(itemDefinition, typeof(ItemDefinition), false, GUILayout.Width(220));
+                EditorGUILayout.ObjectField(itemDefinition, typeof(PrefabDefinition), false, GUILayout.Width(220));
                 EditorGUILayout.ObjectField(itemDefinition.itemPrefab, typeof(GameObject), false);
             }
         }

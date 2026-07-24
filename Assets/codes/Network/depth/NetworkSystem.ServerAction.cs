@@ -1,25 +1,17 @@
 ﻿using Assets.codes.items;
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
-using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 using System;
-using System.Collections;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 public partial class NetworkSystem
 {
     public GameServer Server => _server;
     private GameServer _server;
-    public async UniTask<NetworkGameObject> CreateWorldReferenceNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner)
-    {
-        NetworkGameObject nobj = await CreateNetworkObject(prefabID, pos, rot, owner, WorldReference.Instance.transform);
-        return nobj;
-    }
+
     /// <summary>
     /// Creates a networked object on the server and distributes it to all clients. This method should only be called on the server.
     /// </summary>
@@ -56,10 +48,10 @@ public partial class NetworkSystem
         string identifier = item.GetNetworkObject().Identity.Identifier;
         var msg = new NMS_Server_NO_Destroy(identifier);
         NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Critical);
-        GameCore.Instance.DestroyNetworkIdentity(identifier);
+        GameCore.Instance.DestroyNetworkObject(identifier);
 
     }
-    public async UniTask<NetworkGameObject> CreateNetworkObject(ItemDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false)
+    public async UniTask<NetworkGameObject> CreateNetworkObject(PrefabDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false)
     {
         return await CreateNetworkObject(prefab.prefabID, pos, rot, owner, parent, isCombining);
     }
@@ -155,7 +147,7 @@ public partial class NetworkSystem
             Debug.LogError("SteamClient is not initialized. Cannot create lobby.");
             return false;
         }
-        ResetScene();
+        CreateNewNetworkInstance();
         _client = null;
         try
         {

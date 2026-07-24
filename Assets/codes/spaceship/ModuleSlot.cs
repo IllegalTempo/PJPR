@@ -33,7 +33,7 @@ public class ModuleSlot : Slot
         base.ServerActionOnAttach(item, rot);
         module moduleObject = (module)item;
 
-        ItemDefinition it = moduleObject.AbstractItem;
+        PrefabDefinition it = moduleObject.GetComponent<PrefabDefinition>();
         if (it is ModuleDefinition md)
         {
             int slotIndex = MainSpaceship.Instance.GetModuleSlotIndex(this);
@@ -43,7 +43,7 @@ public class ModuleSlot : Slot
                 return;
             }
 
-            moduleController = (await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefabID, GetModuleControlSpawnPoint(), Quaternion.identity, 0, uid:$"ModuleSlot_{slotIndex}_{it.itemName}_{Guid.NewGuid()}")).GetComponent<ModuleController>();
+            moduleController = (await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefab.prefabID, GetModuleControlSpawnPoint(), Quaternion.identity, 0, uid:$"ModuleSlot_{slotIndex}_{it.itemName}_{Guid.NewGuid()}")).GetComponent<ModuleController>();
         }
         else
         {

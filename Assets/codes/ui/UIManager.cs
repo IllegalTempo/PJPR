@@ -24,6 +24,8 @@ public class UIManager : MonoBehaviour
     private TMP_Text[] interactionKey;
     [SerializeField]
     private TMP_Text GameObjectNameDisplay;
+    [SerializeField]
+    private Slider ThrowForce;
 
 
     [Header("SocialTab")]
@@ -66,6 +68,7 @@ public class UIManager : MonoBehaviour
     {
         LoadingComplete();
         HideAllInteraction();
+        HideThrowForce();
         SD_Group.SetActive(false);
         DID_Group.SetActive(false);
         GameObjectNameDisplay.gameObject.SetActive(false);
@@ -79,7 +82,7 @@ public class UIManager : MonoBehaviour
     {
         GameObjectNameDisplay.gameObject.SetActive(false);
     }
-    public void DisplayDetailedItemDisplay(ItemDefinition item)
+    public void DisplayDetailedItemDisplay(PrefabDefinition item)
     {
 
         DID_itemName.text = item.itemName;
@@ -100,7 +103,7 @@ public class UIManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        foreach (ItemDefinition item in srg.GetItems())
+        foreach (PrefabDefinition item in srg.GetItems())
         {
             Instantiate(SD_slotPrefab, SD_slotGroup).GetComponent<StorageSlot>().InitSlot(item.itemIcon);
         }
@@ -142,6 +145,26 @@ public class UIManager : MonoBehaviour
     {
         interactionIndicatorGroup[index].SetActive(false);
 
+    }
+    public void ShowThrowForce(float percent)
+    {
+        if (ThrowForce == null)
+        {
+            return;
+        }
+
+        ThrowForce.gameObject.SetActive(true);
+        ThrowForce.normalizedValue = Mathf.Clamp01(percent);
+    }
+    public void HideThrowForce()
+    {
+        if (ThrowForce == null)
+        {
+            return;
+        }
+
+        ThrowForce.normalizedValue = 0f;
+        ThrowForce.gameObject.SetActive(false);
     }
     public async UniTask NewPlayerDisplay(ulong steamid,string name)
     {

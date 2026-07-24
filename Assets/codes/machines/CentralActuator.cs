@@ -8,14 +8,14 @@ public class CentralActuator : Port
     [Serializable]
     public class ItemProcessByItemDefinition
     {
-        public ItemDefinition itemDefinition;
-        public UnityEvent<ItemDefinition> onProcess;
+        public PrefabDefinition itemDefinition;
+        public UnityEvent<PrefabDefinition> onProcess;
     }
 
     [SerializeField]
     private List<ItemProcessByItemDefinition> processItemByItemDefinition = new List<ItemProcessByItemDefinition>();
 
-    private readonly Dictionary<ItemDefinition, UnityEvent<ItemDefinition>> processItemLookup = new Dictionary<ItemDefinition, UnityEvent<ItemDefinition>>();
+    private readonly Dictionary<PrefabDefinition, UnityEvent<PrefabDefinition>> processItemLookup = new Dictionary<PrefabDefinition, UnityEvent<PrefabDefinition>>();
 
     private void Awake()
     {
@@ -50,16 +50,16 @@ public class CentralActuator : Port
 
     private void ProcessItem(Item item)
     {
-        Debug.Log("THIS ITEM IS " + item.AbstractItem.itemName);
-        ItemDefinition itemDef = item.AbstractItem;
+        PrefabDefinition objtype = item.GetNetworkObject().AbstractObject;
+        Debug.Log("THIS ITEM IS " + objtype.itemName);
 
-        if (processItemLookup.TryGetValue(itemDef, out UnityEvent<ItemDefinition> handler))
+        if (processItemLookup.TryGetValue(objtype, out UnityEvent<PrefabDefinition> handler))
         {
-            handler?.Invoke(item.AbstractItem);
+            handler?.Invoke(item.GetNetworkObject().AbstractObject);
             return;
         }
 
-        Debug.Log("Unhandled Item: " + item.AbstractItem.itemName);
+        Debug.Log("Unhandled Item: " + objtype.itemName);
     }
 
     public override void Attach(Item item, Quaternion rot)

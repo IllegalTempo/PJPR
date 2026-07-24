@@ -54,7 +54,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
   Identifier: 
   Sovereignty: 0
-  PrefabID: QuantityResources_CombinedProcessableItem
+  PrefabID: CPI
 --- !u!114 &1546080285901963617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,6 +71,7 @@ MonoBehaviour:
   TransformSendInterval: 0.1
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  AbstractObject: {fileID: 11400000, guid: 750b6b2a70f051c43a6b7d6bda0236c3, type: 2}
   Identity: {fileID: 6907274300119882958}
 --- !u!54 &1781186795428300481
 Rigidbody:
@@ -129,7 +130,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfb9e0c3552b4fc41a72ab2c2374ed65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  AbstractItem: {fileID: 11400000, guid: 750b6b2a70f051c43a6b7d6bda0236c3, type: 2}
   netObj: {fileID: 1546080285901963617}
   lockRelativeRotation: 0
   IsPickable: 1
@@ -178,7 +178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccceae3ba9064a34187c9a47722517a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.items.CombinedProcessableItem
-  AbstractItem: {fileID: 11400000, guid: 750b6b2a70f051c43a6b7d6bda0236c3, type: 2}
   netObj: {fileID: 1546080285901963617}
   lockRelativeRotation: 0
   IsPickable: 1

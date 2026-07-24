@@ -249,7 +249,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
             return;
         }
 
-        ItemDefinition itemDefinition = CreateItemDefinition(prefabAsset);
+        PrefabDefinition itemDefinition = CreateItemDefinition(prefabAsset);
         AssignItemDefinition(instance, prefabAsset, itemDefinition);
         EditorSceneManager.MarkSceneDirty(instance.scene);
         Selection.activeGameObject = instance;
@@ -264,9 +264,9 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         EditorUtility.DisplayDialog("Create Network Item Prefab", "Created item definition and prefab for '" + _prefabName.Trim() + "'.", "OK");
     }
 
-    private ItemDefinition CreateItemDefinition(GameObject prefabAsset)
+    private PrefabDefinition CreateItemDefinition(GameObject prefabAsset)
     {
-        ItemDefinition itemDefinition = CreateInstance<ItemDefinition>();
+        PrefabDefinition itemDefinition = CreateInstance<PrefabDefinition>();
         itemDefinition.itemName = _prefabName.Trim();
         itemDefinition.itemDescription = _itemDescription;
         itemDefinition.itemPrefab = prefabAsset;
@@ -284,7 +284,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         return itemDefinition;
     }
 
-    private static void AssignItemDefinition(GameObject instance, GameObject prefabAsset, ItemDefinition itemDefinition)
+    private static void AssignItemDefinition(GameObject instance, GameObject prefabAsset, PrefabDefinition itemDefinition)
     {
         Item instanceItem = instance.GetComponent<Item>();
         if (instanceItem != null)
@@ -386,7 +386,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         foreach (string guid in guids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            ItemDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<ItemDefinition>(assetPath);
+            PrefabDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<PrefabDefinition>(assetPath);
             if (itemDefinition != null && itemDefinition.prefabID == prefabID)
             {
                 return true;

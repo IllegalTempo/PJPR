@@ -1,23 +1,25 @@
 ﻿using Assets.codes.Network.Messages;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.codes.items
 {
 	public class CombinedProcessableItem : Item
 	{
-		public Dictionary<ItemDefinition, int> Processables = new Dictionary<ItemDefinition, int>();
+		public Dictionary<PrefabDefinition, int> Processables = new Dictionary<PrefabDefinition, int>();
 		public void CombineIntoThis(Item item) //run by both client and server
 		{
-			if (Processables.ContainsKey(item.AbstractItem))
+            PrefabDefinition def = item.GetNetworkObject().AbstractObject;
+            if (Processables.ContainsKey(def))
 			{
-				Processables[item.AbstractItem] += 1;
+				Processables[def] += 1;
 			} else
 			{
-				Processables[item.AbstractItem] = 1;
+				Processables[def] = 1;
 			}
-            GameCore.Instance.DestroyNetworkIdentity(item.GetNetworkObject().Identity.Identifier);
+            GameCore.Instance.DestroyNetworkObject(item.GetNetworkObject().Identity.Identifier);
 
         }
         public void ServerAction_CombineIntoThis(Item item)
