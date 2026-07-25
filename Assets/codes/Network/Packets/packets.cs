@@ -16,8 +16,6 @@ public class packets
         StartVotingSession = 1012,
         VoteResult = 1013,
         VoteUpdate = 1014,
-        SpawnMeteorite = 1015,
-        DestroyMeteorite = 1016,
         MeteoriteWarning = 1017,
         LootDrop = 1018,
         UpdateWorld_Velocity = 1019,
