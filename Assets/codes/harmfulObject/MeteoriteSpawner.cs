@@ -438,34 +438,6 @@ public class MeteoriteSpawner : MonoBehaviour
     //}
 
 
-    private int nextSpawnID = 0;
-
-    private void BroadcastMeteoriteSpawn(GameObject obj, Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
-    {
-        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
-
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-        Vector3 velocity = Vector3.zero; // Meteorites are static — no linear movement
-        Vector3 angularVelocity = rb != null ? rb.angularVelocity : Vector3.zero;
-        float scale = obj.transform.localScale.x;
-        int spawnID = ++nextSpawnID;
-
-        var msg = new Assets.codes.Network.Messages.NMS_Server_SpawnMeteorite(
-            typeDef.typeName, position, velocity, angularVelocity, scale, spawnID);
-        NetworkRouter.Instance.DistributeMessageToReady(msg);
-    }
-
-    private void BroadcastMeteoriteDestroy(GameObject obj)
-    {
-        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
-
-        Meteorite m = obj.GetComponent<Meteorite>();
-        string poolKey = m != null ? m.poolKey : "Small";
-
-        var msg = new Assets.codes.Network.Messages.NMS_Server_DestroyMeteorite(poolKey, 0);
-        NetworkRouter.Instance.DistributeMessageToReady(msg);
-    }
-
     public void BroadcastWarning(Vector3 direction, float duration, int warningID)
     {
         if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer) return;
