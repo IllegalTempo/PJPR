@@ -1,4 +1,7 @@
+using Assets.codes.Network;
 using Assets.codes.Network.Messages;
+using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.system;
 using Cysharp.Threading.Tasks;
 using Mono.Cecil;
 using System.Collections;
@@ -231,22 +234,17 @@ public class MeteoriteSpawner : MonoBehaviour
     {
         if (currentWaveRoot == null) return;
 
-        List<Meteorite> toReturn = new List<Meteorite>();
         foreach (var kvp in activeMeteorites)
         {
             if (kvp.Key != null)
             {
-                Meteorite m = kvp.Key.GetComponent<Meteorite>();
-                if (m != null)
-                    toReturn.Add(m);
+                NetworkGameObject nobj = kvp.Key.GetComponent<NetworkGameObject>();
+                if (nobj != null && !string.IsNullOrEmpty(nobj.Identity.Identifier))
+                    GameCore.Instance.DestroyNetworkObject(nobj.Identity.Identifier);
             }
         }
 
-        foreach (var m in toReturn)
-        {
-            //if (m != null)
-            //    OnMeteoriteReturnToPool(m);
-        }
+        activeMeteorites.Clear();
 
         Destroy(currentWaveRoot);
         currentWaveRoot = null;
@@ -263,68 +261,46 @@ public class MeteoriteSpawner : MonoBehaviour
         SpawnSingleMeteorite(position, direction, typeDef);
     }
 
-    private void SpawnSingleMeteorite(Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
+    private async void SpawnSingleMeteorite(Vector3 position, Vector3 direction, MeteoriteTypeDefinition typeDef)
     {
-        //if (meteoritePool == null || typeDef == null) return;
+        if (typeDef == null) return;
 
-        //string poolKey = typeDef.typeName;
-        //Quaternion rotation = Quaternion.LookRotation(direction);
+        Quaternion rotation = Quaternion.LookRotation(direction);
 
-        //GameObject obj = meteoritePool.Get(poolKey, position, rotation);
-        //if (obj == null)
-        //{
-        //    Debug.LogWarning($"[MeteoriteSpawner] Failed to get '{poolKey}' from pool.");
-        //    return;
-        //}
+        NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(
+            typeDef.typeName, position, rotation, 0);
 
+        if (nobj == null)
+        {
+            Debug.LogWarning($"[MeteoriteSpawner] Failed to create '{typeDef.typeName}' network object.");
+            return;
+        }
 
+        GameObject obj = nobj.gameObject;
+        Meteorite meteorite = obj.GetComponent<Meteorite>();
+        if (meteorite != null)
+        {
+            meteorite.ConfigureFromDefinition(typeDef);
+            meteorite.poolKey = typeDef.typeName;
+        }
 
+        float scale = typeDef.GetRandomScale();
+        obj.transform.localScale = Vector3.one * scale;
 
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.back * spawnConfig.waveDriftSpeed;
+            rb.angularVelocity = Random.insideUnitSphere * 2f;
+        }
 
+        if (currentWaveRoot != null)
+            obj.transform.SetParent(currentWaveRoot.transform, true);
 
+        activeMeteorites[obj] = typeDef.typeName;
+        TotalSpawned++;
 
-        //this is new
-        //NetworkSystem.Instance.CreateNetworkObject(smallMeteoriteDef, position, Quaternion.identity, 0).Forget();
-
-
-
-
-
-
-
-
-
-
-
-
-        //Meteorite meteorite = obj.GetComponent<Meteorite>();
-        //if (meteorite != null)
-        //{
-        //    meteorite.ConfigureFromDefinition(typeDef);
-        //    meteorite.poolKey = poolKey;
-        //    meteorite.onReturnToPool = OnMeteoriteReturnToPool;
-
-        //    float scale = typeDef.GetRandomScale();
-        //    obj.transform.localScale = Vector3.one * scale;
-
-        //    Rigidbody rb = obj.GetComponent<Rigidbody>();
-        //    if (rb != null)
-        //    {
-        //        // Apply wave drift velocity (-Z direction, no X/Y)
-        //        rb.linearVelocity = Vector3.back * spawnConfig.waveDriftSpeed;
-        //        rb.angularVelocity = Random.insideUnitSphere * 2f;
-        //    }
-        //}
-
-        //if (currentWaveRoot != null)
-        //    obj.transform.SetParent(currentWaveRoot.transform, true);
-
-        //activeMeteorites[obj] = poolKey;
-        //TotalSpawned++;
-
-        //BroadcastMeteoriteSpawn(obj, position, direction, typeDef);
-
-        //StartCoroutine(CheckMeteoriteDistance(obj));
+        StartCoroutine(CheckMeteoriteDistance(obj));
     }
 
     //private void OnMeteoriteReturnToPool(Meteorite meteorite)
@@ -427,19 +403,12 @@ public class MeteoriteSpawner : MonoBehaviour
 
             if (distance < spawnConfig.spawnDistanceMin * 0.15f)
             {
-                Meteorite m = meteorite.GetComponent<Meteorite>();
-                if (m != null)
-                {
-                    //OnMeteoriteReturnToPool(m);
-                }
-                else
-                {
-                    if (activeMeteorites.TryGetValue(meteorite, out string pk))
-                    {
-                        activeMeteorites.Remove(meteorite);
-                        //meteoritePool.Return(meteorite, pk);
-                    }
-                }
+                activeMeteorites.Remove(meteorite);
+
+                NetworkGameObject nobj = meteorite.GetComponent<NetworkGameObject>();
+                if (nobj != null)
+                    GameCore.Instance.DestroyNetworkObject(nobj.Identity.Identifier);
+
                 yield break;
             }
 

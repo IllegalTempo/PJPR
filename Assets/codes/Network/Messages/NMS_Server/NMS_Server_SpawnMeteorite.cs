@@ -1,3 +1,5 @@
+using Assets.codes.Network;
+using Assets.codes.Network.SyncedIdentity;
 using UnityEngine;
 
 namespace Assets.codes.Network.Messages
@@ -47,9 +49,10 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
-            if (MeteoritePool.Instance == null)
+            PrefabDefinition meteoriteDef = NetworkSystem.Instance.GetPrefabDefinition(poolKey);
+            if (meteoriteDef == null)
             {
-                Debug.LogWarning("[NMS_Server_SpawnMeteorite] MeteoritePool.Instance is null.");
+                Debug.LogWarning($"[NMS_Server_SpawnMeteorite] No PrefabDefinition found for '{poolKey}'.");
                 return;
             }
 
@@ -57,10 +60,25 @@ namespace Assets.codes.Network.Messages
                 ? Quaternion.LookRotation(velocity.normalized)
                 : Quaternion.identity;
 
-            GameObject obj = MeteoritePool.Instance.Get(poolKey, position, rotation);
+            GameObject obj = null;
+
+            if (meteoriteDef.IsPoolPrefab)
+            {
+                NetworkPrefabPool pool = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(meteoriteDef);
+                NetworkGameObject nobj = pool.InstantiatePoolNetworkPrefab(
+                    System.Guid.NewGuid().ToString(), position, rotation);
+                if (nobj != null)
+                    obj = nobj.gameObject;
+            }
+
+            if (obj == null && meteoriteDef.itemPrefab != null)
+            {
+                obj = GameObject.Instantiate(meteoriteDef.itemPrefab, position, rotation);
+            }
+
             if (obj == null)
             {
-                Debug.LogWarning($"[NMS_Server_SpawnMeteorite] Failed to get '{poolKey}' from pool on client.");
+                Debug.LogWarning($"[NMS_Server_SpawnMeteorite] Failed to instantiate '{poolKey}' on client.");
                 return;
             }
 
@@ -72,7 +90,11 @@ namespace Assets.codes.Network.Messages
                 meteorite.poolKey = poolKey;
                 meteorite.onReturnToPool = (m) =>
                 {
-                    MeteoritePool.Instance.Return(m.gameObject, m.poolKey);
+                    NetworkGameObject nobj2 = m.GetComponent<NetworkGameObject>();
+                    if (nobj2 != null && meteoriteDef.IsPoolPrefab)
+                        NetworkSystem.Instance.CurrentNetworkInstance.GetPool(meteoriteDef).Return(nobj2);
+                    else
+                        GameObject.Destroy(m.gameObject);
                 };
             }
 

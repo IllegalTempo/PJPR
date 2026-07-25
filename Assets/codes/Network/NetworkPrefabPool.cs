@@ -27,6 +27,8 @@ namespace Assets.codes.Network
             {
                 NetworkGameObject nobj = Pool.Dequeue();
                 pooledObjects.Remove(nobj);
+                if (nobj.Identity != null)
+                    nobj.Identity.IsPooled = false;
                 nobj.gameObject.SetActive(true);
                 nobj.transform.position = pos;
                 nobj.transform.rotation = rot;
@@ -62,6 +64,14 @@ namespace Assets.codes.Network
                 return null;
             }
 
+            if (nobj.Identity != null)
+            {
+                nobj.Identity.Identifier = $"__POOL_{prefabDefinition.prefabID}_{Pool.Count}";
+                nobj.Identity.IsPooled = true;
+            }
+
+            obj.SetActive(false);
+
             return nobj;
         }
 
@@ -80,6 +90,7 @@ namespace Assets.codes.Network
             if (nobj.Identity != null)
             {
                 nobj.Identity.Unregister();
+                nobj.Identity.IsPooled = true;
             }
 
             nobj.transform.SetParent(poolRoot);

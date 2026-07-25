@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8127965847437451719}
   - component: {fileID: 7837241322324346456}
   - component: {fileID: 2186243281403713722}
+  - component: {fileID: 4620266681392529329}
   m_Layer: 0
   m_Name: MediumMeteoritePrefab
   m_TagString: Untagged
@@ -156,7 +157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrefabIdentity
   Identifier: MediumMeteorite
   Sovereignty: 0
-  PrefabID: 
+  PrefabID: Medium
 --- !u!114 &2186243281403713722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,3 +187,21 @@ MonoBehaviour:
   detachFragmentsBeforeDestroy: 1
   hitEffect: {fileID: 0}
   damagedMaterial: {fileID: 0}
+--- !u!114 &4620266681392529329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8080907634044407302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
+  Sync_Transform: 1
+  TransformSendInterval: 0.1
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  AbstractObject: {fileID: 11400000, guid: bd86f3152121d904fac01c8f7368cb03, type: 2}
+  Identity: {fileID: 0}

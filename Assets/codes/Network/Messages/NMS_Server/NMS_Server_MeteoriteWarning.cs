@@ -1,3 +1,5 @@
+using Assets.codes.Network;
+using Assets.codes.Network.SyncedIdentity;
 using UnityEngine;
 
 namespace Assets.codes.Network.Messages
@@ -34,23 +36,48 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
-            if (MeteoritePool.Instance == null)
+            PrefabDefinition warningDef = NetworkSystem.Instance.GetPrefabDefinition("Warning");
+            if (warningDef == null)
             {
-                Debug.LogWarning("[NMS_Server_MeteoriteWarning] MeteoritePool.Instance is null.");
+                Debug.LogWarning("[NMS_Server_MeteoriteWarning] No PrefabDefinition found for 'Warning'.");
                 return;
             }
 
-            GameObject warningObj = MeteoritePool.Instance.Get("Warning", Vector3.zero, Quaternion.identity);
+            GameObject warningObj = null;
+
+            if (warningDef.IsPoolPrefab)
+            {
+                NetworkPrefabPool pool = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(warningDef);
+                NetworkGameObject nobj = pool.InstantiatePoolNetworkPrefab(
+                    System.Guid.NewGuid().ToString(), Vector3.zero, Quaternion.identity);
+                if (nobj != null)
+                    warningObj = nobj.gameObject;
+            }
+
+            if (warningObj == null && warningDef.itemPrefab != null)
+            {
+                warningObj = GameObject.Instantiate(warningDef.itemPrefab, Vector3.zero, Quaternion.identity);
+            }
+
             if (warningObj != null)
             {
                 MeteoriteWarningIndicator indicator = warningObj.GetComponent<MeteoriteWarningIndicator>();
                 if (indicator != null)
                 {
                     indicator.Show(direction, duration);
+                    indicator.PrefabDef = warningDef;
                 }
                 else
                 {
-                    MeteoritePool.Instance.Return(warningObj, "Warning");
+                    if (warningDef.IsPoolPrefab)
+                    {
+                        NetworkSystem.Instance.CurrentNetworkInstance.GetPool(warningDef)
+                            .Return(warningObj);
+                    }
+                    else
+                    {
+                        GameObject.Destroy(warningObj);
+                    }
                 }
             }
         }

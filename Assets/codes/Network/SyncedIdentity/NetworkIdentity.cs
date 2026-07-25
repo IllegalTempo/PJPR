@@ -10,6 +10,7 @@ public class NetworkIdentity : MonoBehaviour
 {
     public string Identifier;
     public ulong Sovereignty = 0; //0 -> Server Authority
+    [System.NonSerialized] public bool IsPooled = false;
     private readonly UniTaskCompletionSource _startTcs = new UniTaskCompletionSource();
     public UniTask StartTask => _startTcs.Task;
     public void ChangeSovereignty(ulong newowner)
@@ -41,7 +42,10 @@ public class NetworkIdentity : MonoBehaviour
 
     protected virtual void Start()
     {
-        Register();
+        if (!IsPooled && !string.IsNullOrEmpty(Identifier))
+        {
+            Register();
+        }
     }
     public void Register()
     {

@@ -91,6 +91,8 @@ GameObject:
   - component: {fileID: 3366581550105350164}
   - component: {fileID: 5211539771486214741}
   - component: {fileID: 437702251491724870}
+  - component: {fileID: -4670289699514925363}
+  - component: {fileID: -3381369879566384338}
   m_Layer: 5
   m_Name: WarningIndicatorPrefab
   m_TagString: Untagged
@@ -248,3 +250,35 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &-4670289699514925363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6978015522691067216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
+  Identifier: 
+  Sovereignty: 0
+--- !u!114 &-3381369879566384338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6978015522691067216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
+  Sync_Transform: 1
+  TransformSendInterval: 0.1
+  NetworkPos: {x: 0, y: 0, z: 0}
+  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
+  AbstractObject: {fileID: 11400000, guid: de24b476b325ef64da3976b91cd3b219, type: 2}
+  Identity: {fileID: 0}

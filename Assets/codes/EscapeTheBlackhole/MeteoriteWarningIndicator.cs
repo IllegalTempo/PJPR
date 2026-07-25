@@ -1,3 +1,4 @@
+using Assets.codes.Network;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +22,8 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
     private float elapsedTime;
     private bool isActive;
     private CanvasGroup canvasGroup;
+
+    [System.NonSerialized] public PrefabDefinition PrefabDef;
 
     private void Awake()
     {
@@ -81,14 +84,14 @@ public class MeteoriteWarningIndicator : MonoBehaviour, IPoolable
 
         canvasGroup.alpha = 0f;
 
-        //if (MeteoritePool.Instance != null)
-        //{
-        //    MeteoritePool.Instance.Return(gameObject, "Warning");
-        //}
-        //else
-        //{
-        //    Destroy(gameObject);
-        //}
+        if (PrefabDef != null && PrefabDef.IsPoolPrefab && NetworkSystem.Instance.CurrentNetworkInstance != null)
+        {
+            NetworkSystem.Instance.CurrentNetworkInstance.GetPool(PrefabDef).Return(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Update()

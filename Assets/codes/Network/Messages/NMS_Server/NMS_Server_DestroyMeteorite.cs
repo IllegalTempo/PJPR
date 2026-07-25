@@ -31,11 +31,7 @@ namespace Assets.codes.Network.Messages
 
         public void ClientHandle()
         {
-            if (MeteoritePool.Instance == null)
-            {
-                Debug.LogWarning("[NMS_Server_DestroyMeteorite] MeteoritePool.Instance is null.");
-                return;
-            }
+            //
         }
     }
 }
