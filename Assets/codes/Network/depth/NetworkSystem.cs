@@ -28,8 +28,6 @@ public partial class NetworkSystem : MonoBehaviour
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     private readonly Dictionary<string, PrefabDefinition> _networkPrefabsById = new Dictionary<string, PrefabDefinition>();
     //private readonly Dictionary<GameObject, string> _networkPrefabIdsByPrefab = new Dictionary<GameObject, string>();
-    //All player list
-    public Dictionary<ulong, NetworkPlayerObject> PlayerList => CurrentNetworkInstance.PlayerList;
     public List<Slot> Slots
     {
         get => CurrentNetworkInstance.Slots;
@@ -75,10 +73,20 @@ public partial class NetworkSystem : MonoBehaviour
     }
     public List<PlayerData> GetPlayerData()
     {
-        return PlayerList.Values.Select(p => new PlayerData(
+        return CurrentNetworkInstance.Players.Select(p => new PlayerData(
             p.steamID.ToString(),
             p.transform.position,
             p.transform.rotation)).ToList();
+    }
+
+    public NetworkPlayerObject GetPlayer(ulong steamId)
+    {
+        return CurrentNetworkInstance.GetPlayer(steamId);
+    }
+
+    public bool RemovePlayer(ulong steamId)
+    {
+        return CurrentNetworkInstance.RemovePlayer(steamId);
     }
     public T GetComponentOfIdentity<T>(string NetworkID)
     {
@@ -254,7 +262,7 @@ public partial class NetworkSystem : MonoBehaviour
     //Spawn the network Player
     public async UniTask<NetworkPlayerObject> SpawnPlayer(ulong steamid)
     {
-        if (PlayerList.TryGetValue(steamid, out NetworkPlayerObject existingPlayer))
+        if (CurrentNetworkInstance.TryGetPlayer(steamid, out NetworkPlayerObject existingPlayer))
         {
             Debug.LogWarning($"Player {steamid} is already spawned. Reusing existing player object.");
             return existingPlayer;
@@ -263,10 +271,10 @@ public partial class NetworkSystem : MonoBehaviour
         ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
         await request;
         GameObject PlayerInstance = request.asset as GameObject;
-        int index = PlayerList.Count;
+        int index = CurrentNetworkInstance.PlayerCount;
         NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.getPlayerSpawn(), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         await p.Init(steamid, index);
-        PlayerList[steamid] = p;
+        CurrentNetworkInstance.SetPlayer(steamid, p);
 
         Debug.Log($"Spawned Player {steamid}");
 
@@ -278,11 +286,11 @@ public partial class NetworkSystem : MonoBehaviour
     //}
     public void RemoveAllPlayerObject()
     {
-        foreach (NetworkPlayerObject g in PlayerList.Values)
+        foreach (NetworkPlayerObject g in CurrentNetworkInstance.Players)
         {
             Destroy(g.gameObject);
         }
-        PlayerList.Clear();
+        CurrentNetworkInstance.ClearPlayers();
     }
 
     public async UniTask InitializeNetwork()

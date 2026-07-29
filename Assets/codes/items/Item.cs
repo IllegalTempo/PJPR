@@ -173,13 +173,19 @@ public class Item : Selectable //Item is any that is pickable
         netObj.Sync_Transform = isDropAction; //Only sync transform if dropped, not when picked up, because the player will be moving it.
         if (isDropAction)
         {
-            PlayerMain who = NetworkSystem.Instance.PlayerList[netObj.Identity.Sovereignty].playerControl;
+            NetworkPlayerObject player = NetworkSystem.Instance.GetPlayer(netObj.Identity.Sovereignty);
+            if (player == null) return;
+
+            PlayerMain who = player.playerControl;
             gotDropped(who, dropPosition, dropRotation, throwDirection, throwForce);
             
         }
         else
         {
-            PlayerMain who = NetworkSystem.Instance.PlayerList[newowner].playerControl;
+            NetworkPlayerObject player = NetworkSystem.Instance.GetPlayer(newowner);
+            if (player == null) return;
+
+            PlayerMain who = player.playerControl;
             gotPickedup(who);
         }
         netObj.Identity.ChangeSovereignty(newowner);

@@ -47,7 +47,8 @@ namespace Assets.codes.Network.Messages
 
         protected override void applyaction()
         {
-            if (NetworkSystem.Instance.PlayerList.TryGetValue(SourceNetworkID, out NetworkPlayerObject player))
+            NetworkPlayerObject player = NetworkSystem.Instance.GetPlayer(SourceNetworkID);
+            if (player != null)
             {
                 player.SetMovement(pos, headrot, bodyrot);
             }

@@ -77,12 +77,12 @@ public partial class NetworkSystem
     //public async UniTask<Spaceship> SpawnSpaceShip(DecorationSaveData[] decs, ulong owner) //run by server
     //{
     //    if (IsOnline && !Instance.IsServer) return null;
-    //    NetworkPlayerObject player = PlayerList[owner];
+    //    NetworkPlayerObject player = GetPlayer(owner);
     //    Transform spawn = GameCore.Instance.GetSpaceshipSpawn(player.index);
 
     //    Spaceship ss = (await CreateNetworkObject("Spaceship", spawn.position, spawn.rotation, owner)).GetComponent<Spaceship>();
     //    await GameCore.Instance.SpawnDecorations(decs, ss);
-    //    //ss.OwnerPlayer = PlayerList[owner];
+    //    //ss.OwnerPlayer = GetPlayer(owner);
     //    //ss.OwnerPlayer.spaceship = ss;
 
     //    return ss;

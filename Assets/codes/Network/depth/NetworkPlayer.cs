@@ -51,7 +51,7 @@ public class NetworkPlayer
     public void Disconnect()
     {
         player.Disconnect();
-        NetworkSystem.Instance.PlayerList.Remove(steamId);
+        NetworkSystem.Instance.RemovePlayer(steamId);
         NetworkRouter.Instance.DistributeMessage(steamId, new NMS_Server_PlayerQuit(steamId));
 
     }

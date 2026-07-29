@@ -87,6 +87,17 @@ MonoBehaviour:
   networkinfo: {fileID: 5670073900387558509}
   holdingItem: {fileID: 0}
   HandTransform: {fileID: 7248991608529191590}
+  tapDropPlaceDistance: 1.2
+  dropCollisionRadius: 0.35
+  dropCollisionPadding: 0.05
+  dropCollisionMask:
+    serializedVersion: 2
+    m_Bits: 499
+  throwHoldThreshold: 0.25
+  throwFullChargeTime: 1.5
+  maxThrowForce: 10
+  throwChargeFieldOfView: 45
+  throwCameraZoomTransitionSpeed: 60
   LocalInvisible:
   - {fileID: 10069236664392863}
   - {fileID: 5233131636794888236}

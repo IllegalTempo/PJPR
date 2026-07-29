@@ -1,17 +1,29 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Assets.codes.Network.Messages;
+using Assets.codes.voicechat;
+
 
 public class recording : MonoBehaviour
 {
     private AudioClip micClip;
     private string selectedDevice;
     private bool isRecording = false;
+    private readonly List<byte> currentLineBytes = new List<byte>();
+    private readonly List<IVoiceChunkFilter> voiceFilters = new List<IVoiceChunkFilter>();
+    private float currentLineSeconds = 0f;
 
     // ¢w¢w Tune these values ¢w¢w
     public const int SAMPLE_RATE = 16000;   // 11025, 22050, 44100 also possible; lower = smaller packets
     public const int RECORD_LENGTH = 1;       // seconds ¡X how long one clip segment is
     public const int PACKET_FREQUENCY_MS = 100; // how often we grab & send data (every 100 ms = 10 packets/sec)
+    [SerializeField] private float maxLineSeconds = 8f;
+    [SerializeField] private bool filterShortLoudSounds = true;
+    [SerializeField] private float shortLoudRmsThreshold = 0.18f;
+    [SerializeField] private float maxShortLoudSeconds = 0.25f;
+    [SerializeField] private float volumeDisplayRmsForFull = 0.08f;
+    public GameObject VCBubblePrefab;
 
     private int lastMicPosition = 0;
 
@@ -24,6 +36,7 @@ public class recording : MonoBehaviour
         }
 
         selectedDevice = Microphone.devices[0]; // or let player choose later
+        RebuildVoiceFilters();
     }
 
     public void StartVoice()
@@ -42,6 +55,8 @@ public class recording : MonoBehaviour
 
         isRecording = true;
         lastMicPosition = 0;
+        ResetBufferedLine();
+        ResetVoiceFilters();
 
         StartCoroutine(RecordAndSendRoutine());
     }
@@ -51,8 +66,11 @@ public class recording : MonoBehaviour
         if (!isRecording) return;
 
         StopAllCoroutines();
+        SendLatestAudioChunk();
+        SendBufferedLine();
         Microphone.End(selectedDevice);
         isRecording = false;
+        UpdateVCVolumeDisplay(0f);
     }
 
     private IEnumerator RecordAndSendRoutine()
@@ -85,11 +103,14 @@ public class recording : MonoBehaviour
         float[] samples = new float[length];
         micClip.GetData(samples, lastMicPosition);
 
-        // Convert float[-1..1] ¡÷ 16-bit PCM signed bytes (most common format for VoIP)
+        // Convert float[-1..1] -> 16-bit PCM signed bytes (most common format for VoIP)
         byte[] pcmBytes = new byte[length * 2]; // 2 bytes per sample
+        float sumSquares = 0f;
 
         for (int i = 0; i < samples.Length; i++)
         {
+            sumSquares += samples[i] * samples[i];
+
             // Scale float to int16 range
             short pcmValue = (short)(samples[i] * 32767f);
 
@@ -98,15 +119,119 @@ public class recording : MonoBehaviour
             pcmBytes[i * 2 + 1] = (byte)((pcmValue >> 8) & 0xFF);
         }
 
-        NMS_Both_VoicePacket msg = new NMS_Both_VoicePacket(pcmBytes,NetworkSystem.Instance.SteamID);
-        if (NetworkSystem.Instance.IsServer)
+        float rms = Mathf.Sqrt(sumSquares / samples.Length);
+        UpdateVCVolumeDisplay(rms);
+        float chunkDuration = (float)length / SAMPLE_RATE;
+
+        int bytesBeforeFilter = currentLineBytes.Count;
+        ApplyVoiceFilters(pcmBytes, rms, chunkDuration, currentLineBytes);
+        currentLineSeconds += (currentLineBytes.Count - bytesBeforeFilter) / 2f / SAMPLE_RATE;
+
+        if (currentLineSeconds >= maxLineSeconds)
         {
-            NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.Voice);
+            SendBufferedLine();
         }
-        else
+
+        lastMicPosition = currentPos;
+    }
+    
+    private void RebuildVoiceFilters()
+    {
+        voiceFilters.Clear();
+        voiceFilters.Add(new ShortLoudVoiceFilter(filterShortLoudSounds, shortLoudRmsThreshold, maxShortLoudSeconds));
+    }
+
+    private void ResetVoiceFilters()
+    {
+        foreach (IVoiceChunkFilter filter in voiceFilters)
         {
-            NetworkRouter.Instance.SendMessageToServer(msg, NetworkSendProfiles.Voice);
+            filter.Reset();
         }
-            lastMicPosition = currentPos;
+    }
+
+    private void ApplyVoiceFilters(byte[] pcmBytes, float rms, float chunkDuration, List<byte> output)
+    {
+        if (voiceFilters.Count == 0)
+        {
+            output.AddRange(pcmBytes);
+            return;
+        }
+
+        List<byte> input = new List<byte>(pcmBytes);
+        List<byte> filtered = new List<byte>();
+        for (int i = 0; i < voiceFilters.Count; i++)
+        {
+            filtered.Clear();
+            voiceFilters[i].Process(input.ToArray(), rms, chunkDuration, filtered);
+            input.Clear();
+            input.AddRange(filtered);
+        }
+
+        output.AddRange(input);
+    }
+
+    private void FlushVoiceFilters()
+    {
+        foreach (IVoiceChunkFilter filter in voiceFilters)
+        {
+            int bytesBeforeFlush = currentLineBytes.Count;
+            filter.Flush(currentLineBytes);
+            currentLineSeconds += (currentLineBytes.Count - bytesBeforeFlush) / 2f / SAMPLE_RATE;
+        }
+    }
+    private void UpdateVCVolumeDisplay(float rms)
+    {
+        if (UIManager.Instance == null)
+        {
+            return;
+        }
+
+        float normalizedVolume = volumeDisplayRmsForFull > 0f ? rms / volumeDisplayRmsForFull : 0f;
+        UIManager.Instance.UpdateVCVolumeDisplay(normalizedVolume);
+    }
+    private void ResetBufferedLine()
+    {
+        currentLineBytes.Clear();
+        currentLineSeconds = 0f;
+    }
+    private void SendBufferedLine()
+    {
+        FlushVoiceFilters();
+        if (currentLineBytes.Count == 0) return;
+
+        currentLineSeconds = currentLineBytes.Count / 2f / SAMPLE_RATE;
+        byte[] lineBytes = currentLineBytes.ToArray();
+        Vector3 spawnpos = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.position : Vector3.zero;
+        Vector3 spawndir = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.forward : Vector3.forward;
+        //debug voice length
+        Debug.Log($"Sending voice line: {currentLineSeconds:F2}s, {lineBytes.Length} bytes, from {spawnpos}, dir {spawndir}");
+        NMS_Both_VoicePacket msg = new NMS_Both_VoicePacket(lineBytes, NetworkSystem.Instance.SteamID, spawnpos, spawndir);
+        msg.SendMessageAsServerOrClient();
+
+        ResetBufferedLine();
+    }
+    public voicebubble SpawnVCBubbleForLocal(VoiceBubble data, byte[] voiceLineBytes)
+    {
+        if (VCBubblePrefab == null)
+        {
+            Debug.LogError("VCBubblePrefab is not assigned!");
+            return null;
+        }
+
+        Quaternion rotation = data.sendDirection.sqrMagnitude > 0f
+            ? Quaternion.LookRotation(data.sendDirection)
+            : Quaternion.identity;
+
+        GameObject bubble = Instantiate(VCBubblePrefab, data.sendPosition, rotation);
+        voicebubble voiceBubble = bubble.GetComponent<voicebubble>();
+        if (voiceBubble == null)
+        {
+            Debug.LogError("VCBubblePrefab does not have a voicebubble component!");
+            Destroy(bubble);
+            return null;
+        }
+
+        voiceBubble.Init(data, voiceLineBytes);
+        return voiceBubble;
     }
 }

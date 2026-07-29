@@ -32,7 +32,7 @@
 //        base.Init(uid, Owner, PrefabID);
 
 
-//        OwnerPlayer = NetworkSystem.Instance.PlayerList[Owner];
+//        OwnerPlayer = NetworkSystem.Instance.GetPlayer(Owner);
 //        string name = $"Spaceship {OwnerPlayer.index}";
 //        gameObject.name = name;
 //        OwnerPlayer.spaceship = this;

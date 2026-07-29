@@ -52,7 +52,10 @@ public class UIManager : MonoBehaviour
     private Image DID_itemIcon;
     [SerializeField]
     private TMP_Text DID_itemDescription;
-    
+
+
+    [SerializeField]
+    private Slider VCVolumeDisplay;
     private void Awake()
     {
         Instance = this;
@@ -166,6 +169,17 @@ public class UIManager : MonoBehaviour
         ThrowForce.normalizedValue = 0f;
         ThrowForce.gameObject.SetActive(false);
     }
+
+    public void UpdateVCVolumeDisplay(float normalizedVolume)
+    {
+        if (VCVolumeDisplay == null)
+        {
+            return;
+        }
+
+        VCVolumeDisplay.normalizedValue = Mathf.Clamp01(normalizedVolume);
+    }
+
     public async UniTask NewPlayerDisplay(ulong steamid,string name)
     {
         Texture2D icon = await GameCore.Instance.GetIcon(steamid);

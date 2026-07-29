@@ -26,13 +26,14 @@ public class GameClient : ConnectionManager
     public void PlayerQuit(ulong who)
     {
         Debug.Log($"Player {who} Quit the game");
-        if(!NetworkSystem.Instance.PlayerList.ContainsKey(who))
+        NetworkPlayerObject player = NetworkSystem.Instance.GetPlayer(who);
+        if(player == null)
         {
             Debug.Log($"Player {who} not found in GetPlayerBySteamID");
             return;
         }
-        NetworkSystem.Instance.PlayerList[who].Disconnect();
-        NetworkSystem.Instance.PlayerList.Remove(who);
+        player.Disconnect();
+        NetworkSystem.Instance.RemovePlayer(who);
     }
     public bool IsLocal(ulong id)
     {

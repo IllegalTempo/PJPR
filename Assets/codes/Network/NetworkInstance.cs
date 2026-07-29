@@ -11,9 +11,37 @@ namespace Assets.codes.Network
     public class NetworkInstance
     {
         public readonly Dictionary<string, NetworkIdentity> FindNetworkIdentity = new Dictionary<string, NetworkIdentity>();
-        public readonly Dictionary<ulong, NetworkPlayerObject> PlayerList = new Dictionary<ulong, NetworkPlayerObject>();
+        private readonly Dictionary<ulong, NetworkPlayerObject> _players = new Dictionary<ulong, NetworkPlayerObject>();
         public readonly Dictionary<string, NetworkPrefabPool> PrefabPools = new Dictionary<string, NetworkPrefabPool>();
         public List<Slot> Slots = new List<Slot>();
+        public IEnumerable<NetworkPlayerObject> Players => _players.Values;
+        public int PlayerCount => _players.Count;
+
+        public NetworkPlayerObject GetPlayer(ulong steamId)
+        {
+            _players.TryGetValue(steamId, out NetworkPlayerObject player);
+            return player;
+        }
+
+        public bool TryGetPlayer(ulong steamId, out NetworkPlayerObject player)
+        {
+            return _players.TryGetValue(steamId, out player);
+        }
+
+        public void SetPlayer(ulong steamId, NetworkPlayerObject player)
+        {
+            _players[steamId] = player;
+        }
+
+        public bool RemovePlayer(ulong steamId)
+        {
+            return _players.Remove(steamId);
+        }
+
+        public void ClearPlayers()
+        {
+            _players.Clear();
+        }
 
         public NetworkPrefabPool GetPool(PrefabDefinition prefabDefinition)
         {
@@ -27,7 +55,7 @@ namespace Assets.codes.Network
 
         public void CleanupScene()
         {
-            foreach (NetworkPlayerObject player in PlayerList.Values)
+            foreach (NetworkPlayerObject player in _players.Values)
             {
                 if (player != null)
                 {
@@ -48,7 +76,7 @@ namespace Assets.codes.Network
                 pool.Cleanup();
             }
 
-            PlayerList.Clear();
+            _players.Clear();
             FindNetworkIdentity.Clear();
             PrefabPools.Clear();
             Slots.Clear();
