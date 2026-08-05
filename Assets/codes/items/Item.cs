@@ -39,7 +39,7 @@ public struct ItemSnapshot
     /// <summary>Local scale relative to parent transform</summary>
     public Vector3 scale;
 }
-[RequireComponent(typeof(NetworkPrefabIdentity), typeof(Rigidbody))]
+[RequireComponent(typeof(NetworkGameObject), typeof(Rigidbody), typeof(Collider))]
 
 public class Item : Selectable //Item is any that is pickable
 {

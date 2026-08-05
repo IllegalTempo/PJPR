@@ -72,6 +72,7 @@ public class UIManager : MonoBehaviour
         LoadingComplete();
         HideAllInteraction();
         HideThrowForce();
+        HideVCVolumeDisplay();
         SD_Group.SetActive(false);
         DID_Group.SetActive(false);
         GameObjectNameDisplay.gameObject.SetActive(false);
@@ -178,6 +179,28 @@ public class UIManager : MonoBehaviour
         }
 
         VCVolumeDisplay.normalizedValue = Mathf.Clamp01(normalizedVolume);
+    }
+
+    public void ShowVCVolumeDisplay()
+    {
+        if (VCVolumeDisplay == null)
+        {
+            return;
+        }
+
+        VCVolumeDisplay.gameObject.SetActive(true);
+        VCVolumeDisplay.normalizedValue = 0f;
+    }
+
+    public void HideVCVolumeDisplay()
+    {
+        if (VCVolumeDisplay == null)
+        {
+            return;
+        }
+
+        VCVolumeDisplay.normalizedValue = 0f;
+        VCVolumeDisplay.gameObject.SetActive(false);
     }
 
     public async UniTask NewPlayerDisplay(ulong steamid,string name)

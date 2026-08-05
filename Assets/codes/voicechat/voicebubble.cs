@@ -30,8 +30,13 @@ namespace Assets.codes.voicechat
         [SerializeField] private float startSpeed = 4f;
         [SerializeField] private float playbackVolume = 1f;
         [SerializeField] private float sampleGain = 2.5f;
+        [SerializeField] private bool normalizeQuietVoice = true;
+        [SerializeField] private float targetPeak = 0.75f;
+        [SerializeField] private float maxAutoGain = 6f;
         [SerializeField] private float loudnessLossPerBounce = 0.25f;
         [SerializeField] private float scaleLossPerBounce = 0.18f;
+        [SerializeField] private float lifetimeSeconds = 12f;
+        [SerializeField] private float minTimeScale = 0.15f;
         [SerializeField] private int maxBounces = 5;
 
         public VoiceBubble data;
@@ -41,6 +46,10 @@ namespace Assets.codes.voicechat
         private Rigidbody rb;
         private int bounceCount;
         private Vector3 startScale;
+        private Coroutine shrinkRoutine;
+        private float spawnTime;
+        private float bounceScale = 1f;
+        private float timeScale = 1f;
 
         private void Awake()
         {
@@ -62,6 +71,10 @@ namespace Assets.codes.voicechat
             data = bubbleData;
             voiceBytes = voiceLineBytes;
             transform.position = data.sendPosition;
+            spawnTime = Time.time;
+            bounceScale = 1f;
+            timeScale = 1f;
+            transform.localScale = startScale;
 
             if (data.sendDirection.sqrMagnitude > 0f)
             {
@@ -74,6 +87,23 @@ namespace Assets.codes.voicechat
             StartCoroutine(PlayWholeClipThenLoop());
 
             rb.linearVelocity = data.sendDirection.normalized * startSpeed;
+        }
+
+        private void Update()
+        {
+            if (lifetimeSeconds <= 0f)
+            {
+                return;
+            }
+
+            float agePercent = Mathf.Clamp01((Time.time - spawnTime) / lifetimeSeconds);
+            timeScale = Mathf.Lerp(1f, minTimeScale, agePercent);
+            ApplyScale();
+
+            if (agePercent >= 1f)
+            {
+                Destroy(gameObject);
+            }
         }
 
         private IEnumerator PlayWholeClipThenLoop()
@@ -105,12 +135,32 @@ namespace Assets.codes.voicechat
 
             float strength = Mathf.Clamp01(1f - loudnessLossPerBounce * bounceCount);
             audioSource.volume = playbackVolume * strength;
-            transform.localScale = startScale * Mathf.Clamp01(1f - scaleLossPerBounce * bounceCount);
+
+            if (shrinkRoutine != null)
+            {
+                StopCoroutine(shrinkRoutine);
+            }
+
+            shrinkRoutine = StartCoroutine(ShrinkAfterPhysicsStep());
 
             if (bounceCount >= maxBounces)
             {
                 Destroy(gameObject);
             }
+        }
+
+        private IEnumerator ShrinkAfterPhysicsStep()
+        {
+            yield return new WaitForFixedUpdate();
+
+            bounceScale = Mathf.Clamp01(1f - scaleLossPerBounce * bounceCount);
+            ApplyScale();
+            shrinkRoutine = null;
+        }
+
+        private void ApplyScale()
+        {
+            transform.localScale = startScale * bounceScale * timeScale;
         }
 
         private AudioClip CreateClipFromPcm(byte[] bytes)
@@ -121,10 +171,24 @@ namespace Assets.codes.voicechat
             }
 
             float[] samples = new float[bytes.Length / 2];
+            float peak = 0f;
             for (int i = 0; i < samples.Length; i++)
             {
                 short pcmValue = (short)((bytes[i * 2 + 1] << 8) | (bytes[i * 2] & 0xFF));
-                samples[i] = Mathf.Clamp(pcmValue / 32767f * sampleGain, -1f, 1f);
+                samples[i] = pcmValue / 32767f;
+                peak = Mathf.Max(peak, Mathf.Abs(samples[i]));
+            }
+
+            float autoGain = 1f;
+            if (normalizeQuietVoice && peak > 0f && peak < targetPeak)
+            {
+                autoGain = Mathf.Min(targetPeak / peak, maxAutoGain);
+            }
+
+            float finalGain = sampleGain * autoGain;
+            for (int i = 0; i < samples.Length; i++)
+            {
+                samples[i] = Mathf.Clamp(samples[i] * finalGain, -1f, 1f);
             }
 
             AudioClip clip = AudioClip.Create("voiceBubbleLoop", samples.Length, 1, recording.SAMPLE_RATE, false);

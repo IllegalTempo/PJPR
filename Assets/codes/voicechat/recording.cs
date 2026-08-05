@@ -12,16 +12,19 @@ public class recording : MonoBehaviour
     private bool isRecording = false;
     private readonly List<byte> currentLineBytes = new List<byte>();
     private readonly List<IVoiceChunkFilter> voiceFilters = new List<IVoiceChunkFilter>();
+    private readonly List<IVoiceLineFilter> voiceLineFilters = new List<IVoiceLineFilter>();
     private float currentLineSeconds = 0f;
 
     // ¢w¢w Tune these values ¢w¢w
     public const int SAMPLE_RATE = 16000;   // 11025, 22050, 44100 also possible; lower = smaller packets
     public const int RECORD_LENGTH = 1;       // seconds ¡X how long one clip segment is
     public const int PACKET_FREQUENCY_MS = 100; // how often we grab & send data (every 100 ms = 10 packets/sec)
-    [SerializeField] private float maxLineSeconds = 8f;
     [SerializeField] private bool filterShortLoudSounds = true;
     [SerializeField] private float shortLoudRmsThreshold = 0.18f;
     [SerializeField] private float maxShortLoudSeconds = 0.25f;
+    [SerializeField] private bool trimSoundlessVoice = true;
+    [SerializeField] private float silenceTrimThreshold = 0.015f;
+    [SerializeField] private float silenceTrimPaddingSeconds = 0.05f;
     [SerializeField] private float volumeDisplayRmsForFull = 0.08f;
     public GameObject VCBubblePrefab;
 
@@ -57,6 +60,7 @@ public class recording : MonoBehaviour
         lastMicPosition = 0;
         ResetBufferedLine();
         ResetVoiceFilters();
+        ShowVCVolumeDisplay();
 
         StartCoroutine(RecordAndSendRoutine());
     }
@@ -70,7 +74,7 @@ public class recording : MonoBehaviour
         SendBufferedLine();
         Microphone.End(selectedDevice);
         isRecording = false;
-        UpdateVCVolumeDisplay(0f);
+        HideVCVolumeDisplay();
     }
 
     private IEnumerator RecordAndSendRoutine()
@@ -127,18 +131,32 @@ public class recording : MonoBehaviour
         ApplyVoiceFilters(pcmBytes, rms, chunkDuration, currentLineBytes);
         currentLineSeconds += (currentLineBytes.Count - bytesBeforeFilter) / 2f / SAMPLE_RATE;
 
-        if (currentLineSeconds >= maxLineSeconds)
-        {
-            SendBufferedLine();
-        }
 
         lastMicPosition = currentPos;
     }
     
+    private void ShowVCVolumeDisplay()
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowVCVolumeDisplay();
+        }
+    }
+
+    private void HideVCVolumeDisplay()
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideVCVolumeDisplay();
+        }
+    }
     private void RebuildVoiceFilters()
     {
         voiceFilters.Clear();
         voiceFilters.Add(new ShortLoudVoiceFilter(filterShortLoudSounds, shortLoudRmsThreshold, maxShortLoudSeconds));
+
+        voiceLineFilters.Clear();
+        voiceLineFilters.Add(new TrimSilenceVoiceLineFilter(trimSoundlessVoice, silenceTrimThreshold, silenceTrimPaddingSeconds, SAMPLE_RATE));
     }
 
     private void ResetVoiceFilters()
@@ -179,6 +197,20 @@ public class recording : MonoBehaviour
             currentLineSeconds += (currentLineBytes.Count - bytesBeforeFlush) / 2f / SAMPLE_RATE;
         }
     }
+    private byte[] ApplyVoiceLineFilters(byte[] pcmBytes)
+    {
+        byte[] filteredBytes = pcmBytes;
+        foreach (IVoiceLineFilter filter in voiceLineFilters)
+        {
+            filteredBytes = filter.Process(filteredBytes);
+            if (filteredBytes == null || filteredBytes.Length == 0)
+            {
+                return new byte[0];
+            }
+        }
+
+        return filteredBytes;
+    }
     private void UpdateVCVolumeDisplay(float rms)
     {
         if (UIManager.Instance == null)
@@ -199,8 +231,14 @@ public class recording : MonoBehaviour
         FlushVoiceFilters();
         if (currentLineBytes.Count == 0) return;
 
-        currentLineSeconds = currentLineBytes.Count / 2f / SAMPLE_RATE;
-        byte[] lineBytes = currentLineBytes.ToArray();
+        byte[] lineBytes = ApplyVoiceLineFilters(currentLineBytes.ToArray());
+        if (lineBytes.Length == 0)
+        {
+            ResetBufferedLine();
+            return;
+        }
+
+        currentLineSeconds = lineBytes.Length / 2f / SAMPLE_RATE;
         Vector3 spawnpos = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.position : Vector3.zero;
         Vector3 spawndir = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.forward : Vector3.forward;
         //debug voice length

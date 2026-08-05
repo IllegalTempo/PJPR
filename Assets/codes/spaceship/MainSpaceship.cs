@@ -13,7 +13,10 @@ public class MainSpaceship : MonoBehaviour
 {
     public static MainSpaceship Instance { get; private set; }
     private Animator animator;
+    private Rigidbody rb;
     private int speedlevel = 0;
+    private Vector3 velocity;
+    private Vector3 acceleration;
     [SerializeField]
     private List<ModuleSlot> msts;
 
@@ -42,6 +45,66 @@ public class MainSpaceship : MonoBehaviour
     private void onUpdateWaterLevel()
     {
         spaceshipDisplay.SetWaterAmount(waterLevel);
+    }
+
+    public Vector3 GetVelocity()
+    {
+        return velocity;
+    }
+
+    public Vector3 GetAcceleration()
+    {
+        return acceleration;
+    }
+
+    public void SetVelocity(Vector3 newVelocity)
+    {
+        velocity = newVelocity;
+        ApplyVelocity();
+    }
+
+    public void AddVelocity(Vector3 velocityDelta)
+    {
+        SetVelocity(velocity + velocityDelta);
+    }
+
+    public void SetAcceleration(Vector3 newAcceleration)
+    {
+        acceleration = newAcceleration;
+    }
+
+    public void AddAcceleration(Vector3 accelerationDelta)
+    {
+        acceleration += accelerationDelta;
+    }
+
+    public void StopMovement()
+    {
+        velocity = Vector3.zero;
+        acceleration = Vector3.zero;
+        ApplyVelocity();
+    }
+
+    private void FixedUpdate()
+    {
+        if (acceleration != Vector3.zero)
+        {
+            velocity += acceleration * Time.fixedDeltaTime;
+            ApplyVelocity();
+        }
+
+        if (rb == null && velocity != Vector3.zero)
+        {
+            transform.position += velocity * Time.fixedDeltaTime;
+        }
+    }
+
+    private void ApplyVelocity()
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = velocity;
+        }
     }
     
     public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
@@ -108,6 +171,8 @@ public class MainSpaceship : MonoBehaviour
         {
             Instance = this;
         }
+
+        rb = GetComponent<Rigidbody>();
         foreach (ModuleSlot mst in msts)
         {
             slots[mst.Identity.Identifier] = mst;

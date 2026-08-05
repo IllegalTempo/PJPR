@@ -4,6 +4,7 @@ using Assets.codes.Network.SyncedIdentity;
 
 namespace Assets.codes.spaceship
 {
+    [RequireComponent(typeof(Item))]
 	public class ModuleController:MonoBehaviour
 	{
         public ModuleSlot ConnectTo;

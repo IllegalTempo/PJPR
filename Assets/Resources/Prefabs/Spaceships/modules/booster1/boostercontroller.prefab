@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5333307445924552202}
   - component: {fileID: 1651600335879104639}
   - component: {fileID: 1558117532037160980}
+  - component: {fileID: -4908613047248667501}
   m_Layer: 0
   m_Name: boostercontroller
   m_TagString: Untagged
@@ -164,6 +165,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.67, y: 0.5872469, z: 2.0078561}
   m_Center: {x: 0, y: -1.18, z: -0.0019675493}
+--- !u!114 &-4908613047248667501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7370891376704099619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fda48a9a7e4d2464e8622e811fab0e58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.ModuleController
+  ConnectTo: {fileID: 0}
 --- !u!1001 &4665896936929088497
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -10,8 +10,6 @@ public class ModuleSlot : Slot
 
     public module attachedModule;
     public ModuleController moduleController;
-
-
     public override void Attach(Item item,Quaternion rot)
     {
         base.Attach(item,rot);

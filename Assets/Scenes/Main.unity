@@ -7293,10 +7293,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe40b30ab900ad242923e67c48f28162, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceRecorder
-  maxLineSeconds: 8
   filterShortLoudSounds: 1
   shortLoudRmsThreshold: 0.18
   maxShortLoudSeconds: 0.25
+  trimSoundlessVoice: 1
+  silenceTrimThreshold: 0.015
+  silenceTrimPaddingSeconds: 0.05
   volumeDisplayRmsForFull: 0.08
   VCBubblePrefab: {fileID: 3874135358219356816, guid: e4bed0dcff7e60f44b3c095de3844fcc, type: 3}
 --- !u!114 &516030516
@@ -12576,7 +12578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 1
+  StartServerOnStart: 0
   _maxPlayer: 8
   IsOnline: 0
   IsServer: 1
