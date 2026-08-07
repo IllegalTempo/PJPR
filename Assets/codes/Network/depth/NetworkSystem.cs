@@ -27,7 +27,8 @@ public partial class NetworkSystem : MonoBehaviour
     public Dictionary<string, NetworkIdentity> FindNetworkIdentity => CurrentNetworkInstance.FindNetworkIdentity;
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     private readonly Dictionary<string, PrefabDefinition> _networkPrefabsById = new Dictionary<string, PrefabDefinition>();
-    //private readonly Dictionary<GameObject, string> _networkPrefabIdsByPrefab = new Dictionary<GameObject, string>();
+    private readonly Dictionary<PrefabDefinition, string> _networkPrefabIdsByDefinition = new Dictionary<PrefabDefinition, string>();
+    private NetworkPrefabRegistry _networkPrefabRegistry;
     public List<Slot> Slots
     {
         get => CurrentNetworkInstance.Slots;
@@ -71,6 +72,38 @@ public partial class NetworkSystem : MonoBehaviour
             return null;
         }
     }
+
+    public bool TryGetPrefabId(PrefabDefinition prefabDefinition, out string prefabID)
+    {
+        if (prefabDefinition == null)
+        {
+            prefabID = null;
+            return false;
+        }
+
+        if (_networkPrefabIdsByDefinition.TryGetValue(prefabDefinition, out prefabID))
+        {
+            return true;
+        }
+
+        if (_networkPrefabsById.Count == 0)
+        {
+            RebuildNetworkPrefabLookup();
+        }
+
+        return _networkPrefabIdsByDefinition.TryGetValue(prefabDefinition, out prefabID);
+    }
+
+    public string GetPrefabId(PrefabDefinition prefabDefinition)
+    {
+        if (TryGetPrefabId(prefabDefinition, out string prefabID))
+        {
+            return prefabID;
+        }
+
+        Debug.LogError($"PrefabDefinition '{prefabDefinition?.name}' is not mapped in NetworkPrefabRegistry.");
+        return null;
+    }
     public List<PlayerData> GetPlayerData()
     {
         return CurrentNetworkInstance.Players.Select(p => new PlayerData(
@@ -103,27 +136,45 @@ public partial class NetworkSystem : MonoBehaviour
     public void RebuildNetworkPrefabLookup()
     {
         _networkPrefabsById.Clear();
-        //_networkPrefabIdsByPrefab.Clear();
+        _networkPrefabIdsByDefinition.Clear();
 
-        PrefabDefinition[] itemDefinitions = Resources.LoadAll<PrefabDefinition>("Prefabs");
-        foreach (PrefabDefinition itemDefinition in itemDefinitions)
+        _networkPrefabRegistry = Resources.Load<NetworkPrefabRegistry>("Prefabs/NetworkPrefabRegistry");
+        if (_networkPrefabRegistry == null)
         {
-            if (itemDefinition == null || itemDefinition.itemPrefab == null || string.IsNullOrWhiteSpace(itemDefinition.prefabID))
-            {
-                continue;
-            }
-
-            if (_networkPrefabsById.ContainsKey(itemDefinition.prefabID))
-            {
-                Debug.LogError($"Duplicate item prefab ID '{itemDefinition.prefabID}' found while building network prefab lookup.");
-                continue;
-            }
-
-            _networkPrefabsById.Add(itemDefinition.prefabID, itemDefinition);
-            //_networkPrefabIdsByPrefab[itemDefinition.itemPrefab] = itemDefinition.prefabID;
+            Debug.LogError("NetworkPrefabRegistry not found at Resources/Prefabs/NetworkPrefabRegistry.");
+            return;
         }
 
-        Debug.Log($"Loaded {_networkPrefabsById.Count} network prefab(s) from item definitions.");
+        foreach (NetworkPrefabRegistry.Entry entry in _networkPrefabRegistry.Entries)
+        {
+            if (entry == null || entry.PrefabDefinition == null || entry.PrefabDefinition.itemPrefab == null || string.IsNullOrWhiteSpace(entry.PrefabId))
+            {
+                continue;
+            }
+
+            if (_networkPrefabsById.ContainsKey(entry.PrefabId))
+            {
+                Debug.LogError($"Duplicate network prefab ID '{entry.PrefabId}' found while building network prefab lookup.");
+                continue;
+            }
+
+            if (_networkPrefabIdsByDefinition.ContainsKey(entry.PrefabDefinition))
+            {
+                Debug.LogError($"PrefabDefinition '{entry.PrefabDefinition.name}' is mapped to multiple network prefab IDs.");
+                continue;
+            }
+
+            _networkPrefabsById.Add(entry.PrefabId, entry.PrefabDefinition);
+            _networkPrefabIdsByDefinition.Add(entry.PrefabDefinition, entry.PrefabId);
+
+            NetworkPrefabIdentity identity = entry.PrefabDefinition.itemPrefab.GetComponent<NetworkPrefabIdentity>();
+            if (identity != null)
+            {
+                identity.PrefabID = entry.PrefabId;
+            }
+        }
+
+        Debug.Log($"Loaded {_networkPrefabsById.Count} network prefab(s) from NetworkPrefabRegistry.");
     }
 
     //public bool TryGetNetworkPrefab(string prefabID, out GameObject prefab)

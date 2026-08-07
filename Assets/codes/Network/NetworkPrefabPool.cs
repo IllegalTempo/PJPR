@@ -7,17 +7,19 @@ namespace Assets.codes.Network
     public class NetworkPrefabPool
     {
         public readonly PrefabDefinition prefabDefinition;
+        private readonly string prefabId;
         private readonly int PoolSize;
         private Queue<NetworkGameObject> Pool;
         private readonly HashSet<NetworkGameObject> pooledObjects = new HashSet<NetworkGameObject>();
         private readonly Transform poolRoot;
 
-        public NetworkPrefabPool(PrefabDefinition prefabDefinition, int poolSize)
+        public NetworkPrefabPool(PrefabDefinition prefabDefinition, string prefabId, int poolSize)
         {
             this.prefabDefinition = prefabDefinition;
+            this.prefabId = prefabId;
             PoolSize = Mathf.Max(0, poolSize);
             Pool = new Queue<NetworkGameObject>(PoolSize);
-            poolRoot = new GameObject($"{prefabDefinition.prefabID}_NetworkPrefabPool").transform;
+            poolRoot = new GameObject($"{prefabId}_NetworkPrefabPool").transform;
             Prewarm();
         }
 
@@ -59,14 +61,14 @@ namespace Assets.codes.Network
             NetworkGameObject nobj = obj.GetComponent<NetworkGameObject>();
             if (nobj == null)
             {
-                Debug.LogError($"The prefab {prefabDefinition.prefabID} does not have a NetworkGameObject component attached.");
+                Debug.LogError($"The prefab {prefabId} does not have a NetworkGameObject component attached.");
                 Object.Destroy(obj);
                 return null;
             }
 
             if (nobj.Identity != null)
             {
-                nobj.Identity.Identifier = $"__POOL_{prefabDefinition.prefabID}_{Pool.Count}";
+                nobj.Identity.Identifier = $"__POOL_{prefabId}_{Pool.Count}";
                 nobj.Identity.IsPooled = true;
             }
 

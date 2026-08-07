@@ -192,7 +192,7 @@ public class Packet : IDisposable
     public void Write(SlotSnapshot snapshot)
     {
         Write(snapshot.SlotId);
-        Write(snapshot.AttachedItemId);
+        Write(snapshot.AttachedItemNetworkID);
         Write(snapshot.rotation);
     }
     public void Write(Array array)

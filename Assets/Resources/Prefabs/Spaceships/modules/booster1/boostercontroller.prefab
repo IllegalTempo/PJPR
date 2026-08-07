@@ -163,8 +163,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.67, y: 0.5872469, z: 2.0078561}
-  m_Center: {x: 0, y: -1.18, z: -0.0019675493}
+  m_Size: {x: 1.04, y: 0.5872469, z: 2.9806006}
+  m_Center: {x: 0, y: -1.18, z: 0.48440468}
 --- !u!114 &-4908613047248667501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,14 +251,19 @@ PrefabInstance:
       addedObject: {fileID: 6011548503800670852}
     - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1739627219126747447}
-    - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 3256549622313674282}
     - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3786224641481660482}
+    - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4420222279032356122}
   m_SourcePrefab: {fileID: 100100000, guid: 610ceae007328a142a34613f28094981, type: 3}
+--- !u!4 &785665414616551125 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3879950021558641372, guid: 610ceae007328a142a34613f28094981, type: 3}
+  m_PrefabInstance: {fileID: 4665896936929088497}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5136955667336180762 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 610ceae007328a142a34613f28094981, type: 3}
@@ -287,24 +292,6 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
---- !u!114 &1739627219126747447
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6964684324173290494}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8829f69b96f24074a8a1d222b84ca1c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.mechanics.slidercontroller
-  smoothing: 12
-  stepCount: 3
-  sliderSensitivity: 3
-  minSlide: -1
-  maxSlide: 2
-  slideAxis: {x: 0, y: 0, z: 1}
 --- !u!114 &3256549622313674282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,3 +327,35 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.030067561, y: 0.056002133, z: 0.041458074}
   m_Center: {x: 0, y: 0.0009867109, z: -0.010028463}
+--- !u!114 &4420222279032356122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6964684324173290494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8829f69b96f24074a8a1d222b84ca1c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.mechanics.SliderController
+  onStepChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -4908613047248667501}
+        m_TargetAssemblyTypeName: Assets.codes.spaceship.ModuleController, Assembly-CSharp
+        m_MethodName: SetModuleDataInt
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  smoothing: 12
+  stepCount: 3
+  slider: {fileID: 785665414616551125}
+  minSlide: 0
+  maxSlide: 1

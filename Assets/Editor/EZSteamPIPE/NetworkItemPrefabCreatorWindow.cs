@@ -8,6 +8,7 @@ using UnityEngine;
 public class NetworkItemPrefabCreatorWindow : EditorWindow
 {
     private const string PrefabRoot = "Assets/Resources/Prefabs";
+    private const string RegistryPath = PrefabRoot + "/NetworkPrefabRegistry.asset";
 
     private string _group = "";
     private string _prefabName = "NewNetworkItem";
@@ -37,7 +38,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
     private void OnGUI()
     {
         GUILayout.Label("Create Network Item Prefab", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Creates a prefab instance in the open scene, adds NetworkPrefabIdentity, Item, and NetworkGameObject, then creates an ItemDefinition with the canonical prefab ID.", MessageType.Info);
+        EditorGUILayout.HelpBox("Creates a prefab instance in the open scene, adds NetworkPrefabIdentity, Item, and NetworkGameObject, then creates a PrefabDefinition and registry entry with the canonical prefab ID.", MessageType.Info);
 
         EditorGUILayout.Space(8);
         EditorGUI.BeginChangeCheck();
@@ -251,6 +252,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
 
         PrefabDefinition itemDefinition = CreateItemDefinition(prefabAsset);
         AssignItemDefinition(instance, prefabAsset, itemDefinition);
+        AddRegistryEntry(_prefabId.Trim(), itemDefinition);
         EditorSceneManager.MarkSceneDirty(instance.scene);
         Selection.activeGameObject = instance;
         EditorGUIUtility.PingObject(prefabAsset);
@@ -270,7 +272,6 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         itemDefinition.itemName = _prefabName.Trim();
         itemDefinition.itemDescription = _itemDescription;
         itemDefinition.itemPrefab = prefabAsset;
-        itemDefinition.prefabID = _prefabId.Trim();
         itemDefinition.maxStackSize = Mathf.Max(1, _maxStackSize);
         itemDefinition.holdState = new ItemSnapshot
         {
@@ -377,23 +378,45 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
             return false;
         }
 
-        if (!AssetDatabase.IsValidFolder(PrefabRoot))
+        NetworkPrefabRegistry registry = AssetDatabase.LoadAssetAtPath<NetworkPrefabRegistry>(RegistryPath);
+        if (registry == null)
         {
             return false;
         }
 
-        string[] guids = AssetDatabase.FindAssets("t:ItemDefinition", new[] { PrefabRoot });
-        foreach (string guid in guids)
+        foreach (NetworkPrefabRegistry.Entry entry in registry.Entries)
         {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            PrefabDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<PrefabDefinition>(assetPath);
-            if (itemDefinition != null && itemDefinition.prefabID == prefabID)
+            if (entry != null && entry.PrefabId == prefabID)
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static void AddRegistryEntry(string prefabId, PrefabDefinition itemDefinition)
+    {
+        NetworkPrefabRegistry registry = AssetDatabase.LoadAssetAtPath<NetworkPrefabRegistry>(RegistryPath);
+        if (registry == null)
+        {
+            EnsureFolder(PrefabRoot);
+            registry = ScriptableObject.CreateInstance<NetworkPrefabRegistry>();
+            AssetDatabase.CreateAsset(registry, RegistryPath);
+        }
+
+        SerializedObject registryObject = new SerializedObject(registry);
+        SerializedProperty entries = registryObject.FindProperty("entries");
+        int index = entries.arraySize;
+        entries.InsertArrayElementAtIndex(index);
+
+        SerializedProperty entry = entries.GetArrayElementAtIndex(index);
+        entry.FindPropertyRelative("PrefabId").stringValue = prefabId;
+        entry.FindPropertyRelative("PrefabDefinition").objectReferenceValue = itemDefinition;
+
+        registryObject.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(registry);
+        AssetDatabase.SaveAssets();
     }
 
     private string GetPrefabPath()

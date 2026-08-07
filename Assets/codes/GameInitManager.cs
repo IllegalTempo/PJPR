@@ -151,7 +151,7 @@ public class GameInitManager : MonoBehaviour
     {
         foreach (NetworkObjectSnapshot snapshot in saveData.NetworkObjects)
         {
-            await NetworkSystem.Instance.CreateNetworkObject(snapshot.PrefabId, snapshot.Position, snapshot.Rotation, snapshot.Owner, uid: snapshot.Uid);
+            await NetworkSystem.Instance.CreateNetworkObject(snapshot.PrefabId, snapshot.Position, snapshot.Rotation, snapshot.Owner, networkID: snapshot.Uid);
         }
     }
 
@@ -159,20 +159,20 @@ public class GameInitManager : MonoBehaviour
     {
         foreach (SlotSnapshot snapshot in saveData)
         {
-            if (snapshot.AttachedItemId == string.Empty)
+            if (snapshot.AttachedItemNetworkID == string.Empty)
             {
                 Debug.Log("No item attached to slot: " + snapshot.SlotId);
                 continue;
             }
             Slot slot = NetworkSystem.Instance.GetComponentOfIdentity<Slot>(snapshot.SlotId);
-            Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemId);
+            Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemNetworkID);
             if (attachedItem != null && slot != null && attachedItem != null)
             {
-                slot.Attach(attachedItem, snapshot.rotation);
+                slot.SendAttach(attachedItem, snapshot.rotation);
             }
             else
             {
-                Debug.LogError($"Failed to attach item {snapshot.AttachedItemId} to slot {snapshot.SlotId}. Slot or Item not found.");
+                Debug.LogError($"Failed to attach item {snapshot.AttachedItemNetworkID} to slot {snapshot.SlotId}. Slot or Item not found.");
             }
         }
     }

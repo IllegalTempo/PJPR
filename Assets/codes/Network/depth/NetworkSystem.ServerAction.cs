@@ -21,21 +21,21 @@ public partial class NetworkSystem
     /// <param name="owner"></param>
     /// <param name="parent"></param>
     /// <param name="isCombining"></param>
-    /// <param name="uid"></param>
+    /// <param name="networkID"></param>
     /// <returns></returns>
-    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string uid = null)
+    public async UniTask<NetworkGameObject> CreateNetworkObject(string prefabID, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string networkID = null)
     { 
         if (IsOnline && !IsServer) return null;
-        if(uid == null)
+        if(networkID == null)
         {
-            uid = Guid.NewGuid().ToString();
+            networkID = Guid.NewGuid().ToString();
 
         }
 
-        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, uid, pos, rot, parent);
+        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(prefabID, owner, networkID, pos, rot, parent);
         if (IsOnline)
         {
-            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, uid, pos, rot, owner,isCombining));
+            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(prefabID, networkID, pos, rot, owner,isCombining));
 
         }
 
@@ -51,22 +51,22 @@ public partial class NetworkSystem
         GameCore.Instance.DestroyNetworkObject(identifier);
 
     }
-    public async UniTask<NetworkGameObject> CreateNetworkObject(PrefabDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false)
+    public async UniTask<NetworkGameObject> CreateNetworkObject(PrefabDefinition prefab, Vector3 pos, Quaternion rot, ulong owner, Transform parent = null, bool isCombining = false, string networkID = null)
     {
-        return await CreateNetworkObject(prefab.prefabID, pos, rot, owner, parent, isCombining);
+        return await CreateNetworkObject(GetPrefabId(prefab), pos, rot, owner, parent, isCombining, networkID);
     }
     public async UniTask<CombinedProcessableItem> CreateNewCombinedItem(Item it1, Item it2)
     {
         if (IsOnline && !IsServer) return null;
-        string uid = Guid.NewGuid().ToString();
+        string networkID = Guid.NewGuid().ToString();
         string it1id = it1.GetNetworkObject().Identity.Identifier;
         string it2id = it2.GetNetworkObject().Identity.Identifier;
 
         string spawningprefabID = "CPI";
-        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(spawningprefabID, 0, uid, it1.transform.position, it1.transform.rotation, null);
+        NetworkGameObject nobj = await GameCore.Instance.spawnNetworkPrefab(spawningprefabID, 0, networkID, it1.transform.position, it1.transform.rotation, null);
         if (IsOnline)
         {
-            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(spawningprefabID, uid, it1.transform.position, it1.transform.rotation, 0, true, it1id, it2id));
+            NetworkRouter.Instance.DistributeMessageToReady(new NMS_Server_NewObject(spawningprefabID, networkID, it1.transform.position, it1.transform.rotation, 0, true, it1id, it2id));
 
         }
         CombinedProcessableItem cpi = nobj.GetComponent<CombinedProcessableItem>();

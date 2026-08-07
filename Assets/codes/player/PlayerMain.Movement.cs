@@ -71,13 +71,15 @@ public partial class PlayerMain: MonoBehaviour
         Selectable before = seenObject;
         if (Physics.Raycast(ray, out hit, 100f))
         {
-            bool isSelectableLayer = ((GameCore.Instance.Masks.SelectableItems.value & (1 << hit.transform.gameObject.layer)) != 0);
-            Slot slot = hit.collider.GetComponent<Slot>();
+            Debug.DrawLine(ray.origin, hit.point, Color.red);
+            Selectable selectable = hit.collider.GetComponentInParent<Selectable>();
+            GameObject selectableLayerObject = selectable != null ? selectable.gameObject : hit.transform.gameObject;
+            bool isSelectableLayer = ((GameCore.Instance.Masks.SelectableItems.value & (1 << selectableLayerObject.layer)) != 0);
+            Slot slot = hit.collider.GetComponentInParent<Slot>();
             bool isSlotnFit = slot != null && holdingItem != null && holdingItem.FitIn(slot);
             if (isSelectableLayer) // && (slot == null || isSlotnFit)
             {
-                seenObject = hit.collider.GetComponent<Selectable>();
-
+                seenObject = selectable;
 
             } else
             {

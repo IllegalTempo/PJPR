@@ -416,7 +416,7 @@ public partial class PlayerMain : MonoBehaviour
                     case Slot s:
                         if (previtem.FitIn(s))
                         {
-                            s.SendAttach(previtem);
+                            s.SendAttach(previtem,previtem.transform.rotation);
                         }
                         break;
                 }

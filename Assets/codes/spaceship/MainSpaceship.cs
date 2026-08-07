@@ -26,7 +26,7 @@ public class MainSpaceship : MonoBehaviour
     private OnSpaceshipCanvasDisplay spaceshipDisplay;
     public Transform ModuleControlSpawnPoint;
 
-
+    public static string MainSpaceshipNetworkID = "MAINSPACESHIP";
 
     private int waterLevel = 0;
     public int WaterLevel
@@ -41,6 +41,10 @@ public class MainSpaceship : MonoBehaviour
         {
             return waterLevel;
         }
+    }
+    public void AddNonCentralForce(Vector3 force, Vector3 position)
+    {
+        rb.AddForceAtPosition(force, position);
     }
     private void onUpdateWaterLevel()
     {
@@ -107,10 +111,10 @@ public class MainSpaceship : MonoBehaviour
         }
     }
     
-    public async UniTask<module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
+    public async UniTask<Module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
     {
         NetworkGameObject nobj = await NetworkSystem.Instance.CreateNetworkObject(ModulePrefabName, pos, rot, 0);
-        module module = nobj.GetComponent<module>();
+        Module module = nobj.GetComponent<Module>();
         
         return module;
 
@@ -132,7 +136,7 @@ public class MainSpaceship : MonoBehaviour
         return slotSnapshots;
     }
 
-    public void ConnectModule(module module, ModuleSlot slot)
+    public void ConnectModule(Module module, ModuleSlot slot)
     {
         if (module == null || slot == null)
         {

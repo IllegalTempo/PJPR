@@ -16,7 +16,6 @@ MonoBehaviour:
   itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 2643396718964329069, guid: 35bb0f184cdc0b2498e9314725fd5ce1, type: 3}
-  prefabID: qr_watercube
   maxStackSize: 64
   IsPoolPrefab: 1
   poolSize: 10

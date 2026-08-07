@@ -2,11 +2,10 @@
 using Assets.codes.spaceship;
 using UnityEngine;
 
-public class module : SpaceshipPart
+public class Module : SpaceshipPart
 {
     
     private ModuleSlot ConnectedTo;
-
 
     public void Init(ModuleSlot connectedTo)
     {
@@ -24,8 +23,34 @@ public class module : SpaceshipPart
         connectedTo.attachedModule = this;
 
     }
-    public virtual void ModuleUpdate()
+    protected override void Update()
     {
+        base.Update();
+        if (ConnectedTo != null)
+        {
+            ModuleUpdate();
+        }
+    }
+    protected virtual void ModuleUpdate()
+    {
+        // Called every frame when the module is installed on the spaceship
+    }
 
+}
+public class Module<T> : Module
+{
+    private T data;
+    public void SetData(T newData)
+    {
+        data = newData;
+        OnDataChanged(newData);
+    }
+    protected virtual void OnDataChanged(T newData)
+    {
+        // Called when the module data is changed
+    }
+    public T GetModuleData()
+    {
+        return data;
     }
 }

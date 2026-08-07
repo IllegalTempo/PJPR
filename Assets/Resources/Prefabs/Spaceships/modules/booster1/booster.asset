@@ -16,7 +16,6 @@ MonoBehaviour:
   itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 8382276501861436971, guid: 079c460b211d1ce41a06a13d9577e08f, type: 3}
-  prefabID: module_booster1
   maxStackSize: 64
   IsPoolPrefab: 0
   poolSize: 10

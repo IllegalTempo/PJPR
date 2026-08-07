@@ -1,14 +1,13 @@
 ﻿using Assets.codes.Network.Messages;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
-namespace Assets.codes.spaceship.mechanics
+namespace Assets.codes.machines
 {
-	public abstract class stepcontroller: Machine
+	public abstract class SteppedController: SyncedMachine
 	{
-        protected bool isGrabbed; //this is only limited to local player
-
-
+        public UnityEvent<int> onStepChanged;
         public float smoothing = 12f;
 
         [Header("Step Settings")]
@@ -17,28 +16,21 @@ namespace Assets.codes.spaceship.mechanics
         public int CurrentStep { get; private set; }
 
 
-        public override void ServerActionOnInteract()
-        {
-        }
-
-        public override void ShareActionOnInteract()
-        {
-        }
-        public override void OnInteract_press(PlayerMain who)
-        {
-            base.OnInteract_press(who);
-            isGrabbed = true;
-        }
-        public override void OnInteract_release(PlayerMain who)
-        {
-            base.OnInteract_release(who);
-            isGrabbed = false;
-        }
+        //public override void OnInteract_press(PlayerMain who)
+        //{
+        //    base.OnInteract_press(who);
+        //    isGrabbed = true;
+        //}
+        //public override void OnInteract_release(PlayerMain who)
+        //{
+        //    base.OnInteract_release(who);
+        //    isGrabbed = false;
+        //}
         protected override void Update()
         {
             base.Update();
-            if (isGrabbed)
-                DuringGrab(GameCore.Instance.Local_Player);
+            if (IsPressed)
+                DuringGrab(pressedByPlayer);
         }
         protected abstract void DuringGrab(PlayerMain who);
 
@@ -61,11 +53,10 @@ namespace Assets.codes.spaceship.mechanics
         {
             CurrentStep = newStep;
             VisualOnStep(newStep);
-
+            onStepChanged?.Invoke(newStep);
         }
         public virtual void OnStepChanged_Server(int newStep) //Server only when step is changed
         {
-
         }
         public abstract void VisualOnStep(int step);
     }

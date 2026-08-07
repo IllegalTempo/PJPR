@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.codes.machines
 {
-	public class QuantityResourceGenerator: Machine
+	public class QuantityResourceGenerator: SyncedMachine
 	{
 		[SerializeField] private PrefabDefinition resource;
 		Vector3 spawnpos;
@@ -18,14 +18,15 @@ namespace Assets.codes.machines
                 spawnpos = spawnSpot.position;
             }
         }
-        public override async void ServerActionOnInteract()
+        protected override async void ServerActionOnInteract_press(PlayerMain who)
 		{
-            Debug.Log($"[WaterGen] ServerActionOnInteract — spawning {resource?.prefabID}");
+            string resourcePrefabId = NetworkSystem.Instance.GetPrefabId(resource);
+            Debug.Log($"[WaterGen] ServerActionOnInteract — spawning {resourcePrefabId}");
 
-            if (resource != null)
+            if (!string.IsNullOrWhiteSpace(resourcePrefabId))
 			{
                 await UniTask.Delay(100);
-                NetworkSystem.Instance.CreateNetworkObject(resource.prefabID,spawnpos,Quaternion.identity,0).Forget();
+                NetworkSystem.Instance.CreateNetworkObject(resourcePrefabId,spawnpos,Quaternion.identity,0).Forget();
 			}
 		}
 		
@@ -33,7 +34,8 @@ namespace Assets.codes.machines
 		{
             Debug.Log($"[WaterGen] OnInteract — IsServer={NetworkSystem.Instance?.IsServer}, identity={identity?.Identifier}");
 
-            if (resource == null || string.IsNullOrWhiteSpace(resource.prefabID))
+            string resourcePrefabId = NetworkSystem.Instance.GetPrefabId(resource);
+            if (string.IsNullOrWhiteSpace(resourcePrefabId))
 			{
 				Debug.LogWarning($"{name} has no resource prefab ID.");
 				return;
@@ -41,13 +43,9 @@ namespace Assets.codes.machines
 
 			
             
-			string ResourcePrefabID = resource.prefabID;
             base.OnInteract_press(who);
             
         }
 
-        public override void ShareActionOnInteract()
-        {
-        }
     }
 }

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d8d45e1220866448858b54c1e81d192, type: 3}
+  m_Name: NetworkPrefabRegistry
+  m_EditorClassIdentifier: 
+  entries:
+  - PrefabId: Large
+    PrefabDefinition: {fileID: 11400000, guid: 12f61acb95e963b4b9c8d27343f64b88, type: 2}
+  - PrefabId: Medium
+    PrefabDefinition: {fileID: 11400000, guid: bd86f3152121d904fac01c8f7368cb03, type: 2}
+  - PrefabId: Small
+    PrefabDefinition: {fileID: 11400000, guid: 2c2dadc5b62fd994886d4ef62cf5c4e4, type: 2}
+  - PrefabId: Warning
+    PrefabDefinition: {fileID: 11400000, guid: de24b476b325ef64da3976b91cd3b219, type: 2}
+  - PrefabId: CPI
+    PrefabDefinition: {fileID: 11400000, guid: 750b6b2a70f051c43a6b7d6bda0236c3, type: 2}
+  - PrefabId: qr_watercube
+    PrefabDefinition: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
+  - PrefabId: module_booster1
+    PrefabDefinition: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
+  - PrefabId: controllers_boostercontroller
+    PrefabDefinition: {fileID: 11400000, guid: 151d386c6b153e84e8b7b98536dd4d0a, type: 2}

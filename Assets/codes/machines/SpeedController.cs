@@ -3,9 +3,9 @@ using System.Collections;
 using UnityEngine.Events;
 using System;
 
-namespace Assets.codes.spaceship.mechanics
+namespace Assets.codes.machines
 {
-    public class SpeedController : Machine
+    public class SpeedController : SyncedMachine
     {
         [SerializeField]
         private int maxlevel = 6;
@@ -50,12 +50,8 @@ namespace Assets.codes.spaceship.mechanics
             rotationCoroutine = null;
         }
 
-        public override void ServerActionOnInteract()
-        {
 
-        }
-
-        public override void ShareActionOnInteract()
+        protected override void ShareActionOnInteract_press(PlayerMain who)
         {
             level = (level + 1) % maxlevel;
             //OnChangeSpeed.Invoke(level);

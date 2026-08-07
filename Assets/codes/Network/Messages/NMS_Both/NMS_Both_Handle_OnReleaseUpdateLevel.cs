@@ -1,4 +1,4 @@
-using Assets.codes.spaceship.mechanics;
+using Assets.codes.machines;
 using Steamworks;
 using System;
 using Unity.VisualScripting;
@@ -29,13 +29,13 @@ namespace Assets.codes.Network.Messages
 
         protected override void applyaction()
         {
-            stepcontroller PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<stepcontroller>(id);
+            SteppedController PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<SteppedController>(id);
             PacketReferencedMachine.OnStepChanged(level);
         }
 
         protected override void serverAction()
         {
-            stepcontroller PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<stepcontroller>(id);
+            SteppedController PacketReferencedMachine = NetworkSystem.Instance.GetComponentOfIdentity<SteppedController>(id);
             PacketReferencedMachine.OnStepChanged_Server(level);
         }
     }

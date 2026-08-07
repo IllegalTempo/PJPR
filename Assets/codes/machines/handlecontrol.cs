@@ -2,9 +2,9 @@
 using System.Collections;
 using Assets.codes.Network.Messages;
 
-namespace Assets.codes.spaceship.mechanics
+namespace Assets.codes.machines
 {
-    public class handlecontrol : stepcontroller
+    public class handlecontrol : SteppedController
     {
         public float pitchSensitivity = 3f;
         public float minPitch = -45f;

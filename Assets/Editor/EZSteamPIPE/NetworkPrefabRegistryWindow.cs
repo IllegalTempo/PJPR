@@ -5,21 +5,22 @@ using UnityEngine;
 public class NetworkPrefabRegistryWindow : EditorWindow
 {
     private const string PrefabRoot = "Assets/Resources/Prefabs";
+    private const string RegistryPath = PrefabRoot + "/NetworkPrefabRegistry.asset";
 
-    private readonly List<PrefabDefinition> _itemDefinitions = new List<PrefabDefinition>();
-    private Vector2 _scroll;
+    private NetworkPrefabRegistry _registry;
+    private SerializedObject _serializedRegistry;
 
     [MenuItem("Tools/Network Objects/Prefab Lookup")]
     public static void ShowWindow()
     {
         NetworkPrefabRegistryWindow window = GetWindow<NetworkPrefabRegistryWindow>("Prefab Lookup");
         window.minSize = new Vector2(720, 480);
-        window.RefreshDefinitions();
+        window.LoadRegistry();
     }
 
     private void OnEnable()
     {
-        RefreshDefinitions();
+        LoadRegistry();
     }
 
     private void OnGUI()
@@ -29,70 +30,105 @@ public class NetworkPrefabRegistryWindow : EditorWindow
             GUILayout.Label("Network Prefab Lookup", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Refresh", GUILayout.Width(90)))
+            if (GUILayout.Button("Create/Load", GUILayout.Width(90)))
             {
-                RefreshDefinitions();
+                LoadOrCreateRegistry();
             }
         }
 
-        EditorGUILayout.HelpBox("Runtime network prefab lookup is generated from ItemDefinition assets under " + PrefabRoot + ". The ItemDefinition prefabID is the source of truth.", MessageType.Info);
+        EditorGUILayout.HelpBox("Runtime network prefab lookup is loaded from " + RegistryPath + ". This registry is the source of truth for prefab IDs.", MessageType.Info);
+
+        if (_registry == null)
+        {
+            EditorGUILayout.HelpBox("No NetworkPrefabRegistry asset found.", MessageType.Warning);
+            if (GUILayout.Button("Create Registry", GUILayout.Height(28)))
+            {
+                LoadOrCreateRegistry();
+            }
+
+            return;
+        }
 
         DrawSummary();
         DrawEntries();
     }
 
-    private void RefreshDefinitions()
+    private void LoadRegistry()
     {
-        _itemDefinitions.Clear();
+        _registry = AssetDatabase.LoadAssetAtPath<NetworkPrefabRegistry>(RegistryPath);
+        _serializedRegistry = _registry != null ? new SerializedObject(_registry) : null;
+        Repaint();
+    }
 
-        if (!AssetDatabase.IsValidFolder(PrefabRoot))
+    private void LoadOrCreateRegistry()
+    {
+        LoadRegistry();
+        if (_registry != null)
         {
             return;
         }
 
-        string[] guids = AssetDatabase.FindAssets("t:ItemDefinition", new[] { PrefabRoot });
-        foreach (string guid in guids)
-        {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            PrefabDefinition itemDefinition = AssetDatabase.LoadAssetAtPath<PrefabDefinition>(assetPath);
-            if (itemDefinition != null)
-            {
-                _itemDefinitions.Add(itemDefinition);
-            }
-        }
-
-        _itemDefinitions.Sort((left, right) => string.CompareOrdinal(left.prefabID, right.prefabID));
+        EnsureFolder(PrefabRoot);
+        _registry = ScriptableObject.CreateInstance<NetworkPrefabRegistry>();
+        AssetDatabase.CreateAsset(_registry, RegistryPath);
+        AssetDatabase.SaveAssets();
+        _serializedRegistry = new SerializedObject(_registry);
+        Selection.activeObject = _registry;
+        EditorGUIUtility.PingObject(_registry);
         Repaint();
+    }
+
+    private static void EnsureFolder(string folderPath)
+    {
+        string[] parts = folderPath.Split('/');
+        string current = parts[0];
+
+        for (int i = 1; i < parts.Length; i++)
+        {
+            string next = current + "/" + parts[i];
+            if (!AssetDatabase.IsValidFolder(next))
+            {
+                AssetDatabase.CreateFolder(current, parts[i]);
+            }
+
+            current = next;
+        }
     }
 
     private void DrawSummary()
     {
         int missingIdCount = 0;
+        int missingDefinitionCount = 0;
         int missingPrefabCount = 0;
         int duplicateIdCount = 0;
         HashSet<string> seenIds = new HashSet<string>();
 
-        foreach (PrefabDefinition itemDefinition in _itemDefinitions)
+        foreach (NetworkPrefabRegistry.Entry entry in _registry.Entries)
         {
-            if (string.IsNullOrWhiteSpace(itemDefinition.prefabID))
+            if (entry == null || string.IsNullOrWhiteSpace(entry.PrefabId))
             {
                 missingIdCount++;
             }
-            else if (!seenIds.Add(itemDefinition.prefabID))
+            else if (!seenIds.Add(entry.PrefabId))
             {
                 duplicateIdCount++;
             }
 
-            if (itemDefinition.itemPrefab == null)
+            if (entry == null || entry.PrefabDefinition == null)
+            {
+                missingDefinitionCount++;
+            }
+            else if (entry.PrefabDefinition.itemPrefab == null)
             {
                 missingPrefabCount++;
             }
         }
 
-        MessageType messageType = missingIdCount == 0 && missingPrefabCount == 0 && duplicateIdCount == 0 ? MessageType.Info : MessageType.Warning;
+        MessageType messageType = missingIdCount == 0 && missingDefinitionCount == 0 && missingPrefabCount == 0 && duplicateIdCount == 0 ? MessageType.Info : MessageType.Warning;
         EditorGUILayout.HelpBox(
-            "Item definitions: " + _itemDefinitions.Count +
+            "Registry entries: " + _registry.Entries.Count +
             ", missing IDs: " + missingIdCount +
+            ", missing definitions: " + missingDefinitionCount +
             ", missing prefabs: " + missingPrefabCount +
             ", duplicate IDs: " + duplicateIdCount + ".",
             messageType);
@@ -100,23 +136,9 @@ public class NetworkPrefabRegistryWindow : EditorWindow
 
     private void DrawEntries()
     {
-        using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
-        {
-            GUILayout.Label("Prefab ID", EditorStyles.boldLabel, GUILayout.Width(220));
-            GUILayout.Label("Item Definition", EditorStyles.boldLabel, GUILayout.Width(220));
-            GUILayout.Label("Prefab", EditorStyles.boldLabel);
-        }
-
-        _scroll = EditorGUILayout.BeginScrollView(_scroll);
-        foreach (PrefabDefinition itemDefinition in _itemDefinitions)
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.SelectableLabel(itemDefinition.prefabID, GUILayout.Width(220), GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                EditorGUILayout.ObjectField(itemDefinition, typeof(PrefabDefinition), false, GUILayout.Width(220));
-                EditorGUILayout.ObjectField(itemDefinition.itemPrefab, typeof(GameObject), false);
-            }
-        }
-        EditorGUILayout.EndScrollView();
+        _serializedRegistry.Update();
+        SerializedProperty entries = _serializedRegistry.FindProperty("entries");
+        EditorGUILayout.PropertyField(entries, true);
+        _serializedRegistry.ApplyModifiedProperties();
     }
 }

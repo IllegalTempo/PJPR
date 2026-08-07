@@ -48,10 +48,13 @@ namespace Assets.codes.Network.Messages
             if (warningDef.IsPoolPrefab)
             {
                 NetworkPrefabPool pool = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(warningDef);
-                NetworkGameObject nobj = pool.InstantiatePoolNetworkPrefab(
-                    System.Guid.NewGuid().ToString(), Vector3.zero, Quaternion.identity);
-                if (nobj != null)
-                    warningObj = nobj.gameObject;
+                if (pool != null)
+                {
+                    NetworkGameObject nobj = pool.InstantiatePoolNetworkPrefab(
+                        System.Guid.NewGuid().ToString(), Vector3.zero, Quaternion.identity);
+                    if (nobj != null)
+                        warningObj = nobj.gameObject;
+                }
             }
 
             if (warningObj == null && warningDef.itemPrefab != null)

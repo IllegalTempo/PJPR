@@ -16,7 +16,6 @@ MonoBehaviour:
   itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 7370891376704099619, guid: a1b0b1aed084bdc47ae8f3d7ada49f8e, type: 3}
-  prefabID: controllers_boostercontroller
   maxStackSize: 64
   IsPoolPrefab: 0
   poolSize: 10

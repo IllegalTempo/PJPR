@@ -16,7 +16,6 @@ MonoBehaviour:
   itemDescription: 
   itemIcon: {fileID: 0}
   itemPrefab: {fileID: 8080907634044407302, guid: 48f457963d7e2154da90ab4168acd040, type: 3}
-  prefabID: Medium
   maxStackSize: 64
   IsPoolPrefab: 1
   poolSize: 10

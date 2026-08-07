@@ -12,7 +12,6 @@ public class PrefabDefinition : ScriptableObject
     public string itemDescription;
     public Sprite itemIcon;
     public GameObject itemPrefab;
-    public string prefabID;
     public int maxStackSize = 64;
 
 
@@ -35,14 +34,6 @@ public class PrefabDefinition : ScriptableObject
         if (itemPrefab == null)
         {
             return;
-        }
-
-        NetworkPrefabIdentity identity = itemPrefab.GetComponent<NetworkPrefabIdentity>();
-        if (identity != null && identity.PrefabID != prefabID)
-        {
-            identity.PrefabID = prefabID;
-            EditorUtility.SetDirty(identity);
-            EditorUtility.SetDirty(itemPrefab);
         }
 
         NetworkGameObject nobj = itemPrefab.GetComponent<NetworkGameObject>();

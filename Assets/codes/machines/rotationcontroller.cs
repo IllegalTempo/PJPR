@@ -1,15 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Assets.codes.spaceship.mechanics
+namespace Assets.codes.machines
 {
-    public class RotationController : Interactable
+    public class RotationController : SyncedMachine
     {
         public float rotationSpeed = 300f;
         public float returnSpeed = 2f;
         private Quaternion originalRotation;
 
-        private bool isDragging = false;
         private void Awake()
         {
             originalRotation = transform.rotation;
@@ -18,7 +17,7 @@ namespace Assets.codes.spaceship.mechanics
         protected override void Update()
         {
 
-            if (isDragging)
+            if (IsPressed)
             {
                 PlayerMain player = GameCore.Instance.Local_Player;
                 float mouseX = player.lookinput.x;
@@ -51,13 +50,5 @@ namespace Assets.codes.spaceship.mechanics
 
         }
 
-        public override void OnInteract_press(PlayerMain who)
-        {
-            isDragging = true;
-        }
-        public override void OnInteract_release(PlayerMain who)
-        {
-            isDragging = false;
-        }
     }
 }

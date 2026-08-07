@@ -19,6 +19,27 @@ public class GameSaveData
         NetworkObjects = networkObjectSnapshots ?? new List<NetworkObjectSnapshot>();
         SlotRelationships = slotSnapshots ?? new List<SlotSnapshot>();
     }
+    public void AddModule(string slotId, string moduleprefabid)
+    {
+        NetworkObjectSnapshot snapshot = new NetworkObjectSnapshot(Guid.NewGuid().ToString(), 0, moduleprefabid, Vector3.zero, Quaternion.identity);
+        NetworkObjects.Add(snapshot);
+        SlotSnapshot existingSlot = SlotRelationships.Find(slot => slot.SlotId == slotId);
+        if (existingSlot.SlotId != null)
+        {
+            // Update the existing slot with the new module prefab ID
+            existingSlot.AttachedItemNetworkID = snapshot.Uid;
+            int index = SlotRelationships.IndexOf(existingSlot);
+            SlotRelationships[index] = existingSlot;
+        }
+        else
+        {
+            // Create a new slot snapshot and add it to the list
+            SlotSnapshot newSlot = new SlotSnapshot(slotId, snapshot.Uid, Quaternion.identity);
+            SlotRelationships.Add(newSlot);
+        }
+
+
+    }
 }
 
 
@@ -71,13 +92,13 @@ public struct NetworkObjectSnapshot
 public struct SlotSnapshot
 {
     public string SlotId;
-    public string AttachedItemId;
+    public string AttachedItemNetworkID;
     public Quaternion rotation;
 
     public SlotSnapshot(string slotId, string attachedItemId, Quaternion rotation)
     {
         SlotId = slotId;
-        AttachedItemId = attachedItemId;
+        AttachedItemNetworkID = attachedItemId;
         this.rotation = rotation;
     }
 }

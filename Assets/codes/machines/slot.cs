@@ -37,9 +37,9 @@ public class Slot : Selectable //slot is the place where items are put in to be 
 
 
 
-    public void SendAttach(Item item)
+    public void SendAttach(Item item, Quaternion rot)
     {
-        NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier,item.transform.rotation);
+        NMS_Both_SlotAttach message = new NMS_Both_SlotAttach(Identity.Identifier,item.GetNetworkObject().Identity.Identifier,rot);
         message.SendMessageAsServerOrClient();
     }
     public void SendDetach()

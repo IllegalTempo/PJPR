@@ -45,12 +45,18 @@ namespace Assets.codes.Network
 
         public NetworkPrefabPool GetPool(PrefabDefinition prefabDefinition)
         {
-            if (!PrefabPools.ContainsKey(prefabDefinition.prefabID))
+            string prefabId = NetworkSystem.Instance.GetPrefabId(prefabDefinition);
+            if (string.IsNullOrWhiteSpace(prefabId))
             {
-                PrefabPools[prefabDefinition.prefabID] = new NetworkPrefabPool(prefabDefinition, prefabDefinition.poolSize);
+                return null;
             }
 
-            return PrefabPools[prefabDefinition.prefabID];
+            if (!PrefabPools.ContainsKey(prefabId))
+            {
+                PrefabPools[prefabId] = new NetworkPrefabPool(prefabDefinition, prefabId, prefabDefinition.poolSize);
+            }
+
+            return PrefabPools[prefabId];
         }
 
         public void CleanupScene()

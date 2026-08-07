@@ -35,7 +35,6 @@ public partial class GameCore : MonoBehaviour
     private GameObject PlayerSpawn;
     //[SerializeField]
     //private Transform[] SpaceshipSpawns;
-    private int nouidindex = 0;
     //public int CurrentMissionLevel = 0;
 
     public long RandomSeed;
@@ -81,11 +80,6 @@ public partial class GameCore : MonoBehaviour
             LoadSave = true,
             NetworkSyncTimeoutSeconds = NetworkSystem.TIMEOUTSECONDS
         });
-    }
-    public string newNOUID()
-    {
-        nouidindex++;
-        return $"nouid_{nouidindex}";
     }
     private async UniTask InitPlayerControl()
     {
@@ -177,9 +171,9 @@ public partial class GameCore : MonoBehaviour
     //        Debug.Log("Cannot load decorations");
     //    }
     //}
-    public async UniTask<NetworkGameObject> spawnNetworkPrefab(string prefabID,ulong owner, string uid, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
+    public async UniTask<NetworkGameObject> spawnNetworkPrefab(string prefabID,ulong owner, string networkID, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
-        Debug.Log($"Created NetworkObject: {prefabID}, uid: {uid}");
+        Debug.Log($"Created NetworkObject: {prefabID}, networkID: {networkID}");
         PrefabDefinition prefabDef = NetworkSystem.Instance.GetPrefabDefinition(prefabID);
         GameObject prefab = prefabDef.itemPrefab;
         bool isPoolPrefab = prefabDef.IsPoolPrefab;
@@ -187,7 +181,11 @@ public partial class GameCore : MonoBehaviour
         NetworkGameObject nobj = null;
         if (isPoolPrefab)
         {
-            nobj = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(prefabDef).InstantiatePoolNetworkPrefab(uid, pos, rot, parent);
+            NetworkPrefabPool pool = NetworkSystem.Instance.CurrentNetworkInstance.GetPool(prefabDef);
+            if (pool != null)
+            {
+                nobj = pool.InstantiatePoolNetworkPrefab(networkID, pos, rot, parent);
+            }
         }
         if (nobj == null)
         {
@@ -200,7 +198,7 @@ public partial class GameCore : MonoBehaviour
             return null;
         }
 
-        nobj.OnInstantiate(uid, prefabID,owner);
+        nobj.OnInstantiate(networkID, prefabID,owner);
         nobj.SetMovement(pos, rot);
         await nobj.Identity.StartTask;
         return nobj;
