@@ -59,7 +59,8 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.UpdateWorld_Velocity, NMS_Server_UpdateWorld_Velocity.Read },
             { (int)packets.ServerPackets.UpdateWorld_Rotation, NMS_Server_UpdateWorld_Rotation.Read },
             { (int)packets.ServerPackets.WorldInitBegin, NMS_Server_WorldInitBegin.Read },
-            { (int)packets.ServerPackets.WorldInitComplete, NMS_Server_WorldInitComplete.Read },};
+            { (int)packets.ServerPackets.WorldInitComplete, NMS_Server_WorldInitComplete.Read },
+            { (int)packets.ServerPackets.SyncMainSpaceshipRigidbody, NMS_Server_SyncMainSpaceshipRigidbody.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {

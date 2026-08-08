@@ -1,4 +1,5 @@
 using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.Network.Messages;
 using Assets.codes.spaceship;
 using Assets.codes.spaceship.modules;
 using Cysharp.Threading.Tasks;
@@ -26,6 +27,8 @@ public class MainSpaceship : MonoBehaviour
     private OnSpaceshipCanvasDisplay spaceshipDisplay;
     [SerializeField, Min(0f)]
     private float forceDisplayMaxLocalOffset = 0f;
+    [SerializeField, Min(1f)]
+    private float rigidbodySyncRate = 20f;
     public Transform ModuleControlSpawnPoint;
 
     public static string MainSpaceshipNetworkID = "MAINSPACESHIP";
@@ -33,6 +36,9 @@ public class MainSpaceship : MonoBehaviour
     private int waterLevel = 0;
     private float forcePositionWeightSum;
     private float forceWeightedLocalXSum;
+    private float nextRigidbodySyncTime;
+    private uint rigidbodySyncTick;
+    private uint lastReceivedRigidbodySyncTick;
     public int WaterLevel
     {
         set
@@ -108,6 +114,7 @@ public class MainSpaceship : MonoBehaviour
         }
 
         UpdateForceDisplayWeight();
+        SendRigidbodyStateIfServer();
     }
 
     private void ApplyVelocity()
@@ -167,6 +174,59 @@ public class MainSpaceship : MonoBehaviour
     {
         forcePositionWeightSum = 0f;
         forceWeightedLocalXSum = 0f;
+    }
+
+    private void SendRigidbodyStateIfServer()
+    {
+        if (rb == null || NetworkSystem.Instance == null || NetworkRouter.Instance == null)
+        {
+            return;
+        }
+
+        if (!NetworkSystem.Instance.IsOnline || !NetworkSystem.Instance.IsServer)
+        {
+            return;
+        }
+
+        if (Time.time < nextRigidbodySyncTime)
+        {
+            return;
+        }
+
+        nextRigidbodySyncTime = Time.time + 1f / rigidbodySyncRate;
+        rigidbodySyncTick++;
+
+        NetworkRouter.Instance.DistributeMessageToReady(
+            new NMS_Server_SyncMainSpaceshipRigidbody(rb.position, rb.rotation, rb.linearVelocity, rb.angularVelocity, rigidbodySyncTick),
+            sendType: NetworkSendProfiles.State);
+    }
+
+    public void ApplyNetworkRigidbodyState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, uint tick)
+    {
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsServer)
+        {
+            return;
+        }
+
+        if (tick <= lastReceivedRigidbodySyncTick)
+        {
+            return;
+        }
+
+        lastReceivedRigidbodySyncTick = tick;
+        this.velocity = velocity;
+        acceleration = Vector3.zero;
+
+        if (rb == null)
+        {
+            transform.SetPositionAndRotation(position, rotation);
+            return;
+        }
+
+        rb.position = position;
+        rb.rotation = rotation;
+        rb.linearVelocity = velocity;
+        rb.angularVelocity = angularVelocity;
     }
 
     private float GetForceDisplayMaxLocalOffset()

@@ -13,6 +13,7 @@ public abstract class SyncedMachine : Interactable //Machine should be synced
     protected NetworkIdentity identity;
     public PlayerMain pressedByPlayer;
     public bool IsPressed => pressedByPlayer != null;
+    
     protected virtual void ServerActionOnInteract_press(PlayerMain who) { }
     protected virtual void ShareActionOnInteract_press(PlayerMain who) {pressedByPlayer = who;}
 

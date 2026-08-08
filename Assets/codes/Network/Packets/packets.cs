@@ -22,7 +22,8 @@ public class packets
         UpdateWorld_Rotation = 1020,
         WorldInitBegin = 1021,
         WorldInitComplete = 1022,
-    };
+    
+        SyncMainSpaceshipRigidbody = 1023,};
     public enum ClientPackets
     {
         SendReadyState = 2001,
