@@ -6389,9 +6389,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1489606272}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1489606271}
   m_SourcePrefab: {fileID: 100100000, guid: 2a6cccd9e82256f488dfee40bc47b674, type: 3}
 --- !u!4 &1489606266 stripped
 Transform:
@@ -6457,24 +6454,6 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
---- !u!114 &1489606271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489606267}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
-  Sync_Transform: 1
-  TransformSendInterval: 0.1
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  AbstractObject: {fileID: 0}
-  Identity: {fileID: 1489606272}
 --- !u!114 &1489606272
 MonoBehaviour:
   m_ObjectHideFlags: 0
