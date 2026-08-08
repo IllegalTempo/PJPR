@@ -19,7 +19,7 @@ namespace Assets.codes.machines
 
             if (IsPressed)
             {
-                PlayerMain player = GameCore.Instance.Local_Player;
+                PlayerMain player = pressedByPlayer;
                 float mouseX = player.lookinput.x;
                 float mouseY = player.lookinput.y;
 
