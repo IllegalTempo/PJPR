@@ -24,11 +24,15 @@ public class MainSpaceship : MonoBehaviour
 
     [SerializeField]
     private OnSpaceshipCanvasDisplay spaceshipDisplay;
+    [SerializeField, Min(0f)]
+    private float forceDisplayMaxLocalOffset = 0f;
     public Transform ModuleControlSpawnPoint;
 
     public static string MainSpaceshipNetworkID = "MAINSPACESHIP";
 
     private int waterLevel = 0;
+    private float forcePositionWeightSum;
+    private float forceWeightedLocalXSum;
     public int WaterLevel
     {
         set
@@ -45,6 +49,7 @@ public class MainSpaceship : MonoBehaviour
     public void AddNonCentralForce(Vector3 force, Vector3 position)
     {
         rb.AddForceAtPosition(force, position);
+        TrackForceDisplayWeight(force, position);
     }
     private void onUpdateWaterLevel()
     {
@@ -101,6 +106,8 @@ public class MainSpaceship : MonoBehaviour
         {
             transform.position += velocity * Time.fixedDeltaTime;
         }
+
+        UpdateForceDisplayWeight();
     }
 
     private void ApplyVelocity()
@@ -109,6 +116,81 @@ public class MainSpaceship : MonoBehaviour
         {
             rb.linearVelocity = velocity;
         }
+    }
+
+    private void TrackForceDisplayWeight(Vector3 force, Vector3 position)
+    {
+        float forceMagnitude = force.magnitude;
+        if (forceMagnitude <= Mathf.Epsilon)
+        {
+            return;
+        }
+
+        float localX = transform.InverseTransformPoint(position).x;
+        forceWeightedLocalXSum += localX * forceMagnitude;
+        forcePositionWeightSum += forceMagnitude;
+    }
+
+    private void UpdateForceDisplayWeight()
+    {
+        if (spaceshipDisplay == null)
+        {
+            ResetForceDisplayWeight();
+            return;
+        }
+
+        float weight = 0.5f;
+        if (forcePositionWeightSum > Mathf.Epsilon)
+        {
+            float averageLocalX = forceWeightedLocalXSum / forcePositionWeightSum;
+            float maxLocalOffset = GetForceDisplayMaxLocalOffset();
+
+            if (maxLocalOffset > Mathf.Epsilon)
+            {
+                weight = Mathf.InverseLerp(-maxLocalOffset, maxLocalOffset, averageLocalX);
+            }
+            else if (averageLocalX < -Mathf.Epsilon)
+            {
+                weight = 0f;
+            }
+            else if (averageLocalX > Mathf.Epsilon)
+            {
+                weight = 1f;
+            }
+        }
+
+        spaceshipDisplay.SetWeight(weight);
+        ResetForceDisplayWeight();
+    }
+
+    private void ResetForceDisplayWeight()
+    {
+        forcePositionWeightSum = 0f;
+        forceWeightedLocalXSum = 0f;
+    }
+
+    private float GetForceDisplayMaxLocalOffset()
+    {
+        if (forceDisplayMaxLocalOffset > Mathf.Epsilon)
+        {
+            return forceDisplayMaxLocalOffset;
+        }
+
+        float maxLocalOffset = 0f;
+        if (msts != null)
+        {
+            foreach (ModuleSlot slot in msts)
+            {
+                if (slot == null)
+                {
+                    continue;
+                }
+
+                maxLocalOffset = Mathf.Max(maxLocalOffset, Mathf.Abs(transform.InverseTransformPoint(slot.transform.position).x));
+            }
+        }
+
+        return maxLocalOffset;
     }
     
     public async UniTask<Module> SpawnModuleAsync(string ModulePrefabName,Vector3 pos,Quaternion rot)
@@ -168,7 +250,8 @@ public class MainSpaceship : MonoBehaviour
     }
     protected void Start()
     {
-        if(Instance != null)
+        Physics.gravity = Vector3.zero;
+        if (Instance != null)
         {
             Destroy(Instance.gameObject);
         } else

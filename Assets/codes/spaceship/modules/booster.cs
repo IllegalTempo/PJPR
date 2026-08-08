@@ -6,7 +6,7 @@ namespace Assets.codes.spaceship.modules
 {
 	public class Booster: Module<int>
 	{
-		private float spl = 100;
+		public float spl = 300;
 		[SerializeField]
 		private ParticleSystem SpeedParticles;
 		protected override void ModuleUpdate()

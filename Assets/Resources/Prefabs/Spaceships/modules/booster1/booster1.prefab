@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 9139266796419771737}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.0056, z: -0.024}
+  m_LocalPosition: {x: 0, y: 1.02, z: -5.18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4910,15 +4910,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4947416283154097975, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.5
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -4947416283154097975, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.5
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -4947416283154097975, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.5
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -4908871440451274715, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       propertyPath: m_Layer
@@ -5155,8 +5155,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.02, y: 0.01597676, z: 0.05}
-  m_Center: {x: 0, y: 0.006073825, z: -0.0018033311}
+  m_Size: {x: 2.65, y: 2.52, z: 9.15889}
+  m_Center: {x: 0, y: 1.25, z: -0.41351676}
 --- !u!4 &9158075054942999697 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
