@@ -3,7 +3,7 @@ using Assets.codes.Network.Messages;
 
 namespace Assets.codes.Network.Messages
 {
-    public class NMS_Client_RequestVotingSession : NMS, IServerHandle
+    public class NMS_Client_RequestVotingSession : NMS_BOTH_SERVERACTION
     {
         private readonly string terminalNetworkObjectId;
         private readonly int missionCount;
@@ -29,6 +29,16 @@ namespace Assets.codes.Network.Messages
         {
             Debug.Log($"[NMS_Client_RequestVotingSession] Player {player.SteamName} requested voting session with {missionCount} missions.");
             MissionManager.Instance.StartVotingSession(missionCount);
+        }
+
+        protected override void serverAction()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override void applyaction()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

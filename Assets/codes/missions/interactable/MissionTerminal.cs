@@ -28,12 +28,7 @@ public class MissionTerminal : Selectable, IUsable
             // Client: request voting session from server
             string terminalId = networkObject != null ? networkObject.Identifier : "";
             var msg = new NMS_Client_RequestVotingSession(terminalId, missionsToShow);
-            NetworkRouter.Instance.SendMessageToServer(msg);
-        }
-        else
-        {
-            // Server or offline: start locally
-            MissionManager.Instance.StartVotingSession(missionsToShow);
+            msg.SendMessageAsServerOrClient();
         }
     }
 }
