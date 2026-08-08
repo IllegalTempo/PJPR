@@ -265,11 +265,11 @@ public class Item : Selectable //Item is any that is pickable
     {
         AttachedSlot = slot;
         DisableRB();
-        transform.localScale = snapshot_start.scale;
-        transform.SetParent(slot.transform);
+        transform.SetParent(slot.transform, false);
 
         transform.localPosition = Vector3.zero;
-        transform.localRotation = rot;
+        transform.localScale = snapshot_start.scale;
+        transform.rotation = rot;
         netObj.Sync_Transform = false;
     }
 

@@ -113,7 +113,7 @@ namespace Assets.codes.Network.Messages
             {
                 await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);
             }
-            GameInitManager.Instance.InitSlotRelationFromSave(slotsRelationships);
+            GameInitManager.Instance.InitSlotRelationFromSave(slotsRelationships, false);
 
             NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
 

@@ -30,6 +30,12 @@ public class ModuleSlot : Slot
     {
         base.ServerActionOnAttach(item, rot);
         Module moduleObject = (Module)item;
+        if (moduleController != null)
+        {
+            Debug.LogWarning($"Module slot {Identity.Identifier} already has a control prefab. Skipping duplicate spawn for {moduleObject.name}.");
+            return;
+        }
+
         Debug.Log($"Spawning control prefab for module {moduleObject.name} at slot {Identity.Identifier}");
         PrefabDefinition it = moduleObject.GetNetworkObject()?.AbstractObject;
         if (it is ModuleDefinition md)

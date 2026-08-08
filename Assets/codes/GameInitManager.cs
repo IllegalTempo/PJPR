@@ -144,7 +144,7 @@ public class GameInitManager : MonoBehaviour
 
         await Server_SpawnNetworkObjectFromSave(saveData);
         await UniTask.Yield();
-        InitSlotRelationFromSave(saveData.SlotRelationships);
+        InitSlotRelationFromSave(saveData.SlotRelationships, true);
     }
 
     public async UniTask Server_SpawnNetworkObjectFromSave(GameSaveData saveData)
@@ -155,7 +155,7 @@ public class GameInitManager : MonoBehaviour
         }
     }
 
-    public void InitSlotRelationFromSave(IEnumerable<SlotSnapshot> saveData)
+    public void InitSlotRelationFromSave(IEnumerable<SlotSnapshot> saveData, bool sendNetworkAttach)
     {
         foreach (SlotSnapshot snapshot in saveData)
         {
@@ -168,7 +168,14 @@ public class GameInitManager : MonoBehaviour
             Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemNetworkID);
             if (attachedItem != null && slot != null && attachedItem != null)
             {
-                slot.SendAttach(attachedItem, snapshot.rotation);
+                if (sendNetworkAttach)
+                {
+                    slot.SendAttach(attachedItem, snapshot.rotation);
+                }
+                else
+                {
+                    slot.Attach(attachedItem, snapshot.rotation);
+                }
             }
             else
             {
