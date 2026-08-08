@@ -25,6 +25,7 @@ public class Module : SpaceshipPart
     }
     protected override void Update()
     {
+        if (!NetworkSystem.Instance.IsWorldManager) return;
         base.Update();
         if (ConnectedTo != null)
         {

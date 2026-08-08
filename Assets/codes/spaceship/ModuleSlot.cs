@@ -58,7 +58,7 @@ public class ModuleSlot : Slot
     {
         base.Detach();
         attachedModule = null;
-        moduleController = null;
+        //moduleController = null;
     }
     public override void ServerActionOnDetach()
     {

@@ -401,6 +401,8 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (holdingItem != null) //if holding something
         {
+            Quaternion rot = holdingItem.transform.rotation;
+
             Item previtem = SendDrop(holdingItem, throwForce);
             if (throwForce <= 0f)
             {
@@ -416,7 +418,7 @@ public partial class PlayerMain : MonoBehaviour
                     case Slot s:
                         if (previtem.FitIn(s))
                         {
-                            s.SendAttach(previtem,previtem.transform.rotation);
+                            s.SendAttach(previtem,rot);
                         }
                         break;
                 }

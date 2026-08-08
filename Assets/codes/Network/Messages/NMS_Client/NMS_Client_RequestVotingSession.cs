@@ -25,20 +25,15 @@ namespace Assets.codes.Network.Messages
             packet.Write(missionCount);
         }
 
-        public void ServerHandle(NetworkPlayer player)
-        {
-            Debug.Log($"[NMS_Client_RequestVotingSession] Player {player.SteamName} requested voting session with {missionCount} missions.");
-            MissionManager.Instance.StartVotingSession(missionCount);
-        }
 
         protected override void serverAction()
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"[NMS_Client_RequestVotingSession] Received request for voting session from terminal {terminalNetworkObjectId} with {missionCount} missions.");
+            MissionManager.Instance.StartVotingSession(missionCount);
         }
 
         protected override void applyaction()
         {
-            throw new System.NotImplementedException();
         }
     }
 }

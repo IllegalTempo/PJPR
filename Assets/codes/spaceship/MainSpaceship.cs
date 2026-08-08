@@ -100,6 +100,20 @@ public class MainSpaceship : MonoBehaviour
         ApplyVelocity();
     }
 
+    public void RotateToward(Quaternion targetRotation, float maxDegreesPerSecond)
+    {
+        float maxDegreesDelta = maxDegreesPerSecond * Time.deltaTime;
+        Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxDegreesDelta);
+
+        if (rb != null)
+        {
+            rb.MoveRotation(newRotation);
+            return;
+        }
+
+        transform.rotation = newRotation;
+    }
+
     private void FixedUpdate()
     {
         if (acceleration != Vector3.zero)
