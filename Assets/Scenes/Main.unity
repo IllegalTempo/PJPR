@@ -879,12 +879,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d8b7fd71a1d529d49b648b87dab66e2d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1757536599}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d8b7fd71a1d529d49b648b87dab66e2d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1757536601}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d8b7fd71a1d529d49b648b87dab66e2d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1757536600}
     - targetCorrespondingSourceObject: {fileID: -7048915909582380101, guid: d8b7fd71a1d529d49b648b87dab66e2d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1685077654}
@@ -7675,6 +7669,7 @@ MonoBehaviour:
   - {fileID: 1007229726}
   spaceshipDisplay: {fileID: 1757536597}
   forceDisplayMaxLocalOffset: 0
+  rigidbodySyncRate: 20
   ModuleControlSpawnPoint: {fileID: 0}
 --- !u!54 &1757536599
 Rigidbody:
@@ -7703,38 +7698,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1757536600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1757536593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
-  Identifier: MAINSPACESHIP
-  Sovereignty: 0
---- !u!114 &1757536601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1757536593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a4467aff00c2345a72d263a4992f0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.Network.SyncedIdentity.NetworkGameObject
-  Sync_Transform: 1
-  TransformSendInterval: 0.1
-  NetworkPos: {x: 0, y: 0, z: 0}
-  NetworkRot: {x: 0, y: 0, z: 0, w: 0}
-  AbstractObject: {fileID: 0}
-  Identity: {fileID: 1757536600}
 --- !u!1 &1763376891
 GameObject:
   m_ObjectHideFlags: 0
