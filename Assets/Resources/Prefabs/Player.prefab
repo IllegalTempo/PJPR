@@ -105,7 +105,7 @@ MonoBehaviour:
   MoveSpeed: 3
   LookSpeed: 2
   MaxSpeed: 3
-  JetPackForce: 7
+  JetPackForce: 70
   Gravity: 50
   lookinput: {x: 0, y: 0}
   maxVerticalVelocity: 100
