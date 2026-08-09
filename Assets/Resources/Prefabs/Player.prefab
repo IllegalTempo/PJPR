@@ -77,7 +77,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1d352eceb244e49a81e423e15cf1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
-  animator: {fileID: 0}
+  animator: {fileID: 3776810605563319565}
   GroundCheckDistance: 0.3
   audioSource: {fileID: 6399989085136356095}
   seenObject: {fileID: 0}
@@ -105,7 +105,7 @@ MonoBehaviour:
   MoveSpeed: 3
   LookSpeed: 2
   MaxSpeed: 3
-  JetPackForce: 70
+  JetPackForce: 7
   Gravity: 50
   lookinput: {x: 0, y: 0}
   maxVerticalVelocity: 100

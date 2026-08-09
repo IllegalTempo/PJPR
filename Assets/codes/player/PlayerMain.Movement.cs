@@ -22,7 +22,6 @@ public partial class PlayerMain: MonoBehaviour
     private void Move()
     {
 
-
         Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
         move.y = 0f;
         move.Normalize();
@@ -30,13 +29,13 @@ public partial class PlayerMain: MonoBehaviour
 
         Vector3 targetVelocity = move * MoveSpeed * MaxSpeed;
         targetVelocity.y = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
-        rb.AddForce(Vector3.down * Gravity, ForceMode.Acceleration);
+        //rb.AddForce(Vector3.down * Gravity, ForceMode.Acceleration);
         rb.linearVelocity = targetVelocity;
         if (control.Player.jump.IsPressed())
         {
             Jetpack();
         }
-        
+
     }
     private void Look()
     {
