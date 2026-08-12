@@ -57,6 +57,11 @@ public class MainSpaceship : MonoBehaviour
         rb.AddForceAtPosition(force, position);
         TrackForceDisplayWeight(force, position);
     }
+    public void SetHandleSpeed(int step)
+    {
+        float velocityPerStep = 5f;
+        SetVelocity(-transform.right * step * velocityPerStep);
+    }
     private void onUpdateWaterLevel()
     {
         spaceshipDisplay.SetWaterAmount(waterLevel);
@@ -75,7 +80,6 @@ public class MainSpaceship : MonoBehaviour
     public void SetVelocity(Vector3 newVelocity)
     {
         velocity = newVelocity;
-        ApplyVelocity();
     }
 
     public void AddVelocity(Vector3 velocityDelta)
@@ -97,11 +101,11 @@ public class MainSpaceship : MonoBehaviour
     {
         velocity = Vector3.zero;
         acceleration = Vector3.zero;
-        ApplyVelocity();
     }
 
-    public void RotateToward(Quaternion targetRotation, float maxDegreesPerSecond)
+    public void RotateToward(Quaternion targetRotation)
     {
+        float maxDegreesPerSecond = 30f;
         float maxDegreesDelta = maxDegreesPerSecond * Time.deltaTime;
         Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxDegreesDelta);
 
@@ -116,28 +120,12 @@ public class MainSpaceship : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (acceleration != Vector3.zero)
-        {
-            velocity += acceleration * Time.fixedDeltaTime;
-            ApplyVelocity();
-        }
-
-        if (rb == null && velocity != Vector3.zero)
-        {
-            transform.position += velocity * Time.fixedDeltaTime;
-        }
 
         UpdateForceDisplayWeight();
         SendRigidbodyStateIfServer();
+        rb.linearVelocity = velocity;
     }
 
-    private void ApplyVelocity()
-    {
-        if (rb != null)
-        {
-            rb.linearVelocity = velocity;
-        }
-    }
 
     private void TrackForceDisplayWeight(Vector3 force, Vector3 position)
     {

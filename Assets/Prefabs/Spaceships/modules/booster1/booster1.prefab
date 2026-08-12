@@ -5046,6 +5046,7 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   AbstractObject: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
+  InSpaceship: 0
   Identity: {fileID: 8575854996173634517}
 --- !u!54 &1981657392565994241
 Rigidbody:
@@ -5135,6 +5136,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   brokenHiddenOpacity: 0
+  spl: 10000
   SpeedParticles: {fileID: 7628848161086099772}
 --- !u!65 &1880148516079081941
 BoxCollider:
@@ -5155,8 +5157,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.65, y: 2.52, z: 9.15889}
-  m_Center: {x: 0, y: 1.25, z: -0.41351676}
+  m_Size: {x: 6.24, y: 5.947303, z: 19.43691}
+  m_Center: {x: 0, y: 3.0236516, z: -1.3926725}
 --- !u!4 &9158075054942999697 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}

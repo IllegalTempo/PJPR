@@ -20,6 +20,7 @@ public partial class GameCore : MonoBehaviour
     public recording vc;
     public options Option;
     public PlayerInputAction PlayerControl;
+    public GameObject PlayerPrefab;
 
     public Dictionary<string, string> GetDecorationWithID = new Dictionary<string, string>
     {
@@ -147,13 +148,13 @@ public partial class GameCore : MonoBehaviour
 
     //    throw new PrefabNotFound(PrefabID);
     //}
-    public async UniTask<GameObject> GetDecoration(string DecorationID)
-    {
-        string decPath = GetDecorationWithID.ContainsKey(DecorationID) ? _decorationPath + GetDecorationWithID[DecorationID] : throw new PrefabNotFound(DecorationID);
-        ResourceRequest request = Resources.LoadAsync<GameObject>(decPath);
-        await request;
-        return request.asset as GameObject;
-    }
+    //public async UniTask<GameObject> GetDecoration(string DecorationID)
+    //{
+    //    string decPath = GetDecorationWithID.ContainsKey(DecorationID) ? _decorationPath + GetDecorationWithID[DecorationID] : throw new PrefabNotFound(DecorationID);
+    //    ResourceRequest request = Resources.LoadAsync<GameObject>(decPath);
+    //    await request;
+    //    return request.asset as GameObject;
+    //}
     //public async UniTask SpawnDecorations(DecorationSaveData[] decs, Spaceship spaceship)
     //{
     //    if (decs != null)

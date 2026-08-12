@@ -28,7 +28,6 @@ public partial class NetworkSystem : MonoBehaviour
     [SerializeField] private List<string> FindNetworkObjectKey = new List<string>();
     private readonly Dictionary<string, PrefabDefinition> _networkPrefabsById = new Dictionary<string, PrefabDefinition>();
     private readonly Dictionary<PrefabDefinition, string> _networkPrefabIdsByDefinition = new Dictionary<PrefabDefinition, string>();
-    private NetworkPrefabRegistry _networkPrefabRegistry;
     public List<Slot> Slots
     {
         get => CurrentNetworkInstance.Slots;
@@ -41,6 +40,7 @@ public partial class NetworkSystem : MonoBehaviour
     private bool _destroyed = false;
     public const float TIMEOUTSECONDS = 10f;
     public GameClient Client => _client;
+    public NetworkPrefabRegistry NetworkPrefabRegistry;
     public int MaxPlayer => _maxPlayer;
     private bool _startedAsHost = false;
     void Awake()
@@ -138,14 +138,8 @@ public partial class NetworkSystem : MonoBehaviour
         _networkPrefabsById.Clear();
         _networkPrefabIdsByDefinition.Clear();
 
-        _networkPrefabRegistry = Resources.Load<NetworkPrefabRegistry>("Prefabs/NetworkPrefabRegistry");
-        if (_networkPrefabRegistry == null)
-        {
-            Debug.LogError("NetworkPrefabRegistry not found at Resources/Prefabs/NetworkPrefabRegistry.");
-            return;
-        }
 
-        foreach (NetworkPrefabRegistry.Entry entry in _networkPrefabRegistry.Entries)
+        foreach (NetworkPrefabRegistry.Entry entry in NetworkPrefabRegistry.Entries)
         {
             if (entry == null || entry.PrefabDefinition == null || entry.PrefabDefinition.itemPrefab == null || string.IsNullOrWhiteSpace(entry.PrefabId))
             {
@@ -319,11 +313,9 @@ public partial class NetworkSystem : MonoBehaviour
             return existingPlayer;
         }
 
-        ResourceRequest request = Resources.LoadAsync<GameObject>("Prefabs/Player");
-        await request;
-        GameObject PlayerInstance = request.asset as GameObject;
+        
         int index = CurrentNetworkInstance.PlayerCount;
-        NetworkPlayerObject p = Instantiate(PlayerInstance, GameCore.Instance.getPlayerSpawn(), Quaternion.identity).GetComponent<NetworkPlayerObject>();
+        NetworkPlayerObject p = Instantiate(GameCore.Instance.PlayerPrefab, GameCore.Instance.getPlayerSpawn(), Quaternion.identity).GetComponent<NetworkPlayerObject>();
         await p.Init(steamid, index);
         CurrentNetworkInstance.SetPlayer(steamid, p);
 

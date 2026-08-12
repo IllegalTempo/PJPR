@@ -22,6 +22,8 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
+    public bool InSpaceship;
+    private int inSpaceshipTriggerCount;
     [SerializeField]
     private AudioSource audioSource;
 
@@ -231,7 +233,7 @@ public partial class PlayerMain : MonoBehaviour
             head.transform.forward,
             throwForce).SendMessageAsServerOrClient();
         return i;
-        
+
     }
     private Vector3 GetSafeDropPosition()
     {
@@ -399,30 +401,29 @@ public partial class PlayerMain : MonoBehaviour
 
     private void OnClickF(float throwForce)
     {
-        if (holdingItem != null) //if holding something
+        bool isHoldingSomthing = holdingItem != null;
+        if (isHoldingSomthing)
         {
             Quaternion rot = holdingItem.transform.rotation;
 
             Item previtem = SendDrop(holdingItem, throwForce);
-            if (throwForce <= 0f)
+            switch (seenObject)
             {
-                switch (seenObject)
-                {
-                    case Item i:
-                        if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
-                        {
-                            NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
-                            combineMessage.SendMessageAsServerOrClient();
-                        }
-                        break;
-                    case Slot s:
-                        if (previtem.FitIn(s))
-                        {
-                            s.SendAttach(previtem,rot);
-                        }
-                        break;
-                }
+                case Item i:
+                    if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
+                    {
+                        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
+                        combineMessage.SendMessageAsServerOrClient();
+                    }
+                    break;
+                case Slot s:
+                    if (previtem.FitIn(s))
+                    {
+                        s.SendAttach(previtem, rot);
+                    }
+                    break;
             }
+
         }
         else
         {
@@ -508,7 +509,7 @@ public partial class PlayerMain : MonoBehaviour
     private void HandleNewObjectUI(Selectable @new)
     {
         string displayname = @new.gameObject.name;
-        if(@new.GetComponent<NetworkGameObject>())
+        if (@new.GetComponent<NetworkGameObject>())
         {
             displayname = @new.GetComponent<NetworkGameObject>().AbstractObject.itemName;
         }
@@ -597,18 +598,43 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if ((GameCore.Instance.Masks.MoveWith.value & (1 << other.gameObject.layer)) != 0)
+        if (!IsInSpaceshipDetector(other))
         {
-            transform.SetParent(other.transform);
+            return;
         }
+
+        inSpaceshipTriggerCount++;
+        InSpaceship = true;
+        transform.parent = MainSpaceship.Instance.transform;
     }
     private void OnTriggerExit(Collider collision)
     {
-        if ((GameCore.Instance.Masks.MoveWith.value & (1 << collision.gameObject.layer)) != 0)
+        if (!IsInSpaceshipDetector(collision))
         {
-            transform.SetParent(null);
+            return;
+        }
+
+        inSpaceshipTriggerCount = Mathf.Max(0, inSpaceshipTriggerCount - 1);
+        InSpaceship = inSpaceshipTriggerCount > 0;
+        if (!InSpaceship)
+        {
+            transform.parent = null;
         }
     }
+
+    private bool IsInSpaceshipDetector(Collider other)
+    {
+        if (GameCore.Instance == null || GameCore.Instance.Masks == null)
+        {
+            return false;
+        }
+
+        return (GameCore.Instance.Masks.InSpaceshipDetect.value & (1 << other.gameObject.layer)) != 0;
+    }
+
+    
+
+    
     public void ReceiveVoice(byte[] bytesArray)
     {
         if (bytesArray == null || bytesArray.Length == 0)
@@ -652,3 +678,4 @@ public partial class PlayerMain : MonoBehaviour
         // See explanation below
     }
 }
+

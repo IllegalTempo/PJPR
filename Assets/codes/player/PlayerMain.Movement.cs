@@ -25,17 +25,32 @@ public partial class PlayerMain: MonoBehaviour
         Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
         move.y = 0f;
         move.Normalize();
-        
 
-        Vector3 targetVelocity = move * MoveSpeed * MaxSpeed;
-        targetVelocity.y = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
+        Vector3 spaceshipVelocity = GetSpaceshipVelocityAtPlayer();
+        Vector3 relativeVelocity = move * MoveSpeed * MaxSpeed;
+        relativeVelocity.y = Mathf.Clamp(rb.linearVelocity.y - spaceshipVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
         rb.AddForce(Vector3.down * Gravity, ForceMode.Acceleration);
-        rb.linearVelocity = targetVelocity;
+        rb.linearVelocity = relativeVelocity + spaceshipVelocity;
         if (control.Player.jump.IsPressed())
         {
             Jetpack();
         }
 
+    }
+    private Vector3 GetSpaceshipVelocityAtPlayer()
+    {
+        if (!InSpaceship || MainSpaceship.Instance == null)
+        {
+            return Vector3.zero;
+        }
+
+        Rigidbody spaceshipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        if (spaceshipRigidbody == null)
+        {
+            return Vector3.zero;
+        }
+
+        return spaceshipRigidbody.GetPointVelocity(rb.position);
     }
     private void Look()
     {

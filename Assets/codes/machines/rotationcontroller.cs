@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Assets.codes.machines
 {
@@ -6,11 +7,11 @@ namespace Assets.codes.machines
     {
         public float headRotationMultiplier = 1f;
         public float returnSpeed = 2f;
-        public float spaceshipRotationSpeed = 10f;
         private Quaternion originalRotation;
         private Quaternion lastHeadRotation;
         private bool hasLastHeadRotation;
 
+        public UnityEvent<Quaternion> onRotationChanged;
         private void Awake()
         {
             originalRotation = transform.rotation;
@@ -61,14 +62,16 @@ namespace Assets.codes.machines
                 }
 
                 lastHeadRotation = currentHeadRotation;
+
             }
             else
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, returnSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, MainSpaceship.Instance.transform.rotation, returnSpeed * Time.deltaTime);
+
                 hasLastHeadRotation = false;
             }
+            onRotationChanged?.Invoke(transform.rotation);
 
-            MainSpaceship.Instance?.RotateToward(transform.rotation, spaceshipRotationSpeed);
         }
 
     }
