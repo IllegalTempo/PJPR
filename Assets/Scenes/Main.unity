@@ -2827,7 +2827,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd15638116d56c4695e653f29a82ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSystem
-  StartServerOnStart: 0
+  StartServerOnStart: 1
   _maxPlayer: 8
   IsOnline: 0
   IsServer: 1
@@ -8075,6 +8075,10 @@ PrefabInstance:
     - target: {fileID: 6385410674422158875, guid: e15bd750fb0e38b44a6ffdf6607a0b8f, type: 3}
       propertyPath: m_Layer
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7169984332862697199, guid: e15bd750fb0e38b44a6ffdf6607a0b8f, type: 3}
+      propertyPath: lockedAxis
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7169984332862697199, guid: e15bd750fb0e38b44a6ffdf6607a0b8f, type: 3}
       propertyPath: headRotationMultiplier

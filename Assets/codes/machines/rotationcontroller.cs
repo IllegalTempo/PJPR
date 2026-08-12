@@ -5,8 +5,18 @@ namespace Assets.codes.machines
 {
     public class RotationController : SyncedMachine
     {
+        public enum RotationAxisLock
+        {
+            None,
+            X,
+            Y,
+            Z
+        }
+
         public float headRotationMultiplier = 1f;
         public float returnSpeed = 2f;
+        public RotationAxisLock lockedAxis = RotationAxisLock.None;
+
         private Quaternion originalRotation;
         private Quaternion lastHeadRotation;
         private bool hasLastHeadRotation;
@@ -59,6 +69,7 @@ namespace Assets.codes.machines
                 if (axis.sqrMagnitude > 0.0000001f && angle > 0.0001f)
                 {
                     transform.Rotate(axis.normalized, angle * headRotationMultiplier, Space.World);
+                    ApplyAxisLock();
                 }
 
                 lastHeadRotation = currentHeadRotation;
@@ -67,11 +78,48 @@ namespace Assets.codes.machines
             else
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, MainSpaceship.Instance.transform.rotation, returnSpeed * Time.deltaTime);
+                ApplyAxisLock();
 
                 hasLastHeadRotation = false;
             }
             onRotationChanged?.Invoke(transform.rotation);
 
+        }
+
+        private void ApplyAxisLock()
+        {
+            if (lockedAxis == RotationAxisLock.None)
+            {
+                return;
+            }
+
+            Vector3 rotation = transform.rotation.eulerAngles;
+            Vector3 lockedRotation = GetAxisLockReferenceRotation().eulerAngles;
+
+            switch (lockedAxis)
+            {
+                case RotationAxisLock.X:
+                    rotation.x = lockedRotation.x;
+                    break;
+                case RotationAxisLock.Y:
+                    rotation.y = lockedRotation.y;
+                    break;
+                case RotationAxisLock.Z:
+                    rotation.z = lockedRotation.z;
+                    break;
+            }
+
+            transform.rotation = Quaternion.Euler(rotation);
+        }
+
+        private Quaternion GetAxisLockReferenceRotation()
+        {
+            if (MainSpaceship.Instance != null)
+            {
+                return MainSpaceship.Instance.transform.rotation;
+            }
+
+            return originalRotation;
         }
 
     }
