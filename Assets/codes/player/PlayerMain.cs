@@ -22,8 +22,8 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    public bool InSpaceship;
-    private int inSpaceshipTriggerCount;
+    private readonly SpaceshipFollowTracker spaceshipFollowTracker = new SpaceshipFollowTracker();
+    public bool InSpaceship => spaceshipFollowTracker.InSpaceship;
     [SerializeField]
     private AudioSource audioSource;
 
@@ -598,40 +598,21 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (!IsInSpaceshipDetector(other))
+        bool wasInSpaceship = InSpaceship;
+        spaceshipFollowTracker.OnTriggerEnter(other);
+        if (!wasInSpaceship && InSpaceship && MainSpaceship.Instance != null)
         {
-            return;
+            transform.parent = MainSpaceship.Instance.transform;
         }
-
-        inSpaceshipTriggerCount++;
-        InSpaceship = true;
-        transform.parent = MainSpaceship.Instance.transform;
     }
     private void OnTriggerExit(Collider collision)
     {
-        if (!IsInSpaceshipDetector(collision))
-        {
-            return;
-        }
-
-        inSpaceshipTriggerCount = Mathf.Max(0, inSpaceshipTriggerCount - 1);
-        InSpaceship = inSpaceshipTriggerCount > 0;
+        spaceshipFollowTracker.OnTriggerExit(collision);
         if (!InSpaceship)
         {
             transform.parent = null;
         }
     }
-
-    private bool IsInSpaceshipDetector(Collider other)
-    {
-        if (GameCore.Instance == null || GameCore.Instance.Masks == null)
-        {
-            return false;
-        }
-
-        return (GameCore.Instance.Masks.InSpaceshipDetect.value & (1 << other.gameObject.layer)) != 0;
-    }
-
     
 
     
