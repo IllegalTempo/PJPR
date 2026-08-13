@@ -18,6 +18,7 @@ public class MainSpaceship : MonoBehaviour
     private int speedlevel = 0;
     private Vector3 velocity;
     private Vector3 acceleration;
+    private float speed;
     [SerializeField]
     private List<ModuleSlot> msts;
 
@@ -60,7 +61,8 @@ public class MainSpaceship : MonoBehaviour
     public void SetHandleSpeed(int step)
     {
         float velocityPerStep = 5f;
-        SetVelocity(-transform.right * step * velocityPerStep);
+        //SetVelocity(-transform.right * step * velocityPerStep);
+        speed = step * velocityPerStep;
     }
     private void onUpdateWaterLevel()
     {
@@ -77,25 +79,8 @@ public class MainSpaceship : MonoBehaviour
         return acceleration;
     }
 
-    public void SetVelocity(Vector3 newVelocity)
-    {
-        velocity = newVelocity;
-    }
 
-    public void AddVelocity(Vector3 velocityDelta)
-    {
-        SetVelocity(velocity + velocityDelta);
-    }
 
-    public void SetAcceleration(Vector3 newAcceleration)
-    {
-        acceleration = newAcceleration;
-    }
-
-    public void AddAcceleration(Vector3 accelerationDelta)
-    {
-        acceleration += accelerationDelta;
-    }
 
     public void StopMovement()
     {
@@ -123,7 +108,7 @@ public class MainSpaceship : MonoBehaviour
 
         UpdateForceDisplayWeight();
         SendRigidbodyStateIfServer();
-        rb.linearVelocity = velocity;
+        rb.linearVelocity = -transform.right * speed;
     }
 
 

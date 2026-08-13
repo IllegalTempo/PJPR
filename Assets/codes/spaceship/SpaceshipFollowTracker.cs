@@ -70,7 +70,7 @@ public class SpaceshipFollowTracker
             return Vector3.zero;
         }
 
-        return rb.linearVelocity - previousSpaceshipVelocity;
+        return rb.GetPointVelocity(rb.worldCenterOfMass) - previousSpaceshipVelocity;
     }
 
     public void StoreAppliedSpaceshipVelocity(Vector3 spaceshipVelocity)
@@ -87,8 +87,10 @@ public class SpaceshipFollowTracker
         }
 
         Vector3 spaceshipVelocity = GetSpaceshipVelocity(rb.position);
-        Vector3 relativeVelocity = GetRelativeVelocity(rb);
-        rb.linearVelocity = relativeVelocity + spaceshipVelocity;
+        Vector3 currentVelocity = rb.GetPointVelocity(rb.worldCenterOfMass);
+        Vector3 relativeVelocity = currentVelocity - previousSpaceshipVelocity;
+        Vector3 targetVelocity = relativeVelocity + spaceshipVelocity;
+        rb.AddForce(targetVelocity - currentVelocity, ForceMode.VelocityChange);
         StoreAppliedSpaceshipVelocity(spaceshipVelocity);
     }
 

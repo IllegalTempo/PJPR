@@ -1,13 +1,7 @@
-
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
-using Steamworks;
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// This is the brain of a player, most action of the player is done here, such as movement, looking around, picking up items, interacting with objects, and voice chat control. It also handles the player's camera and what they are currently looking at or holding. This script is attached to the player GameObject and requires a Rigidbody component for physics-based movement.
@@ -15,9 +9,8 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Rigidbody))]
 public partial class PlayerMain : MonoBehaviour
 {
-
-
-    public float GroundCheckDistance = 0.3f;
+    private const int PrimaryInteractionIndex = 0;
+    private const int SecondaryInteractionIndex = 1;
 
     private float yaw = 0f;
     private float pitch = 0f;
@@ -27,9 +20,8 @@ public partial class PlayerMain : MonoBehaviour
     [SerializeField]
     private AudioSource audioSource;
 
-    private bool usingvc = false;
+    private bool usingVoiceChat = false;
     public Selectable seenObject = null;
-    public Selectable clickedObject = null;
     public GameObject cam;
     public GameObject head;
     public NetworkPlayerObject networkinfo;
@@ -71,9 +63,8 @@ public partial class PlayerMain : MonoBehaviour
     private Camera localCamera;
     private float normalCameraFieldOfView;
     private float targetCameraFieldOfView;
-    void Start()
+    private void Start()
     {
-
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         rb = GetComponent<Rigidbody>();
@@ -81,16 +72,15 @@ public partial class PlayerMain : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         if (networkinfo.IsLocal)
         {
-            Initialize_local();
+            InitializeLocal();
         }
         else
         {
-            Initialize_remote();
-
+            InitializeRemote();
         }
     }
 
-    private void Initialize_local()
+    private void InitializeLocal()
     {
         PlayerMain[] players = FindObjectsByType<PlayerMain>(FindObjectsSortMode.None);
         foreach (PlayerMain player in players)
@@ -118,21 +108,16 @@ public partial class PlayerMain : MonoBehaviour
 
         control = GameCore.Instance.PlayerControl;
 
-        control.Player.Move.performed += ctx => moveinput = ctx.ReadValue<Vector2>();
-        control.Player.Move.canceled += ctx => moveinput = Vector2.zero;
-        control.Player.Look.performed += ctx => lookinput = ctx.ReadValue<Vector2>();
-        control.Player.Look.canceled += ctx => lookinput = Vector2.zero;
+        control.Player.Move.performed += OnMovePerformed;
+        control.Player.Move.canceled += OnMoveCanceled;
+        control.Player.Look.performed += OnLookPerformed;
+        control.Player.Look.canceled += OnLookCanceled;
         control.Player.pickup.started += OnPickupStarted;
         control.Player.pickup.canceled += OnPickupCanceled;
-        control.Player.Interact.performed += ctx => OnInteract();
-        control.Player.Interact.canceled += ctx => OnInteract_release();
-
-
-
-        control.Player.voice.performed += ctx => OnClickVC();
-        control.Player.rotate.performed += ctx => OnClickSlotRotate();
-
-
+        control.Player.Interact.performed += OnInteractPerformed;
+        control.Player.Interact.canceled += OnInteractCanceled;
+        control.Player.voice.performed += OnVoicePerformed;
+        control.Player.rotate.performed += OnRotatePerformed;
     }
 
     private void OnDisable()
@@ -141,21 +126,63 @@ public partial class PlayerMain : MonoBehaviour
 
         if (control != null)
         {
-            control.Player.Move.performed -= ctx => moveinput = ctx.ReadValue<Vector2>();
-            control.Player.Move.canceled -= ctx => moveinput = Vector2.zero;
-            control.Player.Look.performed -= ctx => lookinput = ctx.ReadValue<Vector2>();
-            control.Player.Look.canceled -= ctx => lookinput = Vector2.zero;
+            control.Player.Move.performed -= OnMovePerformed;
+            control.Player.Move.canceled -= OnMoveCanceled;
+            control.Player.Look.performed -= OnLookPerformed;
+            control.Player.Look.canceled -= OnLookCanceled;
             control.Player.pickup.started -= OnPickupStarted;
             control.Player.pickup.canceled -= OnPickupCanceled;
-            control.Player.Interact.performed -= ctx => OnInteract();
-            control.Player.voice.performed -= ctx => OnClickVC();
-            control.Player.rotate.performed -= ctx => OnClickSlotRotate();
+            control.Player.Interact.performed -= OnInteractPerformed;
+            control.Player.Interact.canceled -= OnInteractCanceled;
+            control.Player.voice.performed -= OnVoicePerformed;
+            control.Player.rotate.performed -= OnRotatePerformed;
         }
     }
-    private void OnClickVC()
+
+    private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
-        usingvc = !usingvc;
-        if (usingvc)
+        moveinput = ctx.ReadValue<Vector2>();
+    }
+
+    private void OnMoveCanceled(InputAction.CallbackContext ctx)
+    {
+        moveinput = Vector2.zero;
+    }
+
+    private void OnLookPerformed(InputAction.CallbackContext ctx)
+    {
+        lookinput = ctx.ReadValue<Vector2>();
+    }
+
+    private void OnLookCanceled(InputAction.CallbackContext ctx)
+    {
+        lookinput = Vector2.zero;
+    }
+
+    private void OnInteractPerformed(InputAction.CallbackContext ctx)
+    {
+        OnInteractPressed();
+    }
+
+    private void OnInteractCanceled(InputAction.CallbackContext ctx)
+    {
+        OnInteractReleased();
+    }
+
+    private void OnVoicePerformed(InputAction.CallbackContext ctx)
+    {
+        ToggleVoiceChat();
+    }
+
+    private void OnRotatePerformed(InputAction.CallbackContext ctx)
+    {
+        RotateHeldItemInSlot();
+    }
+
+    private void ToggleVoiceChat()
+    {
+        usingVoiceChat = !usingVoiceChat;
+        if (usingVoiceChat)
         {
             GameCore.Instance.vc.StartVoice();
         }
@@ -166,7 +193,7 @@ public partial class PlayerMain : MonoBehaviour
 
 
     }
-    private void OnInteract()
+    private void OnInteractPressed()
     {
         IUsable usable = activeUsable
                  ?? holdingItem as IUsable
@@ -179,7 +206,7 @@ public partial class PlayerMain : MonoBehaviour
         }
 
     }
-    private void OnInteract_release()
+    private void OnInteractReleased()
     {
         if (pressedUsable != null)
         {
@@ -200,7 +227,7 @@ public partial class PlayerMain : MonoBehaviour
         }
     }
 
-    private void Initialize_remote()
+    private void InitializeRemote()
     {
         if (cam != null)
         {
@@ -217,22 +244,23 @@ public partial class PlayerMain : MonoBehaviour
     //
 
 
-    private void onSelectObject(Selectable item)
+    private void SelectObject(Selectable item)
     {
         item.OnClicked();
 
     }
-    private Item SendDrop(Item i, float throwForce)
+
+    private Item SendDropRequest(Item item, float throwForce)
     {
         Vector3 dropPosition = GetSafeDropPosition();
         new NMS_Both_PickUpItem(
-            i.GetNetworkObject().Identity.Identifier,
+            item.GetNetworkObject().Identity.Identifier,
             0,
             dropPosition,
-            i.OriginalRotation,
+            item.OriginalRotation,
             head.transform.forward,
             throwForce).SendMessageAsServerOrClient();
-        return i;
+        return item;
 
     }
     private Vector3 GetSafeDropPosition()
@@ -277,24 +305,19 @@ public partial class PlayerMain : MonoBehaviour
 
         return true;
     }
-    private void SendPickUP(Item i)
+    private void SendPickupRequest(Item item)
     {
-        new NMS_Both_PickUpItem(i.GetNetworkObject().Identity.Identifier, networkinfo.steamID).SendMessageAsServerOrClient();
+        new NMS_Both_PickUpItem(item.GetNetworkObject().Identity.Identifier, networkinfo.steamID).SendMessageAsServerOrClient();
 
 
     }
-    private void OnClickSlotRotate()
+
+    private void RotateHeldItemInSlot()
     {
         if (holdingItem != null && holdingItem.BindSlot != null)
         {
-            // Rotate the item 90 degrees around the slot's local Y-axis (up axis)
-            // This allows the player to orient items in different rotations while bound to a slot
             Slot boundSlot = holdingItem.BindSlot;
-
-            // Calculate 90 degree rotation around the slot's local Y-axis
             Quaternion rotationIncrement = Quaternion.AngleAxis(90f, boundSlot.transform.up);
-
-            // Apply rotation relative to slot's current rotation
             holdingItem.transform.rotation = rotationIncrement * holdingItem.transform.rotation;
 
             Debug.Log($"Item rotated 90 degrees around {boundSlot.name}'s Y-axis");
@@ -304,7 +327,7 @@ public partial class PlayerMain : MonoBehaviour
     {
         if (holdingItem == null)
         {
-            OnClickF(0f);
+            HandlePickupButton(0f);
             return;
         }
 
@@ -333,7 +356,7 @@ public partial class PlayerMain : MonoBehaviour
         chargingDropItem = null;
         UIManager.Instance.HideThrowForce();
         ResetThrowCameraZoom();
-        OnClickF(throwForce);
+        HandlePickupButton(throwForce);
     }
 
     private float CalculateThrowCharge01()
@@ -399,187 +422,190 @@ public partial class PlayerMain : MonoBehaviour
             throwCameraZoomTransitionSpeed * Time.deltaTime);
     }
 
-    private void OnClickF(float throwForce)
+    private void HandlePickupButton(float throwForce)
     {
-        bool isHoldingSomthing = holdingItem != null;
-        if (isHoldingSomthing)
+        if (holdingItem != null)
         {
-            Quaternion rot = holdingItem.transform.rotation;
-
-            Item previtem = SendDrop(holdingItem, throwForce);
-            switch (seenObject)
-            {
-                case Item i:
-                    if (previtem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
-                    {
-                        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(previtem.GetNetworkObject().Identity.Identifier, i.GetNetworkObject().Identity.Identifier);
-                        combineMessage.SendMessageAsServerOrClient();
-                    }
-                    break;
-                case Slot s:
-                    if (previtem.FitIn(s))
-                    {
-                        s.SendAttach(previtem, rot);
-                    }
-                    break;
-            }
-
+            DropHeldItem(throwForce);
         }
         else
         {
-            if (seenObject is Item i)
-            {
-                if (i.AttachedSlot != null)
-                {
-                    i.AttachedSlot.SendDetach();
-
-                }
-                SendPickUP(i);
-
-            }
+            TryPickupSeenItem();
         }
+
         if (seenObject != null)
         {
-            clickedObject = seenObject;
-            onSelectObject(clickedObject);
+            SelectObject(seenObject);
         }
     }
 
-    //private bool IsHoldingRepairToolAndLookingAtRepairablePart()
-    //{
-    //    if (holdingItem == null || !holdingItem.IsRepairTool)
-    //    {
-    //        return false;
-    //    }
-
-    //    if (cam == null)
-    //    {
-    //        return false;
-    //    }
-
-    //    Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-    //    if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
-    //    {
-    //        return false;
-    //    }
-
-    //    SpaceshipPart part = hit.collider.GetComponentInParent<SpaceshipPart>();
-    //    return part != null && part.CanStartRepairWithHeldItem(holdingItem);
-    //}
-
-    //private void OnFunctionInteract()
-    //{
-    //    if (holdingItem != null || seenInteractable == null)
-    //    {
-    //        return;
-    //    }
-
-    //    //if (!seenInteractable.IsFunctionKeyOnly())
-    //    //{
-    //    //    return;
-    //    //}
-
-    //    clickedInteractable = seenInteractable;
-    //    onSelectObject(clickedInteractable);
-    //}
-
-    private void UpdateSeenObject(Selectable @new, Selectable before)
+    private void DropHeldItem(float throwForce)
     {
-        HandleSlotUnbinding(@new);
+        Item droppedItem = holdingItem;
+        Quaternion heldRotation = droppedItem.transform.rotation;
 
-        // Handle looking away from previous object
-        if (before != null)
+        SendDropRequest(droppedItem, throwForce);
+        TryCombineDroppedItem(droppedItem);
+        TryAttachDroppedItemToSlot(droppedItem, heldRotation);
+    }
+
+    private void TryCombineDroppedItem(Item droppedItem)
+    {
+        if (seenObject is not Item seenItem)
         {
-            before.onLookedAway();
+            return;
+        }
+
+        if (!droppedItem.HasItemType(ItemType.Processable) || !seenItem.HasItemType(ItemType.Processable))
+        {
+            return;
+        }
+
+        NMS_Both_SendCombineItem combineMessage = new NMS_Both_SendCombineItem(
+            droppedItem.GetNetworkObject().Identity.Identifier,
+            seenItem.GetNetworkObject().Identity.Identifier);
+        combineMessage.SendMessageAsServerOrClient();
+    }
+
+    private void TryAttachDroppedItemToSlot(Item droppedItem, Quaternion heldRotation)
+    {
+        if (seenObject is Slot slot && droppedItem.FitIn(slot))
+        {
+            slot.SendAttach(droppedItem, heldRotation);
+        }
+    }
+
+    private void TryPickupSeenItem()
+    {
+        if (seenObject is not Item item)
+        {
+            return;
+        }
+
+        if (item.AttachedSlot != null)
+        {
+            item.AttachedSlot.SendDetach();
+        }
+
+        SendPickupRequest(item);
+    }
+
+    private void UpdateSeenObject(Selectable current, Selectable previous)
+    {
+        UnbindHeldItemIfNeeded(current);
+
+        if (previous != null)
+        {
+            previous.onLookedAway();
             UIManager.Instance.HideAllInteraction();
             UIManager.Instance.HideGameObjectName();
         }
-        // Handle looking at a new object
-        if (@new != null)
+
+        if (current != null)
         {
-            @new.onLookedAt();
-            HandleNewObjectUI(@new);
-            HandleSlotBinding(@new);
+            current.onLookedAt();
+            ShowSeenObjectUI(current);
+            BindHeldItemToSlot(current);
         }
-
-        // Handle slot unbinding if we're not looking at a compatible slot
-
     }
 
-    private void HandleNewObjectUI(Selectable @new)
+    private void ShowSeenObjectUI(Selectable selectable)
     {
-        string displayname = @new.gameObject.name;
-        if (@new.GetComponent<NetworkGameObject>())
+        if (selectable is IUsable)
         {
-            displayname = @new.GetComponent<NetworkGameObject>().AbstractObject.itemName;
-        }
-        if (@new is IUsable)
-        {
-            UIManager.Instance.ShowInteraction("Use", control.Player.Interact.GetBindingDisplayString(), 1);
+            ShowSecondaryInteraction("Use", control.Player.Interact.GetBindingDisplayString());
         }
 
-        if (@new is Item item)
+        ShowPrimaryObjectInteraction(selectable);
+        UIManager.Instance.DisplayGameObjectName(GetSelectableDisplayName(selectable));
+    }
+
+    private string GetSelectableDisplayName(Selectable selectable)
+    {
+        NetworkGameObject networkObject = selectable.GetComponent<NetworkGameObject>();
+        if (networkObject != null && networkObject.AbstractObject != null)
         {
-            UIManager.Instance.ShowInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString(), 0);
+            return networkObject.AbstractObject.itemName;
         }
-        if (holdingItem != null)
+
+        return selectable.gameObject.name;
+    }
+
+    private void ShowPrimaryObjectInteraction(Selectable selectable)
+    {
+        if (holdingItem == null)
         {
-            switch (@new)
+            if (selectable is Item)
             {
-                case Slot s:
-                    if (holdingItem.FitIn(s))
-                    {
-                        if (s is Port)
-                        {
-                            UIManager.Instance.ShowInteraction("Put", control.Player.pickup.GetBindingDisplayString(), 0);
-
-                        }
-                        else
-                        {
-                            UIManager.Instance.ShowInteraction("Install", control.Player.pickup.GetBindingDisplayString(), 0);
-                            UIManager.Instance.ShowInteraction("Rotate", control.Player.rotate.GetBindingDisplayString(), 1);
-                        }
-                    }
-                    else
-                    {
-                        UIManager.Instance.ShowInteraction("Not Available", "", 0);
-
-                    }
-                    break;
-                case Item i:
-                    if (holdingItem.HasItemType(ItemType.Processable) && i.HasItemType(ItemType.Processable))
-                    {
-                        UIManager.Instance.ShowInteraction("Combine", control.Player.pickup.GetBindingDisplayString(), 0);
-                    }
-                    break;
-                default:
-                    UIManager.Instance.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), 0);
-                    break;
+                ShowPrimaryInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString());
             }
+
+            return;
         }
-        UIManager.Instance.DisplayGameObjectName(displayname);
 
-    }
-
-
-    private void HandleSlotBinding(Selectable @new)
-    {
-        if (@new is Slot s && holdingItem != null && holdingItem.FitIn(s) && s is not Port)
+        switch (selectable)
         {
-            holdingItem.Bind(s);
+            case Slot slot:
+                ShowSlotInteraction(slot);
+                break;
+            case Item item when holdingItem.HasItemType(ItemType.Processable) && item.HasItemType(ItemType.Processable):
+                ShowPrimaryInteraction("Combine", control.Player.pickup.GetBindingDisplayString());
+                break;
+            default:
+                ShowPrimaryInteraction("Drop", control.Player.pickup.GetBindingDisplayString());
+                break;
         }
     }
 
-    private void HandleSlotUnbinding(Selectable @new)
+    private void ShowSlotInteraction(Slot slot)
     {
-        if (holdingItem == null || holdingItem.BindSlot == null) return;
-        //if (!isCompatibleSlot && holdingItem != null && holdingItem.BindSlot != null)
-        if (@new is not Slot || (@new is Slot s && !holdingItem.FitIn(s)))
+        if (!holdingItem.FitIn(slot))
+        {
+            ShowPrimaryInteraction("Not Available", "");
+            return;
+        }
+
+        if (slot is Port)
+        {
+            ShowPrimaryInteraction("Put", control.Player.pickup.GetBindingDisplayString());
+            return;
+        }
+
+        ShowPrimaryInteraction("Install", control.Player.pickup.GetBindingDisplayString());
+        ShowSecondaryInteraction("Rotate", control.Player.rotate.GetBindingDisplayString());
+    }
+
+    private void ShowPrimaryInteraction(string name, string key)
+    {
+        UIManager.Instance.ShowInteraction(name, key, PrimaryInteractionIndex);
+    }
+
+    private void ShowSecondaryInteraction(string name, string key)
+    {
+        UIManager.Instance.ShowInteraction(name, key, SecondaryInteractionIndex);
+    }
+
+    private void BindHeldItemToSlot(Selectable selectable)
+    {
+        if (selectable is Slot slot && holdingItem != null && holdingItem.FitIn(slot) && slot is not Port)
+        {
+            holdingItem.Bind(slot);
+        }
+    }
+
+    private void UnbindHeldItemIfNeeded(Selectable selectable)
+    {
+        if (holdingItem == null || holdingItem.BindSlot == null)
+        {
+            return;
+        }
+
+        if (selectable is not Slot slot || !holdingItem.FitIn(slot))
         {
             holdingItem.Unbind();
         }
     }
-    void Update()
+    private void Update()
     {
         if (networkinfo.IsLocal)
         {
@@ -598,65 +624,47 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        bool wasInSpaceship = InSpaceship;
+        AddTriggerFollowRigidbody(other);
         spaceshipFollowTracker.OnTriggerEnter(other);
-        if (!wasInSpaceship && InSpaceship && MainSpaceship.Instance != null)
-        {
-            transform.parent = MainSpaceship.Instance.transform;
-        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        AddTriggerFollowRigidbody(other);
     }
     private void OnTriggerExit(Collider collision)
     {
+        RemoveTriggerFollowRigidbody(collision);
         spaceshipFollowTracker.OnTriggerExit(collision);
-        if (!InSpaceship)
-        {
-            transform.parent = null;
-        }
     }
-    
-
-    
     public void ReceiveVoice(byte[] bytesArray)
     {
         if (bytesArray == null || bytesArray.Length == 0)
-            return;
-
-        // ¢w¢w Step 1: Convert 16-bit signed PCM bytes ¡÷ float[-1..1] ¢w¢w
-        float[] floatSamples = new float[bytesArray.Length / 2];   // 2 bytes per sample
-
-        for (int i = 0; i < floatSamples.Length; i++)
         {
-            // Read two bytes ¡÷ little-endian signed 16-bit integer
-            short pcmValue = (short)(
-                (bytesArray[i * 2 + 1] << 8) |           // high byte
-                (bytesArray[i * 2] & 0xFF)               // low byte (mask to prevent sign extension)
-            );
-
-            // Normalize to float range [-1.0 .. 1.0]
-            floatSamples[i] = pcmValue / 32767f;        // 32767 = short.MaxValue
+            return;
         }
 
-        // ¢w¢w Step 2: Create or update the clip ¢w¢w
-        // Important: For streaming voice, it's better NOT to create a new clip every packet!
-        //            Create once (when first voice arrives), then keep SetData() on it.
+        float[] floatSamples = new float[bytesArray.Length / 2];
+        for (int i = 0; i < floatSamples.Length; i++)
+        {
+            short pcmValue = (short)(
+                (bytesArray[i * 2 + 1] << 8) |
+                (bytesArray[i * 2] & 0xFF)
+            );
 
-        // Option A: Simple version (new clip every packet) ¡V works but causes small gaps/clicks
+            floatSamples[i] = pcmValue / 32767f;
+        }
+
         AudioClip remoteClip = AudioClip.Create(
             "remoteVoice",
-            floatSamples.Length,               // number of samples this packet contains
-            1,                                 // mono
+            floatSamples.Length,
+            1,
             recording.SAMPLE_RATE,
-            stream: false                      // stream:true is only useful with repeated SetData()
+            stream: false
         );
 
         remoteClip.SetData(floatSamples, 0);
-
         audioSource.clip = remoteClip;
         audioSource.Play();
-
-        // ¢w¢w Option B: Better for real voice chat (recommended) ¢w¢w
-        // Use one persistent clip + rolling buffer + SetData(offset)
-        // See explanation below
     }
 }
 

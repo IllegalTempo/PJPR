@@ -1,8 +1,3 @@
-using UnityEngine;
-
-public partial class PlayerMain : MonoBehaviour
+public partial class PlayerMain
 {
-    [SerializeField]
-    private Animator animator;
-
 }
