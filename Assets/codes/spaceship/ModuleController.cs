@@ -41,6 +41,11 @@ namespace Assets.codes.spaceship
             SetModuleData(data);
         }
 
+        public void SetModuleDataBool(bool data)
+        {
+            SetModuleData(data);
+        }
+
         private void Start()
         {
             transform.parent = MainSpaceship.Instance.transform; 

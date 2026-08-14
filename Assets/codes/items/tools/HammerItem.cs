@@ -1,14 +1,15 @@
+using System.Linq;
 using UnityEngine;
 
-public class HammerItem : tools
+public class HammerItem : Tool
 {
-    protected override void onUse(Selectable lookat)
+    public override void OnUsingInteract(Selectable target)
     {
-        base.onUse(lookat);
-        if (lookat is SpaceshipPart ssp)
+        if (target.GetComponent<SpaceshipPart>() != null)
         {
-            ssp.Repair(10f);
+            target.GetComponent<SpaceshipPart>().Repair(10f);
         }
     }
+
 
 }

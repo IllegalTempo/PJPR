@@ -39,9 +39,9 @@ public struct ItemSnapshot
     /// <summary>Local scale relative to parent transform</summary>
     public Vector3 scale;
 }
-[RequireComponent(typeof(NetworkGameObject), typeof(Rigidbody), typeof(Collider))]
+[RequireComponent(typeof(NetworkGameObject), typeof(Rigidbody), typeof(Selectable))]
 
-public class Item : Selectable //Item is any that is pickable
+public class Item : MonoBehaviour//Item is any that is pickable
 {
 
     //[SerializeField] protected bool isRepairTool;
@@ -57,6 +57,7 @@ public class Item : Selectable //Item is any that is pickable
     public bool IsLocked = false;
 
     public ItemType itemType = ItemType.Generic;
+    [HideInInspector]
     public Slot AttachedSlot;
 
 
@@ -66,6 +67,7 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
+    [HideInInspector]
 
     public Slot BindSlot = null; //use for visual dont mind this
 
@@ -76,7 +78,7 @@ public class Item : Selectable //Item is any that is pickable
     /// Captured in OnEnable() and restored when item is dropped.
     /// Uses LOCAL coordinate space.
     /// </summary>
-    [SerializeField]
+    //[SerializeField]
     private ItemSnapshot snapshot_start;
     private Quaternion originalWorldRotation;
     public Quaternion OriginalRotation => originalWorldRotation;
@@ -86,13 +88,12 @@ public class Item : Selectable //Item is any that is pickable
     /// Captured in Bind() and restored when item is unbound.
     /// Uses LOCAL coordinate space.
     /// </summary>
-    [SerializeField]
+    //[SerializeField]
     private ItemSnapshot snapshot_bind;
     private Transform pre_bind_parent;
 
-    protected override void OnEnable()
+    void OnEnable()
     {
-        base.OnEnable();
 
         if (netObj == null)
         {
@@ -140,17 +141,6 @@ public class Item : Selectable //Item is any that is pickable
     public void EnableRB()
     {
         rb.isKinematic = false;
-    }
-    public override void OnClicked()
-    {
-        base.OnClicked();
-        if (netObj == null)
-        {
-            netObj = GetComponent<NetworkGameObject>();
-            Debug.LogWarning($"{name} has no NetworkObject, cannot be picked up.");
-            return;
-        }
-
     }
     public void ChangeItemOwner(ulong newowner)
     {
@@ -228,7 +218,6 @@ public class Item : Selectable //Item is any that is pickable
 
 
         rb.linearVelocity = Vector3.zero;
-        outline.OutlineColor = Color.aquamarine;
         SetColliders(false);
     }
     private void gotDropped(PlayerMain who, Vector3 dropPosition, Quaternion dropRotation, Vector3 throwDirection, float throwForce)
@@ -246,7 +235,6 @@ public class Item : Selectable //Item is any that is pickable
         transform.localScale = snapshot_start.scale;
 
         //ApplySnapshot(snapshot_start);
-        outline.OutlineColor = Color.white;
         EnableRB();
         rb.constraints = RigidbodyConstraints.None;
 
@@ -303,9 +291,4 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    protected override void Update()
-    {
-        base.Update();
-
-    }
 }

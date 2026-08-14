@@ -2,14 +2,18 @@
 using System.Collections;
 using UnityEngine;
 /// <summary>
-/// Machine is defined as an interactable that is synced. 
+/// SyncedMachine is defined as an interactable that is synced. 
 /// ServerActionOnInteract() only runs on server, typically do Object spawning etc.
 /// ShareActionOnInteract() runs on both, often use to do visuals 
 /// </summary>
 [RequireComponent(typeof(NetworkIdentity))]
-public abstract class SyncedMachine : Interactable //Machine should be synced
+public abstract class SyncedMachine : Interactable
 {
-    
+    public enum InteractionType
+    {
+        Press,
+        Release
+    }
     protected NetworkIdentity identity;
     public PlayerMain pressedByPlayer;
     public bool IsPressed => pressedByPlayer != null;
@@ -40,7 +44,7 @@ public abstract class SyncedMachine : Interactable //Machine should be synced
     }
     private void SendInteractMessage(int interacttype, PlayerMain who)
     {
-        NMS_Both_MachineInteract msg = new NMS_Both_MachineInteract(identity.Identifier, interacttype, who.networkinfo.steamID);
+        NMS_Both_MachineInteract msg = new NMS_Both_MachineInteract(identity.Identifier, interacttype, who.networkinfo.steamID, who.GetHeadRotation());
         msg.SendMessageAsServerOrClient();
     }
     public void OnNetworkApplyAction(int interacttype, PlayerMain who)

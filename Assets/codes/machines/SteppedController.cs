@@ -26,9 +26,8 @@ namespace Assets.codes.machines
         //    base.OnInteract_release(who);
         //    isGrabbed = false;
         //}
-        protected override void Update()
+        void Update()
         {
-            base.Update();
             if (IsPressed)
                 DuringGrab(pressedByPlayer);
         }

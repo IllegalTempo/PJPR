@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public interface IUsable
+[RequireComponent(typeof(Selectable))]
+public class Interactable:MonoBehaviour
 {
 
     public virtual void OnInteract_press(PlayerMain who)
@@ -10,6 +11,7 @@ public interface IUsable
     }
     public virtual void OnInteract_release(PlayerMain who)
     {
+        if (who == null) return;
 
     }
 }

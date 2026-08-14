@@ -27,5 +27,9 @@ MonoBehaviour:
     PrefabDefinition: {fileID: 11400000, guid: fa6e76d0302e03840951fbcc56a71c68, type: 2}
   - PrefabId: module_booster1
     PrefabDefinition: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
-  - PrefabId: controllers_boostercontroller
+  - PrefabId: controllers_booster1
     PrefabDefinition: {fileID: 11400000, guid: 151d386c6b153e84e8b7b98536dd4d0a, type: 2}
+  - PrefabId: module_Puller1
+    PrefabDefinition: {fileID: 11400000, guid: 7acd686d04087e84290eda6d8dc69b84, type: 2}
+  - PrefabId: controllers_Puller1
+    PrefabDefinition: {fileID: 11400000, guid: 18fe5d5615ec4e1468d5e9952f0e7291, type: 2}

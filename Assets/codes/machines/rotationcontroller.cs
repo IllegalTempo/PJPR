@@ -20,11 +20,18 @@ namespace Assets.codes.machines
         private Quaternion originalRotation;
         private Quaternion lastHeadRotation;
         private bool hasLastHeadRotation;
+        private Quaternion targetRotation;
+        private Rigidbody rotatingRigidbody;
+        private Transform cachedRigidbodyTarget;
 
+        public Transform RotatingTransform;
         public UnityEvent<Quaternion> onRotationChanged;
         private void Awake()
         {
-            originalRotation = transform.rotation;
+            Transform rotationTarget = GetRotationTarget();
+            originalRotation = rotationTarget.rotation;
+            targetRotation = originalRotation;
+            CacheRotatingRigidbody(rotationTarget);
         }
 
         protected override void ShareActionOnInteract_press(PlayerMain who)
@@ -33,7 +40,7 @@ namespace Assets.codes.machines
 
             if (who != null && who.head != null)
             {
-                lastHeadRotation = who.head.transform.rotation;
+                lastHeadRotation = who.GetHeadRotation();
                 hasLastHeadRotation = true;
             }
         }
@@ -44,8 +51,10 @@ namespace Assets.codes.machines
             hasLastHeadRotation = false;
         }
 
-        protected override void Update()
+        void Update()
         {
+            Transform rotationTarget = GetRotationTarget();
+            CacheRotatingRigidbody(rotationTarget);
 
             if (IsPressed)
             {
@@ -55,7 +64,7 @@ namespace Assets.codes.machines
                     return;
                 }
 
-                Quaternion currentHeadRotation = player.head.transform.rotation;
+                Quaternion currentHeadRotation = player.GetHeadRotation();
                 if (!hasLastHeadRotation)
                 {
                     lastHeadRotation = currentHeadRotation;
@@ -68,8 +77,8 @@ namespace Assets.codes.machines
 
                 if (axis.sqrMagnitude > 0.0000001f && angle > 0.0001f)
                 {
-                    transform.Rotate(axis.normalized, angle * headRotationMultiplier, Space.World);
-                    ApplyAxisLock();
+                    Quaternion appliedDeltaRotation = Quaternion.AngleAxis(angle * headRotationMultiplier, axis.normalized);
+                    targetRotation = ApplyAxisLock(appliedDeltaRotation * targetRotation);
                 }
 
                 lastHeadRotation = currentHeadRotation;
@@ -77,39 +86,68 @@ namespace Assets.codes.machines
             }
             else
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, MainSpaceship.Instance.transform.rotation, returnSpeed * Time.deltaTime);
-                ApplyAxisLock();
+                targetRotation = ApplyAxisLock(Quaternion.Slerp(targetRotation, GetAxisLockReferenceRotation(), returnSpeed * Time.deltaTime));
 
                 hasLastHeadRotation = false;
             }
-            onRotationChanged?.Invoke(transform.rotation);
+            onRotationChanged?.Invoke(targetRotation);
 
         }
 
-        private void ApplyAxisLock()
+        private void FixedUpdate()
         {
-            if (lockedAxis == RotationAxisLock.None)
+            Transform rotationTarget = GetRotationTarget();
+            CacheRotatingRigidbody(rotationTarget);
+
+            if (rotatingRigidbody != null)
+            {
+                rotatingRigidbody.MoveRotation(targetRotation);
+                return;
+            }
+
+            rotationTarget.rotation = targetRotation;
+        }
+
+        private Transform GetRotationTarget()
+        {
+            return RotatingTransform != null ? RotatingTransform : transform;
+        }
+
+        private void CacheRotatingRigidbody(Transform rotationTarget)
+        {
+            if (cachedRigidbodyTarget == rotationTarget)
             {
                 return;
             }
 
-            Vector3 rotation = transform.rotation.eulerAngles;
+            cachedRigidbodyTarget = rotationTarget;
+            rotatingRigidbody = rotationTarget.GetComponent<Rigidbody>();
+        }
+
+        private Quaternion ApplyAxisLock(Quaternion rotation)
+        {
+            if (lockedAxis == RotationAxisLock.None)
+            {
+                return rotation;
+            }
+
+            Vector3 rotationEuler = rotation.eulerAngles;
             Vector3 lockedRotation = GetAxisLockReferenceRotation().eulerAngles;
 
             switch (lockedAxis)
             {
                 case RotationAxisLock.X:
-                    rotation.x = lockedRotation.x;
+                    rotationEuler.x = lockedRotation.x;
                     break;
                 case RotationAxisLock.Y:
-                    rotation.y = lockedRotation.y;
+                    rotationEuler.y = lockedRotation.y;
                     break;
                 case RotationAxisLock.Z:
-                    rotation.z = lockedRotation.z;
+                    rotationEuler.z = lockedRotation.z;
                     break;
             }
 
-            transform.rotation = Quaternion.Euler(rotation);
+            return Quaternion.Euler(rotationEuler);
         }
 
         private Quaternion GetAxisLockReferenceRotation()

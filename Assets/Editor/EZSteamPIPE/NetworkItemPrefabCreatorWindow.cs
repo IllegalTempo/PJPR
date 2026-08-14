@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
-using Assets.codes.Network.SyncedIdentity;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class NetworkItemPrefabCreatorWindow : EditorWindow
 {
-    private const string PrefabRoot = "Assets/Resources/Prefabs";
+    private const string PrefabRoot = "Assets/Prefabs";
     private const string RegistryPath = PrefabRoot + "/NetworkPrefabRegistry.asset";
 
     private string _group = "";
@@ -15,8 +13,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
     private string _prefabId = "NewNetworkItem";
     private string _itemDescription = "";
     private int _maxStackSize = 64;
-    private bool _useSceneViewPosition = true;
-    private Vector3 _spawnPosition = Vector3.zero;
+    private bool _isModule;
     private string _newGroup = "";
     private string[] _groupOptions = new[] { "" };
     private string[] _groupLabels = new[] { "(None)" };
@@ -38,7 +35,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
     private void OnGUI()
     {
         GUILayout.Label("Create Network Item Prefab", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Creates a prefab instance in the open scene, adds NetworkPrefabIdentity, Item, and NetworkGameObject, then creates a PrefabDefinition and registry entry with the canonical prefab ID.", MessageType.Info);
+        EditorGUILayout.HelpBox("Creates PrefabDefinition assets and registry entries in the selected folder. No scene GameObject or prefab asset is created.", MessageType.Info);
 
         EditorGUILayout.Space(8);
         EditorGUI.BeginChangeCheck();
@@ -60,17 +57,15 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
 
         _itemDescription = EditorGUILayout.TextField("Item Description", _itemDescription);
         _maxStackSize = EditorGUILayout.IntField("Max Stack Size", _maxStackSize);
-
-        _useSceneViewPosition = EditorGUILayout.ToggleLeft("Place at Scene view pivot", _useSceneViewPosition);
-        using (new EditorGUI.DisabledScope(_useSceneViewPosition))
-        {
-            _spawnPosition = EditorGUILayout.Vector3Field("Spawn Position", _spawnPosition);
-        }
+        _isModule = EditorGUILayout.Toggle("Is Module", _isModule);
 
         EditorGUILayout.Space(8);
         EditorGUILayout.LabelField("Target Folder", GetTargetFolderPath());
-        EditorGUILayout.LabelField("Prefab Path", GetPrefabPath());
-        EditorGUILayout.LabelField("Item Definition Path", GetItemDefinitionPath());
+        EditorGUILayout.LabelField("Definition Path", GetItemDefinitionPath());
+        if (_isModule)
+        {
+            EditorGUILayout.LabelField("Controller Definition Path", GetControllerDefinitionPath());
+        }
 
         ValidationResult validation = ValidateInput();
         if (!validation.IsValid)
@@ -80,7 +75,7 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
 
         using (new EditorGUI.DisabledScope(!validation.IsValid))
         {
-            if (GUILayout.Button("Create Prefab In Scene", GUILayout.Height(32)))
+            if (GUILayout.Button("Create Definition", GUILayout.Height(32)))
             {
                 CreatePrefab();
             }
@@ -198,64 +193,28 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         foreach (string subFolder in subFolders)
         {
             string groupPath = subFolder.Substring(PrefabRoot.Length).TrimStart('/');
-            if (!IsGeneratedItemFolder(subFolder))
-            {
-                groups.Add(groupPath);
-            }
-
+            groups.Add(groupPath);
             AddGroupsRecursive(subFolder, groups);
         }
-    }
-
-    private static bool IsGeneratedItemFolder(string folderPath)
-    {
-        string folderName = Path.GetFileName(folderPath);
-        string prefabPath = folderPath + "/" + folderName + ".prefab";
-        string itemDefinitionPath = folderPath + "/" + folderName + ".asset";
-        return File.Exists(prefabPath) || File.Exists(itemDefinitionPath);
     }
 
     private void CreatePrefab()
     {
         EnsureFolder(GetTargetFolderPath());
 
-        string prefabPath = GetPrefabPath();
-        GameObject instance = new GameObject(_prefabName.Trim());
-        Undo.RegisterCreatedObjectUndo(instance, "Create Network Item Prefab");
-        instance.transform.position = GetScenePosition();
-
-        NetworkPrefabIdentity identity = AddOrGetComponent<NetworkPrefabIdentity>(instance);
-        identity.PrefabID = _prefabId.Trim();
-
-        NetworkGameObject networkGameObject = AddOrGetComponent<NetworkGameObject>(instance);
-        networkGameObject.Identity = identity;
-
-        Item item = AddOrGetComponent<Item>(instance);
-        AddOrGetComponent<StaticOutline>(instance);
-        AddOrGetComponent<BoxCollider>(instance);
-
-        SerializedObject itemObject = new SerializedObject(item);
-        SerializedProperty netObjProperty = itemObject.FindProperty("netObj");
-        if (netObjProperty != null)
-        {
-            netObjProperty.objectReferenceValue = networkGameObject;
-            itemObject.ApplyModifiedPropertiesWithoutUndo();
-        }
-
-        GameObject prefabAsset = PrefabUtility.SaveAsPrefabAssetAndConnect(instance, prefabPath, InteractionMode.UserAction);
-        if (prefabAsset == null)
-        {
-            Undo.DestroyObjectImmediate(instance);
-            EditorUtility.DisplayDialog("Create Network Item Prefab", "Unity could not save the prefab asset.", "OK");
-            return;
-        }
-
-        PrefabDefinition itemDefinition = CreateItemDefinition(prefabAsset);
-        AssignItemDefinition(instance, prefabAsset, itemDefinition);
+        PrefabDefinition itemDefinition = CreateItemDefinition();
         AddRegistryEntry(_prefabId.Trim(), itemDefinition);
-        EditorSceneManager.MarkSceneDirty(instance.scene);
-        Selection.activeGameObject = instance;
-        EditorGUIUtility.PingObject(prefabAsset);
+
+        if (_isModule && itemDefinition is ModuleDefinition moduleDefinition)
+        {
+            PrefabDefinition controllerDefinition = CreateControllerDefinition();
+            moduleDefinition.controlPrefab = controllerDefinition;
+            EditorUtility.SetDirty(moduleDefinition);
+            AddRegistryEntry(GetControllerPrefabId(), controllerDefinition);
+        }
+
+        Selection.activeObject = itemDefinition;
+        EditorGUIUtility.PingObject(itemDefinition);
         AssetDatabase.SaveAssets();
 
         if (Application.isPlaying && NetworkSystem.Instance != null)
@@ -263,15 +222,17 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
             NetworkSystem.Instance.RebuildNetworkPrefabLookup();
         }
 
-        EditorUtility.DisplayDialog("Create Network Item Prefab", "Created item definition and prefab for '" + _prefabName.Trim() + "'.", "OK");
+        EditorUtility.DisplayDialog("Create Network Item Prefab", "Created definition assets for '" + _prefabName.Trim() + "'.", "OK");
     }
 
-    private PrefabDefinition CreateItemDefinition(GameObject prefabAsset)
+    private PrefabDefinition CreateItemDefinition()
     {
-        PrefabDefinition itemDefinition = CreateInstance<PrefabDefinition>();
+        PrefabDefinition itemDefinition = _isModule
+            ? CreateInstance<ModuleDefinition>()
+            : CreateInstance<PrefabDefinition>();
+
         itemDefinition.itemName = _prefabName.Trim();
         itemDefinition.itemDescription = _itemDescription;
-        itemDefinition.itemPrefab = prefabAsset;
         itemDefinition.maxStackSize = Mathf.Max(1, _maxStackSize);
         itemDefinition.holdState = new ItemSnapshot
         {
@@ -285,34 +246,22 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         return itemDefinition;
     }
 
-    private static void AssignItemDefinition(GameObject instance, GameObject prefabAsset, PrefabDefinition itemDefinition)
+    private PrefabDefinition CreateControllerDefinition()
     {
-        Item instanceItem = instance.GetComponent<Item>();
-        if (instanceItem != null)
+        PrefabDefinition controllerDefinition = CreateInstance<PrefabDefinition>();
+        controllerDefinition.itemName = GetControllerName();
+        controllerDefinition.itemDescription = _prefabName.Trim() + " controller";
+        controllerDefinition.maxStackSize = 1;
+        controllerDefinition.holdState = new ItemSnapshot
         {
-            SerializedObject itemObject = new SerializedObject(instanceItem);
-            SerializedProperty abstractItemProperty = itemObject.FindProperty("AbstractItem");
-            if (abstractItemProperty != null)
-            {
-                abstractItemProperty.objectReferenceValue = itemDefinition;
-                itemObject.ApplyModifiedPropertiesWithoutUndo();
-            }
-        }
+            position = Vector3.zero,
+            rotation = Quaternion.identity,
+            scale = Vector3.one
+        };
 
-        Item prefabItem = prefabAsset.GetComponent<Item>();
-        if (prefabItem != null)
-        {
-            SerializedObject prefabItemObject = new SerializedObject(prefabItem);
-            SerializedProperty abstractItemProperty = prefabItemObject.FindProperty("AbstractItem");
-            if (abstractItemProperty != null)
-            {
-                abstractItemProperty.objectReferenceValue = itemDefinition;
-                prefabItemObject.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(prefabAsset);
-            }
-        }
-
-        PrefabUtility.SavePrefabAsset(prefabAsset);
+        AssetDatabase.CreateAsset(controllerDefinition, GetControllerDefinitionPath());
+        EditorUtility.SetDirty(controllerDefinition);
+        return controllerDefinition;
     }
 
     private ValidationResult ValidateInput()
@@ -332,14 +281,19 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
             return ValidationResult.Invalid("Prefab ID is already used by an item definition.");
         }
 
-        if (File.Exists(GetPrefabPath()))
-        {
-            return ValidationResult.Invalid("A prefab already exists at this path.");
-        }
-
         if (File.Exists(GetItemDefinitionPath()))
         {
-            return ValidationResult.Invalid("An item definition already exists at this path.");
+            return ValidationResult.Invalid("A definition already exists at this path.");
+        }
+
+        if (_isModule && File.Exists(GetControllerDefinitionPath()))
+        {
+            return ValidationResult.Invalid("A controller definition already exists at this path.");
+        }
+
+        if (_isModule && ItemDefinitionPrefabIdExists(GetControllerPrefabId()))
+        {
+            return ValidationResult.Invalid("Controller prefab ID is already used by an item definition.");
         }
 
         if (_maxStackSize < 1)
@@ -419,14 +373,24 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         AssetDatabase.SaveAssets();
     }
 
-    private string GetPrefabPath()
-    {
-        return GetTargetFolderPath() + "/" + SanitizeFileName(_prefabName) + ".prefab";
-    }
-
     private string GetItemDefinitionPath()
     {
         return GetTargetFolderPath() + "/" + SanitizeFileName(_prefabName) + ".asset";
+    }
+
+    private string GetControllerDefinitionPath()
+    {
+        return GetTargetFolderPath() + "/" + SanitizeFileName(GetControllerName()) + ".asset";
+    }
+
+    private string GetControllerName()
+    {
+        return _prefabName.Trim() + "_controller";
+    }
+
+    private string GetControllerPrefabId()
+    {
+        return _prefabId.Trim() + "_controller";
     }
 
     private string GetTargetFolderPath()
@@ -435,23 +399,6 @@ public class NetworkItemPrefabCreatorWindow : EditorWindow
         string itemFolder = SanitizeFileName(_prefabName);
         string basePath = string.IsNullOrWhiteSpace(groupPath) ? PrefabRoot : PrefabRoot + "/" + groupPath;
         return basePath + "/" + itemFolder;
-    }
-
-    private Vector3 GetScenePosition()
-    {
-        if (!_useSceneViewPosition)
-        {
-            return _spawnPosition;
-        }
-
-        SceneView sceneView = SceneView.lastActiveSceneView;
-        return sceneView != null ? sceneView.pivot : Vector3.zero;
-    }
-
-    private static T AddOrGetComponent<T>(GameObject gameObject) where T : Component
-    {
-        T component = gameObject.GetComponent<T>();
-        return component != null ? component : gameObject.AddComponent<T>();
     }
 
     private static void EnsureFolder(string folderPath)

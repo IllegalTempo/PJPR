@@ -240,7 +240,7 @@ public class recording : MonoBehaviour
 
         currentLineSeconds = lineBytes.Length / 2f / SAMPLE_RATE;
         Vector3 spawnpos = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.position : Vector3.zero;
-        Vector3 spawndir = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.cam.transform.forward : Vector3.forward;
+        Vector3 spawndir = GameCore.Instance != null && GameCore.Instance.Local_Player != null ? GameCore.Instance.Local_Player.GetFacing() : Vector3.forward;
         //debug voice length
         Debug.Log($"Sending voice line: {currentLineSeconds:F2}s, {lineBytes.Length} bytes, from {spawnpos}, dir {spawndir}");
         NMS_Both_VoicePacket msg = new NMS_Both_VoicePacket(lineBytes, NetworkSystem.Instance.SteamID, spawnpos, spawndir);

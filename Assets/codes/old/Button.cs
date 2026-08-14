@@ -21,9 +21,4 @@ public class Button: Interactable
     {
         onReleased.Invoke();
     }
-    protected override void Update()
-    {
-        base.Update();
-
-    }
 }

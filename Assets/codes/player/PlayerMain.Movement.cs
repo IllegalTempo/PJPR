@@ -30,7 +30,7 @@ public partial class PlayerMain : MonoBehaviour
     {
         movementFixedTick++;
 
-        Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
+        Vector3 move = (GetFacing() * moveinput.y + cam.transform.right * moveinput.x);
         move.y = 0f;
         move.Normalize();
 
@@ -216,7 +216,7 @@ public partial class PlayerMain : MonoBehaviour
 
     private Selectable FindSeenSelectable()
     {
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+        Ray ray = new Ray(cam.transform.position, GetFacing());
         if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
         {
             return null;

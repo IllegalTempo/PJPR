@@ -86,6 +86,7 @@ public class GameSaveSystem : MonoBehaviour
         GameSaveData saveData = new GameSaveData(new List<PlayerData>(), new List<NetworkObjectSnapshot>(), new List<SlotSnapshot>());
         saveData.AddModule("ms_left1", DefaultBoosterModuleId);
         saveData.AddModule("ms_right1", DefaultBoosterModuleId);
+        saveData.AddModule("ms_below1", "module_Puller1");
 
         //
         //saveData.InstalledModules.Add(new InstalledModuleSaveData((int)ModuleSlotName.back_left, DefaultBoosterModuleId));
