@@ -39,7 +39,7 @@ public class Puller : Module<bool>
             return;
         }
 
-        Vector3 pullDirection = -transform.up;
+        Vector3 pullDirection = transform.up;
         if (!Physics.SphereCast(transform.position, pullerRayRadius, pullDirection, out RaycastHit hit, pullerRayDistance, pullerRayMask, triggerInteraction))
         {
             Debug.LogWarning($"{name} puller did not hit anything along transform.up.");
@@ -53,8 +53,7 @@ public class Puller : Module<bool>
             return;
         }
 
-        Vector3 handPosition = transform.position + pullDirection * hit.distance;
-        activeHand = Instantiate(PullerHand, handPosition, transform.rotation);
+        activeHand = Instantiate(PullerHand, hit.point, transform.rotation);
 
         Transform handEnd = FindChildRecursive(activeHand.transform, EndAnchorName);
         if (handEnd == null)
@@ -64,6 +63,7 @@ public class Puller : Module<bool>
             return;
         }
 
+        activeHand.transform.position += hit.point - handEnd.position;
         activeSegment = Instantiate(PullerSegment, pullerStart.position, transform.rotation);
 
         Transform segmentStart = FindChildRecursive(activeSegment.transform, StartAnchorName);
@@ -77,6 +77,8 @@ public class Puller : Module<bool>
 
         AlignSegment(activeSegment.transform, segmentStart, segmentEnd, pullerStart.position, handEnd.position);
         ConnectSegmentHinge(activeSegment);
+        ConnectHandHinge(activeHand, activeSegment);
+        ConnectHandToSurface(activeHand, handEnd.position, hit.rigidbody);
     }
 
     private void ClearPuller()
@@ -167,6 +169,52 @@ public class Puller : Module<bool>
         }
 
         hinge.connectedBody = pullerRigidbody;
+    }
+
+    private void ConnectHandHinge(GameObject hand, GameObject segment)
+    {
+        HingeJoint hinge = hand.GetComponentInChildren<HingeJoint>();
+        if (hinge == null)
+        {
+            Debug.LogWarning($"{hand.name} cannot connect puller because it has no HingeJoint.");
+            return;
+        }
+
+        Rigidbody segmentRigidbody = segment.GetComponent<Rigidbody>();
+        if (segmentRigidbody == null)
+        {
+            Debug.LogWarning($"{segment.name} cannot connect puller hand hinge because it has no Rigidbody.");
+            return;
+        }
+
+        hinge.connectedBody = segmentRigidbody;
+    }
+
+    private void ConnectHandToSurface(GameObject hand, Vector3 anchorWorldPosition, Rigidbody surfaceRigidbody)
+    {
+        Rigidbody handRigidbody = hand.GetComponent<Rigidbody>();
+        if (handRigidbody == null)
+        {
+            Debug.LogWarning($"{hand.name} cannot stick to surface because it has no Rigidbody.");
+            return;
+        }
+
+        if (surfaceRigidbody == handRigidbody)
+        {
+            Debug.LogWarning($"{hand.name} cannot stick to itself.");
+            return;
+        }
+
+        FixedJoint surfaceJoint = hand.AddComponent<FixedJoint>();
+        surfaceJoint.connectedBody = surfaceRigidbody;
+        surfaceJoint.autoConfigureConnectedAnchor = false;
+        surfaceJoint.anchor = hand.transform.InverseTransformPoint(anchorWorldPosition);
+        surfaceJoint.connectedAnchor = surfaceRigidbody != null
+            ? surfaceRigidbody.transform.InverseTransformPoint(anchorWorldPosition)
+            : anchorWorldPosition;
+        surfaceJoint.enableCollision = false;
+        surfaceJoint.breakForce = Mathf.Infinity;
+        surfaceJoint.breakTorque = Mathf.Infinity;
     }
 
     private Transform FindChildRecursive(Transform parent, string childName)

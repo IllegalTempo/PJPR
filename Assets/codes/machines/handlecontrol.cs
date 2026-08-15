@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.codes.machines
 {
-    public class handlecontrol : SteppedController
+    public class HandleControl : SteppedController
     {
         public float minPitch = -45f;
         public float maxPitch = 45f;

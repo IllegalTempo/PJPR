@@ -172,6 +172,18 @@ public partial class GameCore : MonoBehaviour
     //        Debug.Log("Cannot load decorations");
     //    }
     //}
+    public static Transform getCollisionTransform(Rigidbody rb)
+    {
+        if (rb != null)
+        {
+            return rb.transform;
+
+        }
+        else
+        {
+            return null;
+        }
+    }
     public async UniTask<NetworkGameObject> spawnNetworkPrefab(string prefabID,ulong owner, string networkID, Vector3 pos, Quaternion rot, Transform parent = null) //run by both server and client 
     {
         Debug.Log($"Created NetworkObject: {prefabID}, networkID: {networkID}");

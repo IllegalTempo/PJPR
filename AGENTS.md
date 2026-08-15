@@ -3,6 +3,7 @@
 - Clients send messages to the server; the server then tells other clients. The host is the server.
 - When the user says "Complete a method", refer to the pseudo-comment code inside that method and implement the method according to those comments.
 
+
 ## Workspace Summary
 - This is a Unity C# project at `C:\Users\jedts\PJPR`.
 - Main gameplay/runtime code lives in `Assets/codes`.
@@ -37,6 +38,7 @@
 - Use `Tools > Network Objects > ID Tools` to scan/fill scene object IDs.
 
 ## Conventions To Follow
+- If the variable get/set method should be same as default, always make it public
 - Use `rg` first when searching files or text.
 - Keep changes small and scoped to the user request.
 - Use `apply_patch` for manual code edits.

@@ -15,8 +15,7 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    private readonly SpaceshipFollowTracker spaceshipFollowTracker = new SpaceshipFollowTracker();
-    public bool InSpaceship => spaceshipFollowTracker.InSpaceship;
+    public bool InSpaceship => collisionCount > 0;
     [SerializeField]
     private AudioSource audioSource;
 
@@ -621,6 +620,7 @@ public partial class PlayerMain : MonoBehaviour
         }
         if(selectable == null)
         {
+            holdingItem.Unbind();
             return;
         }
         Slot slot = selectable.slotOverride;
@@ -646,20 +646,7 @@ public partial class PlayerMain : MonoBehaviour
             Move();
         }
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        AddTriggerFollowRigidbody(other);
-        spaceshipFollowTracker.OnTriggerEnter(other);
-    }
-    private void OnTriggerStay(Collider other)
-    {
-        AddTriggerFollowRigidbody(other);
-    }
-    private void OnTriggerExit(Collider collision)
-    {
-        RemoveTriggerFollowRigidbody(collision);
-        spaceshipFollowTracker.OnTriggerExit(collision);
-    }
+   
     public void ReceiveVoice(byte[] bytesArray)
     {
         if (bytesArray == null || bytesArray.Length == 0)

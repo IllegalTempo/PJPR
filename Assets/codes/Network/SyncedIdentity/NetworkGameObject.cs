@@ -23,9 +23,8 @@ namespace Assets.codes.Network.SyncedIdentity
         private float nextTransformSendTime;
         private bool initializedTransformSendDelay;
         private Rigidbody rb;
-        private readonly SpaceshipFollowTracker spaceshipFollowTracker = new SpaceshipFollowTracker();
         public PrefabDefinition AbstractObject;
-        public bool InSpaceship => spaceshipFollowTracker.InSpaceship;
+        public bool InSpaceship = false;
 
 
 
@@ -82,20 +81,7 @@ namespace Assets.codes.Network.SyncedIdentity
             transform.position = pos;
             transform.rotation = rot;
         }
-        protected virtual void FixedUpdate()
-        {
-            spaceshipFollowTracker.ApplyTo(rb);
-        }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            spaceshipFollowTracker.OnTriggerEnter(other);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            spaceshipFollowTracker.OnTriggerExit(other);
-        }
         private void SendTransform()
         {
             if (!NetworkSystem.Instance.IsOnline) return;

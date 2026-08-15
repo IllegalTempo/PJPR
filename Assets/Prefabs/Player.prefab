@@ -77,11 +77,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1d352eceb244e49a81e423e15cf1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
-  animator: {fileID: 3776810605563319565}
-  GroundCheckDistance: 0.3
   audioSource: {fileID: 6399989085136356095}
   seenObject: {fileID: 0}
-  clickedObject: {fileID: 0}
   cam: {fileID: 2002703588627120506}
   head: {fileID: 5541582815378028596}
   networkinfo: {fileID: 5670073900387558509}
@@ -102,9 +99,9 @@ MonoBehaviour:
   - {fileID: 10069236664392863}
   - {fileID: 5233131636794888236}
   - {fileID: 3793474740640439331}
-  MoveSpeed: 3
+  MoveSpeed: 10
   LookSpeed: 2
-  MaxSpeed: 3
+  MaxSpeed: 10
   JetPackForce: 70
   Gravity: 50
   lookinput: {x: 0, y: 0}
@@ -163,7 +160,7 @@ Rigidbody:
   m_GameObject: {fileID: 1074483101829538221}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}

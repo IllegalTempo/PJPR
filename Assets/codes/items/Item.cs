@@ -60,9 +60,11 @@ public class Item : MonoBehaviour//Item is any that is pickable
     [HideInInspector]
     public Slot AttachedSlot;
 
+    private int collisionCount = 0;
 
-
-
+    public PlayerMain PickedUpBy;
+    private Rigidbody activeShipRigidbody;
+    private Vector3 previousShipVelocity;
 
 
 
@@ -142,6 +144,128 @@ public class Item : MonoBehaviour//Item is any that is pickable
     {
         rb.isKinematic = false;
     }
+    private void FixedUpdate()
+    {
+        ApplySpaceshipVelocity();
+    }
+
+    private void ApplySpaceshipVelocity()
+    {
+        if (PickedUpBy != null || AttachedSlot != null || rb == null || rb.isKinematic)
+        {
+            previousShipVelocity = Vector3.zero;
+            return;
+        }
+
+        Vector3 shipVelocity = GetSpaceshipVelocity();
+        Vector3 relativeVelocity = rb.linearVelocity - previousShipVelocity;
+        rb.linearVelocity = relativeVelocity + shipVelocity;
+        previousShipVelocity = shipVelocity;
+    }
+
+    private Vector3 GetSpaceshipVelocity()
+    {
+        if (collisionCount <= 0)
+        {
+            return Vector3.zero;
+        }
+
+        Rigidbody shipRigidbody = activeShipRigidbody;
+        if (shipRigidbody == null && MainSpaceship.Instance != null)
+        {
+            shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        }
+
+        return shipRigidbody != null ? shipRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+    }
+
+    private Rigidbody GetSpaceshipRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
+    {
+        if (MainSpaceship.Instance == null)
+        {
+            return null;
+        }
+
+        Transform shipTransform = MainSpaceship.Instance.transform;
+        Rigidbody shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        if (candidateRigidbody != null &&
+            (candidateRigidbody.transform == shipTransform || candidateRigidbody.transform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        if (candidateTransform != null &&
+            (candidateTransform == shipTransform || candidateTransform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        return null;
+    }
+
+    private void EnterSpaceship(Rigidbody shipRigidbody)
+    {
+        if (shipRigidbody == null)
+        {
+            return;
+        }
+
+        collisionCount++;
+        activeShipRigidbody = shipRigidbody;
+    }
+
+    private void ExitSpaceship()
+    {
+        collisionCount = Mathf.Max(0, collisionCount - 1);
+        if (collisionCount <= 0)
+        {
+            activeShipRigidbody = null;
+            previousShipVelocity = Vector3.zero;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        EnterSpaceship(GetSpaceshipRigidbody(collision.rigidbody, collision.transform));
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        if (GetSpaceshipRigidbody(collision.rigidbody, collision.transform) != null)
+        {
+            ExitSpaceship();
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        EnterSpaceship(GetSpaceshipRigidbody(other.attachedRigidbody, other.transform));
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        if (GetSpaceshipRigidbody(other.attachedRigidbody, other.transform) != null)
+        {
+            ExitSpaceship();
+        }
+    }
     public void ChangeItemOwner(ulong newowner)
     {
         NMS_Both_PickUpItem message = new NMS_Both_PickUpItem(netObj.Identity.Identifier, newowner);
@@ -197,6 +321,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
     {
         Debug.Log($"{name} picked up by {who.name}");
         who.holdingItem = this;
+        PickedUpBy = who;
 
         if (who.Equals(GameCore.Instance.Local_Player))
         {
@@ -225,7 +350,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
 
         Debug.Log($"{name} dropped by {who.name}");
         who.holdingItem = null;
-
+        PickedUpBy = null;
         if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.HideInteraction(0);

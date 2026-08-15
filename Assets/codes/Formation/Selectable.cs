@@ -6,6 +6,7 @@ public class Selectable : MonoBehaviour
 {
 
     protected StaticOutline outline;
+    [SerializeField]
     private bool lookedAt = false;
     private float ClickTimer = 0f;
     public UnityEvent OnSelect;

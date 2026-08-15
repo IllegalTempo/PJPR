@@ -5,6 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GameSaveData
 {
+    public static Quaternion NullAngle = new Quaternion(0, 0, 0, 0);
     public List<PlayerData> PlayerLocations = new List<PlayerData>(); //Player data is updated upon player join
     public List<NetworkObjectSnapshot> NetworkObjects = new List<NetworkObjectSnapshot>();
     public List<SlotSnapshot> SlotRelationships = new List<SlotSnapshot>();
@@ -34,7 +35,7 @@ public class GameSaveData
         else
         {
             // Create a new slot snapshot and add it to the list
-            SlotSnapshot newSlot = new SlotSnapshot(slotId, snapshot.Uid, Quaternion.identity);
+            SlotSnapshot newSlot = new SlotSnapshot(slotId, snapshot.Uid, NullAngle);
             SlotRelationships.Add(newSlot);
         }
 
