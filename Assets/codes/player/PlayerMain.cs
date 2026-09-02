@@ -308,9 +308,14 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void SendPickupRequest(Item item)
     {
-        new NMS_Both_PickUpItem(item.GetNetworkObject().Identity.Identifier, networkinfo.steamID).SendMessageAsServerOrClient();
+        NetworkGameObject nobj = item != null ? item.GetNetworkObject() : null;
+        if (nobj == null || nobj.Identity == null || string.IsNullOrEmpty(nobj.Identity.Identifier))
+        {
+            Debug.LogWarning($"[PlayerMain] Cannot pick up '{(item != null ? item.name : "null")}': it has no NetworkObject / identifier. Add NetworkGameObject + NetworkPrefabIdentity to the item prefab.");
+            return;
+        }
 
-
+        new NMS_Both_PickUpItem(nobj.Identity.Identifier, networkinfo.steamID).SendMessageAsServerOrClient();
     }
 
     private void RotateHeldItemInSlot()

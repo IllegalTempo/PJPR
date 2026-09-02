@@ -23,13 +23,17 @@ public class packets
         WorldInitBegin = 1021,
         WorldInitComplete = 1022,
     
-        SyncMainSpaceshipRigidbody = 1023,};
+        SyncMainSpaceshipRigidbody = 1023,
+        PeakOfEnergyState = 1024,
+        PeakOfEnergyChargeEvent = 1025,};
     public enum ClientPackets
     {
         SendReadyState = 2001,
         RequestVotingSession = 2004,
         CastVote = 2005,
         RequestWorldState = 2006,
+        PeakOfEnergyChargeRequest = 2007,
+        PeakOfEnergyHammerHit = 2008,
     };
     public enum BothPackets
     {
