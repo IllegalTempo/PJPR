@@ -29,3 +29,9 @@ MonoBehaviour:
     PrefabDefinition: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
   - PrefabId: controllers_boostercontroller
     PrefabDefinition: {fileID: 11400000, guid: 151d386c6b153e84e8b7b98536dd4d0a, type: 2}
+  - PrefabId: PeakMeteorite
+    PrefabDefinition: {fileID: 11400000, guid: 74bc6101bd41b2642966697a908fae26, type: 2}
+  - PrefabId: RustEater
+    PrefabDefinition: {fileID: 11400000, guid: 82128c27935dfc54983c312ec19fbc7e, type: 2}
+  - PrefabId: Hammer
+    PrefabDefinition: {fileID: 11400000, guid: 01890e84109898847b4de82edfa90ca4, type: 2}

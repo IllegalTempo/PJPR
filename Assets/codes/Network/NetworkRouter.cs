@@ -60,7 +60,9 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.UpdateWorld_Rotation, NMS_Server_UpdateWorld_Rotation.Read },
             { (int)packets.ServerPackets.WorldInitBegin, NMS_Server_WorldInitBegin.Read },
             { (int)packets.ServerPackets.WorldInitComplete, NMS_Server_WorldInitComplete.Read },
-            { (int)packets.ServerPackets.SyncMainSpaceshipRigidbody, NMS_Server_SyncMainSpaceshipRigidbody.Read },};
+            { (int)packets.ServerPackets.SyncMainSpaceshipRigidbody, NMS_Server_SyncMainSpaceshipRigidbody.Read },
+            { (int)packets.ServerPackets.PeakOfEnergyState, NMS_Server_PeakOfEnergyState.Read },
+            { (int)packets.ServerPackets.PeakOfEnergyChargeEvent, NMS_Server_PeakOfEnergyChargeEvent.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {
@@ -68,6 +70,8 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ClientPackets.RequestVotingSession, NMS_Client_RequestVotingSession.Read },
             { (int)packets.ClientPackets.CastVote, NMS_Client_CastVote.Read },
             { (int)packets.ClientPackets.RequestWorldState, NMS_Client_RequestWorldState.Read },
+            { (int)packets.ClientPackets.PeakOfEnergyChargeRequest, NMS_Client_PeakOfEnergyChargeRequest.Read },
+            { (int)packets.ClientPackets.PeakOfEnergyHammerHit, NMS_Client_PeakOfEnergyHammerHit.Read },
         };
         public uint NextOutgoingSequence()
         {

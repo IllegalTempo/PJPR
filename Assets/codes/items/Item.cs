@@ -278,6 +278,12 @@ public class Item : Selectable //Item is any that is pickable
 
     public NetworkGameObject GetNetworkObject()
     {
+        // Lazily resolve if the cached reference is stale (e.g. the NetworkGameObject was
+        // added after this Item's OnEnable had already run, or it lives on a child).
+        if (netObj == null)
+        {
+            netObj = GetComponentInChildren<NetworkGameObject>();
+        }
         return netObj;
     }
 
