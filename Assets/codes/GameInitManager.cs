@@ -168,6 +168,11 @@ public class GameInitManager : MonoBehaviour
             Item attachedItem = NetworkSystem.Instance.GetComponentOfIdentity<Item>(snapshot.AttachedItemNetworkID);
             if (attachedItem != null && slot != null && attachedItem != null)
             {
+                Quaternion moduleRotation = snapshot.rotation;
+                if (moduleRotation == GameSaveData.NullAngle)
+                {
+                    moduleRotation = slot.transform.rotation;
+                }
                 if (sendNetworkAttach)
                 {
                     slot.SendAttach(attachedItem, snapshot.rotation);

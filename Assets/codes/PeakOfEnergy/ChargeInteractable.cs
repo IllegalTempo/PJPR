@@ -9,13 +9,11 @@ using Assets.codes.Network.Messages;
 /// (RPM in range AND stable, otherwise the channel cancels instantly).
 /// </summary>
 [RequireComponent(typeof(StaticOutline))]
-public class ChargeInteractable : Selectable, IUsable
+public class ChargeInteractable : Interactable
 {
     [Header("References")]
     [Tooltip("Optional explicit manager reference; auto-found from the scene if empty.")]
     [SerializeField] private PeakOfEnergyManager manager;
-
-    protected override int Layer => 6;
 
     private PeakOfEnergyManager Manager
     {
@@ -31,7 +29,7 @@ public class ChargeInteractable : Selectable, IUsable
         }
     }
 
-    public void OnInteract_press(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         if (Manager == null)
         {
@@ -49,7 +47,7 @@ public class ChargeInteractable : Selectable, IUsable
         }
     }
 
-    public void OnInteract_release(PlayerMain who)
+    public override void OnInteract_release(PlayerMain who)
     {
         if (Manager == null)
             return;

@@ -48,6 +48,7 @@ public class packets
         SlotDetach = 3012,
         QuantityResourceProviderInteract = 3013,
         SendCombineItem = 3014,
-        Handle_OnReleaseUpdateLevel = 3015,};
+        Handle_OnReleaseUpdateLevel = 3015,
+        SyncNetworkVariable = 3016,};
 }
 

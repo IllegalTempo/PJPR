@@ -2,10 +2,12 @@ using UnityEngine;
 
 namespace Assets.codes.machines
 {
-    public class handlecontrol : SteppedController
+    public class HandleControl : SteppedController
     {
         public float minPitch = -45f;
         public float maxPitch = 45f;
+
+        public Transform HandleTransform;
 
         public override void VisualOnStep(int step)
         {
@@ -32,7 +34,7 @@ namespace Assets.codes.machines
 
         private void SetHandlePitch(float pitch)
         {
-            transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+            HandleTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
         }
     }
 }

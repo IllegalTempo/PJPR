@@ -1,12 +1,20 @@
 using UnityEngine;
+using UnityEngine.Events;
 
-[RequireComponent(typeof(StaticOutline))]
-public partial class Selectable : MonoBehaviour
+[RequireComponent(typeof(StaticOutline),typeof(Collider))]
+public class Selectable : MonoBehaviour
 {
 
     protected StaticOutline outline;
+    [SerializeField]
     private bool lookedAt = false;
     private float ClickTimer = 0f;
+    public UnityEvent OnSelect;
+    [Header("Interaction Resolution Overrides")]
+    public Item itemOverride;
+    public Slot slotOverride;
+
+    public Interactable usableOverride;
     protected virtual int Layer => 6; // Default layer for selectable objects
 
     protected virtual void OnEnable()
@@ -50,7 +58,13 @@ public partial class Selectable : MonoBehaviour
     public virtual void OnClicked()
     {
         ClickTimer = 0.2f;
+        OnSelect?.Invoke();
     }
+
+
+    
+
+    
 
     //public virtual bool IsFunctionKeyOnly()
     //{

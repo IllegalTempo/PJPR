@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 
-public class SpaceshipPart : Item
+[RequireComponent(typeof(Selectable))]
+public class SpaceshipPart : MonoBehaviour
 { 
 
     [Header("Identity")]
@@ -27,6 +27,7 @@ public class SpaceshipPart : Item
 	public UnityEvent<float, float> OnHealthChanged;
 	public UnityEvent OnBroken;
 
+    private Selectable selectableComponent;
     //[Header("Repair")]
     //[SerializeField] private bool enableRepair = true;
     //[SerializeField] private bool requireRepairTool = true;
@@ -65,10 +66,16 @@ public class SpaceshipPart : Item
     //    public int colorPropertyId;
     //    public Color baseColor;
     //}
-    protected override int Layer => 8;
 
     private void Awake()
     {
+        selectableComponent = GetComponent<Selectable>();
+        if (selectableComponent != null)
+        {
+            selectableComponent.OnSelect.AddListener(OnSelected);
+
+        }
+
         maxHealth = Mathf.Max(1f, maxHealth);
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
         //CacheRendererBindings();
@@ -78,6 +85,10 @@ public class SpaceshipPart : Item
         {
             HandleBroken();
         }
+
+    }
+    protected virtual void OnSelected()
+    {
 
     }
     //private void Update()

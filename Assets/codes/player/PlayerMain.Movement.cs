@@ -1,192 +1,200 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public partial class PlayerMain : MonoBehaviour
 {
     public float MoveSpeed = 1f;
     public float LookSpeed = 2f;
-    public float MaxSpeed = 3f; // Maximum allowed speed
+    public float MaxSpeed = 5f; // Maximum allowed speed
     public float JetPackForce = 2f;
     public float Gravity = 2f;
     private Vector2 moveinput = Vector2.zero;
     public Vector2 lookinput = Vector2.zero;
 
     public float maxVerticalVelocity = 100f;
-    private readonly Dictionary<Collider, Rigidbody> triggerFollowColliders = new Dictionary<Collider, Rigidbody>();
-    private Rigidbody triggerFollowRigidbody;
-    private Rigidbody touchedFollowRigidbody;
-    private Rigidbody activeFollowRigidbody;
-    private Vector3 touchedFollowLocalPoint;
-    private Vector3 previousFollowVelocity;
-    private int touchedFollowFixedTick = -1;
-    private int movementFixedTick;
+
+    private int collisionCount = 0;
+    private Rigidbody activeShipRigidbody;
+    private Quaternion previousShipRotation;
+    private bool hasPreviousShipRotation;
 
     private void Jetpack()
     {
         rb.AddForce(Vector3.up * JetPackForce, ForceMode.Acceleration);
-
     }
+
     private void Move()
     {
-        movementFixedTick++;
-
-        Vector3 move = (cam.transform.forward * moveinput.y + cam.transform.right * moveinput.x);
+        Vector3 move = (GetFacing() * moveinput.y + cam.transform.right * moveinput.x);
         move.y = 0f;
         move.Normalize();
 
-        Vector3 currentVelocity = rb.GetPointVelocity(rb.worldCenterOfMass);
-        Vector3 followVelocity = GetFollowVelocity();
-        followVelocity = StopFollowVelocityWhenBlocked(followVelocity);
-        Vector3 currentRelativeVelocity = currentVelocity - previousFollowVelocity;
-        Vector3 relativeVelocity = move * MoveSpeed * MaxSpeed;
-        relativeVelocity.y = Mathf.Clamp(currentRelativeVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
+        ApplySpaceshipRotationDelta();
+        Vector3 inputVelocity = move * MoveSpeed;
+        Vector3 shipVelocity = GetSpaceshipVelocity();
+        Vector3 currentRelativeVelocity = rb.linearVelocity - shipVelocity;
+        Vector3 targetVelocity = shipVelocity + inputVelocity;
+        targetVelocity.y = shipVelocity.y + Mathf.Clamp(currentRelativeVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
+
+        rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
         rb.AddForce(Vector3.down * Gravity, ForceMode.Acceleration);
-        Vector3 targetVelocity = relativeVelocity + followVelocity;
-        rb.AddForce(targetVelocity - currentVelocity, ForceMode.VelocityChange);
-        previousFollowVelocity = followVelocity;
+        //if (rb.linearVelocity.magnitude > MaxSpeed)
+        //{
+        //    rb.linearVelocity = rb.linearVelocity.normalized * MaxSpeed;
+
+        //}
+
         if (control.Player.jump.IsPressed())
         {
             Jetpack();
         }
 
+        UpdateSpaceshipRotationTracking();
     }
 
-    private void AddTriggerFollowRigidbody(Collider other)
+    private void ApplySpaceshipRotationDelta()
     {
-        Rigidbody followRigidbody = other != null ? other.attachedRigidbody : null;
-        if (followRigidbody == null || followRigidbody == rb)
+        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
+        if (shipRigidbody == null)
+        {
+            hasPreviousShipRotation = false;
+            return;
+        }
+
+        Quaternion shipRotation = shipRigidbody.rotation;
+        if (!hasPreviousShipRotation)
+        {
+            previousShipRotation = shipRotation;
+            hasPreviousShipRotation = true;
+            return;
+        }
+
+        Quaternion deltaRotation = shipRotation * Quaternion.Inverse(previousShipRotation);
+        Vector3 pivotToPlayer = rb.position - shipRigidbody.position;
+        Vector3 rotatedPosition = shipRigidbody.position + deltaRotation * pivotToPlayer;
+
+        rb.MovePosition(rotatedPosition);
+        ApplyShipYawDelta(deltaRotation);
+    }
+
+    private void ApplyShipYawDelta(Quaternion deltaRotation)
+    {
+        Vector3 previousForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        Vector3 rotatedForward = Vector3.ProjectOnPlane(deltaRotation * transform.forward, Vector3.up);
+        if (previousForward.sqrMagnitude <= Mathf.Epsilon || rotatedForward.sqrMagnitude <= Mathf.Epsilon)
         {
             return;
         }
 
-        triggerFollowColliders[other] = followRigidbody;
-        triggerFollowRigidbody = followRigidbody;
+        yaw += Vector3.SignedAngle(previousForward, rotatedForward, Vector3.up);
     }
 
-    private void RemoveTriggerFollowRigidbody(Collider other)
+    private void UpdateSpaceshipRotationTracking()
     {
-        if (other == null || !triggerFollowColliders.Remove(other))
+        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
+        if (shipRigidbody == null)
+        {
+            hasPreviousShipRotation = false;
+            return;
+        }
+
+        previousShipRotation = shipRigidbody.rotation;
+    }
+
+    private Vector3 GetSpaceshipVelocity()
+    {
+        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
+        return shipRigidbody != null ? shipRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+    }
+
+    private Rigidbody GetActiveSpaceshipRigidbody()
+    {
+        if (!InSpaceship)
+        {
+            return null;
+        }
+        
+        Rigidbody shipRigidbody = activeShipRigidbody;
+        if (shipRigidbody == null && MainSpaceship.Instance != null)
+        {
+            shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        }
+
+        return shipRigidbody;
+    }
+
+    private Rigidbody GetSpaceshipRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
+    {
+        if (MainSpaceship.Instance == null)
+        {
+            return null;
+        }
+
+        Transform shipTransform = MainSpaceship.Instance.transform;
+        Rigidbody shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        if (candidateRigidbody != null &&
+            (candidateRigidbody.transform == shipTransform || candidateRigidbody.transform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        if (candidateTransform != null &&
+            (candidateTransform == shipTransform || candidateTransform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        return null;
+    }
+
+    private void EnterSpaceship(Rigidbody shipRigidbody)
+    {
+        if (shipRigidbody == null)
         {
             return;
         }
 
-        triggerFollowRigidbody = null;
-        foreach (Rigidbody followRigidbody in triggerFollowColliders.Values)
-        {
-            triggerFollowRigidbody = followRigidbody;
-        }
+        collisionCount++;
+        activeShipRigidbody = shipRigidbody;
+        transform.parent = null;
     }
 
-    private Vector3 GetFollowVelocity()
+    private void ExitSpaceship()
     {
-        activeFollowRigidbody = null;
-
-        if (triggerFollowRigidbody != null)
+        collisionCount = Mathf.Max(0, collisionCount - 1);
+        if (collisionCount <= 0)
         {
-            activeFollowRigidbody = triggerFollowRigidbody;
-            return triggerFollowRigidbody.GetPointVelocity(rb.position);
+            activeShipRigidbody = null;
+            transform.parent = null;
+            hasPreviousShipRotation = false;
         }
-
-        Vector3 touchedFollowVelocity = GetTouchedFollowVelocity();
-        if (touchedFollowRigidbody != null)
-        {
-            activeFollowRigidbody = touchedFollowRigidbody;
-            return touchedFollowVelocity;
-        }
-
-        previousFollowVelocity = Vector3.zero;
-        return Vector3.zero;
-    }
-
-    private Vector3 StopFollowVelocityWhenBlocked(Vector3 followVelocity)
-    {
-        float followSpeed = followVelocity.magnitude;
-        if (followSpeed <= Mathf.Epsilon)
-        {
-            return Vector3.zero;
-        }
-
-        float followDistance = followSpeed * Time.fixedDeltaTime;
-        RaycastHit[] hits = rb.SweepTestAll(followVelocity / followSpeed, followDistance, QueryTriggerInteraction.Ignore);
-        foreach (RaycastHit hit in hits)
-        {
-            if (IsFollowMovementBlocker(hit.collider))
-            {
-                return Vector3.zero;
-            }
-        }
-
-        return followVelocity;
-    }
-
-    private bool IsFollowMovementBlocker(Collider collider)
-    {
-        if (collider == null || collider.isTrigger)
-        {
-            return false;
-        }
-
-        if (collider.attachedRigidbody == rb || collider.attachedRigidbody == activeFollowRigidbody)
-        {
-            return false;
-        }
-
-        if (collider.transform.IsChildOf(transform))
-        {
-            return false;
-        }
-
-        return true;
-    }
-    private void UpdateTouchedFollowRigidbody(Collision collision)
-    {
-        if (collision == null || collision.rigidbody == null || collision.rigidbody == rb)
-        {
-            return;
-        }
-
-        touchedFollowRigidbody = collision.rigidbody;
-        Vector3 contactPoint = collision.contactCount > 0 ? collision.GetContact(0).point : rb.position;
-        touchedFollowLocalPoint = touchedFollowRigidbody.transform.InverseTransformPoint(contactPoint);
-        touchedFollowFixedTick = movementFixedTick;
-    }
-
-    private Vector3 GetTouchedFollowVelocity()
-    {
-        if (touchedFollowRigidbody == null || movementFixedTick - touchedFollowFixedTick > 1)
-        {
-            ClearTouchedFollowRigidbody();
-            return Vector3.zero;
-        }
-
-        Vector3 followPoint = touchedFollowRigidbody.transform.TransformPoint(touchedFollowLocalPoint);
-        return touchedFollowRigidbody.GetPointVelocity(followPoint);
-    }
-
-    private void ClearTouchedFollowRigidbody()
-    {
-        touchedFollowRigidbody = null;
-        touchedFollowLocalPoint = Vector3.zero;
-        touchedFollowFixedTick = -1;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        UpdateTouchedFollowRigidbody(collision);
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        UpdateTouchedFollowRigidbody(collision);
+        EnterSpaceship(GetSpaceshipRigidbody(collision.rigidbody, collision.transform));
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision != null && collision.rigidbody == touchedFollowRigidbody)
+        if (GetSpaceshipRigidbody(collision.rigidbody, collision.transform) != null)
         {
-            ClearTouchedFollowRigidbody();
+            ExitSpaceship();
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        EnterSpaceship(GetSpaceshipRigidbody(other.attachedRigidbody, other.transform));
+    }
+
+    private void OnTriggerExit(Collider collision)
+    {
+        if (GetSpaceshipRigidbody(collision.attachedRigidbody, collision.transform) != null)
+        {
+            ExitSpaceship();
+        }
+    }
+
     private void Look()
     {
         float sens = GameCore.Instance.Option.mouseSensitivity;
@@ -195,8 +203,8 @@ public partial class PlayerMain : MonoBehaviour
         pitch = Mathf.Clamp(pitch, -90f, 90f);
         head.transform.eulerAngles = new Vector3(pitch, yaw, 0f);
         transform.eulerAngles = new Vector3(0, yaw, 0f);
-
     }
+
     private void PlayerControl()
     {
         Look();
@@ -216,7 +224,7 @@ public partial class PlayerMain : MonoBehaviour
 
     private Selectable FindSeenSelectable()
     {
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+        Ray ray = new Ray(cam.transform.position, GetFacing());
         if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
         {
             return null;

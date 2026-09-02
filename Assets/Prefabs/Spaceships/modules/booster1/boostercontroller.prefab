@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1651600335879104639}
   - component: {fileID: 1558117532037160980}
   - component: {fileID: -4908613047248667501}
+  - component: {fileID: 1242517458103222396}
   m_Layer: 0
   m_Name: boostercontroller
   m_TagString: Untagged
@@ -136,14 +137,6 @@ MonoBehaviour:
   itemType: 1
   AttachedSlot: {fileID: 0}
   BindSlot: {fileID: 0}
-  snapshot_start:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
-  snapshot_bind:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
 --- !u!65 &1558117532037160980
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -178,6 +171,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.ModuleController
   ConnectTo: {fileID: 0}
+--- !u!114 &1242517458103222396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7370891376704099619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 038cbf041fba9a14fa8f63b02ffcc4be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Selectable
+  OnSelect:
+    m_PersistentCalls:
+      m_Calls: []
+  itemOverride: {fileID: 1651600335879104639}
+  slotOverride: {fileID: 0}
+  usableOverride: {fileID: 0}
 --- !u!1001 &4665896936929088497
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -258,6 +269,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4420222279032356122}
+    - targetCorrespondingSourceObject: {fileID: -6888501967792289777, guid: 610ceae007328a142a34613f28094981, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9134642273414943056}
   m_SourcePrefab: {fileID: 100100000, guid: 610ceae007328a142a34613f28094981, type: 3}
 --- !u!4 &785665414616551125 stripped
 Transform:
@@ -339,6 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8829f69b96f24074a8a1d222b84ca1c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.spaceship.mechanics.SliderController
+  pressedByPlayer: {fileID: 0}
   onStepChanged:
     m_PersistentCalls:
       m_Calls:
@@ -359,3 +374,21 @@ MonoBehaviour:
   slider: {fileID: 785665414616551125}
   minSlide: 0
   maxSlide: 1
+--- !u!114 &9134642273414943056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6964684324173290494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 038cbf041fba9a14fa8f63b02ffcc4be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Selectable
+  OnSelect:
+    m_PersistentCalls:
+      m_Calls: []
+  itemOverride: {fileID: 0}
+  slotOverride: {fileID: 0}
+  usableOverride: {fileID: 4420222279032356122}

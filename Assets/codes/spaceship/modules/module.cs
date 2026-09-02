@@ -2,7 +2,7 @@
 using Assets.codes.spaceship;
 using UnityEngine;
 
-public class Module : SpaceshipPart
+public class Module : Item
 {
     
     private ModuleSlot ConnectedTo;
@@ -23,10 +23,9 @@ public class Module : SpaceshipPart
         connectedTo.attachedModule = this;
 
     }
-    protected override void Update()
+    void Update()
     {
         if (!NetworkSystem.Instance.IsWorldManager) return;
-        base.Update();
         if (ConnectedTo != null)
         {
             ModuleUpdate();

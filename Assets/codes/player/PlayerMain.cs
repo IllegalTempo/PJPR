@@ -15,8 +15,7 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    private readonly SpaceshipFollowTracker spaceshipFollowTracker = new SpaceshipFollowTracker();
-    public bool InSpaceship => spaceshipFollowTracker.InSpaceship;
+    public bool InSpaceship => collisionCount > 0;
     [SerializeField]
     private AudioSource audioSource;
 
@@ -50,13 +49,12 @@ public partial class PlayerMain : MonoBehaviour
     private float throwCameraZoomTransitionSpeed = 60f;
 
     public PlayerInputAction control;
-    private IUsable activeUsable;
 
     [SerializeField]
     private GameObject[] LocalInvisible;
 
 
-    private IUsable pressedUsable = null;
+    private Interactable pressedUsable = null;
     private bool isChargingDrop;
     private float dropChargeStartedAt;
     private Item chargingDropItem;
@@ -79,7 +77,14 @@ public partial class PlayerMain : MonoBehaviour
             InitializeRemote();
         }
     }
-
+    public Vector3 GetFacing()
+    {
+        return head.transform.forward;
+    }
+    public Quaternion GetHeadRotation()
+    {
+        return head.transform.rotation;     
+    }
     private void InitializeLocal()
     {
         PlayerMain[] players = FindObjectsByType<PlayerMain>(FindObjectsSortMode.None);
@@ -195,14 +200,22 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnInteractPressed()
     {
-        IUsable usable = activeUsable
-                 ?? holdingItem as IUsable
-                 ?? seenObject as IUsable;
+        if(seenObject == null)
+        {
+            return;
+        }   
+        Interactable usable = seenObject.usableOverride;
 
         if (usable != null)
         {
             usable.OnInteract_press(this);
             pressedUsable = usable;
+        } else
+        {
+            if (holdingItem != null && holdingItem is Tool t)
+            {
+                t.OnUsingInteract(seenObject);
+            }
         }
 
     }
@@ -214,18 +227,6 @@ public partial class PlayerMain : MonoBehaviour
         }
     }
 
-    public void SetActiveUsable(IUsable usable)
-    {
-        activeUsable = usable;
-    }
-
-    public void ClearActiveUsable(IUsable usable)
-    {
-        if (activeUsable == usable)
-        {
-            activeUsable = null;
-        }
-    }
 
     private void InitializeRemote()
     {
@@ -450,13 +451,19 @@ public partial class PlayerMain : MonoBehaviour
         Quaternion heldRotation = droppedItem.transform.rotation;
 
         SendDropRequest(droppedItem, throwForce);
+        if (seenObject == null)
+        {
+            return;
+        }
         TryCombineDroppedItem(droppedItem);
         TryAttachDroppedItemToSlot(droppedItem, heldRotation);
     }
 
     private void TryCombineDroppedItem(Item droppedItem)
     {
-        if (seenObject is not Item seenItem)
+        
+        Item seenItem = seenObject.itemOverride;
+        if (seenItem == null)
         {
             return;
         }
@@ -474,7 +481,9 @@ public partial class PlayerMain : MonoBehaviour
 
     private void TryAttachDroppedItemToSlot(Item droppedItem, Quaternion heldRotation)
     {
-        if (seenObject is Slot slot && droppedItem.FitIn(slot))
+
+        Slot slot = seenObject.slotOverride;
+        if (slot != null && droppedItem.FitIn(slot))
         {
             slot.SendAttach(droppedItem, heldRotation);
         }
@@ -482,7 +491,12 @@ public partial class PlayerMain : MonoBehaviour
 
     private void TryPickupSeenItem()
     {
-        if (seenObject is not Item item)
+        if(seenObject == null)
+        {
+            return;
+        }
+        Item item = seenObject.itemOverride;
+        if (item == null)
         {
             return;
         }
@@ -516,7 +530,7 @@ public partial class PlayerMain : MonoBehaviour
 
     private void ShowSeenObjectUI(Selectable selectable)
     {
-        if (selectable is IUsable)
+        if (selectable.usableOverride != null)
         {
             ShowSecondaryInteraction("Use", control.Player.Interact.GetBindingDisplayString());
         }
@@ -538,9 +552,12 @@ public partial class PlayerMain : MonoBehaviour
 
     private void ShowPrimaryObjectInteraction(Selectable selectable)
     {
+        Item item = selectable.itemOverride;
+        Slot slot = selectable.slotOverride;
+
         if (holdingItem == null)
         {
-            if (selectable is Item)
+            if (item != null)
             {
                 ShowPrimaryInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString());
             }
@@ -548,18 +565,19 @@ public partial class PlayerMain : MonoBehaviour
             return;
         }
 
-        switch (selectable)
+        if (slot != null)
         {
-            case Slot slot:
-                ShowSlotInteraction(slot);
-                break;
-            case Item item when holdingItem.HasItemType(ItemType.Processable) && item.HasItemType(ItemType.Processable):
-                ShowPrimaryInteraction("Combine", control.Player.pickup.GetBindingDisplayString());
-                break;
-            default:
-                ShowPrimaryInteraction("Drop", control.Player.pickup.GetBindingDisplayString());
-                break;
+            ShowSlotInteraction(slot);
+            return;
         }
+
+        if (item != null && holdingItem.HasItemType(ItemType.Processable) && item.HasItemType(ItemType.Processable))
+        {
+            ShowPrimaryInteraction("Combine", control.Player.pickup.GetBindingDisplayString());
+            return;
+        }
+
+        ShowPrimaryInteraction("Drop", control.Player.pickup.GetBindingDisplayString());
     }
 
     private void ShowSlotInteraction(Slot slot)
@@ -592,7 +610,8 @@ public partial class PlayerMain : MonoBehaviour
 
     private void BindHeldItemToSlot(Selectable selectable)
     {
-        if (selectable is Slot slot && holdingItem != null && holdingItem.FitIn(slot) && slot is not Port)
+        Slot slot = selectable.slotOverride;
+        if (slot != null && holdingItem != null && holdingItem.FitIn(slot) && slot is not Port)
         {
             holdingItem.Bind(slot);
         }
@@ -604,8 +623,13 @@ public partial class PlayerMain : MonoBehaviour
         {
             return;
         }
-
-        if (selectable is not Slot slot || !holdingItem.FitIn(slot))
+        if(selectable == null)
+        {
+            holdingItem.Unbind();
+            return;
+        }
+        Slot slot = selectable.slotOverride;
+        if (slot == null || !holdingItem.FitIn(slot))
         {
             holdingItem.Unbind();
         }
@@ -627,20 +651,7 @@ public partial class PlayerMain : MonoBehaviour
             Move();
         }
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        AddTriggerFollowRigidbody(other);
-        spaceshipFollowTracker.OnTriggerEnter(other);
-    }
-    private void OnTriggerStay(Collider other)
-    {
-        AddTriggerFollowRigidbody(other);
-    }
-    private void OnTriggerExit(Collider collision)
-    {
-        RemoveTriggerFollowRigidbody(collision);
-        spaceshipFollowTracker.OnTriggerExit(collision);
-    }
+   
     public void ReceiveVoice(byte[] bytesArray)
     {
         if (bytesArray == null || bytesArray.Length == 0)

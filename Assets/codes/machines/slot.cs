@@ -1,8 +1,8 @@
 using Assets.codes.Network.Messages;
 using UnityEngine;
 
-[RequireComponent(typeof(NetworkIdentity))]
-public class Slot : Selectable //slot is the place where items are put in to be used by machines, attach this to a gameobject that is a child of a machine, when item is dropped look at it, it will attach to this slot
+[RequireComponent(typeof(NetworkIdentity),typeof(Selectable))]
+public class Slot : MonoBehaviour//slot is the place where items are put in to be used by machines, attach this to a gameobject that is a child of a machine, when item is dropped look at it, it will attach to this slot
 {
     protected Item item;
     [SerializeField]

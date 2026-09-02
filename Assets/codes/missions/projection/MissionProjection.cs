@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Assets.codes.Network.Messages;
 
 [RequireComponent(typeof(BoxCollider))]
-public class MissionProjection : Selectable, IUsable
+public class MissionProjection : Interactable
 {
     [Header("Display Components")]
     [SerializeField] private TextMeshProUGUI missionNameText;
@@ -32,11 +32,9 @@ public class MissionProjection : Selectable, IUsable
     private Mission mission;
     private int missionIndex;
 
-    protected override int Layer => 6;
 
-    protected override void OnEnable()
+    void OnEnable()
     {
-        base.OnEnable();
 
         // Ensure there's a collider for raycast detection
         BoxCollider col = GetComponent<BoxCollider>();
@@ -75,7 +73,7 @@ public class MissionProjection : Selectable, IUsable
             durationText.text = $"Duration: ~{mission.estimatedDuration} min";
     }
 
-    public void OnInteract_press(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && !NetworkSystem.Instance.IsServer)
         {

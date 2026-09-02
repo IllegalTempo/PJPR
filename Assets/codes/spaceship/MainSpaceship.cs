@@ -15,9 +15,9 @@ public class MainSpaceship : MonoBehaviour
     public static MainSpaceship Instance { get; private set; }
     private Animator animator;
     private Rigidbody rb;
-    private int speedlevel = 0;
     private Vector3 velocity;
     private Vector3 acceleration;
+    private Vector3 previousVelocity;
     private float speed;
     [SerializeField]
     private List<ModuleSlot> msts;
@@ -107,8 +107,25 @@ public class MainSpaceship : MonoBehaviour
     {
 
         UpdateForceDisplayWeight();
+        ApplyConstantVelocityDrive();
         SendRigidbodyStateIfServer();
-        rb.linearVelocity = -transform.right * speed;
+    }
+
+    private void ApplyConstantVelocityDrive()
+    {
+        if (rb == null)
+        {
+            return;
+        }
+
+        Vector3 targetVelocity = -transform.right * speed;
+        rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
+
+        velocity = rb.linearVelocity;
+        acceleration = Time.fixedDeltaTime > Mathf.Epsilon
+            ? (velocity - previousVelocity) / Time.fixedDeltaTime
+            : Vector3.zero;
+        previousVelocity = velocity;
     }
 
 

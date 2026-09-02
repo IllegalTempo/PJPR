@@ -39,9 +39,9 @@ public struct ItemSnapshot
     /// <summary>Local scale relative to parent transform</summary>
     public Vector3 scale;
 }
-[RequireComponent(typeof(NetworkGameObject), typeof(Rigidbody), typeof(Collider))]
+[RequireComponent(typeof(NetworkGameObject), typeof(Rigidbody), typeof(Selectable))]
 
-public class Item : Selectable //Item is any that is pickable
+public class Item : MonoBehaviour//Item is any that is pickable
 {
 
     //[SerializeField] protected bool isRepairTool;
@@ -57,15 +57,19 @@ public class Item : Selectable //Item is any that is pickable
     public bool IsLocked = false;
 
     public ItemType itemType = ItemType.Generic;
+    [HideInInspector]
     public Slot AttachedSlot;
 
+    private int collisionCount = 0;
+
+    public PlayerMain PickedUpBy;
+    private Rigidbody activeShipRigidbody;
+    private Vector3 previousShipVelocity;
 
 
 
 
-
-
-
+    [HideInInspector]
 
     public Slot BindSlot = null; //use for visual dont mind this
 
@@ -76,7 +80,7 @@ public class Item : Selectable //Item is any that is pickable
     /// Captured in OnEnable() and restored when item is dropped.
     /// Uses LOCAL coordinate space.
     /// </summary>
-    [SerializeField]
+    //[SerializeField]
     private ItemSnapshot snapshot_start;
     private Quaternion originalWorldRotation;
     public Quaternion OriginalRotation => originalWorldRotation;
@@ -86,13 +90,12 @@ public class Item : Selectable //Item is any that is pickable
     /// Captured in Bind() and restored when item is unbound.
     /// Uses LOCAL coordinate space.
     /// </summary>
-    [SerializeField]
+    //[SerializeField]
     private ItemSnapshot snapshot_bind;
     private Transform pre_bind_parent;
 
-    protected override void OnEnable()
+    void OnEnable()
     {
-        base.OnEnable();
 
         if (netObj == null)
         {
@@ -141,16 +144,127 @@ public class Item : Selectable //Item is any that is pickable
     {
         rb.isKinematic = false;
     }
-    public override void OnClicked()
+    private void FixedUpdate()
     {
-        base.OnClicked();
-        if (netObj == null)
+        ApplySpaceshipVelocity();
+    }
+
+    private void ApplySpaceshipVelocity()
+    {
+        if (PickedUpBy != null || AttachedSlot != null || rb == null || rb.isKinematic)
         {
-            netObj = GetComponent<NetworkGameObject>();
-            Debug.LogWarning($"{name} has no NetworkObject, cannot be picked up.");
+            previousShipVelocity = Vector3.zero;
             return;
         }
 
+        Vector3 shipVelocity = GetSpaceshipVelocity();
+        Vector3 relativeVelocity = rb.linearVelocity - previousShipVelocity;
+        rb.linearVelocity = relativeVelocity + shipVelocity;
+        previousShipVelocity = shipVelocity;
+    }
+
+    private Vector3 GetSpaceshipVelocity()
+    {
+        if (collisionCount <= 0)
+        {
+            return Vector3.zero;
+        }
+
+        Rigidbody shipRigidbody = activeShipRigidbody;
+        if (shipRigidbody == null && MainSpaceship.Instance != null)
+        {
+            shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        }
+
+        return shipRigidbody != null ? shipRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+    }
+
+    private Rigidbody GetSpaceshipRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
+    {
+        if (MainSpaceship.Instance == null)
+        {
+            return null;
+        }
+
+        Transform shipTransform = MainSpaceship.Instance.transform;
+        Rigidbody shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+        if (candidateRigidbody != null &&
+            (candidateRigidbody.transform == shipTransform || candidateRigidbody.transform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        if (candidateTransform != null &&
+            (candidateTransform == shipTransform || candidateTransform.IsChildOf(shipTransform)))
+        {
+            return shipRigidbody;
+        }
+
+        return null;
+    }
+
+    private void EnterSpaceship(Rigidbody shipRigidbody)
+    {
+        if (shipRigidbody == null)
+        {
+            return;
+        }
+
+        collisionCount++;
+        activeShipRigidbody = shipRigidbody;
+    }
+
+    private void ExitSpaceship()
+    {
+        collisionCount = Mathf.Max(0, collisionCount - 1);
+        if (collisionCount <= 0)
+        {
+            activeShipRigidbody = null;
+            previousShipVelocity = Vector3.zero;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        EnterSpaceship(GetSpaceshipRigidbody(collision.rigidbody, collision.transform));
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        if (GetSpaceshipRigidbody(collision.rigidbody, collision.transform) != null)
+        {
+            ExitSpaceship();
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        EnterSpaceship(GetSpaceshipRigidbody(other.attachedRigidbody, other.transform));
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (PickedUpBy != null)
+        {
+            return;
+        }
+
+        if (GetSpaceshipRigidbody(other.attachedRigidbody, other.transform) != null)
+        {
+            ExitSpaceship();
+        }
     }
     public void ChangeItemOwner(ulong newowner)
     {
@@ -207,6 +321,7 @@ public class Item : Selectable //Item is any that is pickable
     {
         Debug.Log($"{name} picked up by {who.name}");
         who.holdingItem = this;
+        PickedUpBy = who;
 
         if (who.Equals(GameCore.Instance.Local_Player))
         {
@@ -228,7 +343,6 @@ public class Item : Selectable //Item is any that is pickable
 
 
         rb.linearVelocity = Vector3.zero;
-        outline.OutlineColor = Color.aquamarine;
         SetColliders(false);
     }
     private void gotDropped(PlayerMain who, Vector3 dropPosition, Quaternion dropRotation, Vector3 throwDirection, float throwForce)
@@ -236,7 +350,7 @@ public class Item : Selectable //Item is any that is pickable
 
         Debug.Log($"{name} dropped by {who.name}");
         who.holdingItem = null;
-
+        PickedUpBy = null;
         if (who.Equals(GameCore.Instance.Local_Player))
         {
             UIManager.Instance.HideInteraction(0);
@@ -246,7 +360,6 @@ public class Item : Selectable //Item is any that is pickable
         transform.localScale = snapshot_start.scale;
 
         //ApplySnapshot(snapshot_start);
-        outline.OutlineColor = Color.white;
         EnableRB();
         rb.constraints = RigidbodyConstraints.None;
 
@@ -309,9 +422,4 @@ public class Item : Selectable //Item is any that is pickable
 
 
 
-    protected override void Update()
-    {
-        base.Update();
-
-    }
 }

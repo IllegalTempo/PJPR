@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545228789fe9d454da07a6cca85b74c7, type: 3}
+  m_Name: Puller1
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleDefinition
+  itemName: Puller 1
+  itemDescription: 
+  itemIcon: {fileID: 0}
+  itemPrefab: {fileID: 1211574886128290609, guid: 9099dc9c78368a64fb4b10c6f325a243, type: 3}
+  maxStackSize: 64
+  IsPoolPrefab: 0
+  poolSize: 10
+  holdState:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    scale: {x: 1, y: 1, z: 1}
+  controlPrefab: {fileID: 11400000, guid: 18fe5d5615ec4e1468d5e9952f0e7291, type: 2}

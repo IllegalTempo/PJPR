@@ -2,20 +2,18 @@ using UnityEngine;
 using Assets.codes.Network.Messages;
 
 [RequireComponent(typeof(NetworkPrefabIdentity))]
-public class MissionTerminal : Selectable, IUsable
+public class MissionTerminal : Interactable
 {
     [SerializeField] private int missionsToShow = 3;
     private NetworkPrefabIdentity networkObject;
 
-    protected override int Layer => 6;
 
-    protected override void OnEnable()
+    void OnEnable()
     {
-        base.OnEnable();
         networkObject = GetComponent<NetworkPrefabIdentity>();
     }
 
-    public void OnInteract_press(PlayerMain who)
+    public override void OnInteract_press(PlayerMain who)
     {
         if (MissionManager.Instance.IsVotingActive)
         {

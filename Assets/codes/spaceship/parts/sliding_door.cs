@@ -69,18 +69,14 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
         }
     }
 
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
-        
         Vector3 targetPos = isDoorOpen ? openPosition : closedPosition;
         doorMesh.localPosition = Vector3.Lerp(doorMesh.localPosition, targetPos, Time.deltaTime * slideSpeed);
     }
 
-    public override void OnClicked()
+    protected override void OnSelected()
     {
-        base.OnClicked();
-        
         if (isDoorOpen)
             CloseDoor();
         else
@@ -111,4 +107,4 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
     //         CloseDoor();
     //     }
     // }
-} 
+}

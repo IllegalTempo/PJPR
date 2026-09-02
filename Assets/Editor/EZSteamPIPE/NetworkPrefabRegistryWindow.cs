@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NetworkPrefabRegistryWindow : EditorWindow
 {
-    private const string PrefabRoot = "Assets/Resources/Prefabs";
+    private const string PrefabRoot = "Assets/Prefabs";
     private const string RegistryPath = PrefabRoot + "/NetworkPrefabRegistry.asset";
 
     private NetworkPrefabRegistry _registry;

@@ -1,24 +1,24 @@
 using UnityEngine;
 
-public class HammerItem : tools
+public class HammerItem : Tool
 {
-    protected override void onUse(Selectable lookat)
+    public override void OnUsingInteract(Selectable target)
     {
-        base.onUse(lookat);
-        if (lookat is SpaceshipPart ssp)
+        SpaceshipPart ssp = target != null ? target.GetComponent<SpaceshipPart>() : null;
+        if (ssp != null)
         {
             ssp.Repair(10f);
             return;
         }
 
         // Peak Of Energy: the hammer is the EVA melee weapon.
-        if (lookat is RustEater rustEater)
+        if (target is RustEater rustEater)
         {
             rustEater.HammerHit();
             return;
         }
 
-        if (lookat is PeakOfEnergyMeteorite meteorite)
+        if (target is PeakOfEnergyMeteorite meteorite)
         {
             meteorite.HammerHit();
         }

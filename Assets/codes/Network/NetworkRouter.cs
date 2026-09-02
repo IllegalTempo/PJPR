@@ -41,7 +41,8 @@ namespace Assets.codes.Network.Messages
             { (int)packets.BothPackets.SlotDetach, NMS_Both_SlotDetach.Read },
             { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },
             { (int)packets.BothPackets.SendCombineItem, NMS_Both_SendCombineItem.Read },
-            { (int)packets.BothPackets.Handle_OnReleaseUpdateLevel, NMS_Both_Handle_OnReleaseUpdateLevel.Read },};
+            { (int)packets.BothPackets.Handle_OnReleaseUpdateLevel, NMS_Both_Handle_OnReleaseUpdateLevel.Read },
+            { (int)packets.BothPackets.SyncNetworkVariable, NMS_Both_SyncNetworkVariable.Read },};
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {
@@ -151,6 +152,11 @@ namespace Assets.codes.Network.Messages
 
         public Result DistributeMessageToReady(NMS message, ulong exclude = 0, SendType sendType = NetworkSendProfiles.Critical)
         {
+            if (!NetworkSystem.Instance.IsOnline)
+            {
+                Debug.Log("Send During Offline, Ignored");
+                return Result.Disabled;
+            }
             using (Packet p = new Packet(message.PacketID))
             {
                 message.Write(p);

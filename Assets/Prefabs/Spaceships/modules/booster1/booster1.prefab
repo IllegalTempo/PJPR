@@ -5005,6 +5005,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1880148516079081941}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2492393399685623452}
   m_SourcePrefab: {fileID: 100100000, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
 --- !u!1 &8382276501861436971 stripped
 GameObject:
@@ -5046,7 +5049,6 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   AbstractObject: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
-  InSpaceship: 0
   Identity: {fileID: 8575854996173634517}
 --- !u!54 &1981657392565994241
 Rigidbody:
@@ -5106,36 +5108,9 @@ MonoBehaviour:
   lockRelativeRotation: 0
   IsPickable: 1
   IsLocked: 0
-  itemType: 1
+  itemType: 2
   AttachedSlot: {fileID: 0}
   BindSlot: {fileID: 0}
-  snapshot_start:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
-  snapshot_bind:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    scale: {x: 0, y: 0, z: 0}
-  partName: Novice Booster
-  maxHealth: 100
-  currentHealth: 100
-  destroyWhenBroken: 0
-  permanentlyDestroyGameObjectOnBreak: 0
-  enableCollisionDamage: 1
-  meteoriteDamage: 25
-  fragmentDamage: 8
-  projectileDamage: 15
-  planetDamage: 50
-  blackHoleDamage: 20
-  defaultCollisionDamage: 5
-  OnHealthChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  OnBroken:
-    m_PersistentCalls:
-      m_Calls: []
-  brokenHiddenOpacity: 0
   spl: 10000
   SpeedParticles: {fileID: 7628848161086099772}
 --- !u!65 &1880148516079081941
@@ -5159,6 +5134,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 6.24, y: 5.947303, z: 19.43691}
   m_Center: {x: 0, y: 3.0236516, z: -1.3926725}
+--- !u!114 &2492393399685623452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382276501861436971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 038cbf041fba9a14fa8f63b02ffcc4be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Selectable
+  OnSelect:
+    m_PersistentCalls:
+      m_Calls: []
+  itemOverride: {fileID: 2771256773190309324}
+  slotOverride: {fileID: 0}
+  usableOverride: {fileID: 0}
 --- !u!4 &9158075054942999697 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d9a541a79bc636640bf22daa60926b6f, type: 3}
