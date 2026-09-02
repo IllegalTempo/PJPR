@@ -33,6 +33,8 @@ public class GameInitManager : MonoBehaviour
     {
         public bool LoadSave;
         public string SaveSlot;
+        public bool OverrideSaveSpaceshipIndex;
+        public int SpaceshipIndex;
         public float NetworkSyncTimeoutSeconds;
     }
 
@@ -108,6 +110,11 @@ public class GameInitManager : MonoBehaviour
             saveData = GameSaveSystem.SaveData ?? GameSaveSystem.CreateDefaultSaveData();
         }
 
+        if (options.OverrideSaveSpaceshipIndex)
+        {
+            saveData.SpaceshipIndex = options.SpaceshipIndex;
+        }
+
         SetState(GameInitializationState.ApplyingWorld);
         UIManager.Instance?.ChangeLoadingStatus("Building world...", 0.7f);
         await ApplySaveDataAsync(saveData);
@@ -142,6 +149,7 @@ public class GameInitManager : MonoBehaviour
             saveData = GameSaveSystem.CreateDefaultSaveData();
         }
 
+        await GameCore.Instance.SpawnSpaceshipAsync(saveData.SpaceshipIndex);
         await Server_SpawnNetworkObjectFromSave(saveData);
         await UniTask.Yield();
         InitSlotRelationFromSave(saveData.SlotRelationships, true);

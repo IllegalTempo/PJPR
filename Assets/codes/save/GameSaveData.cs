@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameSaveData
 {
     public static Quaternion NullAngle = new Quaternion(0, 0, 0, 0);
+    public int SpaceshipIndex;
     public List<PlayerData> PlayerLocations = new List<PlayerData>(); //Player data is updated upon player join
     public List<NetworkObjectSnapshot> NetworkObjects = new List<NetworkObjectSnapshot>();
     public List<SlotSnapshot> SlotRelationships = new List<SlotSnapshot>();
@@ -14,8 +15,9 @@ public class GameSaveData
     {
     }
 
-    public GameSaveData(List<PlayerData> playerDatas, List<NetworkObjectSnapshot> networkObjectSnapshots, List<SlotSnapshot> slotSnapshots)
+    public GameSaveData(List<PlayerData> playerDatas, List<NetworkObjectSnapshot> networkObjectSnapshots, List<SlotSnapshot> slotSnapshots, int spaceshipIndex = 0)
     {
+        SpaceshipIndex = spaceshipIndex;
         PlayerLocations = playerDatas ?? new List<PlayerData>();
         NetworkObjects = networkObjectSnapshots ?? new List<NetworkObjectSnapshot>();
         SlotRelationships = slotSnapshots ?? new List<SlotSnapshot>();

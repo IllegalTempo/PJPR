@@ -26,8 +26,6 @@ public class NetworkPlayerObject : MonoBehaviour
     public bool Sync_BodyRot = true;
 
     [Header("Object References")]
-    public GameObject Head;
-    public GameObject Body;
     public PlayerMain playerControl;
     //public Spaceship spaceship;
     public async UniTask Init(ulong steamid,int index)
@@ -71,15 +69,8 @@ public class NetworkPlayerObject : MonoBehaviour
         if (!NetworkSystem.Instance.IsOnline) return;
         if (IsLocal)
         {
-            NMS_Both_PositionUpdate msg = new NMS_Both_PositionUpdate(NetworkSystem.Instance.SteamID, transform.position, Head.transform.rotation, transform.rotation);
-            if (NetworkSystem.Instance.IsServer)
-            {
-                NetworkRouter.Instance.DistributeMessageToReady(msg, sendType: NetworkSendProfiles.State);
-            }
-            else
-            {
-                NetworkRouter.Instance.SendMessageToServer(msg, NetworkSendProfiles.State);
-            }
+            NMS_Both_PositionUpdate msg = new NMS_Both_PositionUpdate(NetworkSystem.Instance.SteamID, transform.position, playerControl.head.transform.rotation, transform.rotation);
+            msg.SendMessageAsServerOrClient();
         }
         
     }
@@ -94,11 +85,12 @@ public class NetworkPlayerObject : MonoBehaviour
             }
             if (Sync_HeadRot)
             {
-                Head.transform.rotation = Quaternion.Slerp(Head.transform.rotation, NetworkHeadRot, Time.deltaTime * 10f);
+                playerControl.head.transform.rotation = Quaternion.Slerp(playerControl.head.transform.rotation, NetworkHeadRot, Time.deltaTime * 10f);
             }
             if (Sync_BodyRot)
             {
-                Body.transform.localRotation = Quaternion.Slerp(Body.transform.rotation, NetworkBodyrot, Time.deltaTime * 10f);
+               // Body.transform.localRotation = Quaternion.Slerp(Body.transform.rotation, NetworkBodyrot, Time.deltaTime * 10f);
+               transform.rotation = Quaternion.Slerp(transform.rotation, NetworkBodyrot, Time.deltaTime * 10f);
             }
         }
     }

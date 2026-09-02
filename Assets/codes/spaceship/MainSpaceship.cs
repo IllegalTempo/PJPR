@@ -15,10 +15,7 @@ public class MainSpaceship : MonoBehaviour
     public static MainSpaceship Instance { get; private set; }
     private Animator animator;
     private Rigidbody rb;
-    private Vector3 velocity;
     private Vector3 acceleration;
-    private Vector3 previousVelocity;
-    private float speed;
     [SerializeField]
     private List<ModuleSlot> msts;
 
@@ -60,18 +57,13 @@ public class MainSpaceship : MonoBehaviour
     }
     public void SetHandleSpeed(int step)
     {
-        float velocityPerStep = 5f;
+        float accPerStep = 5f;
         //SetVelocity(-transform.right * step * velocityPerStep);
-        speed = step * velocityPerStep;
+        acceleration = -transform.right * step * accPerStep;
     }
     private void onUpdateWaterLevel()
     {
         spaceshipDisplay.SetWaterAmount(waterLevel);
-    }
-
-    public Vector3 GetVelocity()
-    {
-        return velocity;
     }
 
     public Vector3 GetAcceleration()
@@ -84,7 +76,6 @@ public class MainSpaceship : MonoBehaviour
 
     public void StopMovement()
     {
-        velocity = Vector3.zero;
         acceleration = Vector3.zero;
     }
 
@@ -107,25 +98,8 @@ public class MainSpaceship : MonoBehaviour
     {
 
         UpdateForceDisplayWeight();
-        ApplyConstantVelocityDrive();
         SendRigidbodyStateIfServer();
-    }
-
-    private void ApplyConstantVelocityDrive()
-    {
-        if (rb == null)
-        {
-            return;
-        }
-
-        Vector3 targetVelocity = -transform.right * speed;
-        rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
-
-        velocity = rb.linearVelocity;
-        acceleration = Time.fixedDeltaTime > Mathf.Epsilon
-            ? (velocity - previousVelocity) / Time.fixedDeltaTime
-            : Vector3.zero;
-        previousVelocity = velocity;
+        rb.AddForce(acceleration, ForceMode.Acceleration);
     }
 
 
@@ -218,7 +192,6 @@ public class MainSpaceship : MonoBehaviour
         }
 
         lastReceivedRigidbodySyncTick = tick;
-        this.velocity = velocity;
         acceleration = Vector3.zero;
 
         if (rb == null)
@@ -315,14 +288,12 @@ public class MainSpaceship : MonoBehaviour
     protected void Start()
     {
         Physics.gravity = Vector3.zero;
-        if (Instance != null)
+        if (Instance != null && Instance != this)
         {
             Destroy(Instance.gameObject);
-        } else
-        {
-            Instance = this;
         }
 
+        Instance = this;
         rb = GetComponent<Rigidbody>();
         foreach (ModuleSlot mst in msts)
         {

@@ -93,6 +93,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
     //[SerializeField]
     private ItemSnapshot snapshot_bind;
     private Transform pre_bind_parent;
+    private LayerMask[] colliderExcludeLayersBeforeAttach;
 
     void OnEnable()
     {
@@ -315,12 +316,62 @@ public class Item : MonoBehaviour//Item is any that is pickable
             }
         }
     }
+    private void ExcludeSlotLayerFromColliders(Slot slot)
+    {
+        RestoreColliderExcludeLayers();
+
+        if (slot == null)
+        {
+            return;
+        }
+
+        if (colliders == null)
+        {
+            colliders = GetComponentsInChildren<Collider>();
+        }
+
+        int slotLayerMask = 1 << slot.gameObject.layer;
+        colliderExcludeLayersBeforeAttach = new LayerMask[colliders.Length];
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider collider = colliders[i];
+            if (collider == null)
+            {
+                continue;
+            }
+
+            LayerMask excludeLayers = collider.excludeLayers;
+            colliderExcludeLayersBeforeAttach[i] = excludeLayers;
+            excludeLayers.value |= slotLayerMask;
+            collider.excludeLayers = excludeLayers;
+        }
+    }
+    private void RestoreColliderExcludeLayers()
+    {
+        if (colliders == null || colliderExcludeLayersBeforeAttach == null)
+        {
+            colliderExcludeLayersBeforeAttach = null;
+            return;
+        }
+
+        int colliderCount = Mathf.Min(colliders.Length, colliderExcludeLayersBeforeAttach.Length);
+        for (int i = 0; i < colliderCount; i++)
+        {
+            Collider collider = colliders[i];
+            if (collider != null)
+            {
+                collider.excludeLayers = colliderExcludeLayersBeforeAttach[i];
+            }
+        }
+
+        colliderExcludeLayersBeforeAttach = null;
+    }
     private void gotPickedup(PlayerMain who)
 
 
     {
         Debug.Log($"{name} picked up by {who.name}");
-        who.holdingItem = this;
+        who.PickUp(this);
         PickedUpBy = who;
 
         if (who.Equals(GameCore.Instance.Local_Player))
@@ -349,7 +400,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
     {
 
         Debug.Log($"{name} dropped by {who.name}");
-        who.holdingItem = null;
+        who.Drop(this);
         PickedUpBy = null;
         if (who.Equals(GameCore.Instance.Local_Player))
         {
@@ -377,6 +428,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
     public void AttachToSlot(Slot slot, Quaternion rot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
     {
         AttachedSlot = slot;
+        ExcludeSlotLayerFromColliders(slot);
         DisableRB();
         transform.localScale = snapshot_start.scale;
         transform.SetParent(slot.transform);
@@ -384,6 +436,13 @@ public class Item : MonoBehaviour//Item is any that is pickable
         transform.localPosition = Vector3.zero;
         transform.localRotation = rot;
         netObj.Sync_Transform = false;
+    }
+    public void DetachFromSlot()
+    {
+        RestoreColliderExcludeLayers();
+        AttachedSlot = null;
+        EnableRB();
+        transform.SetParent(null);
     }
 
 

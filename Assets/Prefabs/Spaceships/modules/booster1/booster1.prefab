@@ -5049,6 +5049,7 @@ MonoBehaviour:
   NetworkPos: {x: 0, y: 0, z: 0}
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   AbstractObject: {fileID: 11400000, guid: 03d6620c66824ae4188286f6461ff223, type: 2}
+  InSpaceship: 0
   Identity: {fileID: 8575854996173634517}
 --- !u!54 &1981657392565994241
 Rigidbody:
@@ -5069,7 +5070,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 896
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
@@ -5110,6 +5111,7 @@ MonoBehaviour:
   IsLocked: 0
   itemType: 2
   AttachedSlot: {fileID: 0}
+  PickedUpBy: {fileID: 0}
   BindSlot: {fileID: 0}
   spl: 10000
   SpeedParticles: {fileID: 7628848161086099772}
@@ -5146,6 +5148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 038cbf041fba9a14fa8f63b02ffcc4be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Selectable
+  lookedAt: 0
   OnSelect:
     m_PersistentCalls:
       m_Calls: []

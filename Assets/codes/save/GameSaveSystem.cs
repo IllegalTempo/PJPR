@@ -77,7 +77,8 @@ public class GameSaveSystem : MonoBehaviour
 
     public static GameSaveData CaptureSaveData()
     {
-        GameSaveData saveData = new GameSaveData(NetworkSystem.Instance.GetPlayerData(), NetworkObjectSnapshot.GetNetworkPrefabSnapshotInScene(), MainSpaceship.Instance.GetSlotsSnapshot());
+        int spaceshipIndex = GameCore.Instance != null ? GameCore.Instance.CurrentSpaceshipIndex : 0;
+        GameSaveData saveData = new GameSaveData(NetworkSystem.Instance.GetPlayerData(), NetworkObjectSnapshot.GetNetworkPrefabSnapshotInScene(), MainSpaceship.Instance.GetSlotsSnapshot(), spaceshipIndex);
         return saveData;
     }
 

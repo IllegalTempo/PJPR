@@ -8,6 +8,7 @@ namespace Assets.codes.Network.Messages
     {
         private readonly NetworkObjectSnapshot[] sceneNetworkObjects;
         private readonly SlotSnapshot[] slotsRelationships;
+        private readonly int spaceshipIndex;
 
         // Voting session data embedded for late-join sync
         private readonly bool hasVotingSession;
@@ -19,6 +20,7 @@ namespace Assets.codes.Network.Messages
         public NMS_Server_SyncScene(
             IEnumerable<NetworkObjectSnapshot> objects,
             IEnumerable<SlotSnapshot> sr,
+            int spaceshipIndex,
             bool hasVotingSession,
             Mission[] votingMissions,
             float votingTimerRemaining,
@@ -26,6 +28,7 @@ namespace Assets.codes.Network.Messages
         {
             this.sceneNetworkObjects = new List<NetworkObjectSnapshot>(objects).ToArray();
             this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
+            this.spaceshipIndex = spaceshipIndex;
             this.hasVotingSession = hasVotingSession;
             this.votingMissions = votingMissions;
             this.votingTimerRemaining = votingTimerRemaining;
@@ -47,6 +50,7 @@ namespace Assets.codes.Network.Messages
             }
             sceneNetworkObjects = NetworkObjectSnapshot.GetNetworkPrefabSnapshotInScene().ToArray();
             slotsRelationships = slotSnapshots.ToArray();
+            spaceshipIndex = GameCore.Instance != null ? GameCore.Instance.CurrentSpaceshipIndex : 0;
 
             MissionManager mm = MissionManager.Instance;
             if (mm != null && mm.IsVotingActive && mm.CurrentVotingMissions != null)
@@ -72,6 +76,7 @@ namespace Assets.codes.Network.Messages
         {
             NetworkObjectSnapshot[] objects = packet.ReadArray<NetworkObjectSnapshot>();
             SlotSnapshot[] slotsRelationships = packet.ReadArray<SlotSnapshot>();
+            int spaceshipIndex = packet.Readint();
 
             bool hasVotingSession = packet.Readbool();
             if (hasVotingSession)
@@ -82,12 +87,14 @@ namespace Assets.codes.Network.Messages
 
                 return new NMS_Server_SyncScene(
                     objects, slotsRelationships,
+                    spaceshipIndex,
                     true, votingMissions,
                     votingTimerRemaining, voteCounts);
             }
 
             return new NMS_Server_SyncScene(
                 objects, slotsRelationships,
+                spaceshipIndex,
                 false, null, 0f, null);
         }
 
@@ -95,6 +102,7 @@ namespace Assets.codes.Network.Messages
         {
             packet.Write(sceneNetworkObjects);
             packet.Write(slotsRelationships);
+            packet.Write(spaceshipIndex);
 
             packet.Write(hasVotingSession);
             if (hasVotingSession)
@@ -109,6 +117,7 @@ namespace Assets.codes.Network.Messages
         public async void ClientHandle()
         {
             Debug.Log($"Syncing {sceneNetworkObjects.Length} Network Objects from Server");
+            await GameCore.Instance.SpawnSpaceshipAsync(spaceshipIndex);
             foreach (NetworkObjectSnapshot snapshot in sceneNetworkObjects)
             {
                 await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);

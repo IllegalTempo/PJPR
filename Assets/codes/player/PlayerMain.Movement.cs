@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public partial class PlayerMain : MonoBehaviour
 {
@@ -6,7 +7,6 @@ public partial class PlayerMain : MonoBehaviour
     public float LookSpeed = 2f;
     public float MaxSpeed = 5f; // Maximum allowed speed
     public float JetPackForce = 2f;
-    public float Gravity = 2f;
     private Vector2 moveinput = Vector2.zero;
     public Vector2 lookinput = Vector2.zero;
 
@@ -20,12 +20,16 @@ public partial class PlayerMain : MonoBehaviour
     private void Jetpack()
     {
         rb.AddForce(Vector3.up * JetPackForce, ForceMode.Acceleration);
+        animator.SetBool("jetpack", true);
     }
 
     private void Move()
     {
         Vector3 move = (GetFacing() * moveinput.y + cam.transform.right * moveinput.x);
         move.y = 0f;
+        float targetAnimatorSpeed = Mathf.Clamp01(move.magnitude);
+        animator.SetFloat("speed", Mathf.Lerp(animator.GetFloat("speed"), targetAnimatorSpeed, Time.deltaTime * 10f));
+
         move.Normalize();
 
         ApplySpaceshipRotationDelta();
@@ -34,9 +38,7 @@ public partial class PlayerMain : MonoBehaviour
         Vector3 currentRelativeVelocity = rb.linearVelocity - shipVelocity;
         Vector3 targetVelocity = shipVelocity + inputVelocity;
         targetVelocity.y = shipVelocity.y + Mathf.Clamp(currentRelativeVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
-
         rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
-        rb.AddForce(Vector3.down * Gravity, ForceMode.Acceleration);
         //if (rb.linearVelocity.magnitude > MaxSpeed)
         //{
         //    rb.linearVelocity = rb.linearVelocity.normalized * MaxSpeed;
@@ -48,7 +50,21 @@ public partial class PlayerMain : MonoBehaviour
             Jetpack();
         }
 
+        if (IsMoveDownPressed())
+        {
+            rb.AddForce(Vector3.down * JetPackForce, ForceMode.Acceleration);
+        }
+        
+
         UpdateSpaceshipRotationTracking();
+    }
+
+    private bool IsMoveDownPressed()
+    {
+        Keyboard keyboard = Keyboard.current;
+        return keyboard != null &&
+            ((keyboard.leftCtrlKey != null && keyboard.leftCtrlKey.isPressed) ||
+             (keyboard.rightCtrlKey != null && keyboard.rightCtrlKey.isPressed));
     }
 
     private void ApplySpaceshipRotationDelta()

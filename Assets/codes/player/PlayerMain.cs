@@ -18,7 +18,7 @@ public partial class PlayerMain : MonoBehaviour
     public bool InSpaceship => collisionCount > 0;
     [SerializeField]
     private AudioSource audioSource;
-
+    public Animator animator;
     private bool usingVoiceChat = false;
     public Selectable seenObject = null;
     public GameObject cam;
@@ -635,9 +635,19 @@ public partial class PlayerMain : MonoBehaviour
         {
             UpdateThrowForceUI();
             UpdateThrowCameraTransition();
-            PlayerControl();
+            if (control.Player.jump.WasReleasedThisFrame())
+            {
+                animator.SetBool("jetpack", false);
+            }
         }
 
+    }
+    private void LateUpdate()
+    {
+        if (networkinfo.IsLocal)
+        {
+            PlayerControl();
+        }
     }
     private void FixedUpdate()
     {
@@ -676,6 +686,18 @@ public partial class PlayerMain : MonoBehaviour
         remoteClip.SetData(floatSamples, 0);
         audioSource.clip = remoteClip;
         audioSource.Play();
+    }
+    public void Drop(Item item)
+    {
+        holdingItem = null;
+        animator.SetBool("PickUp", false);
+
+    }
+    public void PickUp(Item item)
+    {
+        holdingItem = item;
+        animator.SetBool("PickUp", true);
+
     }
 }
 

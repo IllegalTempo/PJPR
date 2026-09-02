@@ -22,6 +22,7 @@ public partial class GameCore : MonoBehaviour
     public PlayerInputAction PlayerControl;
     public GameObject PlayerPrefab;
 
+    public List<GameObject> Spaceships;
     public Dictionary<string, string> GetDecorationWithID = new Dictionary<string, string>
     {
         { "TestDecoration","testDecoration" },
@@ -39,11 +40,76 @@ public partial class GameCore : MonoBehaviour
     //public int CurrentMissionLevel = 0;
 
     public long RandomSeed;
+    [SerializeField]
+    private bool StartOnAwake = false;
     private bool startedGame = false;
+    private int selectedSpaceshipIndex;
+    public int CurrentSpaceshipIndex { get; private set; }
+
+    public void GameReady()
+    {
+        StartGameAsync(selectedSpaceshipIndex).Forget();
+    }
+
+    public void GameReady(int spaceshipIndex)
+    {
+        SelectSpaceship(spaceshipIndex);
+        GameReady();
+    }
+
+    public void SelectSpaceship(int spaceshipIndex)
+    {
+        selectedSpaceshipIndex = spaceshipIndex;
+        CurrentSpaceshipIndex = spaceshipIndex;
+    }
 
     public Vector3 getPlayerSpawn()
     {
         return PlayerSpawn.transform.position;
+    }
+    public async UniTask<GameObject> SpawnSpaceshipAsync(int spaceshipIndex)
+    {
+        if (Spaceships == null || Spaceships.Count == 0)
+        {
+            Debug.LogError("Cannot spawn spaceship because GameCore.Spaceships is empty.");
+            return null;
+        }
+
+        if (spaceshipIndex < 0 || spaceshipIndex >= Spaceships.Count)
+        {
+            Debug.LogWarning($"Spaceship index {spaceshipIndex} is invalid. Spawning spaceship index 0 instead.");
+            spaceshipIndex = 0;
+        }
+
+        GameObject spaceshipPrefab = Spaceships[spaceshipIndex];
+        if (spaceshipPrefab == null)
+        {
+            Debug.LogError($"Cannot spawn spaceship because GameCore.Spaceships[{spaceshipIndex}] is null.");
+            return null;
+        }
+
+        if (MainSpaceship.Instance != null)
+        {
+            foreach (NetworkIdentity identity in MainSpaceship.Instance.GetComponentsInChildren<NetworkIdentity>(true))
+            {
+                identity.Unregister();
+            }
+
+            Destroy(MainSpaceship.Instance.gameObject);
+            await UniTask.Yield();
+        }
+
+        GameObject spawnedSpaceship = Instantiate(spaceshipPrefab, Vector3.zero, Quaternion.identity);
+        CurrentSpaceshipIndex = spaceshipIndex;
+
+        await UniTask.Yield();
+
+        if (NetworkSystem.Instance != null)
+        {
+            NetworkSystem.Instance.Slots = new List<Slot>(FindObjectsByType<Slot>(FindObjectsSortMode.None));
+        }
+
+        return spawnedSpaceship;
     }
     private void Awake()
     {
@@ -51,7 +117,10 @@ public partial class GameCore : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(this.gameObject);
-            StartGame().Forget();
+            if (StartOnAwake)
+            {
+                GameReady();
+            }
         }
         else
         {
@@ -59,7 +128,7 @@ public partial class GameCore : MonoBehaviour
         }
 
     }
-    private async UniTask StartGame()
+    private async UniTask StartGameAsync(int spaceshipIndex)
     {
         if (startedGame)
         {
@@ -79,6 +148,8 @@ public partial class GameCore : MonoBehaviour
         await initManager.InitializeGameAsync(new GameInitManager.GameInitOptions
         {
             LoadSave = true,
+            OverrideSaveSpaceshipIndex = true,
+            SpaceshipIndex = spaceshipIndex,
             NetworkSyncTimeoutSeconds = NetworkSystem.TIMEOUTSECONDS
         });
     }
@@ -108,6 +179,11 @@ public partial class GameCore : MonoBehaviour
     //}
     private void SavePlayerPrefs()
     {
+        if (PlayerControl == null || Option == null)
+        {
+            return;
+        }
+
         string rebinds = PlayerControl.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("inputRebinds", rebinds);
         PlayerPrefs.SetString("options", Option.saveAsJSON());
