@@ -1,6 +1,7 @@
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using UnityEngine;
@@ -60,11 +61,11 @@ public class Item : MonoBehaviour//Item is any that is pickable
     [HideInInspector]
     public Slot AttachedSlot;
 
-    private int collisionCount = 0;
+    private readonly Dictionary<Rigidbody, int> movementReferenceContacts = new Dictionary<Rigidbody, int>();
 
     public PlayerMain PickedUpBy;
-    private Rigidbody activeShipRigidbody;
-    private Vector3 previousShipVelocity;
+    private Rigidbody activeMovementReferenceRigidbody;
+    private Vector3 previousMovementReferenceVelocity;
 
 
 
@@ -147,81 +148,148 @@ public class Item : MonoBehaviour//Item is any that is pickable
     }
     private void FixedUpdate()
     {
-        ApplySpaceshipVelocity();
+        ApplyMovementReferenceVelocity();
     }
 
-    private void ApplySpaceshipVelocity()
+    private void ApplyMovementReferenceVelocity()
     {
         if (PickedUpBy != null || AttachedSlot != null || rb == null || rb.isKinematic)
         {
-            previousShipVelocity = Vector3.zero;
+            previousMovementReferenceVelocity = Vector3.zero;
             return;
         }
 
-        Vector3 shipVelocity = GetSpaceshipVelocity();
-        Vector3 relativeVelocity = rb.linearVelocity - previousShipVelocity;
-        rb.linearVelocity = relativeVelocity + shipVelocity;
-        previousShipVelocity = shipVelocity;
+        Vector3 movementReferenceVelocity = GetMovementReferenceVelocity();
+        Vector3 relativeVelocity = rb.linearVelocity - previousMovementReferenceVelocity;
+        rb.linearVelocity = relativeVelocity + movementReferenceVelocity;
+        previousMovementReferenceVelocity = movementReferenceVelocity;
     }
 
-    private Vector3 GetSpaceshipVelocity()
+    private Vector3 GetMovementReferenceVelocity()
     {
-        if (collisionCount <= 0)
+        if (movementReferenceContacts.Count <= 0)
         {
             return Vector3.zero;
         }
 
-        Rigidbody shipRigidbody = activeShipRigidbody;
-        if (shipRigidbody == null && MainSpaceship.Instance != null)
+        Rigidbody movementReferenceRigidbody = activeMovementReferenceRigidbody;
+        if (movementReferenceRigidbody == null || !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
         {
-            shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+            movementReferenceRigidbody = ChooseMovementReferenceRigidbody();
+            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
         }
 
-        return shipRigidbody != null ? shipRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+        return movementReferenceRigidbody != null ? movementReferenceRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
     }
 
-    private Rigidbody GetSpaceshipRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
+    private Rigidbody ChooseMovementReferenceRigidbody()
+    {
+        foreach (Rigidbody movementReferenceRigidbody in movementReferenceContacts.Keys)
+        {
+            if (movementReferenceRigidbody != null)
+            {
+                return movementReferenceRigidbody;
+            }
+        }
+
+        return null;
+    }
+
+    private void SetActiveMovementReferenceRigidbody(Rigidbody movementReferenceRigidbody)
+    {
+        if (activeMovementReferenceRigidbody == movementReferenceRigidbody)
+        {
+            return;
+        }
+
+        activeMovementReferenceRigidbody = movementReferenceRigidbody;
+        previousMovementReferenceVelocity = Vector3.zero;
+    }
+
+    private Rigidbody GetMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
     {
         if (MainSpaceship.Instance == null)
         {
             return null;
         }
 
-        Transform shipTransform = MainSpaceship.Instance.transform;
-        Rigidbody shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
-        if (candidateRigidbody != null &&
-            (candidateRigidbody.transform == shipTransform || candidateRigidbody.transform.IsChildOf(shipTransform)))
+        Transform referenceRootTransform = MainSpaceship.Instance.transform;
+        if (IsMovementReferenceRigidbody(candidateRigidbody, referenceRootTransform))
         {
-            return shipRigidbody;
+            return candidateRigidbody;
         }
 
         if (candidateTransform != null &&
-            (candidateTransform == shipTransform || candidateTransform.IsChildOf(shipTransform)))
+            (candidateTransform == referenceRootTransform || candidateTransform.IsChildOf(referenceRootTransform)))
         {
-            return shipRigidbody;
+            Rigidbody transformRigidbody = candidateTransform.GetComponentInParent<Rigidbody>();
+            return IsMovementReferenceRigidbody(transformRigidbody, referenceRootTransform)
+                ? transformRigidbody
+                : MainSpaceship.Instance.GetComponent<Rigidbody>();
         }
 
         return null;
     }
 
-    private void EnterSpaceship(Rigidbody shipRigidbody)
+    private bool IsMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform referenceRootTransform)
     {
-        if (shipRigidbody == null)
+        if (candidateRigidbody == null || candidateRigidbody == rb)
+        {
+            return false;
+        }
+
+        if (candidateRigidbody.GetComponentInParent<Item>() != null)
+        {
+            return false;
+        }
+
+        return candidateRigidbody.transform == referenceRootTransform ||
+            candidateRigidbody.transform.IsChildOf(referenceRootTransform);
+    }
+
+    private void EnterMovementReference(Rigidbody movementReferenceRigidbody)
+    {
+        if (movementReferenceRigidbody == null)
         {
             return;
         }
 
-        collisionCount++;
-        activeShipRigidbody = shipRigidbody;
+        if (movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
+        {
+            movementReferenceContacts[movementReferenceRigidbody] = contactCount + 1;
+        }
+        else
+        {
+            movementReferenceContacts.Add(movementReferenceRigidbody, 1);
+        }
+
+        if (activeMovementReferenceRigidbody == null)
+        {
+            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
+        }
     }
 
-    private void ExitSpaceship()
+    private void ExitMovementReference(Rigidbody movementReferenceRigidbody)
     {
-        collisionCount = Mathf.Max(0, collisionCount - 1);
-        if (collisionCount <= 0)
+        if (movementReferenceRigidbody == null ||
+            !movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
         {
-            activeShipRigidbody = null;
-            previousShipVelocity = Vector3.zero;
+            return;
+        }
+
+        if (contactCount <= 1)
+        {
+            movementReferenceContacts.Remove(movementReferenceRigidbody);
+        }
+        else
+        {
+            movementReferenceContacts[movementReferenceRigidbody] = contactCount - 1;
+        }
+
+        if (activeMovementReferenceRigidbody == movementReferenceRigidbody &&
+            !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
+        {
+            SetActiveMovementReferenceRigidbody(ChooseMovementReferenceRigidbody());
         }
     }
 
@@ -232,7 +300,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        EnterSpaceship(GetSpaceshipRigidbody(collision.rigidbody, collision.transform));
+        EnterMovementReference(GetMovementReferenceRigidbody(collision.rigidbody, collision.transform));
     }
     private void OnCollisionExit(Collision collision)
     {
@@ -241,9 +309,10 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        if (GetSpaceshipRigidbody(collision.rigidbody, collision.transform) != null)
+        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(collision.rigidbody, collision.transform);
+        if (movementReferenceRigidbody != null)
         {
-            ExitSpaceship();
+            ExitMovementReference(movementReferenceRigidbody);
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -253,7 +322,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        EnterSpaceship(GetSpaceshipRigidbody(other.attachedRigidbody, other.transform));
+        EnterMovementReference(GetMovementReferenceRigidbody(other.attachedRigidbody, other.transform));
     }
     private void OnTriggerExit(Collider other)
     {
@@ -262,9 +331,10 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        if (GetSpaceshipRigidbody(other.attachedRigidbody, other.transform) != null)
+        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(other.attachedRigidbody, other.transform);
+        if (movementReferenceRigidbody != null)
         {
-            ExitSpaceship();
+            ExitMovementReference(movementReferenceRigidbody);
         }
     }
     public void ChangeItemOwner(ulong newowner)

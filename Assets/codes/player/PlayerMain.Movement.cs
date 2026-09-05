@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,56 +8,56 @@ public partial class PlayerMain : MonoBehaviour
     public float LookSpeed = 2f;
     public float MaxSpeed = 5f; // Maximum allowed speed
     public float JetPackForce = 2f;
+    [Min(0.01f)] public float MoveAcceleration = 40f;
+    [Min(0.01f)] public float MoveDeceleration = 60f;
     private Vector2 moveinput = Vector2.zero;
     public Vector2 lookinput = Vector2.zero;
 
     public float maxVerticalVelocity = 100f;
 
-    private int collisionCount = 0;
-    private Rigidbody activeShipRigidbody;
-    private Quaternion previousShipRotation;
-    private bool hasPreviousShipRotation;
-
-    private void Jetpack()
-    {
-        rb.AddForce(Vector3.up * JetPackForce, ForceMode.Acceleration);
-        animator.SetBool("jetpack", true);
-    }
+    private readonly Dictionary<Rigidbody, int> movementReferenceContacts = new Dictionary<Rigidbody, int>();
+    private Rigidbody activeMovementReferenceRigidbody;
+    private Quaternion previousMovementReferenceRotation;
+    private bool hasPreviousMovementReferenceRotation;
+    private Vector3 movementReferenceLocalAnchorPosition;
+    private bool hasMovementReferenceLocalAnchor;
+    private float defaultLinearDamping;
+    private bool hasDefaultLinearDamping;
 
     private void Move()
     {
-        Vector3 move = (GetFacing() * moveinput.y + cam.transform.right * moveinput.x);
-        move.y = 0f;
-        float targetAnimatorSpeed = Mathf.Clamp01(move.magnitude);
-        animator.SetFloat("speed", Mathf.Lerp(animator.GetFloat("speed"), targetAnimatorSpeed, Time.deltaTime * 10f));
+        ApplyMovementReferenceYawDelta();
+        Vector2 input = control.Player.enabled ? Vector2.ClampMagnitude(moveinput, 1f) : Vector2.zero;
+        // Build the horizontal basis from yaw so looking vertically never changes walking direction.
+        Vector3 move = Quaternion.Euler(0f, yaw, 0f) * new Vector3(input.x, 0f, input.y);
+        bool hasMoveInput = input.sqrMagnitude > 0f;
+        bool jumpPressed = control.Player.jump.IsPressed();
+        bool moveDownPressed = control.Player.enabled && IsMoveDownPressed();
+        Vector3 movementReferenceVelocity = GetMovementReferenceVelocity();
+        Vector3 currentRelativeVelocity = rb.linearVelocity - movementReferenceVelocity;
+        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(currentRelativeVelocity, Vector3.up);
+        float acceleration = hasMoveInput ? MoveAcceleration : MoveDeceleration;
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, move * Mathf.Max(0f, MoveSpeed),
+            Mathf.Max(0.01f, acceleration) * Time.fixedDeltaTime);
 
-        move.Normalize();
+        bool lockToMovementReference = ShouldLockToMovementReference(hasMoveInput, jumpPressed, moveDownPressed)
+            && horizontalVelocity.sqrMagnitude <= 0.0001f;
+        ApplyMovementReferenceLocalAnchor(lockToMovementReference);
 
-        ApplySpaceshipRotationDelta();
-        Vector3 inputVelocity = move * MoveSpeed;
-        Vector3 shipVelocity = GetSpaceshipVelocity();
-        Vector3 currentRelativeVelocity = rb.linearVelocity - shipVelocity;
-        Vector3 targetVelocity = shipVelocity + inputVelocity;
-        targetVelocity.y = shipVelocity.y + Mathf.Clamp(currentRelativeVelocity.y, -maxVerticalVelocity, maxVerticalVelocity);
+        float verticalInput = (jumpPressed ? 1f : 0f) - (moveDownPressed ? 1f : 0f);
+        float verticalLimit = Mathf.Max(0f, maxVerticalVelocity);
+        float verticalVelocity = lockToMovementReference ? 0f : Mathf.Clamp(
+            currentRelativeVelocity.y + verticalInput * Mathf.Max(0f, JetPackForce) * Time.fixedDeltaTime,
+            -verticalLimit, verticalLimit);
+        Vector3 targetVelocity = movementReferenceVelocity + horizontalVelocity + Vector3.up * verticalVelocity;
         rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
-        //if (rb.linearVelocity.magnitude > MaxSpeed)
-        //{
-        //    rb.linearVelocity = rb.linearVelocity.normalized * MaxSpeed;
 
-        //}
+        animator.SetBool("jetpack", verticalInput > 0f);
+        float targetAnimatorSpeed = MoveSpeed > 0f ? Mathf.Clamp01(horizontalVelocity.magnitude / MoveSpeed) : 0f;
+        animator.SetFloat("speed", Mathf.Lerp(animator.GetFloat("speed"), targetAnimatorSpeed,
+            1f - Mathf.Exp(-10f * Time.fixedDeltaTime)));
 
-        if (control.Player.jump.IsPressed())
-        {
-            Jetpack();
-        }
-
-        if (IsMoveDownPressed())
-        {
-            rb.AddForce(Vector3.down * JetPackForce, ForceMode.Acceleration);
-        }
-        
-
-        UpdateSpaceshipRotationTracking();
+        UpdateMovementReferenceRotationTracking();
     }
 
     private bool IsMoveDownPressed()
@@ -67,32 +68,51 @@ public partial class PlayerMain : MonoBehaviour
              (keyboard.rightCtrlKey != null && keyboard.rightCtrlKey.isPressed));
     }
 
-    private void ApplySpaceshipRotationDelta()
+    private bool ShouldLockToMovementReference(bool hasMoveInput, bool jumpPressed, bool moveDownPressed)
     {
-        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
-        if (shipRigidbody == null)
-        {
-            hasPreviousShipRotation = false;
-            return;
-        }
-
-        Quaternion shipRotation = shipRigidbody.rotation;
-        if (!hasPreviousShipRotation)
-        {
-            previousShipRotation = shipRotation;
-            hasPreviousShipRotation = true;
-            return;
-        }
-
-        Quaternion deltaRotation = shipRotation * Quaternion.Inverse(previousShipRotation);
-        Vector3 pivotToPlayer = rb.position - shipRigidbody.position;
-        Vector3 rotatedPosition = shipRigidbody.position + deltaRotation * pivotToPlayer;
-
-        rb.MovePosition(rotatedPosition);
-        ApplyShipYawDelta(deltaRotation);
+        return HasMovementReference && !hasMoveInput && !jumpPressed && !moveDownPressed;
     }
 
-    private void ApplyShipYawDelta(Quaternion deltaRotation)
+    private void ApplyMovementReferenceLocalAnchor(bool lockToMovementReference)
+    {
+        Rigidbody movementReferenceRigidbody = GetActiveMovementReferenceRigidbody();
+        if (!lockToMovementReference || movementReferenceRigidbody == null)
+        {
+            hasMovementReferenceLocalAnchor = false;
+            return;
+        }
+
+        if (!hasMovementReferenceLocalAnchor)
+        {
+            movementReferenceLocalAnchorPosition = movementReferenceRigidbody.transform.InverseTransformPoint(rb.position);
+            hasMovementReferenceLocalAnchor = true;
+        }
+
+        rb.MovePosition(movementReferenceRigidbody.transform.TransformPoint(movementReferenceLocalAnchorPosition));
+    }
+
+    private void ApplyMovementReferenceYawDelta()
+    {
+        Rigidbody movementReferenceRigidbody = GetActiveMovementReferenceRigidbody();
+        if (movementReferenceRigidbody == null)
+        {
+            hasPreviousMovementReferenceRotation = false;
+            return;
+        }
+
+        Quaternion movementReferenceRotation = movementReferenceRigidbody.rotation;
+        if (!hasPreviousMovementReferenceRotation)
+        {
+            previousMovementReferenceRotation = movementReferenceRotation;
+            hasPreviousMovementReferenceRotation = true;
+            return;
+        }
+
+        Quaternion deltaRotation = movementReferenceRotation * Quaternion.Inverse(previousMovementReferenceRotation);
+        ApplyReferenceYawDelta(deltaRotation);
+    }
+
+    private void ApplyReferenceYawDelta(Quaternion deltaRotation)
     {
         Vector3 previousForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
         Vector3 rotatedForward = Vector3.ProjectOnPlane(deltaRotation * transform.forward, Vector3.up);
@@ -104,110 +124,225 @@ public partial class PlayerMain : MonoBehaviour
         yaw += Vector3.SignedAngle(previousForward, rotatedForward, Vector3.up);
     }
 
-    private void UpdateSpaceshipRotationTracking()
+    private void UpdateMovementReferenceRotationTracking()
     {
-        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
-        if (shipRigidbody == null)
+        Rigidbody movementReferenceRigidbody = GetActiveMovementReferenceRigidbody();
+        if (movementReferenceRigidbody == null)
         {
-            hasPreviousShipRotation = false;
+            hasPreviousMovementReferenceRotation = false;
             return;
         }
 
-        previousShipRotation = shipRigidbody.rotation;
+        previousMovementReferenceRotation = movementReferenceRigidbody.rotation;
     }
 
-    private Vector3 GetSpaceshipVelocity()
+    private Vector3 GetMovementReferenceVelocity()
     {
-        Rigidbody shipRigidbody = GetActiveSpaceshipRigidbody();
-        return shipRigidbody != null ? shipRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+        Rigidbody movementReferenceRigidbody = GetActiveMovementReferenceRigidbody();
+        return movementReferenceRigidbody != null ? movementReferenceRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
     }
 
-    private Rigidbody GetActiveSpaceshipRigidbody()
+    private Rigidbody GetActiveMovementReferenceRigidbody()
     {
-        if (!InSpaceship)
+        if (!HasMovementReference)
         {
             return null;
         }
         
-        Rigidbody shipRigidbody = activeShipRigidbody;
-        if (shipRigidbody == null && MainSpaceship.Instance != null)
+        Rigidbody movementReferenceRigidbody = activeMovementReferenceRigidbody;
+        if (movementReferenceRigidbody == null || !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
         {
-            shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
+            movementReferenceRigidbody = ChooseMovementReferenceRigidbody();
+            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
         }
 
-        return shipRigidbody;
+        return movementReferenceRigidbody;
     }
 
-    private Rigidbody GetSpaceshipRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
+    private void InitializeMovementReferencePhysics()
+    {
+        if (rb == null)
+        {
+            return;
+        }
+
+        defaultLinearDamping = rb.linearDamping;
+        hasDefaultLinearDamping = true;
+    }
+
+    private void ApplyMovementReferenceDamping()
+    {
+        if (rb == null)
+        {
+            return;
+        }
+
+        if (!hasDefaultLinearDamping)
+        {
+            InitializeMovementReferencePhysics();
+        }
+
+        rb.linearDamping = HasMovementReference ? 0f : defaultLinearDamping;
+    }
+
+    private void RestoreMovementReferencePhysics()
+    {
+        if (rb == null || !hasDefaultLinearDamping)
+        {
+            return;
+        }
+
+        rb.linearDamping = defaultLinearDamping;
+    }
+
+    private Rigidbody ChooseMovementReferenceRigidbody()
+    {
+        foreach (Rigidbody movementReferenceRigidbody in movementReferenceContacts.Keys)
+        {
+            if (movementReferenceRigidbody != null)
+            {
+                return movementReferenceRigidbody;
+            }
+        }
+
+        return null;
+    }
+
+    private void SetActiveMovementReferenceRigidbody(Rigidbody movementReferenceRigidbody)
+    {
+        if (activeMovementReferenceRigidbody == movementReferenceRigidbody)
+        {
+            return;
+        }
+
+        activeMovementReferenceRigidbody = movementReferenceRigidbody;
+        hasPreviousMovementReferenceRotation = false;
+        hasMovementReferenceLocalAnchor = false;
+    }
+
+    private Rigidbody GetMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
     {
         if (MainSpaceship.Instance == null)
         {
             return null;
         }
 
-        Transform shipTransform = MainSpaceship.Instance.transform;
-        Rigidbody shipRigidbody = MainSpaceship.Instance.GetComponent<Rigidbody>();
-        if (candidateRigidbody != null &&
-            (candidateRigidbody.transform == shipTransform || candidateRigidbody.transform.IsChildOf(shipTransform)))
+        Transform referenceRootTransform = MainSpaceship.Instance.transform;
+        if (IsMovementReferenceRigidbody(candidateRigidbody, referenceRootTransform))
         {
-            return shipRigidbody;
+            return candidateRigidbody;
         }
 
         if (candidateTransform != null &&
-            (candidateTransform == shipTransform || candidateTransform.IsChildOf(shipTransform)))
+            (candidateTransform == referenceRootTransform || candidateTransform.IsChildOf(referenceRootTransform)))
         {
-            return shipRigidbody;
+            Rigidbody transformRigidbody = candidateTransform.GetComponentInParent<Rigidbody>();
+            return IsMovementReferenceRigidbody(transformRigidbody, referenceRootTransform)
+                ? transformRigidbody
+                : MainSpaceship.Instance.GetComponent<Rigidbody>();
         }
 
         return null;
     }
 
-    private void EnterSpaceship(Rigidbody shipRigidbody)
+    private bool IsMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform referenceRootTransform)
     {
-        if (shipRigidbody == null)
+        if (candidateRigidbody == null || candidateRigidbody == rb)
+        {
+            return false;
+        }
+
+        if (candidateRigidbody.GetComponentInParent<Item>() != null)
+        {
+            return false;
+        }
+
+        return candidateRigidbody.transform == referenceRootTransform ||
+            candidateRigidbody.transform.IsChildOf(referenceRootTransform);
+    }
+
+    private void EnterMovementReference(Rigidbody movementReferenceRigidbody)
+    {
+        if (movementReferenceRigidbody == null)
         {
             return;
         }
 
-        collisionCount++;
-        activeShipRigidbody = shipRigidbody;
+        if (movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
+        {
+            movementReferenceContacts[movementReferenceRigidbody] = contactCount + 1;
+        }
+        else
+        {
+            movementReferenceContacts.Add(movementReferenceRigidbody, 1);
+        }
+
+        if (activeMovementReferenceRigidbody == null)
+        {
+            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
+        }
+
+        ApplyMovementReferenceDamping();
         transform.parent = null;
     }
 
-    private void ExitSpaceship()
+    private void ExitMovementReference(Rigidbody movementReferenceRigidbody)
     {
-        collisionCount = Mathf.Max(0, collisionCount - 1);
-        if (collisionCount <= 0)
+        if (movementReferenceRigidbody == null ||
+            !movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
         {
-            activeShipRigidbody = null;
+            return;
+        }
+
+        if (contactCount <= 1)
+        {
+            movementReferenceContacts.Remove(movementReferenceRigidbody);
+        }
+        else
+        {
+            movementReferenceContacts[movementReferenceRigidbody] = contactCount - 1;
+        }
+
+        if (activeMovementReferenceRigidbody == movementReferenceRigidbody &&
+            !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
+        {
+            SetActiveMovementReferenceRigidbody(ChooseMovementReferenceRigidbody());
+        }
+
+        if (!HasMovementReference)
+        {
+            ApplyMovementReferenceDamping();
             transform.parent = null;
-            hasPreviousShipRotation = false;
+            hasPreviousMovementReferenceRotation = false;
+            hasMovementReferenceLocalAnchor = false;
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        EnterSpaceship(GetSpaceshipRigidbody(collision.rigidbody, collision.transform));
+        EnterMovementReference(GetMovementReferenceRigidbody(collision.rigidbody, collision.transform));
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        if (GetSpaceshipRigidbody(collision.rigidbody, collision.transform) != null)
+        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(collision.rigidbody, collision.transform);
+        if (movementReferenceRigidbody != null)
         {
-            ExitSpaceship();
+            ExitMovementReference(movementReferenceRigidbody);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        EnterSpaceship(GetSpaceshipRigidbody(other.attachedRigidbody, other.transform));
+        EnterMovementReference(GetMovementReferenceRigidbody(other.attachedRigidbody, other.transform));
     }
 
     private void OnTriggerExit(Collider collision)
     {
-        if (GetSpaceshipRigidbody(collision.attachedRigidbody, collision.transform) != null)
+        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(collision.attachedRigidbody, collision.transform);
+        if (movementReferenceRigidbody != null)
         {
-            ExitSpaceship();
+            ExitMovementReference(movementReferenceRigidbody);
         }
     }
 

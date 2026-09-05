@@ -15,7 +15,7 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    public bool InSpaceship => collisionCount > 0;
+    public bool HasMovementReference => movementReferenceContacts.Count > 0;
     [SerializeField]
     private AudioSource audioSource;
     public Animator animator;
@@ -66,6 +66,7 @@ public partial class PlayerMain : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         rb = GetComponent<Rigidbody>();
+        InitializeMovementReferencePhysics();
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         if (networkinfo.IsLocal)
@@ -87,6 +88,8 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void InitializeLocal()
     {
+        yaw = transform.eulerAngles.y;
+        pitch = Mathf.DeltaAngle(0f, head.transform.eulerAngles.x);
         PlayerMain[] players = FindObjectsByType<PlayerMain>(FindObjectsSortMode.None);
         foreach (PlayerMain player in players)
         {
@@ -128,6 +131,7 @@ public partial class PlayerMain : MonoBehaviour
     private void OnDisable()
     {
         ResetThrowCameraZoom();
+        RestoreMovementReferencePhysics();
 
         if (control != null)
         {
@@ -640,10 +644,6 @@ public partial class PlayerMain : MonoBehaviour
         {
             UpdateThrowForceUI();
             UpdateThrowCameraTransition();
-            if (control.Player.jump.WasReleasedThisFrame())
-            {
-                animator.SetBool("jetpack", false);
-            }
         }
 
     }
