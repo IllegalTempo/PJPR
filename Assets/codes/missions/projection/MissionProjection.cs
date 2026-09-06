@@ -42,6 +42,16 @@ public class MissionProjection : Interactable
         {
             col.isTrigger = true;
         }
+
+        Selectable mySelectable = GetComponent<Selectable>();
+        if (mySelectable == null)
+        {
+            mySelectable = gameObject.AddComponent<Selectable>();
+        }
+        if (mySelectable.usableOverride == null)
+        {
+            mySelectable.usableOverride = this;
+        }
     }
 
     public void Initialize(Mission mission, int index)
