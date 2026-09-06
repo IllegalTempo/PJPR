@@ -17,3 +17,4 @@ MonoBehaviour:
   rewardCredits: 100
   difficulty: 10
   estimatedDuration: 5
+  missionScene: {fileID: 844731735586525658, guid: 9eb6a1d9ff9bb694b94b3b2428e3804d, type: 3}

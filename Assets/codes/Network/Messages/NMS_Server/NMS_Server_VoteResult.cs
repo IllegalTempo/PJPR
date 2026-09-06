@@ -28,6 +28,8 @@ namespace Assets.codes.Network.Messages
         public void ClientHandle()
         {
             Debug.Log($"[NMS_Server_VoteResult] Winner: index {winningMissionIndex}, name: {winningMissionName}");
+            MissionManager.Instance?.SpawnMissionScene(winningMissionName);
+
             if (MissionProjectionDisplay.Instance != null)
             {
                 MissionProjectionDisplay.Instance.ShowVoteResult(winningMissionIndex, winningMissionName);

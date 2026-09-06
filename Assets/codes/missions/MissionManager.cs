@@ -19,6 +19,7 @@ public class MissionManager : MonoBehaviour
     public Mission WinningMission { get; private set; }
 
     private Dictionary<ulong, int> playerVotes = new Dictionary<ulong, int>();
+    private GameObject activeMissionScene;
 
     private void Awake()
     {
@@ -189,6 +190,8 @@ public class MissionManager : MonoBehaviour
 
         Debug.Log($"[MissionManager] Voting ended. Winner: {WinningMission.missionName} (index {winningIndex}) with {maxVotes} vote(s).");
 
+        SpawnMissionScene(WinningMission.missionName);
+
         EscapeBlackholeMission.OnMissionVoteWon(WinningMission.missionName);
         PeakOfEnergyMission.OnMissionVoteWon(WinningMission.missionName);
 
@@ -214,5 +217,45 @@ public class MissionManager : MonoBehaviour
     public List<Mission> GetActiveMissions()
     {
         return activeMissions;
+    }
+
+    public void SpawnMissionScene(string missionName)
+    {
+        if (string.IsNullOrEmpty(missionName))
+            return;
+
+        MissionData missionData = GetMissionData(missionName);
+        if (missionData == null)
+        {
+            Debug.LogWarning($"[MissionManager] Cannot spawn mission scene for '{missionName}': no matching MissionData found.");
+            return;
+        }
+
+        if (missionData.missionScene == null)
+        {
+            Debug.LogWarning($"[MissionManager] Cannot spawn mission scene for '{missionName}': MissionData has no missionScene assigned.");
+            return;
+        }
+
+        if (activeMissionScene != null)
+            Destroy(activeMissionScene);
+
+        activeMissionScene = Instantiate(missionData.missionScene);
+        Debug.Log($"[MissionManager] Spawned mission scene prefab for '{missionName}'.");
+    }
+
+    private MissionData GetMissionData(string missionName)
+    {
+        if (availableMissions == null)
+            return null;
+
+        for (int i = 0; i < availableMissions.Length; i++)
+        {
+            MissionData missionData = availableMissions[i];
+            if (missionData != null && missionData.missionName == missionName)
+                return missionData;
+        }
+
+        return null;
     }
 }

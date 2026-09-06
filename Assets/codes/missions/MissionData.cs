@@ -9,6 +9,8 @@ public class MissionData : ScriptableObject
     [Range(0, 10)] public float difficulty = 5f;
     public int estimatedDuration = 10; // minutes
 
+    public GameObject missionScene;
+
     public Mission ToMission()
     {
         return new Mission(missionName, missionDescription, rewardCredits, difficulty, estimatedDuration);
