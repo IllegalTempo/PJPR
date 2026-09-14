@@ -75,7 +75,7 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
         doorMesh.localPosition = Vector3.Lerp(doorMesh.localPosition, targetPos, Time.deltaTime * slideSpeed);
     }
 
-    protected override void OnSelected()
+    public void OnSelected()
     {
         if (isDoorOpen)
             CloseDoor();

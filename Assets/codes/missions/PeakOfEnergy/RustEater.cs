@@ -40,13 +40,15 @@ public class RustEater : Selectable
 
     protected override int Layer => 6; // Selectable layer so the hammer can target this enemy
 
-    private PeakOfEnergyManager Manager => PeakOfEnergyManager.Instance;
+    [SerializeField]
+    private PeakOfEnergyManager Manager;
 
     private bool IsWorldManagerSide => NetworkSystem.Instance == null || NetworkSystem.Instance.IsWorldManager;
 
     private void Awake()
     {
         netObj = GetComponent<NetworkGameObject>();
+        Manager = GetComponent<PeakOfEnergyManager>();
     }
 
     private void OnDisable()

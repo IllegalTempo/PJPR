@@ -568,7 +568,6 @@ GameObject:
   - component: {fileID: 4851882461229120029}
   - component: {fileID: 2468017104650506600}
   - component: {fileID: 8052425946572995524}
-  - component: {fileID: 4485528041249459714}
   - component: {fileID: 7503082464290871908}
   m_Layer: 0
   m_Name: Peak Of Energy
@@ -676,7 +675,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RingVisualController
   ringVisualsRoot: {fileID: 7075505034282567829}
-  ringRenderer: {fileID: 0}
+  ringRenderer: {fileID: 9105522474392866060}
   ringLight: {fileID: 0}
   spinVisualMultiplier: 1
   spinRigidbody: {fileID: 0}
@@ -694,14 +693,6 @@ MonoBehaviour:
   sweetSpotPulseMax: 1
   failFlashDuration: 0.4
   chargeBurstEffect: {fileID: 0}
---- !u!33 &4485528041249459714
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844731735586525658}
-  m_Mesh: {fileID: 0}
 --- !u!23 &7503082464290871908
 MeshRenderer:
   m_ObjectHideFlags: 0

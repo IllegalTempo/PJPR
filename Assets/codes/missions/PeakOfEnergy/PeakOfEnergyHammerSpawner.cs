@@ -23,8 +23,11 @@ public class PeakOfEnergyHammerSpawner : MonoBehaviour
     [Tooltip("Should the hammer spawn automatically at Start?")]
     [SerializeField] private bool spawnOnStart = true;
 
+    private PeakOfEnergyManager manager => PeakOfEnergyManager.Instance;
+
     private void Start()
     {
+
         if (!NetworkSystem.Instance.IsWorldManager)
         {
             enabled = false;
@@ -64,8 +67,8 @@ public class PeakOfEnergyHammerSpawner : MonoBehaviour
         if (MainSpaceship.Instance != null)
             return MainSpaceship.Instance.transform.position + fallbackOffset;
 
-        if (PeakOfEnergyManager.Instance != null)
-            return PeakOfEnergyManager.Instance.transform.position + fallbackOffset;
+        if (manager != null)
+            return manager.transform.position + fallbackOffset;
 
         return transform.position + fallbackOffset;
     }

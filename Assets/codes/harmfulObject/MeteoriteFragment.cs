@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 
 [RequireComponent(typeof(Rigidbody))]
-public class MeteoriteFragment : Meteorite, IPoolable
+public class MeteoriteFragment : Meteorite
 {
     [Header("Fragment Properties")]
     [SerializeField] private float lifetime = 5f;
@@ -15,11 +15,6 @@ public class MeteoriteFragment : Meteorite, IPoolable
     private Color originalColor;
     private bool hasFaded;
 
-    protected override void Awake()
-    {
-        base.Awake();
-        SetHarmfulObjectType(HarmfulObjectType.MeteoriteFragment);
-    }
 
     public override void OnSpawn()
     {

@@ -10,9 +10,6 @@ public class MeteoriteTypeDefinition : ScriptableObject //TODO: Inherit it from 
     [Tooltip("Enum used for SpaceshipPart collision-damage lookup")]
     public MeteoriteSize size = MeteoriteSize.Small;
 
-    [Header("Stats")]
-    [Tooltip("Maximum health before the meteorite breaks")]
-    public float maxHealth = 50f;
 
     [Tooltip("Multiplier applied to the spawner's base speed (1.0 = base speed)")]
     public float speedMultiplier = 1f;

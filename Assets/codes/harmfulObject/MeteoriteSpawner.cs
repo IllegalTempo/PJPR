@@ -280,7 +280,6 @@ public class MeteoriteSpawner : MonoBehaviour
         Meteorite meteorite = obj.GetComponent<Meteorite>();
         if (meteorite != null)
         {
-            meteorite.ConfigureFromDefinition(typeDef);
             meteorite.poolKey = typeDef.typeName;
         }
 

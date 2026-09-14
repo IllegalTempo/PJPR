@@ -4,7 +4,7 @@ public class HammerItem : Tool
 {
     public override void OnUsingInteract(Selectable target)
     {
-        SpaceshipPart ssp = target != null ? target.GetComponent<SpaceshipPart>() : null;
+        Destroyable ssp = target != null ? target.GetComponent<Destroyable>() : null;
         if (ssp != null)
         {
             ssp.Repair(10f);

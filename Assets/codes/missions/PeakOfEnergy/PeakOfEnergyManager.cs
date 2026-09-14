@@ -27,7 +27,6 @@ public class PeakOfEnergyManager : MonoBehaviour
         Victory = 5,    // 5 charges completed
     }
 
-    public static PeakOfEnergyManager Instance { get; private set; }
 
     [Header("RPM Targets (one entry per charge tier, 5 total)")]
     [Tooltip("Minimum RPM required for each charge tier (index 0 = charge 1 ... index 4 = charge 5).")]
@@ -129,24 +128,15 @@ public class PeakOfEnergyManager : MonoBehaviour
     private float syncedTargetMin = -1f;
     private float syncedTargetMax = -1f;
 
+    public static PeakOfEnergyManager Instance;
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
         Instance = this;
 
         if (targetRPM_Min == null || targetRPM_Min.Length == 0) targetRPM_Min = new float[5];
         if (targetRPM_Max == null || targetRPM_Max.Length == 0) targetRPM_Max = new float[5];
     }
 
-    private void OnDestroy()
-    {
-        if (Instance == this)
-            Instance = null;
-    }
 
     // =====================================================================
     // Mission lifecycle (called by PeakOfEnergyMission)

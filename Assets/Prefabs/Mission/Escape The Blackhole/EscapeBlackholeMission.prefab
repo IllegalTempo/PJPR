@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &802078310095052675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6532805306420043898}
+  - component: {fileID: 6682533398766309995}
+  m_Layer: 0
+  m_Name: MeteoriteSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6532805306420043898
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802078310095052675}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6760902878562072598}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6682533398766309995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802078310095052675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87996bc8a0d3dd408dbbf12cbda568f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
+  spawnConfig: {fileID: 11400000, guid: a8859df850b4b25488c68e979a896470, type: 2}
+  smallMeteoriteDef: {fileID: 11400000, guid: 5b7d8765d4a4a164193ce1921735e550, type: 2}
+  mediumMeteoriteDef: {fileID: 11400000, guid: 0747585f100c66f42b61d098feecffcd, type: 2}
+  largeMeteoriteDef: {fileID: 11400000, guid: 3d4d3f3df7736c541be53e54203c6dc0, type: 2}
+  smallMeteoritePrefab: {fileID: 3813433807650716661, guid: a9c1d52fc16d5d24aa3b3d7b1c28af15, type: 3}
+  mediumMeteoritePrefab: {fileID: 8080907634044407302, guid: 48f457963d7e2154da90ab4168acd040, type: 3}
+  largeMeteoritePrefab: {fileID: 561597858457159885, guid: 88399790b2210834daeb8438c8f66028, type: 3}
+  difficultyScaler: {fileID: 0}
+--- !u!1 &6578342565090100143
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6760902878562072598}
+  - component: {fileID: 7629111305602424999}
+  m_Layer: 0
+  m_Name: EscapeBlackholeMission
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6760902878562072598
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6578342565090100143}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21441, y: 0.69747, z: -1.44815}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6532805306420043898}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7629111305602424999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6578342565090100143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58f256c31fef4494fb8017d2d5c9a97c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeBlackholeMission
+  missionName: Escape the Blackhole
+  meteoriteSpawner: {fileID: 6682533398766309995}
+  difficultyScaler: {fileID: 0}
+  spawnConfig: {fileID: 11400000, guid: a8859df850b4b25488c68e979a896470, type: 2}
+  lootDropHandler: {fileID: 0}
+  warningIndicatorPrefab: {fileID: 6978015522691067216, guid: db51ba6dd7ffe464eae5ebdd00da4fb0, type: 3}
+  survivalTime: 0

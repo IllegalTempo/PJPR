@@ -4,17 +4,15 @@ using System;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(NetworkPrefabIdentity))]
-public class Meteorite : HarmfulObject, IPoolable
+[RequireComponent(typeof(Destroyable))]
+public class Meteorite : Destroyable, IPoolable
 {
     [Header("Meteorite Type Reference")]
     [Tooltip("The ScriptableObject that defines this meteorite's stats. Assigned at spawn time.")]
     [SerializeField] private MeteoriteTypeDefinition typeDefinition;
 
     [Header("Meteorite Properties")]
-    [SerializeField] private float health = 100f;
-    [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float rotationSpeed = 30f;
-    [SerializeField] private float damage = 20f;
     [SerializeField] private bool damageOnAnyCollision = false;
     [SerializeField] private float anyCollisionDamage = 999f;
 
@@ -41,13 +39,10 @@ public class Meteorite : HarmfulObject, IPoolable
     private bool isBreaking = false;
     private bool isInitialized = false;
 
-    public MeteoriteTypeDefinition TypeDefinition => typeDefinition;
     public bool IsBreaking => isBreaking;
-    public float CurrentHealth => health;
 
     protected virtual void Awake()
     {
-        SetHarmfulObjectType(HarmfulObjectType.Meteorite);
         rb = GetComponent<Rigidbody>();
         meshRenderer = GetComponent<Renderer>();
         if (meshRenderer != null)
@@ -64,7 +59,6 @@ public class Meteorite : HarmfulObject, IPoolable
     {
         if (isInitialized) return;
         isInitialized = true;
-
         if (rb == null) rb = GetComponent<Rigidbody>();
         if (meshRenderer == null) meshRenderer = GetComponent<Renderer>();
         if (meshRenderer != null && originalMaterial == null)
@@ -82,13 +76,6 @@ public class Meteorite : HarmfulObject, IPoolable
         isBreaking = false;
         isInitialized = false;
 
-        if (typeDefinition != null)
-        {
-            maxHealth = typeDefinition.maxHealth;
-            damage = typeDefinition.damage;
-        }
-
-        health = maxHealth;
 
         if (meshRenderer != null && originalMaterial != null)
             meshRenderer.material = originalMaterial;
@@ -123,21 +110,6 @@ public class Meteorite : HarmfulObject, IPoolable
         }
     }
 
-    public void TakeDamage(float damageAmount)
-    {
-        if (isBreaking) return;
-
-        health -= damageAmount;
-
-        if (health < maxHealth * 0.5f && meshRenderer != null && damagedMaterial != null)
-            meshRenderer.material = damagedMaterial;
-
-        if (hitEffect != null)
-            Instantiate(hitEffect, transform.position, Quaternion.identity);
-
-        if (health <= 0)
-            BreakMeteorite();
-    }
 
     public void BreakMeteorite()
     {
@@ -197,16 +169,6 @@ public class Meteorite : HarmfulObject, IPoolable
             Destroy(gameObject);
     }
 
-    public void ConfigureFromDefinition(MeteoriteTypeDefinition def)
-    {
-        typeDefinition = def;
-        if (def != null)
-        {
-            maxHealth = def.maxHealth;
-            damage = def.damage;
-            health = def.maxHealth;
-        }
-    }
 
     [ContextMenu("Debug/Break Now")]
     private void DebugBreakNow()
@@ -217,14 +179,14 @@ public class Meteorite : HarmfulObject, IPoolable
     [ContextMenu("Debug/Apply 1 Damage")]
     private void DebugApplyOneDamage()
     {
-        TakeDamage(1f);
+        OnDamage(1f, "Debug");
     }
 
     private void HandleCollisionBreak(GameObject other)
     {
         if (damageOnAnyCollision)
         {
-            TakeDamage(anyCollisionDamage);
+            OnDamage(anyCollisionDamage, "Collision");
             return;
         }
 
@@ -235,7 +197,7 @@ public class Meteorite : HarmfulObject, IPoolable
         Rigidbody otherRb = other.GetComponent<Rigidbody>();
         if (otherRb != null && otherRb.linearVelocity.magnitude > 5f)
         {
-            TakeDamage(otherRb.linearVelocity.magnitude * 2f);
+            OnDamage(otherRb.linearVelocity.magnitude * 2f, "Impact");
         }
     }
 

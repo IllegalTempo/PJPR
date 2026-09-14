@@ -11,23 +11,7 @@ using Assets.codes.Network.Messages;
 [RequireComponent(typeof(StaticOutline))]
 public class ChargeInteractable : Interactable
 {
-    [Header("References")]
-    [Tooltip("Optional explicit manager reference; auto-found from the scene if empty.")]
-    [SerializeField] private PeakOfEnergyManager manager;
-
-    private PeakOfEnergyManager Manager
-    {
-        get
-        {
-            if (manager == null)
-            {
-                manager = GetComponentInParent<PeakOfEnergyManager>();
-                if (manager == null)
-                    manager = FindFirstObjectByType<PeakOfEnergyManager>();
-            }
-            return manager;
-        }
-    }
+    private PeakOfEnergyManager Manager => PeakOfEnergyManager.Instance;
 
     public override void OnInteract_press(PlayerMain who)
     {
@@ -49,7 +33,7 @@ public class ChargeInteractable : Interactable
 
     public override void OnInteract_release(PlayerMain who)
     {
-        if (Manager == null)
+        if (PeakOfEnergyManager.Instance == null)
             return;
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && !NetworkSystem.Instance.IsServer)
