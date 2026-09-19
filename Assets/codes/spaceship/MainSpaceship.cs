@@ -94,6 +94,7 @@ public class MainSpaceship : MonoBehaviour
             return;
         }
 
+        transform.SetPositionAndRotation(position, rotation);
         rb.position = position;
         rb.rotation = rotation;
         rb.linearVelocity = Vector3.zero;

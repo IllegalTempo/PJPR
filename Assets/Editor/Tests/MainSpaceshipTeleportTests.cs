@@ -29,7 +29,7 @@ public class MainSpaceshipTeleportTests
         ship.Teleport(destination, rotation);
 
         Assert.That(ship.transform.position, Is.EqualTo(destination));
-        Assert.That(ship.transform.rotation, Is.EqualTo(rotation));
+        Assert.That(Quaternion.Angle(ship.transform.rotation, rotation), Is.LessThan(0.001f));
         Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
         Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
         Assert.That(ship.GetAcceleration(), Is.EqualTo(Vector3.zero));
