@@ -9,6 +9,10 @@ public class MissionData : ScriptableObject
     [Range(0, 10)] public float difficulty = 5f;
     public int estimatedDuration = 10; // minutes
 
+    [Tooltip("Unity scene name loaded additively for this mission.")]
+    public string missionSceneName;
+
+    [HideInInspector]
     public GameObject missionScene;
 
     public Mission ToMission()

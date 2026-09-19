@@ -15,9 +15,9 @@ public class MissionTerminal : Interactable
 
     public override void OnInteract_press(PlayerMain who)
     {
-        if (MissionManager.Instance.IsVotingActive)
+        if (MissionManager.Instance == null || !MissionManager.Instance.CanStartVote)
         {
-            Debug.Log("[MissionTerminal] Voting is already in progress.");
+            Debug.Log("[MissionTerminal] A vote or mission journey is already in progress.");
             return;
         }
 

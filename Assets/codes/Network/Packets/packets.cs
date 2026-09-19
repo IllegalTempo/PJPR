@@ -25,7 +25,11 @@ public class packets
     
         SyncMainSpaceshipRigidbody = 1023,
         PeakOfEnergyState = 1024,
-        PeakOfEnergyChargeEvent = 1025,};
+        PeakOfEnergyChargeEvent = 1025,
+        LoadMissionScene = 1026,
+        EnterMission = 1027,
+        ReturnFromMission = 1028,
+        AbortMissionLoad = 1029,};
     public enum ClientPackets
     {
         SendReadyState = 2001,
@@ -34,6 +38,7 @@ public class packets
         RequestWorldState = 2006,
         PeakOfEnergyChargeRequest = 2007,
         PeakOfEnergyHammerHit = 2008,
+        MissionSceneReady = 2009,
     };
     public enum BothPackets
     {

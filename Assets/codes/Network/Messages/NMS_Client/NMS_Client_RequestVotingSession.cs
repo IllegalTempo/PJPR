@@ -29,7 +29,7 @@ namespace Assets.codes.Network.Messages
         protected override void serverAction()
         {
             Debug.Log($"[NMS_Client_RequestVotingSession] Received request for voting session from terminal {terminalNetworkObjectId} with {missionCount} missions.");
-            MissionManager.Instance.StartVotingSession(missionCount);
+            MissionManager.Instance?.TryStartVotingSession(missionCount);
         }
 
         protected override void applyaction()

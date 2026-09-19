@@ -63,7 +63,12 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ServerPackets.WorldInitComplete, NMS_Server_WorldInitComplete.Read },
             { (int)packets.ServerPackets.SyncMainSpaceshipRigidbody, NMS_Server_SyncMainSpaceshipRigidbody.Read },
             { (int)packets.ServerPackets.PeakOfEnergyState, NMS_Server_PeakOfEnergyState.Read },
-            { (int)packets.ServerPackets.PeakOfEnergyChargeEvent, NMS_Server_PeakOfEnergyChargeEvent.Read },};
+            { (int)packets.ServerPackets.PeakOfEnergyChargeEvent, NMS_Server_PeakOfEnergyChargeEvent.Read },
+            { (int)packets.ServerPackets.LoadMissionScene, NMS_Server_LoadMissionScene.Read },
+            { (int)packets.ServerPackets.EnterMission, NMS_Server_EnterMission.Read },
+            { (int)packets.ServerPackets.ReturnFromMission, NMS_Server_ReturnFromMission.Read },
+            { (int)packets.ServerPackets.AbortMissionLoad, NMS_Server_AbortMissionLoad.Read },
+        };
 
         private readonly Dictionary<int, Func<Packet, NMS>> clientMessages = new()
         {
@@ -73,6 +78,7 @@ namespace Assets.codes.Network.Messages
             { (int)packets.ClientPackets.RequestWorldState, NMS_Client_RequestWorldState.Read },
             { (int)packets.ClientPackets.PeakOfEnergyChargeRequest, NMS_Client_PeakOfEnergyChargeRequest.Read },
             { (int)packets.ClientPackets.PeakOfEnergyHammerHit, NMS_Client_PeakOfEnergyHammerHit.Read },
+            { (int)packets.ClientPackets.MissionSceneReady, NMS_Client_MissionSceneReady.Read },
         };
         public uint NextOutgoingSequence()
         {

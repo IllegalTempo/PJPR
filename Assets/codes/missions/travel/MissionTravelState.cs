@@ -204,6 +204,18 @@ public sealed class MissionTravelState
         return true;
     }
 
+    public bool RestoreOutboundPortal()
+    {
+        if (Phase != MissionTravelPhase.LoadingMission)
+            return false;
+
+        Phase = MissionTravelPhase.OutboundPortal;
+        expectedPeers.Clear();
+        readyPeers.Clear();
+        hostLoaded = false;
+        return true;
+    }
+
     public bool RecordOutcome(MissionOutcome outcome)
     {
         if ((Phase != MissionTravelPhase.MissionActive && Phase != MissionTravelPhase.Returning) ||
