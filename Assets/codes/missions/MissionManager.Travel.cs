@@ -359,12 +359,86 @@ public partial class MissionManager
         PeakOfEnergyMission.OnMissionVoteWon(missionName);
     }
 
-    // Implemented with mission lifecycle reporting in Task 4.
-    private bool TryBeginReturnFromPortal() => false;
+    private bool TryBeginReturnFromPortal()
+    {
+        if (travelState.Phase != MissionTravelPhase.MissionActive)
+            return false;
+
+        ReturnToMainAsync().Forget();
+        return true;
+    }
+
+    public bool ReportMissionEnded(string missionName, bool succeeded)
+    {
+        if (string.IsNullOrEmpty(missionName) || missionName != travelState.MissionName)
+            return false;
+
+        return travelState.RecordOutcome(succeeded ? MissionOutcome.Succeeded : MissionOutcome.Failed);
+    }
+
+    public bool RequestActiveMissionFailure()
+    {
+        if (travelState.Phase != MissionTravelPhase.MissionActive ||
+            travelState.Outcome != MissionOutcome.None)
+            return false;
+
+        if (EscapeBlackholeMission.Instance != null && EscapeBlackholeMission.Instance.IsMissionActive)
+            EscapeBlackholeMission.Instance.FailMissionForReturn();
+        else if (PeakOfEnergyMission.Instance != null && PeakOfEnergyMission.Instance.IsMissionActive)
+            PeakOfEnergyMission.Instance.FailMissionForReturn();
+
+        if (travelState.Outcome == MissionOutcome.None)
+            travelState.RecordOutcome(MissionOutcome.Failed);
+        return travelState.Outcome == MissionOutcome.Failed;
+    }
+
+    public async UniTask ReturnToMainAsync()
+    {
+        if (!IsWorldManager() || travelState.Phase != MissionTravelPhase.MissionActive)
+            return;
+
+        if (travelState.Outcome == MissionOutcome.None)
+            RequestActiveMissionFailure();
+        if (!travelState.BeginReturning())
+            return;
+
+        int sessionId = travelState.SessionId;
+        Vector3 returnPosition = travelState.ReturnPosition;
+        Quaternion returnRotation = travelState.ReturnRotation;
+        bool succeeded = travelState.Outcome == MissionOutcome.Succeeded;
+        string returnPortalId = travelState.ActivePortalId;
+
+        DestroyPortal(returnPortalId);
+        var message = new NMS_Server_ReturnFromMission(
+            sessionId, returnPosition, returnRotation, succeeded);
+        if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline)
+            NetworkRouter.Instance.DistributeMessageToReady(message);
+
+        await HandleReturnFromMissionAsync(
+            sessionId, returnPosition, returnRotation, succeeded);
+    }
 
     public async UniTask HandleReturnFromMissionAsync(
         int sessionId, Vector3 returnPosition, Quaternion returnRotation, bool succeeded)
     {
-        await UniTask.CompletedTask;
+        if (sessionId != travelState.SessionId ||
+            (travelState.Phase != MissionTravelPhase.MissionActive &&
+             travelState.Phase != MissionTravelPhase.Returning))
+            return;
+
+        if (travelState.Phase == MissionTravelPhase.MissionActive)
+        {
+            if (travelState.Outcome == MissionOutcome.None)
+                travelState.RecordOutcome(succeeded ? MissionOutcome.Succeeded : MissionOutcome.Failed);
+            travelState.BeginReturning();
+        }
+
+        MainSpaceship.Instance?.Teleport(returnPosition, returnRotation);
+        missionPauseState?.Restore();
+        missionPauseState = null;
+        UIManager.Instance?.HideWaypoint();
+        await UnloadMissionSceneAsync(travelState.SceneName);
+        loadingPeerIds.Clear();
+        travelState.Reset();
     }
 }

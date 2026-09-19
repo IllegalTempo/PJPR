@@ -107,7 +107,13 @@ public class PeakOfEnergyMission : MonoBehaviour
             Debug.Log($"[PeakOfEnergyMission] '{missionName}' FAILED! The ring was destroyed.");
         }
 
-        // TODO: Notify MissionManager / reward system, same as EscapeBlackholeMission.
+        MissionManager.Instance?.ReportMissionEnded(missionName, won);
+    }
+
+    public void FailMissionForReturn()
+    {
+        if (IsMissionActive)
+            EndMission(false);
     }
 
     private void HandleVictory()

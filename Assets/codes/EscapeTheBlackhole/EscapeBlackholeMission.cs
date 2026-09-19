@@ -103,7 +103,13 @@ public class EscapeBlackholeMission : MonoBehaviour
             Debug.Log($"[EscapeBlackholeMission] '{missionName}' FAILED!");
         }
 
-        // TODO: Notify MissionManager, give rewards, etc.
+        MissionManager.Instance?.ReportMissionEnded(missionName, won);
+    }
+
+    public void FailMissionForReturn()
+    {
+        if (IsMissionActive)
+            EndMission(false);
     }
 
     private void Update()
