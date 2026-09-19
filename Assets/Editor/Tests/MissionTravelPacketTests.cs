@@ -23,6 +23,7 @@ public class MissionTravelPacketTests
             new NMS_Client_MissionSceneReady(3, "Mission3"), NMS_Client_MissionSceneReady.Read);
         Assert.That(ready.SessionId, Is.EqualTo(3));
         Assert.That(ready.SceneName, Is.EqualTo("Mission3"));
+        Assert.That(ready.RequiresEntryCatchup, Is.True);
 
         NMS_Server_EnterMission enter = RoundTrip(
             new NMS_Server_EnterMission(3, Vector3.one, Quaternion.Euler(0f, 30f, 0f), "return-id"),

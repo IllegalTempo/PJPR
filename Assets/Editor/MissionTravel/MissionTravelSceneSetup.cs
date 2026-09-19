@@ -46,10 +46,21 @@ public static class MissionTravelSceneSetup
         GameObject root = PrefabUtility.LoadPrefabContents(PortalPrefabPath);
         try
         {
-            if (root.GetComponent<NetworkPrefabIdentity>() == null)
-                root.AddComponent<NetworkPrefabIdentity>();
-            if (root.GetComponent<Assets.codes.Network.SyncedIdentity.NetworkGameObject>() == null)
-                root.AddComponent<Assets.codes.Network.SyncedIdentity.NetworkGameObject>();
+            NetworkPrefabIdentity prefabIdentity = root.GetComponent<NetworkPrefabIdentity>();
+            if (prefabIdentity == null)
+                prefabIdentity = root.AddComponent<NetworkPrefabIdentity>();
+
+            foreach (NetworkIdentity identity in root.GetComponents<NetworkIdentity>())
+            {
+                if (identity != prefabIdentity)
+                    UnityEngine.Object.DestroyImmediate(identity);
+            }
+
+            Assets.codes.Network.SyncedIdentity.NetworkGameObject networkObject =
+                root.GetComponent<Assets.codes.Network.SyncedIdentity.NetworkGameObject>();
+            if (networkObject == null)
+                networkObject = root.AddComponent<Assets.codes.Network.SyncedIdentity.NetworkGameObject>();
+            networkObject.Identity = prefabIdentity;
             if (root.GetComponent<MissionPortal>() == null)
                 root.AddComponent<MissionPortal>();
 
@@ -99,8 +110,14 @@ public static class MissionTravelSceneSetup
             Type wrapperType = sceneName == "EscapeTheBlackhole"
                 ? typeof(EscapeBlackholeMission)
                 : typeof(PeakOfEnergyMission);
-            if (GetSceneComponents(scene, wrapperType).Length == 0)
-                PrefabUtility.InstantiatePrefab(prefab, scene);
+
+            List<GameObject> instances = scene.GetRootGameObjects()
+                .Where(root => PrefabUtility.GetCorrespondingObjectFromSource(root) == prefab)
+                .ToList();
+            if (instances.Count == 0)
+                instances.Add((GameObject)PrefabUtility.InstantiatePrefab(prefab, scene));
+            for (int i = 1; i < instances.Count; i++)
+                UnityEngine.Object.DestroyImmediate(instances[i]);
 
             if (GetSceneComponents(scene, wrapperType).Length == 0)
             {

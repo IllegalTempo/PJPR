@@ -19,9 +19,12 @@ public partial class MissionManager
     private readonly HashSet<ulong> loadingPeerIds = new();
     private MissionPauseState missionPauseState;
     private Scene loadedMissionScene;
+    private int loadedMissionSessionId;
     private MissionSpawnPoint missionSpawnPoint;
     private int nextTravelSessionId;
     private bool completingMissionEntry;
+    private MissionTravelSnapshot? lastCompletedTravelSnapshot;
+    private string outboundPortalIdForSession = string.Empty;
 
     public bool CanStartVote => travelState.Phase == MissionTravelPhase.Idle;
     public MissionTravelSnapshot TravelSnapshot => travelState.Snapshot;
@@ -49,11 +52,18 @@ public partial class MissionManager
             return;
         }
 
+        if (outboundPortalMaximumDistance < outboundPortalMinimumDistance)
+        {
+            Debug.LogError("[MissionManager] Outbound portal maximum distance must be greater than or equal to its minimum distance.");
+            travelState.Reset();
+            return;
+        }
+
         Vector3 direction = UnityEngine.Random.onUnitSphere;
         Vector3 portalPosition = MissionPortalPlacement.Calculate(
             MainSpaceship.Instance.transform.position,
             outboundPortalMinimumDistance,
-            Mathf.Max(outboundPortalMinimumDistance, outboundPortalMaximumDistance),
+            outboundPortalMaximumDistance,
             direction,
             UnityEngine.Random.value);
 
@@ -71,7 +81,8 @@ public partial class MissionManager
             missionData.missionSceneName,
             portal.Identity.Identifier,
             portalPosition);
-        portal.GetComponent<MissionPortal>()?.ShowWaypoint("Mission Portal");
+        outboundPortalIdForSession = portal.Identity.Identifier;
+        portal.GetComponent<MissionPortal>()?.ShowWaypoint($"{missionData.missionName} Portal");
     }
 
     public bool TryUsePortal(string portalId, Collider shipCollider)
@@ -148,9 +159,26 @@ public partial class MissionManager
         if (IsWorldManager() || sessionId < travelState.SessionId)
             return;
 
+        string outboundPortalId = travelState.ActivePortalId;
+        Vector3 outboundPosition = travelState.ReturnPosition;
+        if (string.IsNullOrEmpty(outboundPortalId))
+        {
+            foreach (MissionPortal portal in UnityEngine.Object.FindObjectsByType<MissionPortal>(FindObjectsSortMode.None))
+            {
+                if (string.IsNullOrEmpty(portal.NetworkId))
+                    continue;
+                outboundPortalId = portal.NetworkId;
+                outboundPosition = portal.transform.position;
+                break;
+            }
+        }
+
+        Quaternion outboundRotation = MainSpaceship.Instance != null
+            ? MainSpaceship.Instance.transform.rotation
+            : travelState.ReturnRotation;
         MissionTravelSnapshot incoming = new(
             MissionTravelPhase.LoadingMission, sessionId, missionName, sceneName,
-            travelState.ActivePortalId, travelState.ReturnPosition, travelState.ReturnRotation, MissionOutcome.None);
+            outboundPortalId, outboundPosition, outboundRotation, MissionOutcome.None);
         travelState.ApplySnapshot(incoming);
 
         bool loaded = await LoadMissionSceneAsync(sessionId, sceneName);
@@ -158,14 +186,33 @@ public partial class MissionManager
             NetworkRouter.Instance.SendMessageToServer(new NMS_Client_MissionSceneReady(sessionId, sceneName));
     }
 
-    public void HandleMissionSceneReady(ulong steamId, int sessionId, string sceneName)
+    public void HandleMissionSceneReady(
+        ulong steamId, int sessionId, string sceneName, bool requiresEntryCatchup)
     {
-        if (!IsWorldManager() || sessionId != travelState.SessionId || sceneName != travelState.SceneName)
+        if (!IsWorldManager())
+            return;
+
+        if (travelState.Phase == MissionTravelPhase.Returning && sessionId == travelState.SessionId)
+        {
+            SendCurrentMissionReturnToPeer(steamId, travelState.Snapshot);
+            return;
+        }
+
+        if (travelState.Phase == MissionTravelPhase.Idle &&
+            lastCompletedTravelSnapshot.HasValue &&
+            lastCompletedTravelSnapshot.Value.SessionId == sessionId)
+        {
+            SendCurrentMissionReturnToPeer(steamId, lastCompletedTravelSnapshot.Value);
+            return;
+        }
+
+        if (sessionId != travelState.SessionId || sceneName != travelState.SceneName)
             return;
 
         if (travelState.Phase == MissionTravelPhase.MissionActive)
         {
-            SendCurrentMissionEntryToLatePeer(steamId);
+            if (requiresEntryCatchup)
+                SendCurrentMissionEntryToLatePeer(steamId);
             return;
         }
 
@@ -175,12 +222,62 @@ public partial class MissionManager
             TryCompleteLoadingAsync().Forget();
     }
 
+    public void RegisterLoadingPeersForSnapshot()
+    {
+        if (!IsWorldManager() || travelState.Phase != MissionTravelPhase.LoadingMission ||
+            NetworkSystem.Instance?.Server == null)
+            return;
+
+        foreach (KeyValuePair<ulong, NetworkPlayer> entry in NetworkSystem.Instance.Server.NetworkUsers)
+        {
+            if (entry.Value == null)
+                continue;
+            travelState.AddExpectedPeer(entry.Key, travelState.SessionId);
+            loadingPeerIds.Add(entry.Key);
+        }
+    }
+
+    public void NotifyLateJoinTravelReady(MissionTravelSnapshot snapshot)
+    {
+        if (IsWorldManager() || NetworkRouter.Instance == null)
+            return;
+
+        if (snapshot.Phase == MissionTravelPhase.LoadingMission)
+        {
+            NetworkRouter.Instance.SendMessageToServer(
+                new NMS_Client_MissionSceneReady(snapshot.SessionId, snapshot.SceneName, true));
+        }
+        else if (snapshot.Phase == MissionTravelPhase.MissionActive)
+        {
+            NetworkRouter.Instance.SendMessageToServer(
+                new NMS_Client_MissionSceneReady(snapshot.SessionId, snapshot.SceneName, false));
+        }
+    }
+
+    private void SendCurrentMissionReturnToPeer(ulong steamId, MissionTravelSnapshot snapshot)
+    {
+        if (NetworkSystem.Instance?.Server == null ||
+            !NetworkSystem.Instance.Server.NetworkUsers.TryGetValue(steamId, out NetworkPlayer player))
+            return;
+
+        NetworkRouter.Instance.SendMessageToClient(player, new NMS_Server_ReturnFromMission(
+            snapshot.SessionId,
+            snapshot.ReturnPosition,
+            snapshot.ReturnRotation,
+            snapshot.Outcome == MissionOutcome.Succeeded));
+    }
+
     private void SendCurrentMissionEntryToLatePeer(ulong steamId)
     {
         if (missionSpawnPoint == null || NetworkSystem.Instance?.Server == null ||
             !NetworkSystem.Instance.Server.NetworkUsers.TryGetValue(steamId, out NetworkPlayer player))
             return;
 
+        if (!string.IsNullOrEmpty(outboundPortalIdForSession))
+        {
+            NetworkRouter.Instance.SendMessageToClient(
+                player, new NMS_Server_NO_Destroy(outboundPortalIdForSession));
+        }
         NetworkRouter.Instance.SendMessageToClient(player, new NMS_Server_EnterMission(
             travelState.SessionId,
             missionSpawnPoint.ShipPosition,
@@ -264,7 +361,9 @@ public partial class MissionManager
         await UnloadMissionSceneAsync(sceneName);
         travelState.RestoreOutboundPortal();
         SetPortalUsable(travelState.ActivePortalId, true);
-        UIManager.Instance?.SetWaypoint(travelState.ReturnPosition, "Mission Portal");
+        UIManager.Instance?.SetWaypoint(
+            travelState.ReturnPosition,
+            $"{travelState.MissionName} Portal");
         Debug.LogWarning($"[MissionManager] Mission load aborted: {reason}");
     }
 
@@ -283,10 +382,24 @@ public partial class MissionManager
         if (string.IsNullOrWhiteSpace(sceneName) || sessionId != travelState.SessionId)
             return false;
 
-        if (loadedMissionScene.IsValid() && loadedMissionScene.isLoaded && loadedMissionScene.name != sceneName)
+        if (loadedMissionScene.IsValid() && loadedMissionScene.isLoaded &&
+            (loadedMissionScene.name != sceneName || loadedMissionSessionId != sessionId))
+        {
             await SceneManager.UnloadSceneAsync(loadedMissionScene);
+            loadedMissionScene = default;
+            loadedMissionSessionId = 0;
+            missionSpawnPoint = null;
+        }
 
         Scene scene = SceneManager.GetSceneByName(sceneName);
+        bool loadedByThisCall = false;
+        bool ownedBySession = loadedMissionScene.IsValid() && scene.IsValid() &&
+            loadedMissionScene.handle == scene.handle && loadedMissionSessionId == sessionId;
+        if (scene.IsValid() && scene.isLoaded && !ownedBySession)
+        {
+            await SceneManager.UnloadSceneAsync(scene);
+            scene = default;
+        }
         if (!scene.IsValid() || !scene.isLoaded)
         {
             try
@@ -296,6 +409,7 @@ public partial class MissionManager
                     return false;
                 await operation;
                 scene = SceneManager.GetSceneByName(sceneName);
+                loadedByThisCall = true;
             }
             catch (Exception exception)
             {
@@ -304,7 +418,17 @@ public partial class MissionManager
             }
         }
 
+        if (sessionId != travelState.SessionId || sceneName != travelState.SceneName ||
+            (travelState.Phase != MissionTravelPhase.LoadingMission &&
+             travelState.Phase != MissionTravelPhase.MissionActive))
+        {
+            if (loadedByThisCall && scene.IsValid() && scene.isLoaded)
+                await SceneManager.UnloadSceneAsync(scene);
+            return false;
+        }
+
         loadedMissionScene = scene;
+        loadedMissionSessionId = sessionId;
         missionSpawnPoint = FindSpawnPoint(scene);
         return missionSpawnPoint != null;
     }
@@ -334,6 +458,7 @@ public partial class MissionManager
             await SceneManager.UnloadSceneAsync(scene);
 
         loadedMissionScene = default;
+        loadedMissionSessionId = 0;
         missionSpawnPoint = null;
     }
 
@@ -451,10 +576,24 @@ public partial class MissionManager
     {
         if (sessionId != travelState.SessionId ||
             (travelState.Phase != MissionTravelPhase.MissionActive &&
+             travelState.Phase != MissionTravelPhase.LoadingMission &&
              travelState.Phase != MissionTravelPhase.Returning))
             return;
 
-        if (travelState.Phase == MissionTravelPhase.MissionActive)
+        if (travelState.Phase == MissionTravelPhase.LoadingMission)
+        {
+            MissionTravelSnapshot current = travelState.Snapshot;
+            travelState.ApplySnapshot(new MissionTravelSnapshot(
+                MissionTravelPhase.Returning,
+                sessionId,
+                current.MissionName,
+                current.SceneName,
+                current.ActivePortalId,
+                returnPosition,
+                returnRotation,
+                succeeded ? MissionOutcome.Succeeded : MissionOutcome.Failed));
+        }
+        else if (travelState.Phase == MissionTravelPhase.MissionActive)
         {
             if (travelState.Outcome == MissionOutcome.None)
                 travelState.RecordOutcome(succeeded ? MissionOutcome.Succeeded : MissionOutcome.Failed);
@@ -465,50 +604,46 @@ public partial class MissionManager
         missionPauseState?.Restore();
         missionPauseState = null;
         UIManager.Instance?.HideWaypoint();
+        lastCompletedTravelSnapshot = travelState.Snapshot;
         await UnloadMissionSceneAsync(travelState.SceneName);
         loadingPeerIds.Clear();
+        outboundPortalIdForSession = string.Empty;
         travelState.Reset();
     }
 
-    public async UniTask ApplyLateJoinTravelSnapshotAsync(MissionTravelSnapshot snapshot)
+    public async UniTask<bool> ApplyLateJoinTravelSnapshotAsync(MissionTravelSnapshot snapshot)
     {
         if (snapshot.SessionId < travelState.SessionId || !travelState.ApplySnapshot(snapshot))
-            return;
+            return false;
 
         switch (snapshot.Phase)
         {
             case MissionTravelPhase.Idle:
-                return;
+                return true;
 
             case MissionTravelPhase.Voting:
-                return;
+                return true;
 
             case MissionTravelPhase.OutboundPortal:
                 if (NetworkSystem.Instance != null &&
                     NetworkSystem.Instance.FindNetworkIdentity.TryGetValue(snapshot.ActivePortalId, out NetworkIdentity outbound))
-                    UIManager.Instance?.SetWaypoint(outbound.transform, "Mission Portal");
+                    UIManager.Instance?.SetWaypoint(outbound.transform, $"{snapshot.MissionName} Portal");
                 else
-                    UIManager.Instance?.SetWaypoint(snapshot.ReturnPosition, "Mission Portal");
-                return;
+                    UIManager.Instance?.SetWaypoint(snapshot.ReturnPosition, $"{snapshot.MissionName} Portal");
+                return true;
 
             case MissionTravelPhase.LoadingMission:
-                if (await LoadMissionSceneAsync(snapshot.SessionId, snapshot.SceneName) &&
-                    NetworkRouter.Instance != null && !IsWorldManager())
-                {
-                    NetworkRouter.Instance.SendMessageToServer(
-                        new NMS_Client_MissionSceneReady(snapshot.SessionId, snapshot.SceneName));
-                }
-                return;
+                return await LoadMissionSceneAsync(snapshot.SessionId, snapshot.SceneName);
 
             case MissionTravelPhase.MissionActive:
                 if (!await LoadMissionSceneAsync(snapshot.SessionId, snapshot.SceneName) || missionSpawnPoint == null)
-                    return;
+                    return false;
                 HandleEnterMission(
                     snapshot.SessionId,
                     missionSpawnPoint.ShipPosition,
                     missionSpawnPoint.ShipRotation,
                     snapshot.ActivePortalId);
-                return;
+                return true;
 
             case MissionTravelPhase.Returning:
                 await HandleReturnFromMissionAsync(
@@ -516,7 +651,9 @@ public partial class MissionManager
                     snapshot.ReturnPosition,
                     snapshot.ReturnRotation,
                     snapshot.Outcome == MissionOutcome.Succeeded);
-                return;
+                return true;
         }
+
+        return false;
     }
 }

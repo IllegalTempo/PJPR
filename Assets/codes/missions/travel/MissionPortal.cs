@@ -26,7 +26,13 @@ public sealed class MissionPortal : MonoBehaviour
         MissionTravelPhase phase = MissionManager.Instance != null
             ? MissionManager.Instance.TravelSnapshot.Phase
             : MissionTravelPhase.OutboundPortal;
-        ShowWaypoint(phase == MissionTravelPhase.MissionActive ? "Return to Main" : "Mission Portal");
+        string missionName = MissionManager.Instance != null
+            ? MissionManager.Instance.TravelSnapshot.MissionName
+            : string.Empty;
+        string outboundLabel = string.IsNullOrWhiteSpace(missionName)
+            ? "Mission Portal"
+            : $"{missionName} Portal";
+        ShowWaypoint(phase == MissionTravelPhase.MissionActive ? "Return to Main" : outboundLabel);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -56,6 +62,15 @@ public sealed class MissionPortal : MonoBehaviour
     public void HideWaypoint()
     {
         UIManager.Instance?.HideWaypoint();
+    }
+
+    private void OnDisable()
+    {
+        if (MissionManager.Instance != null &&
+            MissionManager.Instance.TravelSnapshot.ActivePortalId == NetworkId)
+        {
+            HideWaypoint();
+        }
     }
 
     public static bool IsSpaceshipCollider(Collider collider, MainSpaceship ship = null)

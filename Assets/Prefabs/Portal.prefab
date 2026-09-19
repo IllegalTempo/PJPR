@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4981872843968924911}
   - component: {fileID: 1240745476109155074}
   - component: {fileID: 864796102390674338}
-  - component: {fileID: 358358017341846222}
   - component: {fileID: 2346896874880689409}
   - component: {fileID: 2464041403791478472}
   - component: {fileID: 3242702072091493679}
@@ -4851,20 +4850,6 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &358358017341846222
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4855407417146241969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31d6abbf92181aa4e97eb91115dee03b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkIdentity
-  Identifier: 
-  Sovereignty: 0
 --- !u!114 &2346896874880689409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4883,7 +4868,7 @@ MonoBehaviour:
   NetworkRot: {x: 0, y: 0, z: 0, w: 0}
   AbstractObject: {fileID: 11400000, guid: eee600dd3f223054083fe35b69bbc451, type: 2}
   InSpaceship: 0
-  Identity: {fileID: 358358017341846222}
+  Identity: {fileID: 2464041403791478472}
 --- !u!114 &2464041403791478472
 MonoBehaviour:
   m_ObjectHideFlags: 0

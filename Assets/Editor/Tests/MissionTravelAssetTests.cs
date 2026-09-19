@@ -14,11 +14,13 @@ public class MissionTravelAssetTests
     [Test]
     public void GeneratedScenes_HaveOneSpawnPointAndExpectedMissionWrapper()
     {
-        AssertScene("EscapeTheBlackhole", typeof(EscapeBlackholeMission));
-        AssertScene("PeakOfEnergy", typeof(PeakOfEnergyMission));
-        AssertScene("Mission3", null);
-        AssertScene("Mission4", null);
-        AssertScene("Mission5", null);
+        AssertScene("EscapeTheBlackhole", typeof(EscapeBlackholeMission),
+            "Assets/Prefabs/Mission/Escape The Blackhole/EscapeBlackholeMission.prefab");
+        AssertScene("PeakOfEnergy", typeof(PeakOfEnergyMission),
+            "Assets/Prefabs/Mission/Peak of Energy/Peak Of Energy.prefab");
+        AssertScene("Mission3", null, null);
+        AssertScene("Mission4", null, null);
+        AssertScene("Mission5", null, null);
     }
 
     [Test]
@@ -26,8 +28,12 @@ public class MissionTravelAssetTests
     {
         GameObject portal = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Portal.prefab");
         Assert.That(portal, Is.Not.Null);
-        Assert.That(portal.GetComponent<NetworkPrefabIdentity>(), Is.Not.Null);
-        Assert.That(portal.GetComponent<NetworkGameObject>(), Is.Not.Null);
+        NetworkPrefabIdentity prefabIdentity = portal.GetComponent<NetworkPrefabIdentity>();
+        NetworkGameObject networkObject = portal.GetComponent<NetworkGameObject>();
+        Assert.That(prefabIdentity, Is.Not.Null);
+        Assert.That(portal.GetComponents<NetworkIdentity>(), Has.Length.EqualTo(1));
+        Assert.That(networkObject, Is.Not.Null);
+        Assert.That(networkObject.Identity, Is.SameAs(prefabIdentity));
         Assert.That(portal.GetComponent<MissionPortal>(), Is.Not.Null);
         Collider trigger = portal.GetComponent<Collider>();
         Assert.That(trigger, Is.Not.Null);
@@ -63,7 +69,7 @@ public class MissionTravelAssetTests
         }
     }
 
-    private static void AssertScene(string sceneName, System.Type expectedWrapper)
+    private static void AssertScene(string sceneName, System.Type expectedWrapper, string gameplayPrefabPath)
     {
         Scene scene = EditorSceneManager.OpenScene($"{SceneFolder}/{sceneName}.unity", OpenSceneMode.Additive);
         try
@@ -76,7 +82,13 @@ public class MissionTravelAssetTests
             if (expectedWrapper == null)
                 Assert.That(wrapperCount, Is.Zero, sceneName);
             else
+            {
                 Assert.That(GetComponents(scene, expectedWrapper), Has.Length.EqualTo(1), sceneName);
+                GameObject expectedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(gameplayPrefabPath);
+                int instanceCount = scene.GetRootGameObjects().Count(root =>
+                    PrefabUtility.GetCorrespondingObjectFromSource(root) == expectedPrefab);
+                Assert.That(instanceCount, Is.EqualTo(1), $"{sceneName} gameplay prefab count");
+            }
         }
         finally
         {
