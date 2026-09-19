@@ -188,6 +188,14 @@ public sealed class MissionTravelState
         return readyPeers.Add(steamId);
     }
 
+    public bool AddExpectedPeer(ulong steamId, int sessionId)
+    {
+        if (Phase != MissionTravelPhase.LoadingMission || sessionId != SessionId)
+            return false;
+
+        return expectedPeers.Add(steamId);
+    }
+
     public bool RemoveExpectedPeer(ulong steamId)
     {
         readyPeers.Remove(steamId);

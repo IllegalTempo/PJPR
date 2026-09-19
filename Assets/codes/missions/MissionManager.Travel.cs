@@ -160,11 +160,39 @@ public partial class MissionManager
 
     public void HandleMissionSceneReady(ulong steamId, int sessionId, string sceneName)
     {
-        if (!IsWorldManager() || sceneName != travelState.SceneName)
+        if (!IsWorldManager() || sessionId != travelState.SessionId || sceneName != travelState.SceneName)
             return;
 
+        if (travelState.Phase == MissionTravelPhase.MissionActive)
+        {
+            SendCurrentMissionEntryToLatePeer(steamId);
+            return;
+        }
+
+        travelState.AddExpectedPeer(steamId, sessionId);
+        loadingPeerIds.Add(steamId);
         if (travelState.Acknowledge(steamId, sessionId))
             TryCompleteLoadingAsync().Forget();
+    }
+
+    private void SendCurrentMissionEntryToLatePeer(ulong steamId)
+    {
+        if (missionSpawnPoint == null || NetworkSystem.Instance?.Server == null ||
+            !NetworkSystem.Instance.Server.NetworkUsers.TryGetValue(steamId, out NetworkPlayer player))
+            return;
+
+        NetworkRouter.Instance.SendMessageToClient(player, new NMS_Server_EnterMission(
+            travelState.SessionId,
+            missionSpawnPoint.ShipPosition,
+            missionSpawnPoint.ShipRotation,
+            travelState.ActivePortalId));
+        NetworkRouter.Instance.SendMessageToClient(player, new NMS_Server_NewObject(
+            MissionPortalPrefabId,
+            travelState.ActivePortalId,
+            missionSpawnPoint.ReturnPortalPosition,
+            missionSpawnPoint.ShipRotation,
+            0,
+            false));
     }
 
     private async UniTask TryCompleteLoadingAsync()

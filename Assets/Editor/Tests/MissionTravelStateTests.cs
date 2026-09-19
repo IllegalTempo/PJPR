@@ -29,6 +29,21 @@ public class MissionTravelStateTests
     }
 
     [Test]
+    public void Loading_CanAddLatePeerBeforeAcknowledgement()
+    {
+        var state = new MissionTravelState();
+        Assert.That(state.TryBeginVote(), Is.True);
+        state.SetOutboundPortal("Mission3", "Mission3", "portal", Vector3.zero);
+        Assert.That(state.TryBeginLoading(4, System.Array.Empty<ulong>()), Is.True);
+        Assert.That(state.MarkHostLoaded(4), Is.True);
+
+        Assert.That(state.AddExpectedPeer(99, 4), Is.True);
+        Assert.That(state.AllPeersLoaded, Is.False);
+        Assert.That(state.Acknowledge(99, 4), Is.True);
+        Assert.That(state.AllPeersLoaded, Is.True);
+    }
+
+    [Test]
     public void ApplySnapshot_IgnoresOlderSession()
     {
         MissionTravelState state = CreateActiveState(sessionId: 8);
