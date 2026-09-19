@@ -441,4 +441,54 @@ public partial class MissionManager
         loadingPeerIds.Clear();
         travelState.Reset();
     }
+
+    public async UniTask ApplyLateJoinTravelSnapshotAsync(MissionTravelSnapshot snapshot)
+    {
+        if (snapshot.SessionId < travelState.SessionId || !travelState.ApplySnapshot(snapshot))
+            return;
+
+        switch (snapshot.Phase)
+        {
+            case MissionTravelPhase.Idle:
+                return;
+
+            case MissionTravelPhase.Voting:
+                return;
+
+            case MissionTravelPhase.OutboundPortal:
+                if (NetworkSystem.Instance != null &&
+                    NetworkSystem.Instance.FindNetworkIdentity.TryGetValue(snapshot.ActivePortalId, out NetworkIdentity outbound))
+                    UIManager.Instance?.SetWaypoint(outbound.transform, "Mission Portal");
+                else
+                    UIManager.Instance?.SetWaypoint(snapshot.ReturnPosition, "Mission Portal");
+                return;
+
+            case MissionTravelPhase.LoadingMission:
+                if (await LoadMissionSceneAsync(snapshot.SessionId, snapshot.SceneName) &&
+                    NetworkRouter.Instance != null && !IsWorldManager())
+                {
+                    NetworkRouter.Instance.SendMessageToServer(
+                        new NMS_Client_MissionSceneReady(snapshot.SessionId, snapshot.SceneName));
+                }
+                return;
+
+            case MissionTravelPhase.MissionActive:
+                if (!await LoadMissionSceneAsync(snapshot.SessionId, snapshot.SceneName) || missionSpawnPoint == null)
+                    return;
+                HandleEnterMission(
+                    snapshot.SessionId,
+                    missionSpawnPoint.ShipPosition,
+                    missionSpawnPoint.ShipRotation,
+                    snapshot.ActivePortalId);
+                return;
+
+            case MissionTravelPhase.Returning:
+                await HandleReturnFromMissionAsync(
+                    snapshot.SessionId,
+                    snapshot.ReturnPosition,
+                    snapshot.ReturnRotation,
+                    snapshot.Outcome == MissionOutcome.Succeeded);
+                return;
+        }
+    }
 }
