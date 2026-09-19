@@ -17,3 +17,5 @@ MonoBehaviour:
   rewardCredits: 200
   difficulty: 5
   estimatedDuration: 3
+  missionSceneName: EscapeTheBlackhole
+  missionScene: {fileID: 0}

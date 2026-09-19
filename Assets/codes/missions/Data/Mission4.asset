@@ -17,3 +17,5 @@ MonoBehaviour:
   rewardCredits: 100
   difficulty: 5
   estimatedDuration: 10
+  missionSceneName: Mission4
+  missionScene: {fileID: 0}
