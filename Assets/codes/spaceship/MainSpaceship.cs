@@ -79,6 +79,27 @@ public class MainSpaceship : MonoBehaviour
         acceleration = Vector3.zero;
     }
 
+    public void Teleport(Vector3 position, Quaternion rotation)
+    {
+        StopMovement();
+
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody>();
+        }
+
+        if (rb == null)
+        {
+            transform.SetPositionAndRotation(position, rotation);
+            return;
+        }
+
+        rb.position = position;
+        rb.rotation = rotation;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
     public void RotateToward(Quaternion targetRotation)
     {
         float maxDegreesPerSecond = 30f;
