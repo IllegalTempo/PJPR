@@ -14,4 +14,8 @@ public class Interactable:MonoBehaviour
         if (who == null) return;
 
     }
+    public virtual void OnSecondaryInteract_press(PlayerMain who)
+    {
+        if (who == null) return;
+    }
 }

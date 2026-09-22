@@ -2,8 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.codes.Network.Messages;
+using Cysharp.Threading.Tasks;
 
-public class MissionManager : MonoBehaviour
+public partial class MissionManager : MonoBehaviour
 {
     public static MissionManager Instance { get; private set; }
 
@@ -20,7 +21,10 @@ public class MissionManager : MonoBehaviour
 
     private Dictionary<ulong, int> playerVotes = new Dictionary<ulong, int>();
     private GameObject activeMissionScene;
-
+    [SerializeField]
+    private GameObject PortalPrefab;
+    
+    
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -45,8 +49,19 @@ public class MissionManager : MonoBehaviour
         return counts;
     }
 
+    public int GetVotingPlayerCount()
+    {
+        if (NetworkSystem.Instance == null || !NetworkSystem.Instance.IsOnline)
+            return 1;
+
+        int playerCount = NetworkSystem.Instance.CurrentNetworkInstance.PlayerCount;
+        return Mathf.Max(playerCount, 1);
+    }
+
     private void Update()
     {
+        PruneDisconnectedLoadingPeers();
+
         if (!IsVotingActive)
             return;
 
@@ -85,6 +100,17 @@ public class MissionManager : MonoBehaviour
 
     public void StartVotingSession(int missionCount)
     {
+        TryStartVotingSession(missionCount);
+    }
+
+    public bool TryStartVotingSession(int missionCount)
+    {
+        if (!travelState.TryBeginVote())
+        {
+            Debug.LogWarning($"[MissionManager] Vote rejected while travel is {travelState.Phase}.");
+            return false;
+        }
+
         if (missionCount <= 0)
             missionCount = missionsPerVote;
 
@@ -100,16 +126,18 @@ public class MissionManager : MonoBehaviour
         // Broadcast to all clients
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
         {
-            var msg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer);
+            var msg = new NMS_Server_StartVotingSession(CurrentVotingMissions, VotingTimer, GetVotingPlayerCount());
             NetworkRouter.Instance.DistributeMessageToReady(msg);
             // Also apply locally
-            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer);
+            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer, GetVotingPlayerCount());
         }
         else
         {
             // Offline / single-player
-            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer);
+            MissionProjectionDisplay.Instance?.ShowVotingMissions(CurrentVotingMissions, VotingTimer, GetVotingPlayerCount());
         }
+
+        return true;
     }
 
     public void CastVote(ulong steamId, int missionIndex)
@@ -136,16 +164,17 @@ public class MissionManager : MonoBehaviour
     private void BroadcastVoteUpdate()
     {
         int[] counts = GetCurrentVoteCounts();
+        int totalPlayers = GetVotingPlayerCount();
 
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
         {
-            var msg = new NMS_Server_VoteUpdate(counts);
+            var msg = new NMS_Server_VoteUpdate(counts, totalPlayers);
             NetworkRouter.Instance.DistributeMessageToReady(msg);
-            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts);
+            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts, totalPlayers);
         }
         else
         {
-            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts);
+            MissionProjectionDisplay.Instance?.UpdateVoteCounts(counts, totalPlayers);
         }
     }
 
@@ -157,6 +186,7 @@ public class MissionManager : MonoBehaviour
         {
             Debug.Log("[MissionManager] No votes cast. No mission selected.");
             WinningMission = null;
+            travelState.Reset();
 
             if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
             {
@@ -190,10 +220,7 @@ public class MissionManager : MonoBehaviour
 
         Debug.Log($"[MissionManager] Voting ended. Winner: {WinningMission.missionName} (index {winningIndex}) with {maxVotes} vote(s).");
 
-        SpawnMissionScene(WinningMission.missionName);
-
-        EscapeBlackholeMission.OnMissionVoteWon(WinningMission.missionName);
-        PeakOfEnergyMission.OnMissionVoteWon(WinningMission.missionName);
+        PrepareWinningMissionAsync(GetMissionData(WinningMission.missionName)).Forget();
 
         // Broadcast result
         if (NetworkSystem.Instance != null && NetworkSystem.Instance.IsOnline && NetworkSystem.Instance.IsServer)
@@ -244,7 +271,7 @@ public class MissionManager : MonoBehaviour
         Debug.Log($"[MissionManager] Spawned mission scene prefab for '{missionName}'.");
     }
 
-    private MissionData GetMissionData(string missionName)
+    public MissionData GetMissionData(string missionName)
     {
         if (availableMissions == null)
             return null;

@@ -120,6 +120,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""SecondaryInteract"",
+                    ""type"": ""Button"",
+                    ""id"": ""84d78eca-81fe-4c76-b46d-526f62cbf04d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""pickup"",
                     ""type"": ""Button"",
                     ""id"": ""eb2377b3-6004-42ca-996e-83aa99affcd3"",
@@ -236,6 +245,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""ee6d146e-a481-48a2-92ba-99aefd25cd21"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryInteract"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""94f10859-cef1-4c3f-b2f0-748868f9e4b4"",
                     ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
@@ -288,6 +308,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_SecondaryInteract = m_Player.FindAction("SecondaryInteract", throwIfNotFound: true);
         m_Player_pickup = m_Player.FindAction("pickup", throwIfNotFound: true);
         m_Player_jump = m_Player.FindAction("jump", throwIfNotFound: true);
         m_Player_voice = m_Player.FindAction("voice", throwIfNotFound: true);
@@ -375,6 +396,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_SecondaryInteract;
     private readonly InputAction m_Player_pickup;
     private readonly InputAction m_Player_jump;
     private readonly InputAction m_Player_voice;
@@ -402,6 +424,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Interact".
         /// </summary>
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SecondaryInteract".
+        /// </summary>
+        public InputAction @SecondaryInteract => m_Wrapper.m_Player_SecondaryInteract;
         /// <summary>
         /// Provides access to the underlying input action "Player/pickup".
         /// </summary>
@@ -453,6 +479,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @SecondaryInteract.started += instance.OnSecondaryInteract;
+            @SecondaryInteract.performed += instance.OnSecondaryInteract;
+            @SecondaryInteract.canceled += instance.OnSecondaryInteract;
             @pickup.started += instance.OnPickup;
             @pickup.performed += instance.OnPickup;
             @pickup.canceled += instance.OnPickup;
@@ -485,6 +514,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @SecondaryInteract.started -= instance.OnSecondaryInteract;
+            @SecondaryInteract.performed -= instance.OnSecondaryInteract;
+            @SecondaryInteract.canceled -= instance.OnSecondaryInteract;
             @pickup.started -= instance.OnPickup;
             @pickup.performed -= instance.OnPickup;
             @pickup.canceled -= instance.OnPickup;
@@ -558,6 +590,13 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SecondaryInteract" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSecondaryInteract(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "pickup" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

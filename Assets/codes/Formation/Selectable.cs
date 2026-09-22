@@ -1,11 +1,27 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-[RequireComponent(typeof(StaticOutline),typeof(Collider))]
+public readonly struct SelectionContext
+{
+    public readonly Selectable Selectable;
+    public readonly Item Item;
+    public readonly Slot Slot;
+    public readonly Interactable Usable;
+
+    public SelectionContext(Selectable selectable, Item item, Slot slot, Interactable usable)
+    {
+        Selectable = selectable;
+        Item = item;
+        Slot = slot;
+        Usable = usable;
+    }
+}
+
+[RequireComponent(typeof(Collider))]
 public class Selectable : MonoBehaviour
 {
 
-    protected StaticOutline outline;
+    protected SelectionOutline outline;
     [SerializeField]
     private bool lookedAt = false;
     private float ClickTimer = 0f;
@@ -19,7 +35,7 @@ public class Selectable : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        outline = GetComponent<StaticOutline>();
+        outline = GetSelectionOutline();
         gameObject.layer = Layer;
         onLookedAway();
     }
@@ -45,20 +61,49 @@ public class Selectable : MonoBehaviour
     {
         lookedAt = true;
         if (outline != null)
-            outline.enabled = true;
+            outline.OutlineVisible = true;
 
     }
     public void onLookedAway()
     {
         lookedAt = false;
         if (outline != null)
-            outline.enabled = false;
+            outline.OutlineVisible = false;
 
     }
     public virtual void OnClicked()
     {
         ClickTimer = 0.2f;
         OnSelect?.Invoke();
+    }
+
+    public SelectionContext GetInteractionContext()
+    {
+        return new SelectionContext(this, ResolveItem(), ResolveSlot(), ResolveUsable());
+    }
+
+    private Item ResolveItem()
+    {
+        return itemOverride != null ? itemOverride : GetComponent<Item>();
+    }
+
+    private Slot ResolveSlot()
+    {
+        return slotOverride != null ? slotOverride : GetComponent<Slot>();
+    }
+
+    private Interactable ResolveUsable()
+    {
+        return usableOverride != null ? usableOverride : GetComponent<Interactable>();
+    }
+
+    private SelectionOutline GetSelectionOutline()
+    {
+        UIOutline uiOutline = GetComponent<UIOutline>();
+        if (uiOutline != null)
+            return uiOutline;
+
+        return GetComponent<SelectionOutline>();
     }
 
 

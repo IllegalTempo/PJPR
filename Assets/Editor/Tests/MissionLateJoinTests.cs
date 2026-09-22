@@ -26,4 +26,21 @@ public class MissionLateJoinTests
         Assert.That(received.TravelSnapshot, Is.EqualTo(expected));
         Assert.That(reader.BytesRemaining, Is.Zero);
     }
+
+    [Test]
+    public void SyncScene_RoundTripsSpaceshipSpeedStep()
+    {
+        var sent = new NMS_Server_SyncScene(
+            System.Array.Empty<NetworkObjectSnapshot>(),
+            System.Array.Empty<SlotSnapshot>(),
+            2, false, null, 0f, null, 0, null, -2);
+
+        using var writer = new Packet(sent.PacketID);
+        sent.Write(writer);
+        using var reader = new Packet(writer.GetPacketData(12), null);
+        NMS_Server_SyncScene received = NMS_Server_SyncScene.Read(reader);
+
+        Assert.That(received.SpaceshipSpeedStep, Is.EqualTo(-2));
+        Assert.That(reader.BytesRemaining, Is.Zero);
+    }
 }

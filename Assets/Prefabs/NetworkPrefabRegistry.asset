@@ -39,3 +39,5 @@ MonoBehaviour:
     PrefabDefinition: {fileID: 11400000, guid: 7acd686d04087e84290eda6d8dc69b84, type: 2}
   - PrefabId: controllers_Puller1
     PrefabDefinition: {fileID: 11400000, guid: 18fe5d5615ec4e1468d5e9952f0e7291, type: 2}
+  - PrefabId: Mission_Portal
+    PrefabDefinition: {fileID: 11400000, guid: eee600dd3f223054083fe35b69bbc451, type: 2}

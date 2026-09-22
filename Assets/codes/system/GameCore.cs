@@ -38,7 +38,8 @@ public partial class GameCore : MonoBehaviour
     //[SerializeField]
     //private Transform[] SpaceshipSpawns;
     //public int CurrentMissionLevel = 0;
-
+    [SerializeField]
+    private GameObject PortalPrefab;
     public long RandomSeed;
     [SerializeField]
     private bool StartOnAwake = false;

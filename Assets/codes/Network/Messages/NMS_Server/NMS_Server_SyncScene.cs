@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Assets.codes.machines;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ namespace Assets.codes.Network.Messages
         private readonly Mission[] votingMissions;
         private readonly float votingTimerRemaining;
         private readonly int[] voteCounts;
+        private readonly int votingPlayerCount;
+        public MissionTravelSnapshot TravelSnapshot { get; }
+        public int SpaceshipSpeedStep { get; }
 
         // Constructor used by Read() — receives all data from the packet
         public NMS_Server_SyncScene(
@@ -24,7 +28,10 @@ namespace Assets.codes.Network.Messages
             bool hasVotingSession,
             Mission[] votingMissions,
             float votingTimerRemaining,
-            int[] voteCounts) : base((int)packets.ServerPackets.SyncNetworkObjects)
+            int[] voteCounts,
+            int votingPlayerCount,
+            MissionTravelSnapshot? travelSnapshot = null,
+            int spaceshipSpeedStep = 0) : base((int)packets.ServerPackets.SyncNetworkObjects)
         {
             this.sceneNetworkObjects = new List<NetworkObjectSnapshot>(objects).ToArray();
             this.slotsRelationships = new List<SlotSnapshot>(sr).ToArray();
@@ -33,6 +40,9 @@ namespace Assets.codes.Network.Messages
             this.votingMissions = votingMissions;
             this.votingTimerRemaining = votingTimerRemaining;
             this.voteCounts = voteCounts;
+            this.votingPlayerCount = votingPlayerCount;
+            TravelSnapshot = travelSnapshot ?? IdleTravelSnapshot();
+            SpaceshipSpeedStep = spaceshipSpeedStep;
         }
 
         public NMS_Server_SyncScene( IEnumerable<Slot> slots) : base((int)packets.ServerPackets.SyncNetworkObjects)
@@ -59,6 +69,7 @@ namespace Assets.codes.Network.Messages
                 votingMissions = mm.CurrentVotingMissions;
                 votingTimerRemaining = mm.VotingTimer;
                 voteCounts = mm.GetCurrentVoteCounts();
+                votingPlayerCount = mm.GetVotingPlayerCount();
             }
             else
             {
@@ -66,7 +77,15 @@ namespace Assets.codes.Network.Messages
                 votingMissions = null;
                 votingTimerRemaining = 0f;
                 voteCounts = null;
+                votingPlayerCount = 0;
             }
+
+            mm?.RegisterLoadingPeersForSnapshot();
+            TravelSnapshot = mm != null ? mm.TravelSnapshot : IdleTravelSnapshot();
+            HandleControl speedHandle = MainSpaceship.Instance != null
+                ? MainSpaceship.Instance.GetComponentInChildren<HandleControl>(true)
+                : null;
+            SpaceshipSpeedStep = speedHandle != null ? speedHandle.CurrentStep : 0;
         }
         private List<NetworkObjectSnapshot> GetSceneNetworkObjects()
         {
@@ -79,23 +98,25 @@ namespace Assets.codes.Network.Messages
             int spaceshipIndex = packet.Readint();
 
             bool hasVotingSession = packet.Readbool();
+            Mission[] votingMissions = null;
+            float votingTimerRemaining = 0f;
+            int[] voteCounts = null;
+            int votingPlayerCount = 0;
             if (hasVotingSession)
             {
-                Mission[] votingMissions = packet.ReadArray<Mission>();
-                float votingTimerRemaining = packet.Readfloat();
-                int[] voteCounts = packet.ReadArray<int>();
-
-                return new NMS_Server_SyncScene(
-                    objects, slotsRelationships,
-                    spaceshipIndex,
-                    true, votingMissions,
-                    votingTimerRemaining, voteCounts);
+                votingMissions = packet.ReadArray<Mission>();
+                votingTimerRemaining = packet.Readfloat();
+                voteCounts = packet.ReadArray<int>();
+                votingPlayerCount = packet.Readint();
             }
 
+            MissionTravelSnapshot travelSnapshot = ReadTravelSnapshot(packet);
+            int spaceshipSpeedStep = packet.Readint();
             return new NMS_Server_SyncScene(
                 objects, slotsRelationships,
                 spaceshipIndex,
-                false, null, 0f, null);
+                hasVotingSession, votingMissions, votingTimerRemaining, voteCounts, votingPlayerCount,
+                travelSnapshot, spaceshipSpeedStep);
         }
 
         public override void Write(Packet packet)
@@ -110,7 +131,11 @@ namespace Assets.codes.Network.Messages
                 packet.Write(votingMissions);
                 packet.Write(votingTimerRemaining);
                 packet.Write(voteCounts);
+                packet.Write(votingPlayerCount);
             }
+
+            WriteTravelSnapshot(packet, TravelSnapshot);
+            packet.Write(SpaceshipSpeedStep);
 
         }
 
@@ -118,23 +143,64 @@ namespace Assets.codes.Network.Messages
         {
             Debug.Log($"Syncing {sceneNetworkObjects.Length} Network Objects from Server");
             await GameCore.Instance.SpawnSpaceshipAsync(spaceshipIndex);
+            MainSpaceship.Instance?.GetComponentInChildren<HandleControl>(true)?.OnStepChanged(SpaceshipSpeedStep);
             foreach (NetworkObjectSnapshot snapshot in sceneNetworkObjects)
             {
                 await GameCore.Instance.spawnNetworkPrefab(snapshot.PrefabId, snapshot.Owner, snapshot.Uid, snapshot.Position, snapshot.Rotation);
             }
             GameInitManager.Instance.InitSlotRelationFromSave(slotsRelationships, false);
 
-            NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
-
             if (hasVotingSession && votingMissions != null && MissionProjectionDisplay.Instance != null)
             {
-                MissionProjectionDisplay.Instance.ShowVotingMissions(votingMissions, votingTimerRemaining);
+                MissionProjectionDisplay.Instance.ShowVotingMissions(votingMissions, votingTimerRemaining, votingPlayerCount);
 
                 if (voteCounts != null)
-                    MissionProjectionDisplay.Instance.UpdateVoteCounts(voteCounts);
+                    MissionProjectionDisplay.Instance.UpdateVoteCounts(voteCounts, votingPlayerCount);
 
                 Debug.Log($"[NMS_Server_SyncScene] Restored voting session: {votingMissions.Length} missions, {votingTimerRemaining:F1}s remaining.");
             }
+
+            if (MissionManager.Instance != null &&
+                !await MissionManager.Instance.ApplyLateJoinTravelSnapshotAsync(TravelSnapshot))
+            {
+                Debug.LogError("[NMS_Server_SyncScene] Mission travel snapshot could not be applied; client remains unready.");
+                return;
+            }
+
+            NetworkRouter.Instance.UpdateReadyState(ReadyState.SyncNetworkObjects);
+            MissionManager.Instance?.NotifyLateJoinTravelReady(TravelSnapshot);
+        }
+
+        private static void WriteTravelSnapshot(Packet packet, MissionTravelSnapshot snapshot)
+        {
+            packet.Write((int)snapshot.Phase);
+            packet.Write(snapshot.SessionId);
+            packet.Write(snapshot.MissionName);
+            packet.Write(snapshot.SceneName);
+            packet.Write(snapshot.ActivePortalId);
+            packet.Write(snapshot.ReturnPosition);
+            packet.Write(snapshot.ReturnRotation);
+            packet.Write((int)snapshot.Outcome);
+        }
+
+        private static MissionTravelSnapshot ReadTravelSnapshot(Packet packet)
+        {
+            return new MissionTravelSnapshot(
+                (MissionTravelPhase)packet.Readint(),
+                packet.Readint(),
+                packet.ReadstringUNICODE(),
+                packet.ReadstringUNICODE(),
+                packet.ReadstringUNICODE(),
+                packet.Readvector3(),
+                packet.Readquaternion(),
+                (MissionOutcome)packet.Readint());
+        }
+
+        private static MissionTravelSnapshot IdleTravelSnapshot()
+        {
+            return new MissionTravelSnapshot(
+                MissionTravelPhase.Idle, 0, string.Empty, string.Empty, string.Empty,
+                Vector3.zero, Quaternion.identity, MissionOutcome.None);
         }
 
         

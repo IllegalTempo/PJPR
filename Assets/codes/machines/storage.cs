@@ -1,22 +1,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class storage //This is only a data type class, used it in some thing like a machine when the machine need to store something
+public class Storage //This is only a data type class, used it in some thing like a machine when the machine need to store something
 {
-    string name;
-    int capacity;
-    List<PrefabDefinition> content;
+    private readonly string name;
+    private readonly int capacity;
+    private readonly List<PrefabDefinition> content;
 
-    public storage(string name,int size = 1)
+    public Storage(string name,int size = 1)
     {
-        capacity = size;
+        capacity = Mathf.Max(1, size);
         this.name = name;
-        content = new List<PrefabDefinition>();
+        content = new List<PrefabDefinition>(capacity);
+        for (int i = 0; i < capacity; i++)
+        {
+            content.Add(null);
+        }
     }
     public bool IsFull()
     {
-        return content.Count >= capacity;
+        for (int i = 0; i < content.Count; i++)
+        {
+            if (content[i] == null)
+            {
+                return false;
+            }
+        }
 
+        return true;
     }
     public PrefabDefinition[] GetItems()
     {
@@ -51,4 +62,12 @@ public class storage //This is only a data type class, used it in some thing lik
         content[index] = null;
     }
 
+}
+
+[System.Obsolete("Use Storage.")]
+public class storage : Storage
+{
+    public storage(string name, int size = 1) : base(name, size)
+    {
+    }
 }

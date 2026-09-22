@@ -8,7 +8,7 @@ namespace Assets.codes.system
 	/// Attach this to a empty gameobject, when starting a mission, instantiate that object
 	/// Inherit from this for all mission managers
 	/// </summary>
-	public class MissionManager: MonoBehaviour
+	public abstract class MissionController: MonoBehaviour
 	{
 		[SerializeField]
 		private string missionName;
@@ -24,5 +24,10 @@ namespace Assets.codes.system
 		}
 
 		
+	}
+
+    [Obsolete("Use MissionController for mission-specific runtime behaviour. The global voting flow uses the root MissionManager class in Assets/codes/missions.")]
+	public class MissionManager: MissionController
+	{
 	}
 }

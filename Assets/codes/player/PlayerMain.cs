@@ -15,7 +15,7 @@ public partial class PlayerMain : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private Rigidbody rb;
-    public bool HasMovementReference => movementReferenceContacts.Count > 0;
+    public bool HasMovementReference => movementReferenceTracker != null && movementReferenceTracker.HasReference;
     [SerializeField]
     private AudioSource audioSource;
     public Animator animator;
@@ -52,6 +52,8 @@ public partial class PlayerMain : MonoBehaviour
 
     [SerializeField]
     private GameObject[] LocalInvisible;
+    [SerializeField]
+    private UIManager uiManager;
 
 
     private Interactable pressedUsable = null;
@@ -61,6 +63,7 @@ public partial class PlayerMain : MonoBehaviour
     private Camera localCamera;
     private float normalCameraFieldOfView;
     private float targetCameraFieldOfView;
+    private UIManager PlayerUI => uiManager != null ? uiManager : UIManager.Instance;
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -124,6 +127,7 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.pickup.canceled += OnPickupCanceled;
         control.Player.Interact.performed += OnInteractPerformed;
         control.Player.Interact.canceled += OnInteractCanceled;
+        control.Player.SecondaryInteract.performed += OnSecondaryInteractPerformed;
         control.Player.voice.performed += OnVoicePerformed;
         control.Player.rotate.performed += OnRotatePerformed;
     }
@@ -143,6 +147,7 @@ public partial class PlayerMain : MonoBehaviour
             control.Player.pickup.canceled -= OnPickupCanceled;
             control.Player.Interact.performed -= OnInteractPerformed;
             control.Player.Interact.canceled -= OnInteractCanceled;
+            control.Player.SecondaryInteract.performed -= OnSecondaryInteractPerformed;
             control.Player.voice.performed -= OnVoicePerformed;
             control.Player.rotate.performed -= OnRotatePerformed;
         }
@@ -178,6 +183,16 @@ public partial class PlayerMain : MonoBehaviour
         OnInteractReleased();
     }
 
+    private void OnSecondaryInteractPerformed(InputAction.CallbackContext ctx)
+    {
+        if (seenObject == null)
+        {
+            return;
+        }
+
+        seenObject.GetInteractionContext().Usable?.OnSecondaryInteract_press(this);
+    }
+
     private void OnVoicePerformed(InputAction.CallbackContext ctx)
     {
         ToggleVoiceChat();
@@ -204,11 +219,13 @@ public partial class PlayerMain : MonoBehaviour
     }
     private void OnInteractPressed()
     {
-        if(seenObject == null)
+        if (seenObject == null)
         {
             return;
-        }   
-        Interactable usable = seenObject.usableOverride;
+        }
+
+        SelectionContext context = seenObject.GetInteractionContext();
+        Interactable usable = context.Usable;
 
         if (usable != null)
         {
@@ -218,7 +235,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             if (holdingItem != null && holdingItem is Tool t)
             {
-                t.OnUsingInteract(seenObject);
+                t.OnUsingInteract(context.Selectable);
             }
         }
 
@@ -344,7 +361,7 @@ public partial class PlayerMain : MonoBehaviour
         isChargingDrop = true;
         dropChargeStartedAt = Time.time;
         chargingDropItem = holdingItem;
-        UIManager.Instance.ShowThrowForce(0f);
+        PlayerUI?.ShowThrowForce(0f);
         UpdateThrowCameraZoom(0f);
     }
 
@@ -354,7 +371,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             isChargingDrop = false;
             chargingDropItem = null;
-            UIManager.Instance.HideThrowForce();
+            PlayerUI?.HideThrowForce();
             ResetThrowCameraZoom();
             return;
         }
@@ -364,7 +381,7 @@ public partial class PlayerMain : MonoBehaviour
 
         isChargingDrop = false;
         chargingDropItem = null;
-        UIManager.Instance.HideThrowForce();
+        PlayerUI?.HideThrowForce();
         ResetThrowCameraZoom();
         HandlePickupButton(throwForce);
     }
@@ -394,7 +411,7 @@ public partial class PlayerMain : MonoBehaviour
         }
 
         float charge = CalculateThrowCharge01();
-        UIManager.Instance.ShowThrowForce(charge);
+        PlayerUI?.ShowThrowForce(charge);
         UpdateThrowCameraZoom(CalculateThrowCameraZoom01());
     }
 
@@ -466,7 +483,7 @@ public partial class PlayerMain : MonoBehaviour
     private void TryCombineDroppedItem(Item droppedItem)
     {
         
-        Item seenItem = seenObject.itemOverride;
+        Item seenItem = seenObject.GetInteractionContext().Item;
         if (seenItem == null)
         {
             return;
@@ -486,7 +503,7 @@ public partial class PlayerMain : MonoBehaviour
     private void TryAttachDroppedItemToSlot(Item droppedItem, Quaternion heldRotation)
     {
 
-        Slot slot = seenObject.slotOverride;
+        Slot slot = seenObject.GetInteractionContext().Slot;
         if (slot != null && droppedItem.FitIn(slot))
         {
             slot.SendAttach(droppedItem, heldRotation);
@@ -499,7 +516,7 @@ public partial class PlayerMain : MonoBehaviour
         {
             return;
         }
-        Item item = seenObject.itemOverride;
+        Item item = seenObject.GetInteractionContext().Item;
         if (item == null)
         {
             return;
@@ -520,8 +537,8 @@ public partial class PlayerMain : MonoBehaviour
         if (previous != null)
         {
             previous.onLookedAway();
-            UIManager.Instance.HideAllInteraction();
-            UIManager.Instance.HideGameObjectName();
+            PlayerUI?.HideAllInteraction();
+            PlayerUI?.HideGameObjectName();
         }
 
         if (current != null)
@@ -534,13 +551,15 @@ public partial class PlayerMain : MonoBehaviour
 
     private void ShowSeenObjectUI(Selectable selectable)
     {
-        if (selectable.usableOverride != null)
-        {
-            ShowSecondaryInteraction("Use", control.Player.Interact.GetBindingDisplayString());
-        }
-
-        ShowPrimaryObjectInteraction(selectable);
-        UIManager.Instance.DisplayGameObjectName(GetSelectableDisplayName(selectable));
+        InteractionPromptSet prompts = PlayerInteractionPromptBuilder.Build(
+            selectable.GetInteractionContext(),
+            holdingItem,
+            control.Player.pickup.GetBindingDisplayString(),
+            control.Player.Interact.GetBindingDisplayString(),
+            control.Player.rotate.GetBindingDisplayString());
+        ShowInteractionPrompt(prompts.Primary, PrimaryInteractionIndex);
+        ShowInteractionPrompt(prompts.Secondary, SecondaryInteractionIndex);
+        PlayerUI?.DisplayGameObjectName(GetSelectableDisplayName(selectable));
     }
 
     private string GetSelectableDisplayName(Selectable selectable)
@@ -554,67 +573,21 @@ public partial class PlayerMain : MonoBehaviour
         return selectable.gameObject.name;
     }
 
-    private void ShowPrimaryObjectInteraction(Selectable selectable)
+    private void ShowInteractionPrompt(InteractionPrompt prompt, int index)
     {
-        Item item = selectable.itemOverride;
-        Slot slot = selectable.slotOverride;
-
-        if (holdingItem == null)
+        if (prompt.IsVisible)
         {
-            if (item != null)
-            {
-                ShowPrimaryInteraction("Pick Up", control.Player.pickup.GetBindingDisplayString());
-            }
-
-            return;
+            PlayerUI?.ShowInteraction(prompt.Name, prompt.Key, index);
         }
-
-        if (slot != null)
+        else
         {
-            ShowSlotInteraction(slot);
-            return;
+            PlayerUI?.HideInteraction(index);
         }
-
-        if (item != null && holdingItem.HasItemType(ItemType.Processable) && item.HasItemType(ItemType.Processable))
-        {
-            ShowPrimaryInteraction("Combine", control.Player.pickup.GetBindingDisplayString());
-            return;
-        }
-
-        ShowPrimaryInteraction("Drop", control.Player.pickup.GetBindingDisplayString());
-    }
-
-    private void ShowSlotInteraction(Slot slot)
-    {
-        if (!holdingItem.FitIn(slot))
-        {
-            ShowPrimaryInteraction("Not Available", "");
-            return;
-        }
-
-        if (slot is Port)
-        {
-            ShowPrimaryInteraction("Put", control.Player.pickup.GetBindingDisplayString());
-            return;
-        }
-
-        ShowPrimaryInteraction("Install", control.Player.pickup.GetBindingDisplayString());
-        ShowSecondaryInteraction("Rotate", control.Player.rotate.GetBindingDisplayString());
-    }
-
-    private void ShowPrimaryInteraction(string name, string key)
-    {
-        UIManager.Instance.ShowInteraction(name, key, PrimaryInteractionIndex);
-    }
-
-    private void ShowSecondaryInteraction(string name, string key)
-    {
-        UIManager.Instance.ShowInteraction(name, key, SecondaryInteractionIndex);
     }
 
     private void BindHeldItemToSlot(Selectable selectable)
     {
-        Slot slot = selectable.slotOverride;
+        Slot slot = selectable.GetInteractionContext().Slot;
         if (slot != null && holdingItem != null && holdingItem.FitIn(slot) && slot is not Port)
         {
             holdingItem.Bind(slot);
@@ -632,7 +605,7 @@ public partial class PlayerMain : MonoBehaviour
             holdingItem.Unbind();
             return;
         }
-        Slot slot = selectable.slotOverride;
+        Slot slot = selectable.GetInteractionContext().Slot;
         if (slot == null || !holdingItem.FitIn(slot))
         {
             holdingItem.Unbind();
@@ -704,5 +677,14 @@ public partial class PlayerMain : MonoBehaviour
         animator.SetBool("PickUp", true);
 
     }
-}
 
+    public void ShowHeldItemDropPrompt()
+    {
+        PlayerUI?.ShowInteraction("Drop", control.Player.pickup.GetBindingDisplayString(), PrimaryInteractionIndex);
+    }
+
+    public void HideHeldItemDropPrompt()
+    {
+        PlayerUI?.HideInteraction(PrimaryInteractionIndex);
+    }
+}

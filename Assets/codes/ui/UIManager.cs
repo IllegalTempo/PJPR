@@ -56,6 +56,10 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private Slider VCVolumeDisplay;
+
+    [Header("Waypoint")]
+    [SerializeField]
+    private WaypointIndicator waypointIndicator;
     private void Awake()
     {
         Instance = this;
@@ -73,6 +77,7 @@ public class UIManager : MonoBehaviour
         HideAllInteraction();
         HideThrowForce();
         HideVCVolumeDisplay();
+        HideWaypoint();
         SD_Group.SetActive(false);
         DID_Group.SetActive(false);
         GameObjectNameDisplay.gameObject.SetActive(false);
@@ -100,7 +105,7 @@ public class UIManager : MonoBehaviour
     }
 
 
-    public void DisplayStorage(storage srg)
+    public void DisplayStorage(Storage srg)
     {
         //clear children in slot group
         foreach (Transform child in SD_slotGroup)
@@ -201,6 +206,38 @@ public class UIManager : MonoBehaviour
 
         VCVolumeDisplay.normalizedValue = 0f;
         VCVolumeDisplay.gameObject.SetActive(false);
+    }
+
+    public void SetWaypoint(Transform target, string label = "Waypoint")
+    {
+        GetWaypointIndicator()?.SetTarget(target, label);
+    }
+
+    public void SetWaypoint(Vector3 worldPosition, string label = "Waypoint")
+    {
+        GetWaypointIndicator()?.SetPosition(worldPosition, label);
+    }
+
+    public void HideWaypoint()
+    {
+        GetWaypointIndicator()?.Clear();
+    }
+
+    private WaypointIndicator GetWaypointIndicator()
+    {
+        if (waypointIndicator != null)
+        {
+            return waypointIndicator;
+        }
+
+        waypointIndicator = GetComponentInChildren<WaypointIndicator>(true);
+        if (waypointIndicator != null)
+        {
+            return waypointIndicator;
+        }
+
+        waypointIndicator = gameObject.AddComponent<WaypointIndicator>();
+        return waypointIndicator;
     }
 
     public async UniTask NewPlayerDisplay(ulong steamid,string name)

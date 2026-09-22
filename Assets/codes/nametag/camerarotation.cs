@@ -1,18 +1,29 @@
 using UnityEngine;
 
-public class UIrotator : MonoBehaviour
+public class CameraFacingUI : MonoBehaviour
 {
     private Vector3 offset = new Vector3(0, 180, 0);
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
-        transform.LookAt(Camera.main.transform);
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            return;
+        }
+
+        transform.LookAt(mainCamera.transform);
         transform.Rotate(offset);
     }
+}
+
+[System.Obsolete("Use CameraFacingUI.")]
+public class UIrotator : CameraFacingUI
+{
 }

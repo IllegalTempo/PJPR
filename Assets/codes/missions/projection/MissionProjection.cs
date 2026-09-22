@@ -14,20 +14,8 @@ public class MissionProjection : Interactable
     [SerializeField] private TextMeshProUGUI durationText;
     [SerializeField] private TextMeshProUGUI voteCountText;
 
-    [Header("Vote Bar")]
-    [SerializeField] private RectTransform voteBarContainer;
-    [SerializeField] private Color voteFilledColor = Color.green;
-    [SerializeField] private float boxSize = 8f;
-    [SerializeField] private float boxSpacing = 3f;
-
-    private int currentBoxCount = 0;
-
-    [Header("Visual Settings")]
-    [SerializeField] private Material projectionMaterial;
-    [SerializeField] private MeshRenderer meshRenderer;
-    [SerializeField] private CanvasGroup canvasGroup;
-    [SerializeField] private Color winnerColor = Color.green;
-    [SerializeField] private Color loserColor = Color.red;
+    [Header("Vote Progress")]
+    [SerializeField] private Slider voteSlider;
 
     private Mission mission;
     private int missionIndex;
@@ -52,6 +40,7 @@ public class MissionProjection : Interactable
         {
             mySelectable.usableOverride = this;
         }
+
     }
 
     public void Initialize(Mission mission, int index)
@@ -60,7 +49,7 @@ public class MissionProjection : Interactable
         this.missionIndex = index;
 
         UpdateDisplay();
-        ShowVoteCount(0); // Hide all vote boxes initially
+        ShowVoteCount(0, 0);
     }
 
     private void UpdateDisplay()
@@ -102,55 +91,28 @@ public class MissionProjection : Interactable
         Debug.Log($"[MissionProjection] Voted for mission index {missionIndex}: {mission.missionName}");
     }
 
-    public void ShowVoteCount(int count)
+    public void ShowVoteCount(int count, int totalPlayers)
     {
-        if (voteBarContainer == null)
-            return;
-
-        // Add boxes if needed
-        while (currentBoxCount < count)
-        {
-            GameObject box = new GameObject("VoteBox", typeof(RectTransform), typeof(UnityEngine.UI.Image));
-            box.transform.SetParent(voteBarContainer, false);
-
-            RectTransform rt = box.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(boxSize, boxSize);
-            rt.anchorMin = new Vector2(0, 0.5f);
-            rt.anchorMax = new Vector2(0, 0.5f);
-            rt.pivot = new Vector2(0, 0.5f);
-            rt.anchoredPosition = new Vector2(currentBoxCount * (boxSize + boxSpacing), 0);
-
-            box.GetComponent<UnityEngine.UI.Image>().color = voteFilledColor;
-            currentBoxCount++;
-        }
-
-        // Remove excess boxes
-        while (currentBoxCount > count)
-        {
-            Transform last = voteBarContainer.GetChild(voteBarContainer.childCount - 1);
-            if (last != null)
-                Destroy(last.gameObject);
-            currentBoxCount--;
-        }
-
         if (voteCountText != null)
-            voteCountText.text = count > 0 ? $"{count} vote{(count != 1 ? "s" : "")}" : "";
+        {
+            int displayTotal = Mathf.Max(totalPlayers, 0);
+            voteCountText.text = $"{count}/{displayTotal}";
+        }
+
+        if (voteSlider != null)
+        {
+            voteSlider.minValue = 0f;
+            voteSlider.maxValue = 1f;
+            voteSlider.value = totalPlayers > 0 ? Mathf.Clamp01((float)count / totalPlayers) : 0f;
+        }
     }
 
     public void ShowAsWinner()
     {
-        if (canvasGroup != null)
-            canvasGroup.alpha = 1f;
-        if (meshRenderer != null && meshRenderer.material != null)
-            meshRenderer.material.color = winnerColor;
     }
 
     public void ShowAsLoser()
     {
-        if (canvasGroup != null)
-            canvasGroup.alpha = 0.5f;
-        if (meshRenderer != null && meshRenderer.material != null)
-            meshRenderer.material.color = loserColor;
     }
 
     public Mission GetMission()
@@ -161,5 +123,24 @@ public class MissionProjection : Interactable
     public int GetMissionIndex()
     {
         return missionIndex;
+    }
+
+    public void ClearDisplay()
+    {
+        mission = null;
+        missionIndex = -1;
+
+        if (missionNameText != null)
+            missionNameText.text = "";
+        if (missionDescriptionText != null)
+            missionDescriptionText.text = "";
+        if (rewardText != null)
+            rewardText.text = "";
+        if (difficultyText != null)
+            difficultyText.text = "";
+        if (durationText != null)
+            durationText.text = "";
+
+        ShowVoteCount(0, 0);
     }
 }

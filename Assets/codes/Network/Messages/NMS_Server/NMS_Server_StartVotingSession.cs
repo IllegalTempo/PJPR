@@ -12,8 +12,9 @@ namespace Assets.codes.Network.Messages
         private readonly float[] difficulties;
         private readonly int[] durations;
         private readonly float totalTime;
+        private readonly int totalPlayers;
 
-        public NMS_Server_StartVotingSession(Mission[] missions, float totalTime) : base((int)packets.ServerPackets.StartVotingSession)
+        public NMS_Server_StartVotingSession(Mission[] missions, float totalTime, int totalPlayers) : base((int)packets.ServerPackets.StartVotingSession)
         {
             missionCount = missions.Length;
             missionNames = new string[missionCount];
@@ -32,6 +33,7 @@ namespace Assets.codes.Network.Messages
             }
 
             this.totalTime = totalTime;
+            this.totalPlayers = totalPlayers;
         }
 
         public static NMS_Server_StartVotingSession Read(Packet packet)
@@ -51,8 +53,9 @@ namespace Assets.codes.Network.Messages
             }
 
             float totalTime = packet.Readfloat();
+            int totalPlayers = packet.Readint();
 
-            return new NMS_Server_StartVotingSession(missions, totalTime);
+            return new NMS_Server_StartVotingSession(missions, totalTime, totalPlayers);
         }
 
         public override void Write(Packet packet)
@@ -69,6 +72,7 @@ namespace Assets.codes.Network.Messages
             }
 
             packet.Write(totalTime);
+            packet.Write(totalPlayers);
         }
 
         public void ClientHandle()
@@ -87,7 +91,7 @@ namespace Assets.codes.Network.Messages
                     );
                 }
 
-                MissionProjectionDisplay.Instance.ShowVotingMissions(missions, totalTime);
+                MissionProjectionDisplay.Instance.ShowVotingMissions(missions, totalTime, totalPlayers);
             }
             else
             {

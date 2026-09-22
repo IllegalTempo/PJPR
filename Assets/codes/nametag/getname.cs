@@ -2,7 +2,7 @@ using Steamworks;
 using UnityEngine;
 using TMPro;
 
-public class getname : MonoBehaviour
+public class PlayerNameLabel : MonoBehaviour
 {
     [SerializeField]
     private NetworkPlayerObject player;
@@ -10,10 +10,14 @@ public class getname : MonoBehaviour
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected virtual void Start()
     {
         string playername = player.Getname();
         myTextBox.text = playername;
     }
 }
 
+[System.Obsolete("Use PlayerNameLabel.")]
+public class getname : PlayerNameLabel
+{
+}

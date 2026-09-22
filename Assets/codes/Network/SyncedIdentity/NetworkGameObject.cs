@@ -27,7 +27,6 @@ namespace Assets.codes.Network.SyncedIdentity
         public bool InSpaceship = false;
 
 
-
         public NetworkIdentity Identity;
 
         protected virtual void Awake()

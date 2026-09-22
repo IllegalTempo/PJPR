@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class sliding_door : SpaceshipPart //the animators are still in the animtion file, but now it's using hardcode
+public class SlidingDoor : SpaceshipPart //the animators are still in the animtion file, but now it's using hardcode
 {
     public enum OpenDirection
     {
@@ -21,7 +21,7 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
     
     private bool isDoorOpen = false;
 
-    private void Start()
+    protected virtual void Start()
     {
         if (doorMesh == null)
             doorMesh = transform;
@@ -69,7 +69,7 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
         }
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         Vector3 targetPos = isDoorOpen ? openPosition : closedPosition;
         doorMesh.localPosition = Vector3.Lerp(doorMesh.localPosition, targetPos, Time.deltaTime * slideSpeed);
@@ -107,4 +107,9 @@ public class sliding_door : SpaceshipPart //the animators are still in the animt
     //         CloseDoor();
     //     }
     // }
+}
+
+[System.Obsolete("Use SlidingDoor.")]
+public class sliding_door : SlidingDoor
+{
 }

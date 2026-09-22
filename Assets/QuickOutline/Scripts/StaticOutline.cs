@@ -13,7 +13,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 
-public class StaticOutline : MonoBehaviour {
+public class StaticOutline : SelectionOutline {
   private static HashSet<Mesh> registeredMeshes = new HashSet<Mesh>();
 
   public enum Mode {
@@ -40,7 +40,7 @@ public class StaticOutline : MonoBehaviour {
     }
   }
 
-  public float OutlineWidth {
+  public override float OutlineWidth {
     get { return outlineWidth; }
     set {
       outlineWidth = value;

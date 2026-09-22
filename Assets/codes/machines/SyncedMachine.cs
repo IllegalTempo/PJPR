@@ -12,17 +12,20 @@ public abstract class SyncedMachine : Interactable
     public enum InteractionType
     {
         Press,
-        Release
+        Release,
+        SecondaryPress
     }
     protected NetworkIdentity identity;
     public PlayerMain pressedByPlayer;
     public bool IsPressed => pressedByPlayer != null;
     
     protected virtual void ServerActionOnInteract_press(PlayerMain who) { }
+    protected virtual void ServerActionOnSecondaryInteract_press(PlayerMain who) { }
     protected virtual void ShareActionOnInteract_press(PlayerMain who) {pressedByPlayer = who;}
 
     protected virtual void ServerActionOnInteract_release() {}
     protected virtual void ShareActionOnInteract_release() {pressedByPlayer = null;}
+    protected virtual void ShareActionOnSecondaryInteract_press(PlayerMain who) { }
     protected virtual void Start()
     {
         identity = GetComponent<NetworkIdentity>();
@@ -42,6 +45,11 @@ public abstract class SyncedMachine : Interactable
         base.OnInteract_release(who);
         SendInteractMessage((int)InteractionType.Release, who);
     }
+    public override void OnSecondaryInteract_press(PlayerMain who)
+    {
+        base.OnSecondaryInteract_press(who);
+        SendInteractMessage((int)InteractionType.SecondaryPress, who);
+    }
     private void SendInteractMessage(int interacttype, PlayerMain who)
     {
         NMS_Both_MachineInteract msg = new NMS_Both_MachineInteract(identity.Identifier, interacttype, who.networkinfo.steamID, who.GetHeadRotation());
@@ -56,6 +64,9 @@ public abstract class SyncedMachine : Interactable
                 break;
             case 1:
                 ShareActionOnInteract_release();
+                break;
+            case 2:
+                ShareActionOnSecondaryInteract_press(who);
                 break;
            
             
@@ -72,6 +83,9 @@ public abstract class SyncedMachine : Interactable
                 break;
             case 1:
                 ServerActionOnInteract_release();
+                break;
+            case 2:
+                ServerActionOnSecondaryInteract_press(who);
                 break;
         }
     }

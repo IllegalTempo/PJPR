@@ -34,6 +34,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "SecondaryInteract",
+                    "type": "Button",
+                    "id": "84d78eca-81fe-4c76-b46d-526f62cbf04d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "pickup",
                     "type": "Button",
                     "id": "eb2377b3-6004-42ca-996e-83aa99affcd3",
@@ -145,6 +154,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ee6d146e-a481-48a2-92ba-99aefd25cd21",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SecondaryInteract",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

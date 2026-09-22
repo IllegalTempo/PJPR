@@ -23,6 +23,14 @@ public enum ItemType
 
     All = Generic | SpaceshipModule | Processable,
 }
+
+public enum ItemState
+{
+    World,
+    Held,
+    PreviewBound,
+    Attached,
+}
 /// <summary>
 /// Stores item transform state in LOCAL coordinate space.
 /// All values (position, rotation, scale) are relative to the item's parent transform.
@@ -61,11 +69,14 @@ public class Item : MonoBehaviour//Item is any that is pickable
     [HideInInspector]
     public Slot AttachedSlot;
 
-    private readonly Dictionary<Rigidbody, int> movementReferenceContacts = new Dictionary<Rigidbody, int>();
-
     public PlayerMain PickedUpBy;
-    private Rigidbody activeMovementReferenceRigidbody;
+    private MovementReferenceTracker movementReferenceTracker;
+    private int lastMovementReferenceVersion;
     private Vector3 previousMovementReferenceVelocity;
+    public ItemState State { get; private set; } = ItemState.World;
+    public bool IsHeld => State == ItemState.Held || State == ItemState.PreviewBound;
+    public bool IsAttached => State == ItemState.Attached;
+    public bool IsPreviewBound => State == ItemState.PreviewBound;
 
 
 
@@ -106,6 +117,9 @@ public class Item : MonoBehaviour//Item is any that is pickable
 
         rb = GetComponent<Rigidbody>();
         colliders = GetComponentsInChildren<Collider>();
+        movementReferenceTracker = new MovementReferenceTracker(
+            rb,
+            candidateRigidbody => candidateRigidbody.GetComponentInParent<Item>() == null);
         snapshot_start = GetSnapshot();
         originalWorldRotation = transform.rotation;
     }
@@ -153,7 +167,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
 
     private void ApplyMovementReferenceVelocity()
     {
-        if (PickedUpBy != null || AttachedSlot != null || rb == null || rb.isKinematic)
+        if (IsHeld || IsAttached || rb == null || rb.isKinematic)
         {
             previousMovementReferenceVelocity = Vector3.zero;
             return;
@@ -167,130 +181,19 @@ public class Item : MonoBehaviour//Item is any that is pickable
 
     private Vector3 GetMovementReferenceVelocity()
     {
-        if (movementReferenceContacts.Count <= 0)
+        if (movementReferenceTracker == null)
         {
             return Vector3.zero;
         }
 
-        Rigidbody movementReferenceRigidbody = activeMovementReferenceRigidbody;
-        if (movementReferenceRigidbody == null || !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
+        Vector3 velocity = movementReferenceTracker.GetVelocity(rb.position);
+        if (lastMovementReferenceVersion != movementReferenceTracker.ActiveVersion)
         {
-            movementReferenceRigidbody = ChooseMovementReferenceRigidbody();
-            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
+            previousMovementReferenceVelocity = Vector3.zero;
+            lastMovementReferenceVersion = movementReferenceTracker.ActiveVersion;
         }
 
-        return movementReferenceRigidbody != null ? movementReferenceRigidbody.GetPointVelocity(rb.position) : Vector3.zero;
-    }
-
-    private Rigidbody ChooseMovementReferenceRigidbody()
-    {
-        foreach (Rigidbody movementReferenceRigidbody in movementReferenceContacts.Keys)
-        {
-            if (movementReferenceRigidbody != null)
-            {
-                return movementReferenceRigidbody;
-            }
-        }
-
-        return null;
-    }
-
-    private void SetActiveMovementReferenceRigidbody(Rigidbody movementReferenceRigidbody)
-    {
-        if (activeMovementReferenceRigidbody == movementReferenceRigidbody)
-        {
-            return;
-        }
-
-        activeMovementReferenceRigidbody = movementReferenceRigidbody;
-        previousMovementReferenceVelocity = Vector3.zero;
-    }
-
-    private Rigidbody GetMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform candidateTransform)
-    {
-        if (MainSpaceship.Instance == null)
-        {
-            return null;
-        }
-
-        Transform referenceRootTransform = MainSpaceship.Instance.transform;
-        if (IsMovementReferenceRigidbody(candidateRigidbody, referenceRootTransform))
-        {
-            return candidateRigidbody;
-        }
-
-        if (candidateTransform != null &&
-            (candidateTransform == referenceRootTransform || candidateTransform.IsChildOf(referenceRootTransform)))
-        {
-            Rigidbody transformRigidbody = candidateTransform.GetComponentInParent<Rigidbody>();
-            return IsMovementReferenceRigidbody(transformRigidbody, referenceRootTransform)
-                ? transformRigidbody
-                : MainSpaceship.Instance.GetComponent<Rigidbody>();
-        }
-
-        return null;
-    }
-
-    private bool IsMovementReferenceRigidbody(Rigidbody candidateRigidbody, Transform referenceRootTransform)
-    {
-        if (candidateRigidbody == null || candidateRigidbody == rb)
-        {
-            return false;
-        }
-
-        if (candidateRigidbody.GetComponentInParent<Item>() != null)
-        {
-            return false;
-        }
-
-        return candidateRigidbody.transform == referenceRootTransform ||
-            candidateRigidbody.transform.IsChildOf(referenceRootTransform);
-    }
-
-    private void EnterMovementReference(Rigidbody movementReferenceRigidbody)
-    {
-        if (movementReferenceRigidbody == null)
-        {
-            return;
-        }
-
-        if (movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
-        {
-            movementReferenceContacts[movementReferenceRigidbody] = contactCount + 1;
-        }
-        else
-        {
-            movementReferenceContacts.Add(movementReferenceRigidbody, 1);
-        }
-
-        if (activeMovementReferenceRigidbody == null)
-        {
-            SetActiveMovementReferenceRigidbody(movementReferenceRigidbody);
-        }
-    }
-
-    private void ExitMovementReference(Rigidbody movementReferenceRigidbody)
-    {
-        if (movementReferenceRigidbody == null ||
-            !movementReferenceContacts.TryGetValue(movementReferenceRigidbody, out int contactCount))
-        {
-            return;
-        }
-
-        if (contactCount <= 1)
-        {
-            movementReferenceContacts.Remove(movementReferenceRigidbody);
-        }
-        else
-        {
-            movementReferenceContacts[movementReferenceRigidbody] = contactCount - 1;
-        }
-
-        if (activeMovementReferenceRigidbody == movementReferenceRigidbody &&
-            !movementReferenceContacts.ContainsKey(movementReferenceRigidbody))
-        {
-            SetActiveMovementReferenceRigidbody(ChooseMovementReferenceRigidbody());
-        }
+        return velocity;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -300,7 +203,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        EnterMovementReference(GetMovementReferenceRigidbody(collision.rigidbody, collision.transform));
+        movementReferenceTracker?.Enter(collision);
     }
     private void OnCollisionExit(Collision collision)
     {
@@ -309,11 +212,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(collision.rigidbody, collision.transform);
-        if (movementReferenceRigidbody != null)
-        {
-            ExitMovementReference(movementReferenceRigidbody);
-        }
+        movementReferenceTracker?.Exit(collision);
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -322,7 +221,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        EnterMovementReference(GetMovementReferenceRigidbody(other.attachedRigidbody, other.transform));
+        movementReferenceTracker?.Enter(other);
     }
     private void OnTriggerExit(Collider other)
     {
@@ -331,11 +230,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             return;
         }
 
-        Rigidbody movementReferenceRigidbody = GetMovementReferenceRigidbody(other.attachedRigidbody, other.transform);
-        if (movementReferenceRigidbody != null)
-        {
-            ExitMovementReference(movementReferenceRigidbody);
-        }
+        movementReferenceTracker?.Exit(other);
     }
     public void ChangeItemOwner(ulong newowner)
     {
@@ -443,10 +338,11 @@ public class Item : MonoBehaviour//Item is any that is pickable
         Debug.Log($"{name} picked up by {who.name}");
         who.PickUp(this);
         PickedUpBy = who;
+        State = ItemState.Held;
 
         if (who.Equals(GameCore.Instance.Local_Player))
         {
-            UIManager.Instance.ShowInteraction("Drop", who.control.Player.pickup.GetBindingDisplayString(), 0);
+            who.ShowHeldItemDropPrompt();
         }
         transform.SetParent(who.HandTransform);
         rb.constraints = RigidbodyConstraints.FreezeAll;
@@ -472,9 +368,11 @@ public class Item : MonoBehaviour//Item is any that is pickable
         Debug.Log($"{name} dropped by {who.name}");
         who.Drop(this);
         PickedUpBy = null;
+        BindSlot = null;
+        State = ItemState.World;
         if (who.Equals(GameCore.Instance.Local_Player))
         {
-            UIManager.Instance.HideInteraction(0);
+            who.HideHeldItemDropPrompt();
 
         }
         transform.parent = null;
@@ -498,6 +396,8 @@ public class Item : MonoBehaviour//Item is any that is pickable
     public void AttachToSlot(Slot slot, Quaternion rot) //Dont use this directly, use slot.Attach(item) instead, this is just for internal use
     {
         AttachedSlot = slot;
+        BindSlot = null;
+        State = ItemState.Attached;
         ExcludeSlotLayerFromColliders(slot);
         DisableRB();
         transform.localScale = snapshot_start.scale;
@@ -511,6 +411,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
     {
         RestoreColliderExcludeLayers();
         AttachedSlot = null;
+        State = ItemState.World;
         EnableRB();
         transform.SetParent(null);
     }
@@ -540,6 +441,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
         transform.localPosition = Vector3.zero;
         transform.rotation = slot.transform.rotation;
         BindSlot = slot;
+        State = ItemState.PreviewBound;
     }
     public void Unbind()
     {
@@ -547,6 +449,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
         BindSlot = null;
         transform.parent = pre_bind_parent;
         ApplySnapshot(snapshot_bind);
+        State = PickedUpBy != null ? ItemState.Held : ItemState.World;
     }
 
 

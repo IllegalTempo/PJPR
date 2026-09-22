@@ -3,14 +3,8 @@ using TMPro;
 
 public class MissionProjectionDisplay : MonoBehaviour
 {
-    [Header("Prefab References")]
-    [SerializeField] private GameObject missionProjectionPrefab;
+    [SerializeField] private MissionProjection[] prespawnedProjections;
 
-    [Header("Layout Settings")]
-    [SerializeField] private Transform spawnOrigin;
-    [SerializeField] private float horizontalSpacing = 3f;
-    [SerializeField] private float verticalOffset = 2f;
-    [SerializeField] private float projectionScale = 1f;
 
     [Header("Timer Display")]
     [SerializeField] private TextMeshProUGUI timerText;
@@ -19,6 +13,7 @@ public class MissionProjectionDisplay : MonoBehaviour
     private float votingTimer;
     private bool isVotingActive;
     private int selectedMissionIndex = -1;
+    private int totalVotingPlayers;
 
     /// <summary>
     /// Set by MissionProjection.OnInteract when the local player votes.
@@ -36,6 +31,7 @@ public class MissionProjectionDisplay : MonoBehaviour
             return;
         }
         Instance = this;
+        HidePrespawnedProjections();
     }
 
     private void Update()
@@ -66,8 +62,9 @@ public class MissionProjectionDisplay : MonoBehaviour
             timerText.text = $"Vote for a mission: {timeStr}";
     }
 
-    public void ShowVotingMissions(Mission[] missions, float totalTime)
+    public void ShowVotingMissions(Mission[] missions, float totalTime, int totalPlayers = 0)
     {
+        CancelInvoke(nameof(ClearMissions));
         ClearMissions();
 
         if (missions == null || missions.Length == 0)
@@ -76,32 +73,31 @@ public class MissionProjectionDisplay : MonoBehaviour
             return;
         }
 
-        int missionCount = missions.Length;
+        if (prespawnedProjections == null || prespawnedProjections.Length == 0)
+        {
+            Debug.LogWarning("[MissionProjectionDisplay] No prespawned projections are assigned.");
+            return;
+        }
+
+        int missionCount = Mathf.Min(missions.Length, prespawnedProjections.Length);
+        if (missionCount < missions.Length)
+            Debug.LogWarning($"[MissionProjectionDisplay] Only {missionCount} prespawned projections are available for {missions.Length} missions.");
+
         activeProjections = new MissionProjection[missionCount];
         isVotingActive = true;
         votingTimer = totalTime;
+        totalVotingPlayers = Mathf.Max(totalPlayers, 0);
 
         // Layout cards in a horizontal row
-        Vector3 origin = spawnOrigin != null ? spawnOrigin.position : transform.position;
-        Transform parent = spawnOrigin != null ? spawnOrigin : transform;
-        float totalWidth = (missionCount - 1) * horizontalSpacing;
-        float startX = -totalWidth / 2f;
 
         for (int i = 0; i < missionCount; i++)
         {
-            GameObject projectionObj = Instantiate(
-                missionProjectionPrefab,
-                origin + new Vector3(startX + i * horizontalSpacing, verticalOffset, 0),
-                Quaternion.identity,
-                parent
-            );
-
-            projectionObj.transform.localScale = Vector3.one * projectionScale;
-
-            MissionProjection projection = projectionObj.GetComponent<MissionProjection>();
+            MissionProjection projection = prespawnedProjections[i];
             if (projection != null)
             {
+                projection.gameObject.SetActive(true);
                 projection.Initialize(missions[i], i);
+                projection.ShowVoteCount(0, totalVotingPlayers);
                 activeProjections[i] = projection;
             }
         }
@@ -134,9 +130,15 @@ public class MissionProjectionDisplay : MonoBehaviour
                 continue;
 
             if (i == winningIndex)
+            {
+                activeProjections[i].gameObject.SetActive(true);
                 activeProjections[i].ShowAsWinner();
+            }
             else
+            {
                 activeProjections[i].ShowAsLoser();
+                activeProjections[i].gameObject.SetActive(false);
+            }
         }
 
         selectedMissionIndex = winningIndex;
@@ -146,15 +148,18 @@ public class MissionProjectionDisplay : MonoBehaviour
         Invoke(nameof(ClearMissions), 5f);
     }
 
-    public void UpdateVoteCounts(int[] counts)
+    public void UpdateVoteCounts(int[] counts, int totalPlayers = 0)
     {
         if (activeProjections == null || counts == null)
             return;
 
+        if (totalPlayers > 0)
+            totalVotingPlayers = totalPlayers;
+
         for (int i = 0; i < activeProjections.Length && i < counts.Length; i++)
         {
             if (activeProjections[i] != null)
-                activeProjections[i].ShowVoteCount(counts[i]);
+                activeProjections[i].ShowVoteCount(counts[i], totalVotingPlayers);
         }
     }
 
@@ -165,7 +170,10 @@ public class MissionProjectionDisplay : MonoBehaviour
             foreach (var projection in activeProjections)
             {
                 if (projection != null)
-                    Destroy(projection.gameObject);
+                {
+                    projection.ClearDisplay();
+                    projection.gameObject.SetActive(false);
+                }
             }
         }
 
@@ -173,10 +181,26 @@ public class MissionProjectionDisplay : MonoBehaviour
         selectedMissionIndex = -1;
         isVotingActive = false;
         votingTimer = 0f;
+        totalVotingPlayers = 0;
         LocalPlayerVotedMissionName = null;
 
         if (timerText != null)
             timerText.text = "";
+    }
+
+    private void HidePrespawnedProjections()
+    {
+        if (prespawnedProjections == null)
+            return;
+
+        foreach (var projection in prespawnedProjections)
+        {
+            if (projection == null)
+                continue;
+
+            projection.ClearDisplay();
+            projection.gameObject.SetActive(false);
+        }
     }
 
     public int GetSelectedMissionIndex()

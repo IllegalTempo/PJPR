@@ -2742,15 +2742,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.58
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.286
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.405
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2798,7 +2798,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4351411106470829699, guid: cd4ea0dd6c5a0aa43af5e1873b76ecba, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -2846,6 +2846,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3279767742409204624, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      propertyPath: mainScenePauseRoots.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3279767742409204624, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      propertyPath: 'mainScenePauseRoots.Array.data[0]'
+      value: 
+      objectReference: {fileID: 956797691}
+    - target: {fileID: 3279767742409204624, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      propertyPath: 'mainScenePauseRoots.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1975661917}
+    - target: {fileID: 3279767742409204624, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      propertyPath: 'mainScenePauseRoots.Array.data[2]'
+      value: 
+      objectReference: {fileID: 832575517}
     - target: {fileID: 6421323201195895344, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
       propertyPath: m_Name
       value: systems
@@ -2894,6 +2910,10 @@ PrefabInstance:
       propertyPath: PlayerSpawn
       value: 
       objectReference: {fileID: 414516936}
+    - target: {fileID: 8565789213064746808, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      propertyPath: PortalPrefab
+      value: 
+      objectReference: {fileID: 4855407417146241969, guid: 899770c478e227541ac4bf40c6674198, type: 3}
     - target: {fileID: 8565789213064746808, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
       propertyPath: StartOnAwake
       value: 1

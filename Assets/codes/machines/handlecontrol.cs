@@ -9,16 +9,25 @@ namespace Assets.codes.machines
 
         public Transform HandleTransform;
 
+        protected override void Start()
+        {
+            base.Start();
+            VisualOnStep(CurrentStep);
+        }
+
         public override void VisualOnStep(int step)
         {
             SetHandlePitch(StepToPitch(step));
         }
 
-        protected override void ShareActionOnInteract_press(PlayerMain who)
+        protected override void ServerActionOnInteract_press(PlayerMain who)
         {
-            int newStep = (CurrentStep + 1) % stepCount;
-            CheckForStepChange(newStep);
+            CheckForStepChange(GetNextStep(1));
+        }
 
+        protected override void ServerActionOnSecondaryInteract_press(PlayerMain who)
+        {
+            CheckForStepChange(GetNextStep(-1));
         }
 
 
@@ -28,8 +37,16 @@ namespace Assets.codes.machines
 
         private float StepToPitch(int step)
         {
-            float step01 = Mathf.Clamp01(step / (float)(stepCount - 1));
+            int maximumStep = (stepCount - 1) / 2;
+            float step01 = Mathf.InverseLerp(-maximumStep, maximumStep, step);
             return Mathf.Lerp(minPitch, maxPitch, step01);
+        }
+
+        public int GetNextStep(int direction)
+        {
+            int maximumStep = (stepCount - 1) / 2;
+            int normalizedDirection = direction == 0 ? 0 : (direction > 0 ? 1 : -1);
+            return Mathf.Clamp(CurrentStep + normalizedDirection, -maximumStep, maximumStep);
         }
 
         private void SetHandlePitch(float pitch)

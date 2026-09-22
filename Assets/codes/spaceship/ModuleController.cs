@@ -15,6 +15,14 @@ namespace Assets.codes.spaceship
             networkObject = GetComponent<NetworkGameObject>();
         }
 
+        public void Initialize(ModuleSlot slot)
+        {
+            ConnectTo = slot;
+            if (ConnectTo != null)
+            {
+                ConnectTo.moduleController = this;
+            }
+        }
 
 
 
@@ -49,6 +57,12 @@ namespace Assets.codes.spaceship
         private void Start()
         {
             transform.parent = MainSpaceship.Instance.transform; 
+            if (ConnectTo != null)
+            {
+                ConnectTo.moduleController = this;
+                return;
+            }
+
             if (networkObject == null || networkObject.Identity == null)
             {
                 Debug.LogWarning($"ModuleController {name} has no NetworkGameObject identity.");
@@ -56,37 +70,14 @@ namespace Assets.codes.spaceship
             }
 
             string id = networkObject.Identity.Identifier;
-            if(TryGetSlotIndexFromNetworkID(id, out int slotIndex))
+            if(ModuleControllerSlotLink.TryResolve(id, out ModuleSlot slot))
             {
-                ConnectTo = MainSpaceship.Instance.GetModuleSlot(slotIndex);
-                if (ConnectTo != null)
-                {
-                    ConnectTo.moduleController = this;
-                }
+                Initialize(slot);
             }
             else
             {
-                Debug.LogWarning($"Failed to extract slot index from NetworkID: {id}");
+                Debug.LogWarning($"Failed to resolve module slot from NetworkID: {id}");
             }
-        }
-        private bool TryGetSlotIndexFromNetworkID(string networkID, out int slotIndex)
-        {
-            slotIndex = -1;
-
-            if (string.IsNullOrEmpty(networkID))
-                return false;
-
-            const string prefix = "ModuleSlot_";
-            if (!networkID.StartsWith(prefix))
-                return false;
-
-            int startIndex = prefix.Length;
-            int endIndex = networkID.IndexOf('_', startIndex);
-            string slotIndexText = endIndex >= 0
-                ? networkID.Substring(startIndex, endIndex - startIndex)
-                : networkID.Substring(startIndex);
-
-            return int.TryParse(slotIndexText, out slotIndex);
         }
     }
 }

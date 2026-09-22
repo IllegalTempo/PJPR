@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3083113698277926553}
   - component: {fileID: 7717007614042347399}
   - component: {fileID: 4183530218703540391}
+  - component: {fileID: 5232167709951539027}
   m_Layer: 6
   m_Name: MissionProjection
   m_TagString: Untagged
@@ -114,6 +115,25 @@ MonoBehaviour:
   canvasGroup: {fileID: 3083113698277926553}
   winnerColor: {r: 0, g: 1, b: 0, a: 1}
   loserColor: {r: 1, g: 0.26666668, b: 0.26666668, a: 1}
+--- !u!114 &5232167709951539027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744670637975377438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 038cbf041fba9a14fa8f63b02ffcc4be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Selectable
+  lookedAt: 0
+  OnSelect:
+    m_PersistentCalls:
+      m_Calls: []
+  itemOverride: {fileID: 0}
+  slotOverride: {fileID: 0}
+  usableOverride: {fileID: 0}
 --- !u!1 &3092433697457551999
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +186,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3092433697457551999}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 

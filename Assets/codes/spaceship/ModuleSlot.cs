@@ -47,7 +47,13 @@ public class ModuleSlot : Slot
                 return;
             }
 
-            moduleController = (await NetworkSystem.Instance.CreateNetworkObject(md.controlPrefab, GetModuleControlSpawnPoint(), Quaternion.identity, 0, networkID:$"ModuleSlot_{slotIndex}_{it.itemName}_{Guid.NewGuid()}")).GetComponent<ModuleController>();
+            moduleController = (await NetworkSystem.Instance.CreateNetworkObject(
+                md.controlPrefab,
+                GetModuleControlSpawnPoint(),
+                Quaternion.identity,
+                0,
+                networkID: ModuleControllerSlotLink.CreateNetworkId(this))).GetComponent<ModuleController>();
+            moduleController.Initialize(this);
         }
         else
         {

@@ -7,11 +7,13 @@ namespace Assets.codes.Network.Messages
     {
         private readonly int missionCount;
         private readonly int[] voteCounts;
+        private readonly int totalPlayers;
 
-        public NMS_Server_VoteUpdate(int[] voteCounts) : base((int)packets.ServerPackets.VoteUpdate)
+        public NMS_Server_VoteUpdate(int[] voteCounts, int totalPlayers) : base((int)packets.ServerPackets.VoteUpdate)
         {
             missionCount = voteCounts.Length;
             this.voteCounts = voteCounts;
+            this.totalPlayers = totalPlayers;
         }
 
         public static NMS_Server_VoteUpdate Read(Packet packet)
@@ -20,7 +22,8 @@ namespace Assets.codes.Network.Messages
             int[] counts = new int[count];
             for (int i = 0; i < count; i++)
                 counts[i] = packet.Readint();
-            return new NMS_Server_VoteUpdate(counts);
+            int totalPlayers = packet.Readint();
+            return new NMS_Server_VoteUpdate(counts, totalPlayers);
         }
 
         public override void Write(Packet packet)
@@ -28,13 +31,14 @@ namespace Assets.codes.Network.Messages
             packet.Write(missionCount);
             for (int i = 0; i < missionCount; i++)
                 packet.Write(voteCounts[i]);
+            packet.Write(totalPlayers);
         }
 
         public void ClientHandle()
         {
             if (MissionProjectionDisplay.Instance != null)
             {
-                MissionProjectionDisplay.Instance.UpdateVoteCounts(voteCounts);
+                MissionProjectionDisplay.Instance.UpdateVoteCounts(voteCounts, totalPlayers);
             }
         }
     }

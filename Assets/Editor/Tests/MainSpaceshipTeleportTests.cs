@@ -1,10 +1,12 @@
 using System.Reflection;
+using Assets.codes.machines;
 using NUnit.Framework;
 using UnityEngine;
 
 public class MainSpaceshipTeleportTests
 {
     private GameObject shipObject;
+    private GameObject handleObject;
 
     [TearDown]
     public void TearDown()
@@ -13,6 +15,48 @@ public class MainSpaceshipTeleportTests
         {
             Object.DestroyImmediate(shipObject);
         }
+
+        if (handleObject != null)
+        {
+            Object.DestroyImmediate(handleObject);
+        }
+    }
+
+    [Test]
+    public void SpeedHandle_ZeroStepIsVisualCenter()
+    {
+        HandleControl handle = CreateSpeedHandle();
+
+        handle.VisualOnStep(0);
+
+        Assert.That(handle.HandleTransform.localEulerAngles.x, Is.EqualTo(45f).Within(0.001f));
+    }
+
+    [TestCase(0, 1, 1)]
+    [TestCase(0, -1, -1)]
+    [TestCase(3, 1, 3)]
+    [TestCase(-3, -1, -3)]
+    public void SpeedHandle_NextStepMovesInDirectionAndClamps(int currentStep, int direction, int expectedStep)
+    {
+        HandleControl handle = CreateSpeedHandle();
+        handle.OnStepChanged(currentStep);
+
+        int nextStep = handle.GetNextStep(direction);
+
+        Assert.That(nextStep, Is.EqualTo(expectedStep));
+    }
+
+    [Test]
+    public void SyncedMachine_SecondaryPressRunsOnlyServerHandler()
+    {
+        handleObject = new GameObject("MainSpaceshipTeleportTests SyncedMachine");
+        SecondaryInteractionMachine machine = handleObject.AddComponent<SecondaryInteractionMachine>();
+
+        machine.OnNetworkApplyAction((int)SyncedMachine.InteractionType.SecondaryPress, null);
+        Assert.That(machine.ServerSecondaryPressCount, Is.Zero);
+
+        machine.OnNetworkApplyActionServer((int)SyncedMachine.InteractionType.SecondaryPress, null);
+        Assert.That(machine.ServerSecondaryPressCount, Is.EqualTo(1));
     }
 
     [Test]
@@ -46,5 +90,27 @@ public class MainSpaceshipTeleportTests
         Assert.That(rigidbodyField, Is.Not.Null);
         rigidbodyField.SetValue(ship, body);
         return ship;
+    }
+
+    private HandleControl CreateSpeedHandle()
+    {
+        handleObject = new GameObject("MainSpaceshipTeleportTests Handle");
+        handleObject.AddComponent<NetworkIdentity>();
+        HandleControl handle = handleObject.AddComponent<HandleControl>();
+        handle.HandleTransform = handleObject.transform;
+        handle.minPitch = 0f;
+        handle.maxPitch = 90f;
+        handle.stepCount = 7;
+        return handle;
+    }
+
+    private sealed class SecondaryInteractionMachine : SyncedMachine
+    {
+        public int ServerSecondaryPressCount { get; private set; }
+
+        protected override void ServerActionOnSecondaryInteract_press(PlayerMain who)
+        {
+            ServerSecondaryPressCount++;
+        }
     }
 }
