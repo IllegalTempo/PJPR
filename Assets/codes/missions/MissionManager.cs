@@ -10,7 +10,7 @@ public partial class MissionManager : MonoBehaviour
 
     [SerializeField] private MissionData[] availableMissions;
     [SerializeField] private int missionsPerVote = 3;
-    [SerializeField] private float secondsPerMission = 15f;
+    [SerializeField] private float votingDuration = 5f;
 
     private List<Mission> activeMissions = new List<Mission>();
 
@@ -118,7 +118,7 @@ public partial class MissionManager : MonoBehaviour
         CurrentVotingMissions = GetRandomMissions(missionCount);
         playerVotes.Clear();
         IsVotingActive = true;
-        VotingTimer = missionCount * secondsPerMission;
+        VotingTimer = votingDuration;
         WinningMission = null;
 
         Debug.Log($"[MissionManager] Voting session started with {missionCount} missions. Timer: {VotingTimer}s");

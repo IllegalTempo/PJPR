@@ -32,11 +32,12 @@ public class MainSpaceship : MonoBehaviour
     public static string MainSpaceshipNetworkID = "MAINSPACESHIP";
 
     private int waterLevel = 0;
-    private float forcePositionWeightSum;
-    private float forceWeightedLocalXSum;
     private float nextRigidbodySyncTime;
     private uint rigidbodySyncTick;
     private uint lastReceivedRigidbodySyncTick;
+    public Slot[] controllerSlot;
+    private readonly Dictionary<ModuleController, Slot> controllerSlotAssignments = new Dictionary<ModuleController, Slot>();
+    private readonly HashSet<Slot> reservedControllerSlots = new HashSet<Slot>();
     public int WaterLevel
     {
         set
@@ -63,7 +64,6 @@ public class MainSpaceship : MonoBehaviour
     }
     private void onUpdateWaterLevel()
     {
-        spaceshipDisplay.SetWaterAmount(waterLevel);
     }
 
     public Vector3 GetAcceleration()
@@ -119,7 +119,6 @@ public class MainSpaceship : MonoBehaviour
     private void FixedUpdate()
     {
 
-        UpdateForceDisplayWeight();
         SendRigidbodyStateIfServer();
         rb.AddForce(acceleration, ForceMode.Acceleration);
     }
@@ -134,47 +133,9 @@ public class MainSpaceship : MonoBehaviour
         }
 
         float localX = transform.InverseTransformPoint(position).x;
-        forceWeightedLocalXSum += localX * forceMagnitude;
-        forcePositionWeightSum += forceMagnitude;
     }
 
-    private void UpdateForceDisplayWeight()
-    {
-        if (spaceshipDisplay == null)
-        {
-            ResetForceDisplayWeight();
-            return;
-        }
 
-        float weight = 0.5f;
-        if (forcePositionWeightSum > Mathf.Epsilon)
-        {
-            float averageLocalX = forceWeightedLocalXSum / forcePositionWeightSum;
-            float maxLocalOffset = GetForceDisplayMaxLocalOffset();
-
-            if (maxLocalOffset > Mathf.Epsilon)
-            {
-                weight = Mathf.InverseLerp(-maxLocalOffset, maxLocalOffset, averageLocalX);
-            }
-            else if (averageLocalX < -Mathf.Epsilon)
-            {
-                weight = 0f;
-            }
-            else if (averageLocalX > Mathf.Epsilon)
-            {
-                weight = 1f;
-            }
-        }
-
-        spaceshipDisplay.SetWeight(weight);
-        ResetForceDisplayWeight();
-    }
-
-    private void ResetForceDisplayWeight()
-    {
-        forcePositionWeightSum = 0f;
-        forceWeightedLocalXSum = 0f;
-    }
 
     private void SendRigidbodyStateIfServer()
     {
@@ -301,6 +262,54 @@ public class MainSpaceship : MonoBehaviour
         }
 
         return msts[index];
+    }
+
+    public Slot GetAvailableControllerSlot(ModuleController controller)
+    {
+        if (controllerSlot == null)
+        {
+            return null;
+        }
+
+        foreach (Slot candidate in controllerSlot)
+        {
+            if (candidate == null)
+            {
+                continue;
+            }
+
+            if (!reservedControllerSlots.Contains(candidate))
+            {
+                reservedControllerSlots.Add(candidate);
+                if (controller != null)
+                {
+                    controllerSlotAssignments[controller] = candidate;
+                }
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    public void AssignControllerSlot(ModuleController controller, Slot slot)
+    {
+        if (controller != null && slot != null)
+        {
+            controllerSlotAssignments[controller] = slot;
+        }
+    }
+
+    public void ReleaseControllerSlot(ModuleController controller)
+    {
+        if (controller != null)
+        {
+            if (controllerSlotAssignments.TryGetValue(controller, out Slot slot))
+            {
+                reservedControllerSlots.Remove(slot);
+                controllerSlotAssignments.Remove(controller);
+            }
+        }
     }
 
     public void ResetScene()

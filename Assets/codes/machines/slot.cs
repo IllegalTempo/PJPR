@@ -10,6 +10,13 @@ public class Slot : MonoBehaviour//slot is the place where items are put in to b
     [SerializeField]
     public NetworkIdentity Identity;
 
+    private void Awake()
+    {
+        if (Identity == null)
+        {
+            Identity = GetComponent<NetworkIdentity>();
+        }
+    }
     public virtual void Attach(Item item, Quaternion rot)
     {
         this.item = item;

@@ -21,6 +21,9 @@ namespace Assets.codes.machines
         private Quaternion lastHeadRotation;
         private bool hasLastHeadRotation;
         private Quaternion targetRotation;
+        private Quaternion originalSpaceshipRotation;
+        private Quaternion spaceshipTargetRotation;
+        private Transform spaceshipTransform;
         private Rigidbody rotatingRigidbody;
         private Transform cachedRigidbodyTarget;
 
@@ -31,6 +34,16 @@ namespace Assets.codes.machines
             Transform rotationTarget = GetRotationTarget();
             originalRotation = rotationTarget.rotation;
             targetRotation = originalRotation;
+
+            MainSpaceship spaceship = GetComponentInParent<MainSpaceship>();
+            if (spaceship == null)
+            {
+                spaceship = MainSpaceship.Instance;
+            }
+
+            spaceshipTransform = spaceship != null ? spaceship.transform : null;
+            originalSpaceshipRotation = spaceshipTransform != null ? spaceshipTransform.rotation : originalRotation;
+            spaceshipTargetRotation = originalSpaceshipRotation;
             CacheRotatingRigidbody(rotationTarget);
         }
 
@@ -42,6 +55,9 @@ namespace Assets.codes.machines
             {
                 lastHeadRotation = who.GetHeadRotation();
                 hasLastHeadRotation = true;
+
+                targetRotation = ApplyAxisLock(lastHeadRotation, originalRotation);
+                GetRotationTarget().rotation = targetRotation;
             }
         }
 
@@ -65,20 +81,22 @@ namespace Assets.codes.machines
                 }
 
                 Quaternion currentHeadRotation = player.GetHeadRotation();
+                targetRotation = ApplyAxisLock(currentHeadRotation, originalRotation);
                 if (!hasLastHeadRotation)
                 {
                     lastHeadRotation = currentHeadRotation;
                     hasLastHeadRotation = true;
-                    return;
                 }
-
-                Quaternion deltaRotation = currentHeadRotation * Quaternion.Inverse(lastHeadRotation);
-                deltaRotation.ToAngleAxis(out float angle, out Vector3 axis);
-
-                if (axis.sqrMagnitude > 0.0000001f && angle > 0.0001f)
+                else
                 {
-                    Quaternion appliedDeltaRotation = Quaternion.AngleAxis(angle * headRotationMultiplier, axis.normalized);
-                    targetRotation = ApplyAxisLock(appliedDeltaRotation * targetRotation);
+                    Quaternion deltaRotation = currentHeadRotation * Quaternion.Inverse(lastHeadRotation);
+                    deltaRotation.ToAngleAxis(out float angle, out Vector3 axis);
+
+                    if (axis.sqrMagnitude > 0.0000001f && angle > 0.0001f)
+                    {
+                        Quaternion appliedDeltaRotation = Quaternion.AngleAxis(angle * headRotationMultiplier, axis.normalized);
+                        spaceshipTargetRotation = ApplyAxisLock(appliedDeltaRotation * spaceshipTargetRotation, originalSpaceshipRotation);
+                    }
                 }
 
                 lastHeadRotation = currentHeadRotation;
@@ -86,11 +104,9 @@ namespace Assets.codes.machines
             }
             else
             {
-                targetRotation = ApplyAxisLock(Quaternion.Slerp(targetRotation, GetAxisLockReferenceRotation(), returnSpeed * Time.deltaTime));
-
                 hasLastHeadRotation = false;
             }
-            onRotationChanged?.Invoke(targetRotation);
+            onRotationChanged?.Invoke(spaceshipTargetRotation);
 
         }
 
@@ -101,7 +117,7 @@ namespace Assets.codes.machines
 
             if (rotatingRigidbody != null)
             {
-                rotatingRigidbody.MoveRotation(targetRotation);
+                //rotatingRigidbody.MoveRotation(targetRotation);
                 return;
             }
 
@@ -124,7 +140,7 @@ namespace Assets.codes.machines
             rotatingRigidbody = rotationTarget.GetComponent<Rigidbody>();
         }
 
-        private Quaternion ApplyAxisLock(Quaternion rotation)
+        private Quaternion ApplyAxisLock(Quaternion rotation, Quaternion referenceRotation)
         {
             if (lockedAxis == RotationAxisLock.None)
             {
@@ -132,7 +148,7 @@ namespace Assets.codes.machines
             }
 
             Vector3 rotationEuler = rotation.eulerAngles;
-            Vector3 lockedRotation = GetAxisLockReferenceRotation().eulerAngles;
+            Vector3 lockedRotation = referenceRotation.eulerAngles;
 
             switch (lockedAxis)
             {
@@ -148,16 +164,6 @@ namespace Assets.codes.machines
             }
 
             return Quaternion.Euler(rotationEuler);
-        }
-
-        private Quaternion GetAxisLockReferenceRotation()
-        {
-            if (MainSpaceship.Instance != null)
-            {
-                return MainSpaceship.Instance.transform.rotation;
-            }
-
-            return originalRotation;
         }
 
     }

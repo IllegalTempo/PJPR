@@ -56,7 +56,6 @@ namespace Assets.codes.spaceship
 
         private void Start()
         {
-            transform.parent = MainSpaceship.Instance.transform; 
             if (ConnectTo != null)
             {
                 ConnectTo.moduleController = this;

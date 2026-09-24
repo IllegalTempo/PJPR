@@ -286,7 +286,7 @@ public partial class MissionManager
         NetworkRouter.Instance.SendMessageToClient(player, new NMS_Server_NewObject(
             MissionPortalPrefabId,
             travelState.ActivePortalId,
-            missionSpawnPoint.ReturnPortalPosition,
+            missionSpawnPoint.GetReturnPortalPosition(travelState.SessionId),
             missionSpawnPoint.ShipRotation,
             0,
             false));
@@ -318,16 +318,60 @@ public partial class MissionManager
 
             NetworkGameObject returnPortal = await NetworkSystem.Instance.CreateNetworkObject(
                 MissionPortalPrefabId,
-                missionSpawnPoint.ReturnPortalPosition,
+                missionSpawnPoint.GetReturnPortalPosition(enter.SessionId),
                 missionSpawnPoint.ShipRotation,
                 0,
                 networkID: returnPortalId);
-            returnPortal?.GetComponent<MissionPortal>()?.ShowWaypoint("Return to Main");
+            MissionPortal missionPortal = returnPortal?.GetComponent<MissionPortal>();
+            if (missionPortal != null)
+            {
+                // The ship has just been teleported to the mission spawn. If the return
+                // portal overlaps its collider, enabling it immediately returns the ship
+                // before the mission start hook can run.
+                Collider portalCollider = missionPortal.GetComponent<Collider>();
+                Bounds portalBounds = portalCollider != null ? portalCollider.bounds : default;
+                missionPortal.SetUsable(false);
+                ArmReturnPortalWhenShipClearsAsync(missionPortal, portalBounds, enter.SessionId).Forget();
+            }
             InvokeMissionStartHook(travelState.MissionName);
         }
         finally
         {
             completingMissionEntry = false;
+        }
+    }
+
+    private async UniTask ArmReturnPortalWhenShipClearsAsync(MissionPortal portal, Bounds portalBounds, int sessionId)
+    {
+        if (portal == null || MainSpaceship.Instance == null)
+            return;
+
+        while (portal != null && MainSpaceship.Instance != null)
+        {
+            if (travelState.Phase != MissionTravelPhase.MissionActive || travelState.SessionId != sessionId)
+                return;
+
+            bool overlapsShip = false;
+            foreach (Collider shipCollider in MainSpaceship.Instance.GetComponentsInChildren<Collider>())
+            {
+                if (shipCollider != null && shipCollider.enabled && portalBounds.Intersects(shipCollider.bounds))
+                {
+                    overlapsShip = true;
+                    break;
+                }
+            }
+
+            if (!overlapsShip)
+                return;
+
+            await UniTask.Yield();
+        }
+
+        if (portal != null && travelState.Phase == MissionTravelPhase.MissionActive &&
+            travelState.SessionId == sessionId)
+        {
+            portal.SetUsable(true);
+            portal.ShowWaypoint("Return to Main");
         }
     }
 
@@ -350,7 +394,44 @@ public partial class MissionManager
 
         missionPauseState ??= new MissionPauseState(mainScenePauseRoots);
         missionPauseState.Pause();
-        MainSpaceship.Instance?.Teleport(shipPosition, shipRotation);
+        TeleportShipAndPlayers(shipPosition, shipRotation);
+    }
+
+    private static void TeleportShipAndPlayers(Vector3 shipPosition, Quaternion shipRotation)
+    {
+        MainSpaceship ship = MainSpaceship.Instance;
+        if (ship == null)
+            return;
+
+        Transform shipTransform = ship.transform;
+        PlayerMain[] players = UnityEngine.Object.FindObjectsByType<PlayerMain>(FindObjectsSortMode.None);
+        var localPositions = new Vector3[players.Length];
+        var localRotations = new Quaternion[players.Length];
+        for (int i = 0; i < players.Length; i++)
+        {
+            localPositions[i] = shipTransform.InverseTransformPoint(players[i].transform.position);
+            localRotations[i] = Quaternion.Inverse(shipTransform.rotation) * players[i].transform.rotation;
+        }
+
+        ship.Teleport(shipPosition, shipRotation);
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i] == null)
+                continue;
+
+            Transform playerTransform = players[i].transform;
+            playerTransform.SetPositionAndRotation(
+                shipTransform.TransformPoint(localPositions[i]),
+                shipTransform.rotation * localRotations[i]);
+            Rigidbody playerRigidbody = players[i].GetComponent<Rigidbody>();
+            if (playerRigidbody != null)
+            {
+                playerRigidbody.position = playerTransform.position;
+                playerRigidbody.rotation = playerTransform.rotation;
+                playerRigidbody.linearVelocity = Vector3.zero;
+                playerRigidbody.angularVelocity = Vector3.zero;
+            }
+        }
     }
 
     public async UniTask HandleAbortMissionLoadAsync(int sessionId, string sceneName, string reason)
@@ -600,7 +681,7 @@ public partial class MissionManager
             travelState.BeginReturning();
         }
 
-        MainSpaceship.Instance?.Teleport(returnPosition, returnRotation);
+        TeleportShipAndPlayers(returnPosition, returnRotation);
         missionPauseState?.Restore();
         missionPauseState = null;
         UIManager.Instance?.HideWaypoint();

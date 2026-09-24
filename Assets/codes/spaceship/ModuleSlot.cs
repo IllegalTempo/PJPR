@@ -22,10 +22,6 @@ public class ModuleSlot : Slot
         
         MainSpaceship.Instance.ConnectModule(moduleObject, this);
     }
-    public Vector3 GetModuleControlSpawnPoint()
-    {
-        return MainSpaceship.Instance.transform.position;
-    }
     public override async void ServerActionOnAttach(Item item, Quaternion rot)
     {
         base.ServerActionOnAttach(item, rot);
@@ -40,19 +36,23 @@ public class ModuleSlot : Slot
         PrefabDefinition it = moduleObject.GetNetworkObject()?.AbstractObject;
         if (it is ModuleDefinition md)
         {
-            int slotIndex = MainSpaceship.Instance.GetModuleSlotIndex(this);
-            if (slotIndex < 0)
+            Slot assignedControllerSlot = MainSpaceship.Instance.GetAvailableControllerSlot(null);
+            if (assignedControllerSlot == null)
             {
-                Debug.LogWarning($"Module slot {Identity.Identifier} is not registered on MainSpaceship. Cannot spawn control prefab.");
+                Debug.LogWarning($"No available controller slot for module {moduleObject.name}. Cannot spawn control prefab.");
                 return;
             }
 
-            moduleController = (await NetworkSystem.Instance.CreateNetworkObject(
+            ModuleController spawnedController = (await NetworkSystem.Instance.CreateNetworkObject(
                 md.controlPrefab,
-                GetModuleControlSpawnPoint(),
-                Quaternion.identity,
+                assignedControllerSlot.transform.position,
+                assignedControllerSlot.transform.rotation,
                 0,
                 networkID: ModuleControllerSlotLink.CreateNetworkId(this))).GetComponent<ModuleController>();
+            Item controllerItem = spawnedController.GetComponent<Item>();
+            assignedControllerSlot.Attach(controllerItem, Quaternion.identity);
+            moduleController = spawnedController;
+            MainSpaceship.Instance.AssignControllerSlot(moduleController, assignedControllerSlot);
             moduleController.Initialize(this);
         }
         else
@@ -71,7 +71,10 @@ public class ModuleSlot : Slot
         base.ServerActionOnDetach();
         if (moduleController != null)
         {
+            moduleController.GetComponent<Item>().AttachedSlot?.Detach();
             NetworkSystem.Instance.ServerDestroyNetworkItem(moduleController.GetComponent<Item>());
+            MainSpaceship.Instance.ReleaseControllerSlot(moduleController);
+            moduleController = null;
         }
 
     }

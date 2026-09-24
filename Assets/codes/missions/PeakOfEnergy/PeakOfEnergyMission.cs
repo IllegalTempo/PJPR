@@ -87,10 +87,10 @@ public class PeakOfEnergyMission : MonoBehaviour
     [ContextMenu("End Mission (Lose)")]
     public void DebugEndMissionLose()
     {
-        EndMission(false);
+        EndMission(false, "manually ended as a failure");
     }
 
-    public void EndMission(bool won)
+    public void EndMission(bool won, string failureReason = "mission failed")
     {
         if (!IsMissionActive) return;
 
@@ -104,7 +104,7 @@ public class PeakOfEnergyMission : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[PeakOfEnergyMission] '{missionName}' FAILED! The ring was destroyed.");
+            Debug.Log($"[PeakOfEnergyMission] '{missionName}' FAILED! Reason: {failureReason}.");
         }
 
         MissionManager.Instance?.ReportMissionEnded(missionName, won);
@@ -113,7 +113,7 @@ public class PeakOfEnergyMission : MonoBehaviour
     public void FailMissionForReturn()
     {
         if (IsMissionActive)
-            EndMission(false);
+            EndMission(false, "the team returned from the mission");
     }
 
     private void HandleVictory()
@@ -123,7 +123,7 @@ public class PeakOfEnergyMission : MonoBehaviour
 
     private void HandleGameOver()
     {
-        EndMission(false);
+        EndMission(false, "the ring was destroyed");
     }
 
     private void Update()
@@ -156,7 +156,7 @@ public class PeakOfEnergyMission : MonoBehaviour
     {
         if (IsMissionActive)
         {
-            EndMission(false);
+            EndMission(false, "the mission object was destroyed");
         }
 
         if (Instance == this)

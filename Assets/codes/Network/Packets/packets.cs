@@ -54,6 +54,7 @@ public class packets
         QuantityResourceProviderInteract = 3013,
         SendCombineItem = 3014,
         Handle_OnReleaseUpdateLevel = 3015,
-        SyncNetworkVariable = 3016,};
+        SyncNetworkVariable = 3016,
+        RotationControllerState = 3017,};
 }
 

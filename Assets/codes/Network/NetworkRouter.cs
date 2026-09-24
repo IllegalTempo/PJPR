@@ -42,7 +42,8 @@ namespace Assets.codes.Network.Messages
             { (int)packets.BothPackets.QuantityResourceProviderInteract, NMS_Both_MachineInteract.Read },
             { (int)packets.BothPackets.SendCombineItem, NMS_Both_SendCombineItem.Read },
             { (int)packets.BothPackets.Handle_OnReleaseUpdateLevel, NMS_Both_Handle_OnReleaseUpdateLevel.Read },
-            { (int)packets.BothPackets.SyncNetworkVariable, NMS_Both_SyncNetworkVariable.Read },};
+            { (int)packets.BothPackets.SyncNetworkVariable, NMS_Both_SyncNetworkVariable.Read }
+        };
 
         private readonly Dictionary<int, Func<Packet, NMS>> serverMessages = new()
         {

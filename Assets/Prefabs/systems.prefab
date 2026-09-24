@@ -94,7 +94,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d45fafcfa9c8ae644aac1ca3dbcd8d4f, type: 2}
   - {fileID: 11400000, guid: f157782a001ea5a47a242ddc2636e029, type: 2}
   missionsPerVote: 3
-  secondsPerMission: 15
+  votingDuration: 5
 --- !u!1 &6421323201195895344
 GameObject:
   m_ObjectHideFlags: 0

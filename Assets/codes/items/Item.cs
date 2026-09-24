@@ -1,7 +1,6 @@
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using UnityEngine;
@@ -295,7 +294,7 @@ public class Item : MonoBehaviour//Item is any that is pickable
             colliders = GetComponentsInChildren<Collider>();
         }
 
-        int slotLayerMask = 1 << slot.gameObject.layer;
+        int slotLayerMask = 1 << slot.transform.root.gameObject.layer;
         colliderExcludeLayersBeforeAttach = new LayerMask[colliders.Length];
         for (int i = 0; i < colliders.Length; i++)
         {
@@ -404,7 +403,9 @@ public class Item : MonoBehaviour//Item is any that is pickable
         transform.SetParent(slot.transform);
 
         transform.localPosition = Vector3.zero;
-        transform.localRotation = rot;
+        // Attach rotations are passed in world space (the preview uses slot.transform.rotation).
+        // Convert to the slot's local space so a tilted parent does not get applied twice.
+        transform.localRotation = Quaternion.Inverse(slot.transform.rotation) * rot;
         netObj.Sync_Transform = false;
     }
     public void DetachFromSlot()

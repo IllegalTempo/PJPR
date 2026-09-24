@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bb704052a2c4b79ab5668a63b333e8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionSpawnPoint
-  returnPortalLocalOffset: {x: 15, y: 0, z: 0}
+  returnPortalLocalOffset: {x: 100, y: 0, z: 0}
 --- !u!4 &708011618
 Transform:
   m_ObjectHideFlags: 0
