@@ -18,8 +18,9 @@ public partial class PlayerMain : MonoBehaviour
 
     private void Move()
     {
+        if (InAction) return;
         ApplyMovementReferenceYawDelta();
-        Vector2 input = control.Player.enabled ? Vector2.ClampMagnitude(moveinput, 1f) : Vector2.zero;
+        Vector2 input = !InAction ? Vector2.ClampMagnitude(moveinput, 1f) : Vector2.zero;
         Vector3 move = GetLookRelativeMove(input);
         bool hasMoveInput = input.sqrMagnitude > 0f;
         bool jumpPressed = control.Player.jump.IsPressed();
@@ -48,6 +49,7 @@ public partial class PlayerMain : MonoBehaviour
         }
 
         Vector3 targetVelocity = movementReferenceVelocity + movementVelocity;
+
         rb.AddForce(targetVelocity - rb.linearVelocity, ForceMode.VelocityChange);
 
         animator.SetBool("jetpack", verticalInput > 0f);
@@ -87,6 +89,11 @@ public partial class PlayerMain : MonoBehaviour
     private void ApplyMovementReferenceLocalAnchor(bool lockToMovementReference)
     {
         movementReferenceTracker?.ApplyLocalAnchor(lockToMovementReference);
+    }
+
+    private void ResetMovementReferenceLocalAnchor()
+    {
+        movementReferenceTracker?.ApplyLocalAnchor(false);
     }
 
     private void ApplyMovementReferenceYawDelta()

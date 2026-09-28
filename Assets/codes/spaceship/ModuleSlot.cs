@@ -50,7 +50,7 @@ public class ModuleSlot : Slot
                 0,
                 networkID: ModuleControllerSlotLink.CreateNetworkId(this))).GetComponent<ModuleController>();
             Item controllerItem = spawnedController.GetComponent<Item>();
-            assignedControllerSlot.Attach(controllerItem, Quaternion.identity);
+            assignedControllerSlot.Attach(controllerItem, assignedControllerSlot.transform.rotation);
             moduleController = spawnedController;
             MainSpaceship.Instance.AssignControllerSlot(moduleController, assignedControllerSlot);
             moduleController.Initialize(this);

@@ -18,4 +18,8 @@ public class Interactable:MonoBehaviour
     {
         if (who == null) return;
     }
+    public virtual void OnSecondaryInteract_release(PlayerMain who)
+    {
+        if (who == null) return;
+    }
 }

@@ -13,19 +13,26 @@ public abstract class SyncedMachine : Interactable
     {
         Press,
         Release,
-        SecondaryPress
+        SecondaryPress,
+        SecondaryRelease,
     }
     protected NetworkIdentity identity;
     public PlayerMain pressedByPlayer;
     public bool IsPressed => pressedByPlayer != null;
     
     protected virtual void ServerActionOnInteract_press(PlayerMain who) { }
+    protected virtual void ServerActionOnInteract_release() { }
     protected virtual void ServerActionOnSecondaryInteract_press(PlayerMain who) { }
-    protected virtual void ShareActionOnInteract_press(PlayerMain who) {pressedByPlayer = who;}
+    protected virtual void ServerActionOnSecondaryInteract_release(PlayerMain who) { }
 
-    protected virtual void ServerActionOnInteract_release() {}
+
     protected virtual void ShareActionOnInteract_release() {pressedByPlayer = null;}
-    protected virtual void ShareActionOnSecondaryInteract_press(PlayerMain who) { }
+    protected virtual void ShareActionOnInteract_press(PlayerMain who) { pressedByPlayer = who; }
+    protected virtual void ShareActionOnSecondaryInteract_press(PlayerMain who) { pressedByPlayer = who; }
+
+    protected virtual void ShareActionOnSecondaryInteract_release(PlayerMain who) { pressedByPlayer = null; }
+    protected bool InteractHolding = false;
+    protected bool SecondInteractHolding = false;
     protected virtual void Start()
     {
         identity = GetComponent<NetworkIdentity>();
@@ -38,17 +45,26 @@ public abstract class SyncedMachine : Interactable
     public override void OnInteract_press(PlayerMain who)
     {
         base.OnInteract_press(who);
+        InteractHolding = true;
         SendInteractMessage((int)InteractionType.Press, who);
     }
     public override void OnInteract_release(PlayerMain who)
     {
         base.OnInteract_release(who);
+        InteractHolding = false;
         SendInteractMessage((int)InteractionType.Release, who);
     }
     public override void OnSecondaryInteract_press(PlayerMain who)
     {
         base.OnSecondaryInteract_press(who);
+        SecondInteractHolding = true;
         SendInteractMessage((int)InteractionType.SecondaryPress, who);
+    }
+    public override void OnSecondaryInteract_release(PlayerMain who)
+    {
+        base.OnSecondaryInteract_release(who);
+        SecondInteractHolding = false;
+        SendInteractMessage((int)InteractionType.SecondaryRelease, who);
     }
     private void SendInteractMessage(int interacttype, PlayerMain who)
     {
@@ -68,8 +84,10 @@ public abstract class SyncedMachine : Interactable
             case 2:
                 ShareActionOnSecondaryInteract_press(who);
                 break;
-           
-            
+           case 3:
+                ShareActionOnSecondaryInteract_release(who);
+                break;
+
         }
 
     }
@@ -86,6 +104,9 @@ public abstract class SyncedMachine : Interactable
                 break;
             case 2:
                 ServerActionOnSecondaryInteract_press(who);
+                break;
+            case 3:
+                ServerActionOnSecondaryInteract_release(who);
                 break;
         }
     }

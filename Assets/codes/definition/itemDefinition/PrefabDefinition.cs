@@ -25,7 +25,7 @@ public class PrefabDefinition : ScriptableObject
     {
         position = Vector3.zero,
         rotation = Quaternion.identity,  // Identity rotation works in both world and local space
-        scale = Vector3.one
+        scale = new Vector3(0.02f,0.02f,0.02f)
     };
 
 #if UNITY_EDITOR

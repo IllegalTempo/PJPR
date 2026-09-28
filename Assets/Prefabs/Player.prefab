@@ -98,10 +98,13 @@ MonoBehaviour:
   - {fileID: 4752617421275299887}
   - {fileID: 1689039305521375281}
   - {fileID: 2435415623852892139}
+  uiManager: {fileID: 0}
   MoveSpeed: 10
   LookSpeed: 2
   MaxSpeed: 10
-  JetPackForce: 40
+  JetPackForce: 100
+  MoveAcceleration: 40
+  MoveDeceleration: 60
   lookinput: {x: 0, y: 0}
   maxVerticalVelocity: 60
 --- !u!95 &3776810605563319565
@@ -175,7 +178,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!82 &6399989085136356095
 AudioSource:
   m_ObjectHideFlags: 0

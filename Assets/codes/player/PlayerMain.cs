@@ -25,6 +25,7 @@ public partial class PlayerMain : MonoBehaviour
     public GameObject head;
     public NetworkPlayerObject networkinfo;
 
+    public bool InAction = false; //cant move if true
     public Item holdingItem = null;
 
     public Transform HandTransform;
@@ -63,12 +64,14 @@ public partial class PlayerMain : MonoBehaviour
     private Camera localCamera;
     private float normalCameraFieldOfView;
     private float targetCameraFieldOfView;
+    private Collider mainCollider;
     private UIManager PlayerUI => uiManager != null ? uiManager : UIManager.Instance;
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         rb = GetComponent<Rigidbody>();
+        mainCollider = GetComponent<Collider>();
         InitializeMovementReferencePhysics();
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
@@ -81,13 +84,51 @@ public partial class PlayerMain : MonoBehaviour
             InitializeRemote();
         }
     }
+    public void Sit(seat s)
+    {
+        Debug.Log($"Player sitting at seat: {s.name}");
+
+        ResetMovementReferenceLocalAnchor();
+        InAction = true;
+
+        rb.isKinematic = true;
+        mainCollider.enabled = false;
+
+        transform.SetParent(s.transform, false);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+
+        rb.position = transform.position;
+        rb.rotation = transform.rotation;
+
+        animator.SetBool("sit", true);
+    }
+    public void Stand()
+    {
+        Vector3 standPosition = transform.position;
+        Quaternion standRotation = transform.rotation;
+
+        ResetMovementReferenceLocalAnchor();
+        transform.SetParent(null, true);
+
+        rb.position = standPosition;
+        rb.rotation = standRotation;
+        rb.isKinematic = false;
+
+        Physics.SyncTransforms();
+
+        InAction = false;
+        mainCollider.enabled = true;
+
+        animator.SetBool("sit", false);
+    }
     public Vector3 GetFacing()
     {
         return head.transform.forward;
     }
     public Quaternion GetHeadRotation()
     {
-        return head.transform.rotation;     
+        return head.transform.rotation;
     }
     private void InitializeLocal()
     {
@@ -128,6 +169,7 @@ public partial class PlayerMain : MonoBehaviour
         control.Player.Interact.performed += OnInteractPerformed;
         control.Player.Interact.canceled += OnInteractCanceled;
         control.Player.SecondaryInteract.performed += OnSecondaryInteractPerformed;
+        control.Player.SecondaryInteract.canceled += OnSecondaryInteractCanceled;
         control.Player.voice.performed += OnVoicePerformed;
         control.Player.rotate.performed += OnRotatePerformed;
     }
@@ -148,11 +190,11 @@ public partial class PlayerMain : MonoBehaviour
             control.Player.Interact.performed -= OnInteractPerformed;
             control.Player.Interact.canceled -= OnInteractCanceled;
             control.Player.SecondaryInteract.performed -= OnSecondaryInteractPerformed;
+            control.Player.SecondaryInteract.canceled -= OnSecondaryInteractCanceled;
             control.Player.voice.performed -= OnVoicePerformed;
             control.Player.rotate.performed -= OnRotatePerformed;
         }
     }
-
     private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
         moveinput = ctx.ReadValue<Vector2>();
@@ -185,12 +227,11 @@ public partial class PlayerMain : MonoBehaviour
 
     private void OnSecondaryInteractPerformed(InputAction.CallbackContext ctx)
     {
-        if (seenObject == null)
-        {
-            return;
-        }
-
-        seenObject.GetInteractionContext().Usable?.OnSecondaryInteract_press(this);
+        OnSecondInteractPressed();
+    }
+    private void OnSecondaryInteractCanceled(InputAction.CallbackContext ctx)
+    {
+        OnSecondInteractReleased();
     }
 
     private void OnVoicePerformed(InputAction.CallbackContext ctx)
@@ -240,6 +281,20 @@ public partial class PlayerMain : MonoBehaviour
         }
 
     }
+    private void OnSecondInteractPressed()
+    {
+        if (seenObject == null)
+        {
+            return;
+        }
+        SelectionContext context = seenObject.GetInteractionContext();
+        Interactable usable = context.Usable;
+        if (usable != null)
+        {
+            usable.OnSecondaryInteract_press(this);
+            pressedUsable = usable;
+        }   
+    }
     private void OnInteractReleased()
     {
         if (pressedUsable != null)
@@ -247,7 +302,13 @@ public partial class PlayerMain : MonoBehaviour
             pressedUsable.OnInteract_release(this);
         }
     }
-
+    private void OnSecondInteractReleased()
+    {
+        if (pressedUsable != null)
+        {
+            pressedUsable.OnSecondaryInteract_release(this);
+        }
+    }
 
     private void InitializeRemote()
     {
