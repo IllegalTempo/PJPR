@@ -27018,13 +27018,13 @@ PrefabInstance:
       addedObject: {fileID: 4399402783212117746}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4b919948c72acc74c92c0ac7583c3ed4, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 318303682120919694}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4b919948c72acc74c92c0ac7583c3ed4, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 4334438269565455350}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4b919948c72acc74c92c0ac7583c3ed4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6697574160828155366}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4b919948c72acc74c92c0ac7583c3ed4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1473106110993955347}
   m_SourcePrefab: {fileID: 100100000, guid: 4b919948c72acc74c92c0ac7583c3ed4, type: 3}
 --- !u!4 &4905126484560184304 stripped
 Transform:
@@ -27075,19 +27075,7 @@ MonoBehaviour:
       m_Calls: []
   itemOverride: {fileID: 0}
   slotOverride: {fileID: 0}
-  usableOverride: {fileID: 318303682120919694}
---- !u!114 &318303682120919694
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5717691499318237514}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d35bc6508b43a694081c83f2d12fb1e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::seat
+  usableOverride: {fileID: 0}
 --- !u!65 &4334438269565455350
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -27127,6 +27115,18 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &1473106110993955347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5717691499318237514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ce6de061dcafd2478604ef3d92f2edc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.machines.PilotSeat
 --- !u!1001 &5978230637736523489
 PrefabInstance:
   m_ObjectHideFlags: 0

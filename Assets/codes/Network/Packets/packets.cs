@@ -55,6 +55,7 @@ public class packets
         SendCombineItem = 3014,
         Handle_OnReleaseUpdateLevel = 3015,
         SyncNetworkVariable = 3016,
-        RotationControllerState = 3017,};
+        RotationControllerState = 3017,
+        ControlSpaceshipWASD = 3018,};
 }
 

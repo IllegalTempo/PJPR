@@ -1,5 +1,7 @@
+using Assets.codes.machines;
 using Assets.codes.Network.Messages;
 using Assets.codes.Network.SyncedIdentity;
+using Assets.codes.system;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -30,24 +32,7 @@ public partial class PlayerMain : MonoBehaviour
 
     public Transform HandTransform;
 
-    [SerializeField]
-    private float tapDropPlaceDistance = 1.2f;
-    [SerializeField]
-    private float dropCollisionRadius = 0.35f;
-    [SerializeField]
-    private float dropCollisionPadding = 0.05f;
-    [SerializeField]
-    private LayerMask dropCollisionMask = Physics.DefaultRaycastLayers;
-    [SerializeField]
-    private float throwHoldThreshold = 0.25f;
-    [SerializeField]
-    private float throwFullChargeTime = 1.5f;
-    [SerializeField]
-    private float maxThrowForce = 10f;
-    [SerializeField]
-    private float throwChargeFieldOfView = 45f;
-    [SerializeField]
-    private float throwCameraZoomTransitionSpeed = 60f;
+    
 
     public PlayerInputAction control;
 
@@ -56,7 +41,7 @@ public partial class PlayerMain : MonoBehaviour
     [SerializeField]
     private UIManager uiManager;
 
-
+    private Seat seat;
     private Interactable pressedUsable = null;
     private bool isChargingDrop;
     private float dropChargeStartedAt;
@@ -66,6 +51,7 @@ public partial class PlayerMain : MonoBehaviour
     private float targetCameraFieldOfView;
     private Collider mainCollider;
     private UIManager PlayerUI => uiManager != null ? uiManager : UIManager.Instance;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -84,13 +70,13 @@ public partial class PlayerMain : MonoBehaviour
             InitializeRemote();
         }
     }
-    public void Sit(seat s)
+    public void Sit(Seat s)
     {
         Debug.Log($"Player sitting at seat: {s.name}");
 
         ResetMovementReferenceLocalAnchor();
         InAction = true;
-
+        seat = s;
         rb.isKinematic = true;
         mainCollider.enabled = false;
 
@@ -350,12 +336,12 @@ public partial class PlayerMain : MonoBehaviour
     {
         Vector3 origin = head.transform.position;
         Vector3 direction = head.transform.forward;
-        float radius = Mathf.Max(0.01f, dropCollisionRadius);
-        float padding = Mathf.Max(0f, dropCollisionPadding);
-        float maxDistance = tapDropPlaceDistance + radius + padding;
-        float safeDistance = tapDropPlaceDistance;
+        float radius = Mathf.Max(0.01f, PlayerPreset.Playerpreset.dropCollisionRadius);
+        float padding = Mathf.Max(0f, PlayerPreset.Playerpreset.dropCollisionPadding);
+        float maxDistance = PlayerPreset.Playerpreset.tapDropPlaceDistance + radius + padding;
+        float safeDistance = PlayerPreset.Playerpreset.tapDropPlaceDistance;
 
-        RaycastHit[] hits = Physics.SphereCastAll(origin, radius, direction, maxDistance, dropCollisionMask, QueryTriggerInteraction.Ignore);
+        RaycastHit[] hits = Physics.SphereCastAll(origin, radius, direction, maxDistance, PlayerPreset.Playerpreset.dropCollisionMask, QueryTriggerInteraction.Ignore);
         foreach (RaycastHit hit in hits)
         {
             if (!IsDropPlacementBlocker(hit.collider))
@@ -368,7 +354,14 @@ public partial class PlayerMain : MonoBehaviour
 
         return origin + direction * safeDistance;
     }
-
+    public bool IsSitting()
+    {
+        return InAction && seat != null;
+    }
+    public bool IsSittingOnPilotSeat()
+    {
+        return IsSitting() && seat != null && seat is PilotSeat;
+    }
     private bool IsDropPlacementBlocker(Collider collider)
     {
         if (collider == null)
@@ -438,7 +431,7 @@ public partial class PlayerMain : MonoBehaviour
         }
 
         float charge = CalculateThrowCharge01();
-        float throwForce = charge * maxThrowForce;
+        float throwForce = charge * PlayerPreset.Playerpreset.maxThrowForce;
 
         isChargingDrop = false;
         chargingDropItem = null;
@@ -450,18 +443,18 @@ public partial class PlayerMain : MonoBehaviour
     private float CalculateThrowCharge01()
     {
         float heldTime = Time.time - dropChargeStartedAt;
-        if (heldTime < throwHoldThreshold)
+        if (heldTime < PlayerPreset.Playerpreset.throwHoldThreshold)
         {
             return 0f;
         }
 
-        return Mathf.InverseLerp(throwHoldThreshold, throwFullChargeTime, heldTime);
+        return Mathf.InverseLerp(PlayerPreset.Playerpreset.throwHoldThreshold, PlayerPreset.Playerpreset.throwFullChargeTime, heldTime);
     }
 
     private float CalculateThrowCameraZoom01()
     {
         float heldTime = Time.time - dropChargeStartedAt;
-        return Mathf.InverseLerp(0f, throwFullChargeTime, heldTime);
+        return Mathf.InverseLerp(0f, PlayerPreset.Playerpreset.throwFullChargeTime, heldTime);
     }
 
     private void UpdateThrowForceUI()
@@ -483,7 +476,7 @@ public partial class PlayerMain : MonoBehaviour
             return;
         }
 
-        float zoomedFieldOfView = Mathf.Min(normalCameraFieldOfView, throwChargeFieldOfView);
+        float zoomedFieldOfView = Mathf.Min(normalCameraFieldOfView,    PlayerPreset.Playerpreset.throwChargeFieldOfView);
         targetCameraFieldOfView = Mathf.Lerp(normalCameraFieldOfView, zoomedFieldOfView, Mathf.Clamp01(charge));
     }
 
@@ -507,7 +500,7 @@ public partial class PlayerMain : MonoBehaviour
         localCamera.fieldOfView = Mathf.MoveTowards(
             localCamera.fieldOfView,
             targetCameraFieldOfView,
-            throwCameraZoomTransitionSpeed * Time.deltaTime);
+            PlayerPreset.Playerpreset.throwCameraZoomTransitionSpeed * Time.deltaTime);
     }
 
     private void HandlePickupButton(float throwForce)

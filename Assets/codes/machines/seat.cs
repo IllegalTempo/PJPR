@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class seat : Interactable
+public class Seat : Interactable
 {
     bool isOccupied = false;
+    private PlayerMain currentPlayer;
     public override void OnInteract_press(PlayerMain who)
     {
         base.OnInteract_press(who);
@@ -11,11 +12,14 @@ public class seat : Interactable
         {
             who.Stand();
             isOccupied = false;
+            currentPlayer = null;
         } else
         {
             who.Sit(this);
             isOccupied = true;
+            currentPlayer = who;
 
         }
     }
+    
 }

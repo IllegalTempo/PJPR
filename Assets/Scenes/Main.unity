@@ -957,6 +957,31 @@ MonoBehaviour:
   ambientStrength: 0.35
   additionalLightStrength: 1
   ambientOcclusionIntensity: 1
+--- !u!114 &491347291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491347284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 989475ed1091603439b935bace23707e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.codes.system.PlayerPreset
+  MoveAcceleration: 40
+  MoveDeceleration: 60
+  tapDropPlaceDistance: 1.2
+  dropCollisionRadius: 0.35
+  dropCollisionPadding: 0.05
+  dropCollisionMask:
+    serializedVersion: 2
+    m_Bits: 1011
+  throwHoldThreshold: 0.25
+  throwFullChargeTime: 1.5
+  maxThrowForce: 10
+  throwChargeFieldOfView: 45
+  throwCameraZoomTransitionSpeed: 60
 --- !u!1 &582782497
 GameObject:
   m_ObjectHideFlags: 0
@@ -2933,6 +2958,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6421323201195895344, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
       insertIndex: -1
       addedObject: {fileID: 491347290}
+    - targetCorrespondingSourceObject: {fileID: 6421323201195895344, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 491347291}
   m_SourcePrefab: {fileID: 100100000, guid: 5b065e8007a547e448dfd36dac9ee296, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

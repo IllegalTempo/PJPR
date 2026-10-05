@@ -165,6 +165,11 @@ public class Packet : IDisposable
         Write(i.y);
         Write(i.z);
     }
+    public void Write(Vector2 i)
+    {
+        Write(i.x);
+        Write(i.y);
+    }
     public void Write(Quaternion i)
     {
         Write(i.x);
@@ -359,6 +364,10 @@ public class Packet : IDisposable
     public Vector3 Readvector3()
     {
         return new Vector3(Readfloat(),Readfloat(),Readfloat());
+    }
+    public Vector2 ReadVector2()
+    {
+        return new Vector2(Readfloat(), Readfloat());
     }
     public Quaternion Readquaternion()
     {

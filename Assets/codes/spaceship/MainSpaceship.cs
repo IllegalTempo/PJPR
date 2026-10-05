@@ -136,7 +136,16 @@ public class MainSpaceship : MonoBehaviour
     }
 
 
+    public void ServerMoveMainSpaceship(Vector2 input)
+    {
+        Vector3 moveDirection = getSpaceshipFacing() * input;
+        rb.AddForce(moveDirection, ForceMode.VelocityChange);
 
+    }
+    private Vector3 getSpaceshipFacing()
+    {
+        return transform.forward;
+    }
     private void SendRigidbodyStateIfServer()
     {
         if (rb == null || NetworkSystem.Instance == null || NetworkRouter.Instance == null)

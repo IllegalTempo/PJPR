@@ -1,3 +1,5 @@
+using Assets.codes.machines;
+using Assets.codes.system;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,8 +9,7 @@ public partial class PlayerMain : MonoBehaviour
     public float LookSpeed = 2f;
     public float MaxSpeed = 5f; // Maximum allowed speed
     public float JetPackForce = 2f;
-    [Min(0.01f)] public float MoveAcceleration = 40f;
-    [Min(0.01f)] public float MoveDeceleration = 60f;
+    
     private Vector2 moveinput = Vector2.zero;
     public Vector2 lookinput = Vector2.zero;
 
@@ -18,7 +19,17 @@ public partial class PlayerMain : MonoBehaviour
 
     private void Move()
     {
-        if (InAction) return;
+        if (IsSittingOnPilotSeat())
+        {
+            ((PilotSeat)seat).ControlMainSpaceship(moveinput);
+        }
+        else
+        {
+            ControlPlayer();
+        }
+    }
+    private void ControlPlayer()
+    {
         ApplyMovementReferenceYawDelta();
         Vector2 input = !InAction ? Vector2.ClampMagnitude(moveinput, 1f) : Vector2.zero;
         Vector3 move = GetLookRelativeMove(input);
@@ -27,7 +38,7 @@ public partial class PlayerMain : MonoBehaviour
         bool moveDownPressed = control.Player.enabled && IsMoveDownPressed();
         Vector3 movementReferenceVelocity = GetMovementReferenceVelocity();
         Vector3 currentRelativeVelocity = rb.linearVelocity - movementReferenceVelocity;
-        float acceleration = hasMoveInput ? MoveAcceleration : MoveDeceleration;
+        float acceleration = hasMoveInput ? PlayerPreset.Playerpreset.MoveAcceleration : PlayerPreset.Playerpreset.MoveDeceleration;
         Vector3 movementVelocity = Vector3.MoveTowards(currentRelativeVelocity, move * Mathf.Max(0f, MoveSpeed),
             Mathf.Max(0.01f, acceleration) * Time.fixedDeltaTime);
 
@@ -59,7 +70,6 @@ public partial class PlayerMain : MonoBehaviour
 
         UpdateMovementReferenceRotationTracking();
     }
-
     private Vector3 GetLookRelativeMove(Vector2 input)
     {
         Vector3 forward = head != null ? head.transform.forward : transform.forward;
